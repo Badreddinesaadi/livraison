@@ -1,6 +1,6 @@
+import { useSession } from "@/stores/auth.store";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import {
   Alert,
@@ -13,11 +13,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth } from "../firebase";
 
 export default function HomeScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
+  const { signOut } = useSession();
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const closeMenu = () => setMenuVisible(false);
 
@@ -33,7 +33,7 @@ export default function HomeScreen() {
         },
         {
           text: "Oui",
-          onPress: () => signOut(auth),
+          onPress: signOut,
         },
       ],
       { cancelable: true },

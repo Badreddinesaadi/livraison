@@ -1,6 +1,6 @@
 import { listBLSEnCours } from "@/api/BLS.api";
 import { Colors } from "@/constants/theme";
-import { useBlsStore } from "@/stores/bls-store";
+import { useBlsStore } from "@/stores/bls.store";
 import { BL } from "@/types/BL";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";

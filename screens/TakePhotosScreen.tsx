@@ -1,5 +1,5 @@
 import { Colors } from "@/constants/theme";
-import { useBlsStore } from "@/stores/bls-store";
+import { useBlsStore } from "@/stores/bls.store";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRef, useState } from "react";

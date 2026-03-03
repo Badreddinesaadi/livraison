@@ -1,6 +1,6 @@
+import { useSession } from "@/stores/auth.store";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import {
   Image,
@@ -15,14 +15,13 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { auth } from "../firebase";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-
+  const { signIn } = useSession();
   const netInfo = useNetInfo(); // ✅ Hook pour l'état Internet
 
   const handleLogin = () => {
@@ -38,9 +37,9 @@ export default function LoginScreen() {
       return;
     }
 
-    signInWithEmailAndPassword(auth, email, password).catch(() =>
-      setError("❌ Email ou mot de passe incorrect")
-    );
+    signIn(email, password, () => {
+      setError("❌ Email ou mot de passe incorrect");
+    });
   };
 
   return (
