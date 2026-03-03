@@ -17,7 +17,7 @@ export default function Index() {
       setTimeout(() => {
         setUser(currentUser);
         setLoading(false);
-      }, 5000);
+      }, 500);
     });
 
     return unsubscribe;

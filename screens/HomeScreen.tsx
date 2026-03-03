@@ -1,8 +1,10 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import {
   Alert,
+  Button,
   Image,
   StyleSheet,
   Text,
@@ -15,7 +17,7 @@ import { auth } from "../firebase";
 
 export default function HomeScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
-
+  const router = useRouter();
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const closeMenu = () => setMenuVisible(false);
 
@@ -77,7 +79,13 @@ export default function HomeScreen() {
 
         {/* CONTENT */}
         <View style={styles.content}>
-          <Text style={styles.welcome}>Welcome 👋</Text>
+          <Button
+            color={"#ED5623"}
+            title="Demarrez une nouvelle voyage"
+            onPress={() => {
+              router.navigate("/voyages/create");
+            }}
+          />
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -135,15 +143,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.3)",
     marginHorizontal: 10,
   },
-
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-
-  welcome: {
+  item: {
     fontSize: 26,
-    fontWeight: "bold",
+    fontWeight: "600",
+    color: "white",
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: "800",
+    textAlign: "center",
   },
 });
