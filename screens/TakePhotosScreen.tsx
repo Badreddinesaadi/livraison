@@ -3,7 +3,16 @@ import { useBlsStore } from "@/stores/bls-store";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRef, useState } from "react";
-import { Button, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const TakePhotosScreen = () => {
@@ -16,25 +25,21 @@ export const TakePhotosScreen = () => {
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
     if (photo?.uri) {
-      setPhotos(prev => [...prev, photo.uri]);
+      setPhotos((prev) => [...prev, photo.uri]);
     }
   };
 
   const removePhoto = (index: number) => {
-    setPhotos(prev => prev.filter((_, i) => i !== index));
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
   const renderPicture = (uri: string, index: number) => {
     return (
       <View style={styles.photoContainer}>
         <TouchableOpacity onPress={() => setPreviewUri(uri)}>
-          <Image
-            source={{ uri }}
-            contentFit="cover"
-            style={styles.thumbnail}
-          />
+          <Image source={{ uri }} contentFit="cover" style={styles.thumbnail} />
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.removeBtn}
           onPress={() => removePhoto(index)}
         >
@@ -65,14 +70,12 @@ export const TakePhotosScreen = () => {
           {photos.length > 0 && (
             <View style={styles.photosContainer}>
               <Text style={styles.photosCount}>
-                {photos.length} photo{photos.length > 1 ? 's' : ''} taken
+                {photos.length} photo{photos.length > 1 ? "s" : ""} taken
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.photosList}>
                   {photos.map((uri, index) => (
-                    <View key={index}>
-                      {renderPicture(uri, index)}
-                    </View>
+                    <View key={index}>{renderPicture(uri, index)}</View>
                   ))}
                 </View>
               </ScrollView>
@@ -88,12 +91,12 @@ export const TakePhotosScreen = () => {
         animationType="fade"
         onRequestClose={() => setPreviewUri(null)}
       >
-        <Pressable 
+        <Pressable
           style={styles.previewModal}
           onPress={() => setPreviewUri(null)}
         >
           <View style={styles.previewContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.closeBtn}
               onPress={() => setPreviewUri(null)}
             >
