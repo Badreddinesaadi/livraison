@@ -15,5 +15,5 @@ export const login = async (
     },
   );
   const data = await res.json();
-  return data.title;
+  return data;
 };
