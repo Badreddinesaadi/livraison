@@ -10,19 +10,22 @@ export const signInWithEmailAndPassword = async (
     body: { username, password },
     pathname: "/sdkboard/api/users/authentification.php",
   });
-  console.log("API response:", data);
+  // console.log("API response:", data);
   return data;
 };
 
 export const getCurrentUser = async (
   sessionToken: string,
 ): Promise<User | null> => {
+  // console.log("getCurrentUser called with token:", sessionToken);
   const data = await client.request<User>({
     method: "GET",
+    pathname: "/sdkboard/api/users/users.php",
     headers: {
       session_token: sessionToken,
     },
-    pathname: "/sdkboard/api/users/getCurrentUser.php",
   });
+  // console.log("getCurrentUser API response:", data);
+
   return data;
 };

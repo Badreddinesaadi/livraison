@@ -8,8 +8,9 @@ const AuthContext = createContext<{
   signIn: (
     email: string,
     password: string,
-    onErrorCallback?: () => void,
+    onErrorCallback?: (message: string) => void,
   ) => void;
+  signInIsPending: boolean;
   signOut: () => void;
   user?: User | null;
   isLoading: boolean;
@@ -18,6 +19,7 @@ const AuthContext = createContext<{
   signOut: () => null,
   user: null,
   isLoading: false,
+  signInIsPending: false,
 });
 
 // Use this hook to access the user info.
@@ -32,11 +34,25 @@ export function useSession() {
 
 export function SessionProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
-  const [[, session], setSession] = useStorageState("sessionToken");
-  const { data, isLoading } = useQuery({
-    queryFn: () => (session ? getCurrentUser(session) : null),
+  const [[isFinished, session], setSession] = useStorageState("sessionToken");
+
+  // console.log(
+  //   "SessionProvider render - isFinished:",
+  //   isFinished,
+  //   "session:",
+  //   session,
+  //   "hasSession:",
+  //   !!session,
+  // );
+
+  const { data, isLoading, refetch } = useQuery({
+    queryFn: () => {
+      // console.log("getCurrentUser queryFn called with session:", session);
+      return getCurrentUser(session!);
+    },
     queryKey: ["currentUser"],
     initialData: null,
+    enabled: !isFinished && !!session,
   });
 
   const signInMutation = useMutation({
@@ -50,8 +66,21 @@ export function SessionProvider({ children }: PropsWithChildren) {
   });
 
   useEffect(() => {
-    console.log("SessionProvider - currentUser:", data);
+    // console.log("SessionProvider - currentUser:", data);
   }, [data]);
+
+  useEffect(() => {
+    // console.log(
+    //   "Session effect - isFinished:",
+    //   isFinished,
+    //   "session:",
+    //   session,
+    // );
+    if (!isFinished && session) {
+      // console.log("Session loaded, refetching user data");
+      refetch();
+    }
+  }, [isFinished, session, refetch]);
 
   return (
     <AuthContext.Provider
@@ -59,15 +88,17 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signIn: (
           email: string,
           password: string,
-          onErrorCallback?: () => void,
+          onErrorCallback?: (message: string) => void,
         ) => {
           // Perform sign-in logic here
           signInMutation.mutate(
             { email, password },
             {
-              onError: () => {
+              onError: (error) => {
                 if (onErrorCallback) {
-                  onErrorCallback();
+                  onErrorCallback(
+                    error.message || "Erreur lors de la connexion",
+                  );
                 }
               },
             },
@@ -78,7 +109,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
           setSession(null);
         },
         user: data,
-        isLoading,
+        isLoading: isFinished || isLoading || (!!session && !data),
+        signInIsPending: signInMutation.isPending,
       }}
     >
       {children}

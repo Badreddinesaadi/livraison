@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export const TakePhotosScreen = () => {
   const bls = useBlsStore();
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
@@ -65,22 +65,21 @@ export const TakePhotosScreen = () => {
             style={{ flex: 1 }}
             facing={"back"}
           />
-          <Button onPress={takePicture} title="Take picture" />
 
-          {photos.length > 0 && (
-            <View style={styles.photosContainer}>
-              <Text style={styles.photosCount}>
-                {photos.length} photo{photos.length > 1 ? "s" : ""} taken
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.photosList}>
-                  {photos.map((uri, index) => (
-                    <View key={index}>{renderPicture(uri, index)}</View>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-          )}
+          <View style={styles.photosContainer}>
+            <Text style={styles.photosCount}>
+              {photos.length > 0 &&
+                `${photos.length} photo${photos.length > 1 ? "s" : ""} taken`}
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.photosList}>
+                {photos.map((uri, index) => (
+                  <View key={index}>{renderPicture(uri, index)}</View>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+          <Button onPress={takePicture} title="Take picture" />
         </View>
       </View>
 
@@ -119,7 +118,7 @@ export const TakePhotosScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 14,
     backgroundColor: "white",
   },
 
@@ -235,7 +234,7 @@ const styles = StyleSheet.create({
   },
   closeBtnText: {
     color: "white",
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

@@ -3,6 +3,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNetInfo } from "@react-native-community/netinfo";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -21,8 +22,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("Sdk@2025");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const { signIn } = useSession();
-  const netInfo = useNetInfo(); // ✅ Hook pour l'état Internet
+  const { signIn, signInIsPending } = useSession();
+  const netInfo = useNetInfo(); // Hook pour l'état Internet
 
   const handleLogin = () => {
     setError("");
@@ -85,19 +86,29 @@ export default function LoginScreen() {
               onChangeText={setPassword}
             />
 
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <TouchableWithoutFeedback
+              onPress={() => setShowPassword(!showPassword)}
+            >
               <MaterialIcons
                 name={showPassword ? "visibility" : "visibility-off"}
                 size={24}
                 color="#888"
               />
-            </TouchableOpacity>
+            </TouchableWithoutFeedback>
           </View>
 
           <Text style={styles.error}>{error}</Text>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Se connecter</Text>
+          <TouchableOpacity
+            style={styles.button}
+            disabled={signInIsPending}
+            onPress={handleLogin}
+          >
+            {signInIsPending ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.buttonText}>Se connecter</Text>
+            )}
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>

@@ -1,3 +1,4 @@
+import * as SecureStore from "expo-secure-store";
 import { apiUrl } from "./query";
 
 interface RequestOptions {
@@ -5,7 +6,6 @@ interface RequestOptions {
   body?: any;
   headers?: Record<string, string>;
   pathname?: string;
-  authToken?: string;
 }
 
 class ApiClient {
@@ -22,19 +22,15 @@ class ApiClient {
   }
 
   async request<T = any>(options: RequestOptions = {}): Promise<T> {
-    const {
-      method = "GET",
-      body,
-      headers = {},
-      pathname = "",
-      authToken,
-    } = options;
+    const { method = "GET", body, headers = {}, pathname = "" } = options;
 
     const url = this.baseUrl + pathname;
     const mergedHeaders = { ...this.defaultHeaders, ...headers };
 
-    if (authToken) {
-      mergedHeaders["auth_token"] = authToken;
+    // get the token from local storage and add it to the headers if it exists
+    let sessionToken = await SecureStore.getItemAsync("sessionToken");
+    if (sessionToken) {
+      mergedHeaders["auth_token"] = sessionToken;
     }
 
     const fetchOptions: RequestInit = {
@@ -50,6 +46,14 @@ class ApiClient {
     const data = await response.json();
 
     if (data.status === false) {
+      console.log("API Error (status is false):", data.message);
+
+      if (data.code === 76) {
+        // token is expired
+        // await SecureStore.deleteItemAsync("sessionToken");
+        // queryClient.setQueryData(["currentUser"], null);
+      }
+
       throw new Error(data.message || "An error occurred");
     }
 

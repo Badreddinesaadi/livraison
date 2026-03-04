@@ -1,4 +1,5 @@
 import { listBLSEnCours } from "@/api/BLS.api";
+import Loader from "@/components/Loader";
 import { Colors } from "@/constants/theme";
 import { useBlsStore } from "@/stores/bls.store";
 import { BL } from "@/types/BL";
@@ -8,40 +9,49 @@ import { Button, FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const CreateVoyageScreen = () => {
-  const { data } = useQuery({ queryKey: ["voyages"], queryFn: listBLSEnCours });
+  const { data, isLoading } = useQuery({
+    queryKey: ["voyages"],
+    queryFn: listBLSEnCours,
+  });
   const bls = useBlsStore();
   const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.title}>
-          Veuillez sélectionner les BLS à inclure dans le voyage
-        </Text>
+        <View style={{ marginBottom: 20 }}>
+          <Text style={styles.title}>
+            Veuillez sélectionner les BLS à inclure dans le voyage
+          </Text>
+        </View>
         {/* <TextInput style={styles.input} placeholder="Nom du voyage" /> */}
-        <FlatList
-          data={data}
-          keyExtractor={(bl, i) => bl.id.toString() + i}
-          renderItem={({ item: bl }) => (
-            <BLCard
-              key={bl.id}
-              bl={bl}
-              selected={bls.bls?.some((b) => b.id === bl.id)}
-              addBls={bls.addBls}
-              removeBL={bls.removeBL}
-            />
-          )}
-        />
-      </View>
-      <View>
-        <Button
-          disabled={!bls.bls || bls.bls.length === 0}
-          color={Colors.light.primary}
-          title="Créer le voyage"
-          onPress={() => {
-            router.push("/voyages/create/photo");
-          }}
-        />
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(bl, i) => bl.id.toString() + i}
+            renderItem={({ item: bl }) => (
+              <BLCard
+                key={bl.id}
+                bl={bl}
+                selected={bls.bls?.some((b) => b.id === bl.id)}
+                addBls={bls.addBls}
+                removeBL={bls.removeBL}
+              />
+            )}
+          />
+        )}
+        <View style={{ marginBottom: 10 }}>
+          <Button
+            disabled={!bls.bls || bls.bls.length === 0}
+            color={Colors.light.primary}
+            title="Créer le voyage"
+            onPress={() => {
+              router.push("/voyages/create/photo");
+            }}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -82,14 +92,13 @@ const BLCard = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 14,
     backgroundColor: "white",
   },
 
   title: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 20,
   },
   input: {
     height: 50,

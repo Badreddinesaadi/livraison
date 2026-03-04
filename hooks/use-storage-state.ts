@@ -10,10 +10,11 @@ async function save(key: string, value: string) {
 async function getValueFor(key: string) {
   let result = await SecureStore.getItemAsync(key);
   if (result) {
-    alert("🔐 Here's your value 🔐 \n" + result);
+    console.log("stored token is 🔐: " + result);
   } else {
-    alert("No values stored under that key.");
+    console.log("No values stored under in key: " + key);
   }
+  return result;
 }
 
 async function deleteValue(key: string) {
@@ -58,7 +59,7 @@ export function useStorageState(key: string): UseStateHook<string> {
 
   // Get
   useEffect(() => {
-    SecureStore.getItemAsync(key).then((value: string | null) => {
+    getValueFor(key).then((value: string | null) => {
       setState(value);
     });
   }, [key, setState]);
