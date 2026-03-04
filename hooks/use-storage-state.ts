@@ -3,6 +3,23 @@ import { useCallback, useEffect, useReducer } from "react";
 import { Platform } from "react-native";
 type UseStateHook<T> = [[boolean, T | null], (value: T | null) => void];
 
+async function save(key: string, value: string) {
+  await SecureStore.setItemAsync(key, value);
+}
+
+async function getValueFor(key: string) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result) {
+    alert("🔐 Here's your value 🔐 \n" + result);
+  } else {
+    alert("No values stored under that key.");
+  }
+}
+
+async function deleteValue(key: string) {
+  await SecureStore.deleteItemAsync(key);
+}
+
 function useAsyncState<T>(
   initialValue: [boolean, T | null] = [true, null],
 ): UseStateHook<T> {
@@ -19,18 +36,18 @@ export async function setStorageItemAsync(key: string, value: string | null) {
   if (Platform.OS === "web") {
     try {
       if (value === null) {
-        localStorage.removeItem(key);
+        await deleteValue(key);
       } else {
-        localStorage.setItem(key, value);
+        await save(key, value);
       }
     } catch (e) {
-      console.error("Local storage is unavailable:", e);
+      console.error("Secure store  is unavailable:", e);
     }
   } else {
     if (value == null) {
-      localStorage.removeItem(key);
+      await deleteValue(key);
     } else {
-      localStorage.setItem(key, value);
+      await save(key, value);
     }
   }
 }
@@ -41,19 +58,9 @@ export function useStorageState(key: string): UseStateHook<string> {
 
   // Get
   useEffect(() => {
-    if (Platform.OS === "web") {
-      try {
-        if (typeof localStorage !== "undefined") {
-          setState(localStorage.getItem(key));
-        }
-      } catch (e) {
-        console.error("Local storage is unavailable:", e);
-      }
-    } else {
-      SecureStore.getItemAsync(key).then((value: string | null) => {
-        setState(value);
-      });
-    }
+    SecureStore.getItemAsync(key).then((value: string | null) => {
+      setState(value);
+    });
   }, [key, setState]);
   // Set
   const setValue = useCallback(

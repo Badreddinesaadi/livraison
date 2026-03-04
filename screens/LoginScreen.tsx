@@ -17,8 +17,8 @@ import {
 } from "react-native";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("badr.saadi@sdkwood.ma");
+  const [password, setPassword] = useState("Sdk@2025");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const { signIn } = useSession();
@@ -28,17 +28,24 @@ export default function LoginScreen() {
     setError("");
 
     if (!netInfo.isConnected) {
-      setError("❌ Pas de connexion Internet");
+      setError("Pas de connexion Internet");
       return;
     }
 
     if (!email || !password) {
-      setError("❌ Tous les champs sont obligatoires");
+      setError("Tous les champs sont obligatoires");
+      return;
+    }
+    //validate email format
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Format d'email invalide");
       return;
     }
 
     signIn(email, password, () => {
-      setError("❌ Email ou mot de passe incorrect");
+      setError("Email ou mot de passe incorrect");
     });
   };
 
@@ -87,7 +94,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {error !== "" && <Text style={styles.error}>{error}</Text>}
+          <Text style={styles.error}>{error}</Text>
 
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Se connecter</Text>

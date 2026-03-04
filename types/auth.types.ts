@@ -1,5 +1,11 @@
 export type User = {
-  id: number;
+  user_id: number;
   token: string;
-  username: string;
+  name: string;
+};
+
+export type AuthLoginResponse = {
+  status: boolean;
+  message: string;
+  data?: User | null;
 };

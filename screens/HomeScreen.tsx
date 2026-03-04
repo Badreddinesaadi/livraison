@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomeScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
-  const { signOut } = useSession();
+  const { signOut, user } = useSession();
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const closeMenu = () => setMenuVisible(false);
 
@@ -60,7 +60,9 @@ export default function HomeScreen() {
               <View style={styles.menu}>
                 <TouchableOpacity style={styles.menuItem}>
                   <MaterialIcons name="person" size={20} color="white" />
-                  <Text style={styles.menuText}>Mon compte</Text>
+                  <Text style={styles.menuText} numberOfLines={1}>
+                    {user?.name}
+                  </Text>
                 </TouchableOpacity>
 
                 <View style={styles.divider} />
@@ -136,6 +138,9 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 15,
     fontWeight: "600",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    maxWidth: 100,
   },
 
   divider: {

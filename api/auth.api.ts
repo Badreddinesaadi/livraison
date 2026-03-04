@@ -1,35 +1,28 @@
-import { apiUrl } from "@/constants/query";
+import { client } from "@/constants/client";
 import { User } from "@/types/auth.types";
 
 export const signInWithEmailAndPassword = async (
   username: string,
   password: string,
 ): Promise<User | null> => {
-  const res = await fetch(apiUrl + "/sdkboard/api/users/authentification.php", {
+  const data = await client.request<User>({
     method: "POST",
-    body: JSON.stringify({ username, password }),
-    headers: {
-      "Content-Type": "application/json",
-      login_token: "SDKWOOD",
-      code_token: "SDKWOOD/2026@!!",
-    },
+    body: { username, password },
+    pathname: "/sdkboard/api/users/authentification.php",
   });
-  const data = (await res.json()) as User | null;
+  console.log("API response:", data);
   return data;
 };
 
 export const getCurrentUser = async (
   sessionToken: string,
 ): Promise<User | null> => {
-  const res = await fetch(apiUrl + "/sdkboard/api/users/getCurrentUser.php", {
+  const data = await client.request<User>({
     method: "GET",
     headers: {
-      "Content-Type": "application/json",
-      login_token: "SDKWOOD",
-      code_token: "SDKWOOD/2026@!!",
       session_token: sessionToken,
     },
+    pathname: "/sdkboard/api/users/getCurrentUser.php",
   });
-  const data = (await res.json()) as User | null;
   return data;
 };

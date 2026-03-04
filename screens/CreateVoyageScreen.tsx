@@ -15,7 +15,9 @@ export const CreateVoyageScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.title}>Créer un voyage {data?.length}</Text>
+        <Text style={styles.title}>
+          Veuillez sélectionner les BLS à inclure dans le voyage
+        </Text>
         {/* <TextInput style={styles.input} placeholder="Nom du voyage" /> */}
         <FlatList
           data={data}
@@ -85,7 +87,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: "bold",
     marginBottom: 20,
   },

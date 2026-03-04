@@ -2,7 +2,7 @@ import { getCurrentUser, signInWithEmailAndPassword } from "@/api/auth.api";
 import { useStorageState } from "@/hooks/use-storage-state";
 import { User } from "@/types/auth.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, use, type PropsWithChildren } from "react";
+import { createContext, use, useEffect, type PropsWithChildren } from "react";
 
 const AuthContext = createContext<{
   signIn: (
@@ -44,10 +44,14 @@ export function SessionProvider({ children }: PropsWithChildren) {
       signInWithEmailAndPassword(email, password),
 
     onSuccess: (data) => {
-      queryClient.setQueryData(["currentUser"], data);
+      queryClient.setQueryData(["currentUser"], data || null);
       setSession(data?.token || null);
     },
   });
+
+  useEffect(() => {
+    console.log("SessionProvider - currentUser:", data);
+  }, [data]);
 
   return (
     <AuthContext.Provider
@@ -71,6 +75,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         },
         signOut: () => {
           queryClient.setQueryData(["currentUser"], null);
+          setSession(null);
         },
         user: data,
         isLoading,

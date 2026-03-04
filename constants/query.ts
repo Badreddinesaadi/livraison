@@ -10,7 +10,6 @@ export const queryClient = new QueryClient({
           text1: "An error occurred",
           text2: error instanceof Error ? error.message : "Unknown error",
         });
-        console.error("Mutation error:", error);
       },
     },
   },
