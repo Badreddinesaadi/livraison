@@ -4,7 +4,7 @@ export default function StackLayout() {
   return (
     <Stack
       screenOptions={{
-        animation: "fade_from_bottom",
+        animation: "slide_from_right",
         headerTitle: "Créer un voyage",
       }}
     />

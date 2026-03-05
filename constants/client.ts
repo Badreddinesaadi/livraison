@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import { apiUrl } from "./query";
+import { apiUrl, queryClient } from "./query";
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -21,7 +21,7 @@ class ApiClient {
     };
   }
 
-  async request<T = any>(options: RequestOptions = {}): Promise<T> {
+  async request<T = any>(options: RequestOptions = {}): Promise<T | null> {
     const { method = "GET", body, headers = {}, pathname = "" } = options;
 
     const url = this.baseUrl + pathname;
@@ -50,14 +50,14 @@ class ApiClient {
 
       if (data.code === 76) {
         // token is expired
-        // await SecureStore.deleteItemAsync("sessionToken");
-        // queryClient.setQueryData(["currentUser"], null);
+        await SecureStore.deleteItemAsync("sessionToken");
+        queryClient.setQueryData(["currentUser"], null);
       }
 
       throw new Error(data.message || "An error occurred");
     }
 
-    return data.data as T;
+    return data.data as T | null;
   }
 }
 

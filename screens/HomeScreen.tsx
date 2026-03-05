@@ -85,7 +85,7 @@ export default function HomeScreen() {
             color={"#ED5623"}
             title="Demarrez une nouvelle voyage"
             onPress={() => {
-              router.navigate("/voyages/create");
+              router.navigate("/voyages/create/chauffeur");
             }}
           />
         </View>

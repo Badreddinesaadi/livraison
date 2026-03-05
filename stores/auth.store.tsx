@@ -109,7 +109,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
           setSession(null);
         },
         user: data,
-        isLoading: isFinished || isLoading || (!!session && !data),
+        isLoading: isFinished || isLoading,
         signInIsPending: signInMutation.isPending,
       }}
     >

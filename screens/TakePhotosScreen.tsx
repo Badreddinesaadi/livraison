@@ -1,5 +1,5 @@
 import { Colors } from "@/constants/theme";
-import { useBlsStore } from "@/stores/bls.store";
+import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRef, useState } from "react";
@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const TakePhotosScreen = () => {
-  const bls = useBlsStore();
+  const bls = useCreateVoyageStore();
   const [permission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
   const [photos, setPhotos] = useState<string[]>([]);
