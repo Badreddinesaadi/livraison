@@ -13,6 +13,8 @@ type BlsState = {
   setSelectedVehicle: (vehicle: Vehicle) => void;
   selectedDepot: Depot | null;
   setSelectedDepot: (depot: Depot) => void;
+  kmDepart: number;
+  setKmDepart: (km: number) => void;
 };
 
 export const useCreateVoyageStore = create<BlsState>((set) => ({
@@ -39,4 +41,6 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
   setSelectedVehicle: (vehicle: Vehicle) => set({ selectedVehicle: vehicle }),
   selectedDepot: null,
   setSelectedDepot: (depot: Depot) => set({ selectedDepot: depot }),
+  kmDepart: 0,
+  setKmDepart: (km: number) => set({ kmDepart: km }),
 }));

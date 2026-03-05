@@ -9,7 +9,7 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export const SelectChauffeurScreen = () => {
   const { data: chauffersList, isLoading: isChauffeursLoading } = useQuery({
@@ -170,13 +170,48 @@ export const SelectChauffeurScreen = () => {
                 ))}
               </Picker>
             </View>
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 10,
+                  gap: 8,
+                }}
+              >
+                <FontAwesome6
+                  name="road"
+                  size={24}
+                  color={Colors.light.primary}
+                />
+                <Text style={{ fontSize: 24, fontWeight: "700" }}>
+                  Km départ:
+                </Text>
+              </View>
+              <TextInput
+                style={styles.kmInput}
+                keyboardType="numeric"
+                placeholder="Kilométrage au départ..."
+                placeholderTextColor="#999"
+                value={
+                  createVoyageStore.kmDepart
+                    ? String(createVoyageStore.kmDepart)
+                    : ""
+                }
+                onChangeText={(val) => {
+                  const parsed = parseInt(val, 10);
+                  createVoyageStore.setKmDepart(isNaN(parsed) ? 0 : parsed);
+                }}
+              />
+            </View>
           </View>
         )}
         <View style={{ marginBottom: 10 }}>
           <Button
             disabled={
               !createVoyageStore.selectedDepot ||
-              !createVoyageStore.selectedChauffeur
+              !createVoyageStore.selectedChauffeur ||
+              !createVoyageStore.kmDepart
             }
             preset="filled"
             text="Suivant"
@@ -201,12 +236,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  input: {
+  kmInput: {
     height: 50,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
+    fontSize: 16,
+    marginBottom: 10,
   },
   card: {
     backgroundColor: "#f9f9f9",
