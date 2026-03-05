@@ -6,6 +6,7 @@ interface RequestOptions {
   body?: any;
   headers?: Record<string, string>;
   pathname?: string;
+  isDebug?: boolean;
 }
 
 class ApiClient {
@@ -22,7 +23,13 @@ class ApiClient {
   }
 
   async request<T = any>(options: RequestOptions = {}): Promise<T | null> {
-    const { method = "GET", body, headers = {}, pathname = "" } = options;
+    const {
+      method = "GET",
+      body,
+      headers = {},
+      pathname = "",
+      isDebug = false,
+    } = options;
 
     const url = this.baseUrl + pathname;
     const mergedHeaders = { ...this.defaultHeaders, ...headers };
@@ -42,8 +49,24 @@ class ApiClient {
       fetchOptions.body = JSON.stringify(body);
     }
 
+    if (isDebug) {
+      console.log("\n====== API REQUEST DEBUG ======");
+      console.log("URL:", url);
+      console.log("Method:", method);
+      console.log("Headers:", JSON.stringify(mergedHeaders, null, 2));
+      console.log("Body:", body ? JSON.stringify(body, null, 2) : "(none)");
+      console.log("==============================\n");
+    }
+
     const response = await fetch(url, fetchOptions);
     const data = await response.json();
+
+    if (isDebug) {
+      console.log("\n====== API RESPONSE DEBUG ======");
+      console.log("Status:", response.status, response.statusText);
+      console.log("Response Data:", JSON.stringify(data, null, 2));
+      console.log("================================\n");
+    }
 
     if (data.status === false) {
       console.log("API Error (status is false):", data.message);

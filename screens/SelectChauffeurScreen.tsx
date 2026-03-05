@@ -6,10 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome6 } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { useState } from "react";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export const SelectChauffeurScreen = () => {
   const { data: chauffersList, isLoading: isChauffeursLoading } = useQuery({
@@ -34,6 +43,8 @@ export const SelectChauffeurScreen = () => {
   });
   const createVoyageStore = useCreateVoyageStore();
   const router = useRouter();
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -62,7 +73,7 @@ export const SelectChauffeurScreen = () => {
                   size={24}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 24, fontWeight: "700" }}>
+                <Text style={{ fontSize: 20, fontWeight: "700" }}>
                   Chauffeur:
                 </Text>
               </View>
@@ -79,6 +90,10 @@ export const SelectChauffeurScreen = () => {
                   }
                 }}
               >
+                <Picker.Item
+                  label="Sélectionner un chauffeur"
+                  value={undefined}
+                />
                 {chauffersList?.map((chauffeur) => (
                   <Picker.Item
                     key={chauffeur.id}
@@ -102,7 +117,7 @@ export const SelectChauffeurScreen = () => {
                   size={24}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 24, fontWeight: "700" }}>
+                <Text style={{ fontSize: 20, fontWeight: "700" }}>
                   Véhicule:
                 </Text>
               </View>
@@ -119,6 +134,10 @@ export const SelectChauffeurScreen = () => {
                   }
                 }}
               >
+                <Picker.Item
+                  label="Sélectionner un véhicule"
+                  value={undefined}
+                />
                 {vehiclesList?.map((vehicle) => (
                   <Picker.Item
                     key={vehicle.id}
@@ -147,7 +166,7 @@ export const SelectChauffeurScreen = () => {
                   size={24}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 24, fontWeight: "700" }}>Dépôt:</Text>
+                <Text style={{ fontSize: 20, fontWeight: "700" }}>Dépôt:</Text>
               </View>
               <Picker
                 dropdownIconColor={Colors.light.primary}
@@ -161,6 +180,7 @@ export const SelectChauffeurScreen = () => {
                   }
                 }}
               >
+                <Picker.Item label="Sélectionner un dépôt" value={undefined} />
                 {depotsList?.map((depot) => (
                   <Picker.Item
                     key={depot.id}
@@ -184,7 +204,7 @@ export const SelectChauffeurScreen = () => {
                   size={24}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 24, fontWeight: "700" }}>
+                <Text style={{ fontSize: 20, fontWeight: "700" }}>
                   Km départ:
                 </Text>
               </View>
@@ -204,6 +224,75 @@ export const SelectChauffeurScreen = () => {
                 }}
               />
             </View>
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 10,
+                  gap: 8,
+                }}
+              >
+                <FontAwesome6
+                  name="calendar"
+                  size={24}
+                  color={Colors.light.primary}
+                />
+                <Text style={{ fontSize: 20, fontWeight: "700" }}>
+                  Date et heure de départ:
+                </Text>
+              </View>
+              <Pressable
+                style={styles.dateButton}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Text style={styles.dateButtonText}>
+                  {createVoyageStore.dateDepart
+                    ? createVoyageStore.dateDepart.toLocaleDateString("fr-FR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "Sélectionner la date et l'heure"}
+                </Text>
+                <FontAwesome6 name="chevron-right" size={16} color="#666" />
+              </Pressable>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={createVoyageStore.dateDepart || new Date()}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(Platform.OS === "ios");
+                    if (selectedDate) {
+                      const currentDate =
+                        createVoyageStore.dateDepart || new Date();
+                      selectedDate.setHours(currentDate.getHours());
+                      selectedDate.setMinutes(currentDate.getMinutes());
+                      createVoyageStore.setDateDepart(selectedDate);
+                      if (Platform.OS !== "ios") {
+                        setShowTimePicker(true);
+                      }
+                    }
+                  }}
+                />
+              )}
+              {showTimePicker && (
+                <DateTimePicker
+                  value={createVoyageStore.dateDepart || new Date()}
+                  mode="time"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={(event, selectedTime) => {
+                    setShowTimePicker(Platform.OS === "ios");
+                    if (selectedTime) {
+                      createVoyageStore.setDateDepart(selectedTime);
+                    }
+                  }}
+                />
+              )}
+            </View>
           </View>
         )}
         <View style={{ marginBottom: 10 }}>
@@ -211,7 +300,8 @@ export const SelectChauffeurScreen = () => {
             disabled={
               !createVoyageStore.selectedDepot ||
               !createVoyageStore.selectedChauffeur ||
-              !createVoyageStore.kmDepart
+              !createVoyageStore.kmDepart ||
+              !createVoyageStore.dateDepart
             }
             preset="filled"
             text="Suivant"
@@ -244,6 +334,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 10,
+  },
+  dateButton: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: "#333",
   },
   card: {
     backgroundColor: "#f9f9f9",

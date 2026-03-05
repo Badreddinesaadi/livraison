@@ -10,8 +10,9 @@ export const queryClient = new QueryClient({
       onError: (error) => {
         Toast.show({
           type: "error",
-          text1: "An error occurred",
-          text2: error instanceof Error ? error.message : "Unknown error",
+          text1: "Erreur lors de la requête",
+          text2:
+            error instanceof Error ? error.message : "Une erreur est survenue",
         });
       },
     },
