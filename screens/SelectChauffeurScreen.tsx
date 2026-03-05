@@ -5,7 +5,7 @@ import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -57,7 +57,11 @@ export const SelectChauffeurScreen = () => {
                   gap: 8,
                 }}
               >
-                <FontAwesome name="drivers-license" size={24} color="black" />
+                <FontAwesome6
+                  name="drivers-license"
+                  size={24}
+                  color={Colors.light.primary}
+                />
                 <Text style={{ fontSize: 24, fontWeight: "700" }}>
                   Chauffeur:
                 </Text>
@@ -93,7 +97,11 @@ export const SelectChauffeurScreen = () => {
                   gap: 8,
                 }}
               >
-                <FontAwesome name="drivers-license" size={24} color="black" />
+                <FontAwesome6
+                  name="truck"
+                  size={24}
+                  color={Colors.light.primary}
+                />
                 <Text style={{ fontSize: 24, fontWeight: "700" }}>
                   Véhicule:
                 </Text>
@@ -126,11 +134,21 @@ export const SelectChauffeurScreen = () => {
               </Picker>
             </View>
             <View>
-              <Text
-                style={{ fontSize: 24, fontWeight: "700", marginBottom: 10 }}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 10,
+                  gap: 8,
+                }}
               >
-                Dépôt:
-              </Text>
+                <FontAwesome6
+                  name="location-dot"
+                  size={24}
+                  color={Colors.light.primary}
+                />
+                <Text style={{ fontSize: 24, fontWeight: "700" }}>Dépôt:</Text>
+              </View>
               <Picker
                 dropdownIconColor={Colors.light.primary}
                 selectedValue={createVoyageStore.selectedDepot?.id}
