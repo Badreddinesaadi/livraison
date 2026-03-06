@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export const CreateVoyageScreen = () => {
   const { data, isLoading } = useQuery({
-    queryKey: ["voyages"],
+    queryKey: ["bls", "list"],
     queryFn: listBLSEnCours,
   });
   const bls = useCreateVoyageStore();

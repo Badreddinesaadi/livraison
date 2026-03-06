@@ -1,10 +1,11 @@
+import { Button } from "@/components/ui/button";
+import { Colors } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
-  Button,
   Image,
   StyleSheet,
   Text,
@@ -82,12 +83,37 @@ export default function HomeScreen() {
         {/* CONTENT */}
         <View style={styles.content}>
           <Button
-            color={"#ED5623"}
-            title="Demarrez une nouvelle voyage"
+            preset="filled"
+            text="Voyages"
+            LeftAccessory={() => (
+              <View>
+                <MaterialCommunityIcons
+                  name="truck-fast"
+                  size={24}
+                  color={Colors.light.background}
+                />
+              </View>
+            )}
+            onPress={() => {
+              router.navigate("/voyages");
+            }}
+          />
+          {/* <Button
+            preset="filled"
+            text="Demarrez un nouvelle voyage"
+            LeftAccessory={() => (
+              <View>
+                <MaterialCommunityIcons
+                  name="truck-fast"
+                  size={24}
+                  color={Colors.light.background}
+                />
+              </View>
+            )}
             onPress={() => {
               router.navigate("/voyages/create/chauffeur");
             }}
-          />
+          /> */}
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -150,6 +176,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    rowGap: 8,
     justifyContent: "center",
     alignItems: "center",
   },

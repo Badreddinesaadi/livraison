@@ -36,7 +36,9 @@ export const VoyageSummaryScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.pageTitle}>Récapitulatif du voyage</Text>
+        <Text style={styles.pageTitle}>
+          Veuillez confirmer les détails du voyage avant de le créer
+        </Text>
 
         <FlatList
           data={[]}
@@ -204,7 +206,7 @@ export const VoyageSummaryScreen = () => {
                   </Text>
                   <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => router.replace("/voyages/create")}
+                    onPress={() => router.replace("/voyages/create/select-bls")}
                   >
                     <FontAwesome6
                       name="pen"
@@ -272,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   pageTitle: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: "bold",
     marginBottom: 20,
   },

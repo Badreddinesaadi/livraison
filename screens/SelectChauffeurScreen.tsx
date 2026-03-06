@@ -58,7 +58,7 @@ export const SelectChauffeurScreen = () => {
         {isChauffeursLoading || isVehiclesLoading || isDepotsLoading ? (
           <Loader />
         ) : (
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, rowGap: 10 }}>
             <View>
               <View
                 style={{
@@ -166,7 +166,9 @@ export const SelectChauffeurScreen = () => {
                   size={24}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 20, fontWeight: "700" }}>Dépôt:</Text>
+                <Text style={{ fontSize: 20, fontWeight: "700" }}>
+                  Dépôt de depart:
+                </Text>
               </View>
               <Picker
                 dropdownIconColor={Colors.light.primary}
@@ -306,7 +308,7 @@ export const SelectChauffeurScreen = () => {
             preset="filled"
             text="Suivant"
             onPress={() => {
-              router.push("/voyages/create");
+              router.push("/voyages/create/select-bls");
             }}
           />
         </View>

@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   leftAccessory: {
-    marginEnd: 16,
+    marginRight: 16,
     zIndex: 1,
   },
   disabledView: {

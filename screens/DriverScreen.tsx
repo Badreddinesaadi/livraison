@@ -83,7 +83,7 @@ export default function DriverScreen() {
         <View style={styles.content}>
           <Button
             color={"#ED5623"}
-            title="Demarrez une nouvelle voyage"
+            title="Demarrez un nouvelle voyage"
             onPress={() => {
               router.navigate("/voyages/create/chauffeur");
             }}
