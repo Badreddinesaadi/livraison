@@ -77,10 +77,6 @@ const VoyageCard = ({
       })
     : "—";
 
-  const blDate = item.dateBL
-    ? new Date(item.dateBL).toLocaleDateString("fr-FR")
-    : "—";
-
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded((v) => !v);
@@ -130,7 +126,7 @@ const VoyageCard = ({
             Voyage #{item.idVoyage}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
-            {item.nomChauffeur || "—"}
+            {`Chauffeur #${item.idChauffeur}`}
           </Text>
         </View>
 
@@ -168,7 +164,7 @@ const VoyageCard = ({
           <DetailRow
             icon="file-alt"
             label="BLs"
-            value={bls?.map((b) => b.code).join("  •  ") ?? "—"}
+            value={bls?.map((b) => b.id_document).join("  •  ") ?? "—"}
           />
           <DetailRow
             icon="map-marker-alt"
@@ -178,9 +174,8 @@ const VoyageCard = ({
           <DetailRow
             icon="car"
             label="Véhicule"
-            value={item.immatriculation !== null ? item.immatriculation : "—"}
+            value={item.idVehicule ? String(item.idVehicule) : "—"}
           />
-          <DetailRow icon="calendar-alt" label="Date BL" value={blDate} />
 
           {/* Action buttons */}
           <View
@@ -275,10 +270,10 @@ export const VoyagesScreen = () => {
     store.resetAll();
     store.setIdVoyage(item.idVoyage);
 
-    if (item.idChauffeur && item.nomChauffeur) {
+    if (item.idChauffeur) {
       store.setSelectedChauffeur({
         id: item.idChauffeur,
-        name: item.nomChauffeur,
+        name: "",
         idDepartement: 0,
         telephone: "",
         fonction: "Chauffeur",
@@ -290,11 +285,10 @@ export const VoyagesScreen = () => {
 
     store.removeAllBls();
     if (item.bl_list) {
-      const blIds = item.bl_list
-        .filter(
-          (bl): bl is { id: number; code: string } => !!bl.id && !!bl.code,
-        )
-        .map((bl) => ({ id: bl.id, num_bl: bl.code }));
+      const blIds = item.bl_list.map((bl) => ({
+        id: bl.idBL,
+        num_bl: bl.id_document,
+      }));
       console.log("BLs à ajouter au store :", blIds);
       store.addBls(blIds);
     }
@@ -338,10 +332,8 @@ export const VoyagesScreen = () => {
     if (!data) return [];
     if (!debouncedSearch) return data;
     const q = debouncedSearch.toLowerCase();
-    return data.filter(
-      (v) =>
-        v.bl_list?.some((bl) => bl.code?.toLowerCase().includes(q)) ||
-        v.nomChauffeur?.toLowerCase().includes(q),
+    return data.filter((v) =>
+      v.bl_list?.some((bl) => bl.id_document?.toLowerCase().includes(q)),
     );
   }, [data, debouncedSearch]);
 

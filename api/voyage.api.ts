@@ -19,25 +19,28 @@ export const createVoyage = async (request: CreateVoyageRequest) => {
   return data;
 };
 
+export type BLItem = {
+  idBL: number;
+  id_document: string;
+  nomClient: string;
+  images: string[];
+};
+
 export type VoyageListItem = {
   idVoyage: number;
-  bl_list: { id: number; code: string | null }[] | null;
-  idClient: number | null;
-  dateBL: string | null;
-  montant_ttc: string | null;
-  idVehicule: number | null;
-  date_depart: string | null;
-  depot_depart: string | null;
-  idChauffeur: number | null;
-  immatriculation: string | null;
-  nomChauffeur: string | null;
-  km_depart: number | null;
+  date_depart: string;
+  idChauffeur: number;
+  idVehicule: number;
+  km_depart: number;
+  depot_depart: string;
+  bl_list: BLItem[];
 };
 export const listVoyage = async () => {
   //log body
   const data = await client.request<VoyageListItem[]>({
-    pathname: "/sdkboard/api/homescreen/bl_voyage_list.php",
+    pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "GET",
+    isDebug: true,
   });
   return data;
 };
