@@ -1,3 +1,6 @@
+import { ListDepots } from "@/api/depots.api";
+import { ListChauffeurs } from "@/api/users.api";
+import { ListVehicles } from "@/api/vehicle.api";
 import { deleteVoyage, listVoyage, VoyageListItem } from "@/api/voyage.api";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
@@ -123,7 +126,7 @@ const VoyageCard = ({
 
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: "700", fontSize: 15, color: "#1a1a2e" }}>
-            Voyage #{item.idVoyage}
+            Voyage #{item.id}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
             {`Chauffeur #${item.idChauffeur}`}
@@ -164,7 +167,7 @@ const VoyageCard = ({
           <DetailRow
             icon="file-alt"
             label="BLs"
-            value={bls?.map((b) => b.id_document).join("  •  ") ?? "—"}
+            value={bls?.map((b) => b.code).join("  •  ") ?? "—"}
           />
           <DetailRow
             icon="map-marker-alt"
@@ -239,7 +242,26 @@ export const VoyagesScreen = () => {
     queryKey: ["voyages", "list"],
     queryFn: listVoyage,
   });
-
+  const { data: chauffersList } = useQuery({
+    queryKey: ["chauffeurs", "full-list"],
+    queryFn: ListChauffeurs,
+    select: (data) =>
+      data
+        ?.map((chauffeur) => ({
+          ...chauffeur,
+          name: chauffeur.name.trim(),
+        }))
+        .filter((chauffeur) => chauffeur.fonction === "Chauffeur")
+        .sort((a, b) => a.name.localeCompare(b.name)),
+  });
+  const { data: vehiclesList } = useQuery({
+    queryKey: ["vehicles", "full-list"],
+    queryFn: ListVehicles,
+  });
+  const { data: depotsList } = useQuery({
+    queryKey: ["depots", "full-list"],
+    queryFn: ListDepots,
+  });
   const router = useRouter();
   const store = useCreateVoyageStore();
   const queryClient = useQueryClient();
@@ -268,40 +290,43 @@ export const VoyagesScreen = () => {
 
   const handleUpdate = (item: VoyageListItem) => {
     store.resetAll();
-    store.setIdVoyage(item.idVoyage);
+    store.setIdVoyage(item.id);
 
     if (item.idChauffeur) {
-      store.setSelectedChauffeur({
-        id: item.idChauffeur,
-        name: "",
-        idDepartement: 0,
-        telephone: "",
-        fonction: "Chauffeur",
-        role: "",
-        photoIdentite: "",
-        photo: "",
-      });
+      const foundedChauffeur = chauffersList?.find(
+        (c) => c.id === item.idChauffeur,
+      );
+      if (foundedChauffeur) {
+        store.setSelectedChauffeur(foundedChauffeur);
+      }
     }
 
-    store.removeAllBls();
     if (item.bl_list) {
       const blIds = item.bl_list.map((bl) => ({
-        id: bl.idBL,
-        num_bl: bl.id_document,
+        id: bl.id,
+        num_bl: bl.code,
       }));
       console.log("BLs à ajouter au store :", blIds);
-      store.addBls(blIds);
+      store.setBls(blIds);
     }
 
     if (item.idVehicule !== null) {
-      store.setSelectedVehicle({
-        id: item.idVehicule,
-        immatriculation: "",
-        nameVehicule: "",
-        vehiculeType: "",
-        vehiculeMarque: "",
-        km_reel: null,
-      });
+      const foundedVehicle = vehiclesList?.find(
+        (v) => v.id === item.idVehicule,
+      );
+
+      if (foundedVehicle) {
+        store.setSelectedVehicle(foundedVehicle);
+      }
+    }
+
+    if (item.depot_depart) {
+      const foundedDepot = depotsList?.find(
+        (d) => d.code.trim() === item.depot_depart.trim(),
+      );
+      if (foundedDepot) {
+        store.setSelectedDepot(foundedDepot);
+      }
     }
     if (item.km_depart) {
       store.setKmDepart(item.km_depart);
@@ -333,7 +358,7 @@ export const VoyagesScreen = () => {
     if (!debouncedSearch) return data;
     const q = debouncedSearch.toLowerCase();
     return data.filter((v) =>
-      v.bl_list?.some((bl) => bl.id_document?.toLowerCase().includes(q)),
+      v.bl_list?.some((bl) => bl.code?.toLowerCase().includes(q)),
     );
   }, [data, debouncedSearch]);
 
@@ -407,11 +432,11 @@ export const VoyagesScreen = () => {
 
         <FlatList
           data={filteredData}
-          keyExtractor={(item) => String(item.idVoyage)}
+          keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
             <VoyageCard
               item={item}
-              onDelete={() => handleDelete(item.idVoyage)}
+              onDelete={() => handleDelete(item.id)}
               onUpdate={() => handleUpdate(item)}
             />
           )}

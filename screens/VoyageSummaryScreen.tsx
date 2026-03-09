@@ -1,4 +1,4 @@
-import { createVoyage } from "@/api/voyage.api";
+import { createVoyage, updateVoyage } from "@/api/voyage.api";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
@@ -25,6 +25,21 @@ export const VoyageSummaryScreen = () => {
       Toast.show({
         type: "success",
         text1: "Voyage créé avec succès",
+      });
+      // reset store
+      router.replace("/(app)");
+      setTimeout(() => {
+        store.resetAll();
+      }, 2000);
+    },
+  });
+  const updateVoyageMutation = useMutation({
+    mutationFn: updateVoyage,
+    mutationKey: ["updateVoyage"],
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Voyage mis à jour avec succès",
       });
       // reset store
       router.replace("/(app)");
@@ -234,7 +249,11 @@ export const VoyageSummaryScreen = () => {
         <View style={{ marginBottom: 10, gap: 10, marginTop: 5 }}>
           <Button
             preset="filled"
-            text="Confirmer le voyage"
+            text={
+              store.type === "create"
+                ? "Confirmer le voyage"
+                : "Mettre à jour le voyage"
+            }
             isLoading={createVoyageMutation.isPending}
             disabled={
               !store.selectedChauffeur ||
@@ -246,14 +265,26 @@ export const VoyageSummaryScreen = () => {
               store.bls.length === 0
             }
             onPress={() => {
-              createVoyageMutation.mutate({
-                bl_list: store.bls!.map((bl) => bl.id),
-                idChauffeur: store.selectedChauffeur!.id,
-                idVehicule: store.selectedVehicle!.id,
-                depot_depart: store.selectedDepot!.code,
-                km_depart: store.kmDepart,
-                date_depart: store.dateDepart!.toISOString(),
-              });
+              if (store.type === "create") {
+                createVoyageMutation.mutate({
+                  bl_list: store.bls!.map((bl) => bl.id),
+                  idChauffeur: store.selectedChauffeur!.id,
+                  idVehicule: store.selectedVehicle!.id,
+                  depot_depart: store.selectedDepot!.code,
+                  km_depart: store.kmDepart,
+                  date_depart: store.dateDepart!.toISOString(),
+                });
+              } else {
+                updateVoyageMutation.mutate({
+                  idVoyage: store.idVoyage!,
+                  bl_list: store.bls!.map((bl) => bl.id),
+                  idChauffeur: store.selectedChauffeur!.id,
+                  idVehicule: store.selectedVehicle!.id,
+                  depot_depart: store.selectedDepot!.code,
+                  km_depart: store.kmDepart,
+                  date_depart: store.dateDepart!.toISOString(),
+                });
+              }
             }}
           />
           <Button

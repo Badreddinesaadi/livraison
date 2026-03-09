@@ -20,14 +20,15 @@ export const createVoyage = async (request: CreateVoyageRequest) => {
 };
 
 export type BLItem = {
-  idBL: number;
-  id_document: string;
+  id: number;
+  code: string;
   nomClient: string;
+  datetime_document: string;
   images: string[];
 };
 
 export type VoyageListItem = {
-  idVoyage: number;
+  id: number;
   date_depart: string;
   idChauffeur: number;
   idVehicule: number;
@@ -46,12 +47,12 @@ export const listVoyage = async () => {
 };
 
 export const updateVoyage = async (
-  request: Omit<CreateVoyageRequest, "idVoyage">,
+  request: CreateVoyageRequest & { idVoyage: number },
 ) => {
   //log body
   const data = await client.request({
     pathname: "/sdkboard/api/homescreen/voyage.php",
-    method: "DELETE",
+    method: "PUT",
     body: request,
   });
   return data;

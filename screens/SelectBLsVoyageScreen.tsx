@@ -15,8 +15,16 @@ export const CreateVoyageScreen = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["bls", "list"],
     queryFn: listBLSEnCours,
+    select: (data) => {
+      return data?.map((bl) => ({
+        id: bl.id,
+        num_bl: bl.code,
+        date: bl.datetime_document,
+        nomClient: bl.nomClient,
+      }));
+    },
   });
-  const bls = useCreateVoyageStore();
+  const store = useCreateVoyageStore();
   const router = useRouter();
 
   const [searchText, setSearchText] = useState("");
@@ -64,30 +72,30 @@ export const CreateVoyageScreen = () => {
             onChangeText={setSearchText}
             clearButtonMode="while-editing"
           />
-          {!!bls.bls && bls.bls.length > 0 && (
+          {!!store.bls && store.bls.length > 0 && (
             <Button
               size="sm"
               preset="ghost"
               text="Tout désélectionner"
-              onPress={bls.removeAllBls}
+              onPress={store.removeAllBls}
               textStyle={styles.deselectText}
             />
           )}
         </View>
-        {/* <TextInput style={styles.input} placeholder="Nom du voyage" /> */}
+        <TextInput style={styles.input} placeholder="Nom du voyage" />
         {isLoading ? (
           <Loader />
         ) : (
           <FlatList
             data={filteredData}
-            keyExtractor={(bl, i) => bl.id.toString() + i}
+            keyExtractor={(bl, i) => bl.id.toString()}
             renderItem={({ item: bl }) => (
               <BLCard
                 key={bl.id}
                 bl={bl}
-                selected={bls.bls?.some((b) => b.id === bl.id)}
-                addBls={bls.addBls}
-                removeBL={bls.removeBL}
+                selected={store.bls?.some((b) => b.id === bl.id)}
+                addBls={store.addBls}
+                removeBL={store.removeBL}
               />
             )}
           />
@@ -95,8 +103,8 @@ export const CreateVoyageScreen = () => {
         <View style={{ marginBottom: 10 }}>
           <Button
             preset="filled"
-            disabled={!bls.bls || bls.bls.length === 0}
-            text={`Suivant (${bls.bls?.length || 0})`}
+            disabled={!store.bls || store.bls.length === 0}
+            text={`Suivant (${store.bls?.length || 0})`}
             onPress={() => {
               router.push("/voyages/create/photo");
             }}

@@ -6,6 +6,7 @@ type BlsState = {
   bls: BL[] | null;
   type: "update" | "create";
   addBls: (newBls: BL[]) => void;
+  setBls: (bls: BL[] | null) => void;
   removeBL: (blId: number) => void;
   removeAllBls: () => void;
   selectedChauffeur: Chauffeur | null;
@@ -36,6 +37,7 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
       const uniqueBls = [...new Set([...state.bls, ...newBls])];
       return { bls: uniqueBls };
     }),
+  setBls: (bls: BL[] | null) => set({ bls }),
   removeBL: (blId: number) =>
     set((state) => {
       if (!state.bls) return state;
