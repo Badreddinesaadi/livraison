@@ -1,19 +1,21 @@
 import { deleteVoyage, listVoyage, VoyageListItem } from "@/api/voyage.api";
+import { Button } from "@/components/ui/button";
+import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    LayoutAnimation,
-    Platform,
-    Pressable,
-    Text,
-    TextInput,
-    UIManager,
-    View,
+  Alert,
+  FlatList,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  UIManager,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -365,30 +367,57 @@ export const VoyagesScreen = () => {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: "#fff",
-            borderColor: "#e8e8e8",
-            borderWidth: 1,
-            borderRadius: 10,
-            paddingHorizontal: 12,
-            marginBottom: 12,
             marginTop: 4,
+            columnGap: 8,
+            marginBottom: 12,
           }}
         >
-          <FontAwesome5 name="search" size={14} color="#bbb" />
-          <TextInput
+          <View
             style={{
               flex: 1,
-              height: 46,
-              paddingHorizontal: 10,
-              fontSize: 14,
-              color: "#222",
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: "#fff",
+              borderColor: "#e8e8e8",
+              borderWidth: 1,
+              borderRadius: 10,
+              paddingHorizontal: 12,
             }}
-            placeholder="Rechercher par N° BL ou chauffeur..."
-            placeholderTextColor="#bbb"
-            value={searchText}
-            onChangeText={setSearchText}
-            clearButtonMode="while-editing"
-          />
+          >
+            <FontAwesome5 name="search" size={14} color="#bbb" />
+            <TextInput
+              style={{
+                flex: 1,
+                height: 46,
+                paddingHorizontal: 10,
+                fontSize: 14,
+                color: "#222",
+              }}
+              placeholder="Rechercher par N° BL ou chauffeur..."
+              placeholderTextColor="#bbb"
+              value={searchText}
+              onChangeText={setSearchText}
+              clearButtonMode="while-editing"
+            />
+          </View>
+          <View>
+            <Button
+              preset="filled"
+              LeftAccessory={() => (
+                <FontAwesome5
+                  name="plus"
+                  size={24}
+                  color={Colors.light.background}
+                />
+              )}
+              size="md"
+              onPress={() => {
+                store.resetAll();
+                store.setType("create");
+                router.push("/voyages/create/chauffeur");
+              }}
+            />
+          </View>
         </View>
 
         {/* Result count */}
