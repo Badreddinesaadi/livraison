@@ -21,7 +21,7 @@ export const createVoyage = async (request: CreateVoyageRequest) => {
 
 export type VoyageListItem = {
   idVoyage: number;
-  num_bl: string | null;
+  bl_list: { id: number; code: string | null }[] | null;
   idClient: number | null;
   dateBL: string | null;
   montant_ttc: string | null;

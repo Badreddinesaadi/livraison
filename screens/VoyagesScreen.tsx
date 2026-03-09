@@ -68,11 +68,7 @@ const VoyageCard = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
 
-  const bls = item.num_bl
-    ?.split(",")
-    .map((b) => b.trim())
-    .filter(Boolean);
-
+  const bls = item.bl_list;
   const departDate = item.date_depart
     ? new Date(item.date_depart).toLocaleDateString("fr-FR", {
         day: "2-digit",
@@ -83,10 +79,6 @@ const VoyageCard = ({
 
   const blDate = item.dateBL
     ? new Date(item.dateBL).toLocaleDateString("fr-FR")
-    : "—";
-
-  const montant = item.montant_ttc
-    ? `${parseFloat(item.montant_ttc).toLocaleString("fr-FR")} DH`
     : "—";
 
   const toggle = () => {
@@ -176,12 +168,7 @@ const VoyageCard = ({
           <DetailRow
             icon="file-alt"
             label="BLs"
-            value={bls?.join("  •  ") ?? "—"}
-          />
-          <DetailRow
-            icon="money-bill-wave"
-            label="Montant TTC"
-            value={montant}
+            value={bls?.map((b) => b.code).join("  •  ") ?? "—"}
           />
           <DetailRow
             icon="map-marker-alt"
@@ -302,13 +289,14 @@ export const VoyagesScreen = () => {
     }
 
     store.removeAllBls();
-    if (item.num_bl) {
-      const blIds = item.num_bl
-        .split(",")
-        .map((b) => b.trim())
-        .filter(Boolean)
-        .map((b) => parseInt(b.split("-")[0].replace("BL", "").trim()));
-      store.addBls(blIds.map((id) => ({ id, num_bl: `BL${id}` })));
+    if (item.bl_list) {
+      const blIds = item.bl_list
+        .filter(
+          (bl): bl is { id: number; code: string } => !!bl.id && !!bl.code,
+        )
+        .map((bl) => ({ id: bl.id, num_bl: bl.code }));
+      console.log("BLs à ajouter au store :", blIds);
+      store.addBls(blIds);
     }
 
     if (item.idVehicule !== null) {
@@ -352,7 +340,7 @@ export const VoyagesScreen = () => {
     const q = debouncedSearch.toLowerCase();
     return data.filter(
       (v) =>
-        v.num_bl?.toLowerCase().includes(q) ||
+        v.bl_list?.some((bl) => bl.code?.toLowerCase().includes(q)) ||
         v.nomChauffeur?.toLowerCase().includes(q),
     );
   }, [data, debouncedSearch]);
