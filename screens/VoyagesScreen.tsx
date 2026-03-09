@@ -1,16 +1,19 @@
-import { listVoyage } from "@/api/voyage.api";
+import { deleteVoyage, listVoyage, VoyageListItem } from "@/api/voyage.api";
+import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  FlatList,
-  LayoutAnimation,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  UIManager,
-  View,
+    Alert,
+    FlatList,
+    LayoutAnimation,
+    Platform,
+    Pressable,
+    Text,
+    TextInput,
+    UIManager,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -22,19 +25,6 @@ if (
 }
 
 const PRIMARY = "#ED5623";
-
-type VoyageItem = {
-  idVoyage: number;
-  num_bl: string;
-  idClient: number;
-  dateBL: string;
-  montant_ttc: string;
-  idVehicule: number;
-  date_depart: string;
-  depot_depart: string;
-  idChauffeur: number;
-  nomChauffeur: string;
-};
 
 const DetailRow = ({
   icon,
@@ -65,11 +55,19 @@ const DetailRow = ({
   </View>
 );
 
-const VoyageCard = ({ item }: { item: VoyageItem }) => {
+const VoyageCard = ({
+  item,
+  onDelete,
+  onUpdate,
+}: {
+  item: VoyageListItem;
+  onDelete: () => void;
+  onUpdate: () => void;
+}) => {
   const [expanded, setExpanded] = useState(false);
 
   const bls = item.num_bl
-    .split(",")
+    ?.split(",")
     .map((b) => b.trim())
     .filter(Boolean);
 
@@ -138,7 +136,7 @@ const VoyageCard = ({ item }: { item: VoyageItem }) => {
             Voyage #{item.idVoyage}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
-            {item.nomChauffeur}
+            {item.nomChauffeur || "—"}
           </Text>
         </View>
 
@@ -152,7 +150,7 @@ const VoyageCard = ({ item }: { item: VoyageItem }) => {
               marginTop: 2,
             }}
           >
-            {bls.length} BL{bls.length > 1 ? "s" : ""}
+            {bls?.length ?? 0} BL{bls?.length !== 1 ? "s" : ""}
           </Text>
         </View>
 
@@ -173,7 +171,11 @@ const VoyageCard = ({ item }: { item: VoyageItem }) => {
             paddingVertical: 12,
           }}
         >
-          <DetailRow icon="file-alt" label="BLs" value={bls.join("  •  ")} />
+          <DetailRow
+            icon="file-alt"
+            label="BLs"
+            value={bls?.join("  •  ") ?? "—"}
+          />
           <DetailRow
             icon="money-bill-wave"
             label="Montant TTC"
@@ -187,9 +189,61 @@ const VoyageCard = ({ item }: { item: VoyageItem }) => {
           <DetailRow
             icon="car"
             label="Véhicule"
-            value={`#${item.idVehicule}`}
+            value={item.immatriculation !== null ? item.immatriculation : "—"}
           />
           <DetailRow icon="calendar-alt" label="Date BL" value={blDate} />
+
+          {/* Action buttons */}
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              marginTop: 10,
+              paddingTop: 10,
+              borderTopWidth: 1,
+              borderTopColor: "#f2f2f2",
+            }}
+          >
+            <Pressable
+              onPress={onUpdate}
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 10,
+                borderRadius: 8,
+                backgroundColor: PRIMARY + "18",
+                gap: 6,
+              }}
+            >
+              <FontAwesome5 name="edit" size={14} color={PRIMARY} />
+              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
+                Modifier
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={onDelete}
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 10,
+                borderRadius: 8,
+                backgroundColor: "#ff4d4f18",
+                gap: 6,
+              }}
+            >
+              <FontAwesome5 name="trash-alt" size={14} color="#ff4d4f" />
+              <Text
+                style={{ color: "#ff4d4f", fontWeight: "600", fontSize: 13 }}
+              >
+                Supprimer
+              </Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </Pressable>
@@ -201,6 +255,80 @@ export const VoyagesScreen = () => {
     queryKey: ["voyages", "list"],
     queryFn: listVoyage,
   });
+
+  const router = useRouter();
+  const store = useCreateVoyageStore();
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteMutate } = useMutation({
+    mutationFn: deleteVoyage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voyages", "list"] });
+    },
+  });
+
+  const handleDelete = (idVoyage: number) => {
+    Alert.alert(
+      "Supprimer le voyage",
+      `Êtes-vous sûr de vouloir supprimer le voyage #${idVoyage} ?`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => deleteMutate(idVoyage),
+        },
+      ],
+    );
+  };
+
+  const handleUpdate = (item: VoyageListItem) => {
+    store.resetAll();
+    store.setIdVoyage(item.idVoyage);
+
+    if (item.idChauffeur && item.nomChauffeur) {
+      store.setSelectedChauffeur({
+        id: item.idChauffeur,
+        name: item.nomChauffeur,
+        idDepartement: 0,
+        telephone: "",
+        fonction: "Chauffeur",
+        role: "",
+        photoIdentite: "",
+        photo: "",
+      });
+    }
+
+    store.removeAllBls();
+    if (item.num_bl) {
+      const blIds = item.num_bl
+        .split(",")
+        .map((b) => b.trim())
+        .filter(Boolean)
+        .map((b) => parseInt(b.split("-")[0].replace("BL", "").trim()));
+      store.addBls(blIds.map((id) => ({ id, num_bl: `BL${id}` })));
+    }
+
+    if (item.idVehicule !== null) {
+      store.setSelectedVehicle({
+        id: item.idVehicule,
+        immatriculation: "",
+        nameVehicule: "",
+        vehiculeType: "",
+        vehiculeMarque: "",
+        km_reel: null,
+      });
+    }
+    if (item.km_depart) {
+      store.setKmDepart(item.km_depart);
+    }
+    if (item.date_depart) {
+      store.setDateDepart(new Date(item.date_depart));
+    }
+
+    store.setType("update");
+    router.push("/voyages/create/chauffeur");
+  };
 
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -222,8 +350,8 @@ export const VoyagesScreen = () => {
     const q = debouncedSearch.toLowerCase();
     return data.filter(
       (v) =>
-        v.num_bl.toLowerCase().includes(q) ||
-        v.nomChauffeur.toLowerCase().includes(q),
+        v.num_bl?.toLowerCase().includes(q) ||
+        v.nomChauffeur?.toLowerCase().includes(q),
     );
   }, [data, debouncedSearch]);
 
@@ -271,7 +399,13 @@ export const VoyagesScreen = () => {
         <FlatList
           data={filteredData}
           keyExtractor={(item) => String(item.idVoyage)}
-          renderItem={({ item }) => <VoyageCard item={item} />}
+          renderItem={({ item }) => (
+            <VoyageCard
+              item={item}
+              onDelete={() => handleDelete(item.idVoyage)}
+              onUpdate={() => handleUpdate(item)}
+            />
+          )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 }}
           ListEmptyComponent={

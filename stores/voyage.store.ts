@@ -4,6 +4,7 @@ import { create } from "zustand";
 
 type BlsState = {
   bls: BL[] | null;
+  type: "update" | "create";
   addBls: (newBls: BL[]) => void;
   removeBL: (blId: number) => void;
   removeAllBls: () => void;
@@ -17,11 +18,15 @@ type BlsState = {
   setKmDepart: (km: number) => void;
   dateDepart: Date | null;
   setDateDepart: (date: Date) => void;
+  idVoyage: number | null;
+  setIdVoyage: (id: number | null) => void;
+  setType: (type: "update" | "create") => void;
   resetAll: () => void;
 };
 
 export const useCreateVoyageStore = create<BlsState>((set) => ({
   bls: null,
+  type: "create",
   removeAllBls: () => set({ bls: null }),
   addBls: (newBls: BL[]) =>
     set((state) => {
@@ -48,6 +53,8 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
   setKmDepart: (km: number) => set({ kmDepart: km }),
   dateDepart: null,
   setDateDepart: (date: Date) => set({ dateDepart: date }),
+  idVoyage: null,
+  setIdVoyage: (id: number | null) => set({ idVoyage: id }),
   resetAll: () =>
     set({
       bls: null,
@@ -56,5 +63,7 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
       selectedDepot: null,
       kmDepart: 0,
       dateDepart: null,
+      idVoyage: null,
     }),
+  setType: (type: "update" | "create") => set({ type }),
 }));

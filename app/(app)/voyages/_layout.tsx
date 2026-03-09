@@ -1,9 +1,11 @@
 import { Colors } from "@/constants/theme";
+import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import { Text, TouchableWithoutFeedback, View } from "react-native";
 
 export default function StackLayout() {
+  const storeType = useCreateVoyageStore((state) => state.type);
   return (
     <Stack
       screenOptions={{
@@ -23,9 +25,11 @@ export default function StackLayout() {
               <FontAwesome5 name="arrow-left" size={24} color="black" />
             </TouchableWithoutFeedback>
             <Text style={{ fontSize: 20, fontWeight: "700" }}>
-              {headerTitles[s.route.name] ??
-                "Créer un voyage" + +" -" + s.route.name}
+              {(headerTitles[s.route.name] ?? storeType === "create")
+                ? "Créer un voyage"
+                : "Modifier le voyage"}
             </Text>
+            <Text style={{ fontSize: 8 }}>{"DEBUG: " + s.route.name}</Text>
           </View>
         ),
       }}

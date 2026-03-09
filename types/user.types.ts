@@ -15,11 +15,12 @@ export type Vehicle = {
   nameVehicule: string;
   vehiculeType: string;
   vehiculeMarque: string;
+  km_reel: string | null;
 };
 export type Depot = {
   id: number;
   code: string;
   active: "y" | "n";
-  nom: "string";
+  nom: string;
   enable_stock: "y" | "n";
 };
