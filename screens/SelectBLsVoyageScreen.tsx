@@ -19,7 +19,7 @@ export const CreateVoyageScreen = () => {
       return data?.map((bl) => ({
         id: bl.id,
         num_bl: bl.code,
-        date: bl.datetime_document,
+        datetime_document: bl.datetime_document,
         nomClient: bl.nomClient,
       }));
     },
@@ -42,12 +42,26 @@ export const CreateVoyageScreen = () => {
   }, [searchText]);
 
   const filteredData = useMemo(() => {
-    if (!data) return [];
-    if (!debouncedSearch) return data;
-    return data.filter((bl) =>
+    const apiBls = data ?? [];
+    const mergedData =
+      store.type === "update"
+        ? (() => {
+            const apiIds = new Set(apiBls.map((bl) => bl.id));
+            const oldMissingBls = (store.bls ?? []).filter(
+              (bl) => !apiIds.has(bl.id),
+            );
+
+            // Keep API order stable, then append old BLs not returned by API.
+            return [...apiBls, ...oldMissingBls];
+          })()
+        : apiBls;
+
+    if (!debouncedSearch) return mergedData;
+
+    return mergedData.filter((bl) =>
       bl.num_bl.toLowerCase().includes(debouncedSearch.toLowerCase()),
     );
-  }, [data, debouncedSearch]);
+  }, [data, debouncedSearch, store.type, store.bls]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -126,12 +140,45 @@ const BLCard = ({
   addBls: (newBls: BL[]) => void;
   removeBL: (blId: number) => void;
 }) => {
+  const blDate = new Date(bl.datetime_document);
   return (
     <View style={[styles.card]}>
       <View style={{ marginBottom: 10 }}>
         <Text style={styles.cardTitle}>{bl.num_bl}</Text>
-        <Text>bl.date</Text>
-        <Text>bl.status</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
+            marginTop: 4,
+          }}
+        >
+          <FontAwesome5 name="clock" size={12} color={Colors.light.primary} />
+          <Text>
+            {blDate.toLocaleDateString("fr-FR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
+            marginTop: 4,
+          }}
+        >
+          <FontAwesome5
+            name="user-tag"
+            size={12}
+            color={Colors.light.primary}
+          />
+          <Text>{bl.nomClient}</Text>
+        </View>
       </View>
       <Button
         size="sm"
@@ -193,6 +240,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
+    borderLeftWidth: 5,
+    borderLeftColor: Colors.light.primary,
   },
   cardTitle: {
     fontSize: 18,

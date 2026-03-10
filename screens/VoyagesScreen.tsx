@@ -2,11 +2,18 @@ import { ListDepots } from "@/api/depots.api";
 import { ListChauffeurs } from "@/api/users.api";
 import { ListVehicles } from "@/api/vehicle.api";
 import { deleteVoyage, listVoyage, VoyageListItem } from "@/api/voyage.api";
+import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
+import { BL } from "@/types/bl.types";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -129,7 +136,7 @@ const VoyageCard = ({
             Voyage #{item.id}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
-            {`Chauffeur #${item.idChauffeur}`}
+            {item.nomChauffeur}
           </Text>
         </View>
 
@@ -178,6 +185,11 @@ const VoyageCard = ({
             icon="car"
             label="Véhicule"
             value={item.idVehicule ? String(item.idVehicule) : "—"}
+          />
+          <DetailRow
+            icon="tachometer-alt"
+            label="Km départ"
+            value={item.km_depart ? `${item.km_depart} km` : "—"}
           />
 
           {/* Action buttons */}
@@ -238,10 +250,19 @@ const VoyageCard = ({
 };
 
 export const VoyagesScreen = () => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["voyages", "list"],
-    queryFn: listVoyage,
-  });
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: ["voyages", "list"],
+      queryFn: ({ pageParam }) => listVoyage({ page: pageParam }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => {
+        const pagination = lastPage.pagination;
+        if (!pagination || pagination.page >= pagination.totalPages) {
+          return undefined;
+        }
+        return pagination.page + 1;
+      },
+    });
   const { data: chauffersList } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
@@ -302,9 +323,11 @@ export const VoyagesScreen = () => {
     }
 
     if (item.bl_list) {
-      const blIds = item.bl_list.map((bl) => ({
+      const blIds: BL[] = item.bl_list.map((bl) => ({
         id: bl.id,
         num_bl: bl.code,
+        datetime_document: bl.datetime_document,
+        nomClient: bl.nomClient,
       }));
       console.log("BLs à ajouter au store :", blIds);
       store.setBls(blIds);
@@ -353,11 +376,12 @@ export const VoyagesScreen = () => {
     };
   }, [searchText]);
 
-  const filteredData = useMemo(() => {
-    if (!data) return [];
-    if (!debouncedSearch) return data;
+  const listData = useMemo(() => {
+    const flattenedData = data?.pages.flatMap((page) => page.data ?? []) ?? [];
+    if (!debouncedSearch) return flattenedData;
+
     const q = debouncedSearch.toLowerCase();
-    return data.filter((v) =>
+    return flattenedData.filter((v) =>
       v.bl_list?.some((bl) => bl.code?.toLowerCase().includes(q)),
     );
   }, [data, debouncedSearch]);
@@ -427,11 +451,11 @@ export const VoyagesScreen = () => {
 
         {/* Result count */}
         <Text style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>
-          {filteredData.length} voyage{filteredData.length !== 1 ? "s" : ""}
+          {listData.length} voyage{listData.length !== 1 ? "s" : ""}
         </Text>
 
         <FlatList
-          data={filteredData}
+          data={listData}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
             <VoyageCard
@@ -442,8 +466,17 @@ export const VoyagesScreen = () => {
           )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 }}
+          onEndReachedThreshold={0.3}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          ListFooterComponent={isFetchingNextPage ? <Loader /> : null}
           ListEmptyComponent={
-            isLoading ? null : (
+            isLoading ? (
+              <Loader />
+            ) : (
               <View style={{ alignItems: "center", marginTop: 60 }}>
                 <FontAwesome5 name="truck" size={40} color="#ddd" />
                 <Text style={{ color: "#ccc", marginTop: 14, fontSize: 14 }}>

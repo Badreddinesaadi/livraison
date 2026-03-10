@@ -14,6 +14,7 @@ import { useState } from "react";
 import {
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -24,14 +25,6 @@ export const SelectChauffeurScreen = () => {
   const { data: chauffersList, isLoading: isChauffeursLoading } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
-    select: (data) =>
-      data
-        ?.map((chauffeur) => ({
-          ...chauffeur,
-          name: chauffeur.name.trim(),
-        }))
-        .filter((chauffeur) => chauffeur.fonction === "Chauffeur")
-        .sort((a, b) => a.name.localeCompare(b.name)),
   });
   const { data: vehiclesList, isLoading: isVehiclesLoading } = useQuery({
     queryKey: ["vehicles", "full-list"],
@@ -48,167 +41,140 @@ export const SelectChauffeurScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <View style={{ marginBottom: 20 }}>
+      <View style={styles.content}>
+        <View style={styles.header}>
           <Text style={styles.title}>
             Veuillez sélectionner le chauffeur pour ce voyage
           </Text>
         </View>
-        {/* <TextInput style={styles.input} placeholder="Nom du voyage" /> */}
+
         {isChauffeursLoading || isVehiclesLoading || isDepotsLoading ? (
           <Loader />
         ) : (
-          <View style={{ flex: 1, rowGap: 10 }}>
-            <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 10,
-                  gap: 8,
-                }}
-              >
+          <ScrollView
+            style={styles.formScroll}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.formContent}
+          >
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
                 <FontAwesome6
                   name="drivers-license"
-                  size={24}
+                  size={18}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                  Chauffeur:
-                </Text>
+                <Text style={styles.sectionTitle}>Chauffeur</Text>
               </View>
-
-              <Picker
-                dropdownIconColor={Colors.light.primary}
-                selectedValue={createVoyageStore.selectedChauffeur?.id}
-                onValueChange={(itemValue, itemIndex) => {
-                  const selectedChauffeur = chauffersList?.find(
-                    (chauffeur) => chauffeur.id === itemValue,
-                  );
-                  if (selectedChauffeur) {
-                    createVoyageStore.setSelectedChauffeur(selectedChauffeur);
-                  }
-                }}
-              >
-                <Picker.Item
-                  label="Sélectionner un chauffeur"
-                  value={undefined}
-                />
-                {chauffersList?.map((chauffeur) => (
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  dropdownIconColor={Colors.light.primary}
+                  selectedValue={createVoyageStore.selectedChauffeur?.id}
+                  onValueChange={(itemValue) => {
+                    const selectedChauffeur = chauffersList?.find(
+                      (chauffeur) => chauffeur.id === itemValue,
+                    );
+                    if (selectedChauffeur) {
+                      createVoyageStore.setSelectedChauffeur(selectedChauffeur);
+                    }
+                  }}
+                >
                   <Picker.Item
-                    key={chauffeur.id}
-                    label={chauffeur.name}
-                    value={chauffeur.id}
+                    label="Sélectionner un chauffeur"
+                    value={undefined}
                   />
-                ))}
-              </Picker>
+                  {chauffersList?.map((chauffeur) => (
+                    <Picker.Item
+                      key={chauffeur.id}
+                      label={chauffeur.name}
+                      value={chauffeur.id}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </View>
-            <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 10,
-                  gap: 8,
-                }}
-              >
+
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
                 <FontAwesome6
                   name="truck"
-                  size={24}
+                  size={18}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                  Véhicule:
-                </Text>
+                <Text style={styles.sectionTitle}>Véhicule</Text>
               </View>
-
-              <Picker
-                dropdownIconColor={Colors.light.primary}
-                selectedValue={createVoyageStore.selectedVehicle?.id}
-                onValueChange={(itemValue, itemIndex) => {
-                  const selectedVehicle = vehiclesList?.find(
-                    (vehicle) => vehicle.id === itemValue,
-                  );
-                  if (selectedVehicle) {
-                    createVoyageStore.setSelectedVehicle(selectedVehicle);
-                  }
-                }}
-              >
-                <Picker.Item
-                  label="Sélectionner un véhicule"
-                  value={undefined}
-                />
-                {vehiclesList?.map((vehicle) => (
-                  <Picker.Item
-                    key={vehicle.id}
-                    label={
-                      vehicle.immatriculation +
-                      " (" +
-                      vehicle.vehiculeMarque +
-                      ")"
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  dropdownIconColor={Colors.light.primary}
+                  selectedValue={createVoyageStore.selectedVehicle?.id}
+                  onValueChange={(itemValue) => {
+                    const selectedVehicle = vehiclesList?.find(
+                      (vehicle) => vehicle.id === itemValue,
+                    );
+                    if (selectedVehicle) {
+                      createVoyageStore.setSelectedVehicle(selectedVehicle);
                     }
-                    value={vehicle.id}
+                  }}
+                >
+                  <Picker.Item
+                    label="Sélectionner un véhicule"
+                    value={undefined}
                   />
-                ))}
-              </Picker>
+                  {vehiclesList?.map((vehicle) => (
+                    <Picker.Item
+                      key={vehicle.id}
+                      label={`${vehicle.immatriculation} (${vehicle.vehiculeMarque})`}
+                      value={vehicle.id}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </View>
-            <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 10,
-                  gap: 8,
-                }}
-              >
+
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
                 <FontAwesome6
                   name="location-dot"
-                  size={24}
+                  size={18}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                  Dépôt de depart:
-                </Text>
+                <Text style={styles.sectionTitle}>Depot de depart</Text>
               </View>
-              <Picker
-                dropdownIconColor={Colors.light.primary}
-                selectedValue={createVoyageStore.selectedDepot?.id}
-                onValueChange={(itemValue, itemIndex) => {
-                  const selectedDepot = depotsList?.find(
-                    (depot) => depot.id === itemValue,
-                  );
-                  if (selectedDepot) {
-                    createVoyageStore.setSelectedDepot(selectedDepot);
-                  }
-                }}
-              >
-                <Picker.Item label="Sélectionner un dépôt" value={undefined} />
-                {depotsList?.map((depot) => (
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  dropdownIconColor={Colors.light.primary}
+                  selectedValue={createVoyageStore.selectedDepot?.id}
+                  onValueChange={(itemValue) => {
+                    const selectedDepot = depotsList?.find(
+                      (depot) => depot.id === itemValue,
+                    );
+                    if (selectedDepot) {
+                      createVoyageStore.setSelectedDepot(selectedDepot);
+                    }
+                  }}
+                >
                   <Picker.Item
-                    key={depot.id}
-                    label={depot.code}
-                    value={depot.id}
+                    label="Sélectionner un dépôt"
+                    value={undefined}
                   />
-                ))}
-              </Picker>
+                  {depotsList?.map((depot) => (
+                    <Picker.Item
+                      key={depot.id}
+                      label={depot.code}
+                      value={depot.id}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </View>
-            <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 10,
-                  gap: 8,
-                }}
-              >
+
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
                 <FontAwesome6
                   name="road"
-                  size={24}
+                  size={18}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                  Km départ:
-                </Text>
+                <Text style={styles.sectionTitle}>Km départ</Text>
               </View>
               <TextInput
                 style={styles.kmInput}
@@ -226,23 +192,15 @@ export const SelectChauffeurScreen = () => {
                 }}
               />
             </View>
-            <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 10,
-                  gap: 8,
-                }}
-              >
+
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
                 <FontAwesome6
                   name="calendar"
-                  size={24}
+                  size={18}
                   color={Colors.light.primary}
                 />
-                <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                  Date et heure de départ:
-                </Text>
+                <Text style={styles.sectionTitle}>Date et heure de départ</Text>
               </View>
               <Pressable
                 style={styles.dateButton}
@@ -259,7 +217,7 @@ export const SelectChauffeurScreen = () => {
                       })
                     : "Sélectionner la date et l'heure"}
                 </Text>
-                <FontAwesome6 name="chevron-right" size={16} color="#666" />
+                <FontAwesome6 name="chevron-right" size={14} color="#888" />
               </Pressable>
               {showDatePicker && (
                 <DateTimePicker
@@ -295,9 +253,9 @@ export const SelectChauffeurScreen = () => {
                 />
               )}
             </View>
-          </View>
+          </ScrollView>
         )}
-        <View style={{ marginBottom: 10 }}>
+        <View style={styles.footer}>
           <Button
             disabled={
               !createVoyageStore.selectedDepot ||
@@ -321,52 +279,83 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 14,
-    backgroundColor: "white",
+    backgroundColor: "#f7f8fa",
   },
-
+  content: {
+    flex: 1,
+  },
+  header: {
+    marginTop: 6,
+    marginBottom: 14,
+  },
   title: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#11181C",
+  },
+  formScroll: {
+    flex: 1,
+  },
+  formContent: {
+    gap: 12,
+    paddingBottom: 14,
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  pickerWrapper: {
+    borderColor: "#e8e8e8",
+    borderWidth: 1,
+    borderRadius: 10,
+    overflow: "hidden",
   },
   kmInput: {
-    height: 50,
-    borderColor: "#ccc",
+    height: 48,
+    borderColor: "#e8e8e8",
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingHorizontal: 15,
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: 14,
+    color: "#11181C",
+    backgroundColor: "#fff",
   },
   dateButton: {
-    height: 50,
-    borderColor: "#ccc",
+    height: 48,
+    borderColor: "#e8e8e8",
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingHorizontal: 15,
-    fontSize: 16,
-    marginBottom: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "#fff",
   },
   dateButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#333",
   },
-  card: {
-    backgroundColor: "#f9f9f9",
-    padding: 15,
-    borderRadius: 8,
+  footer: {
     marginBottom: 10,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  selectedCard: {
-    backgroundColor: Colors.light.primary,
-    color: "white",
+    marginTop: 8,
   },
 });

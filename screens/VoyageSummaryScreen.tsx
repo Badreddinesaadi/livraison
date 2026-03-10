@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
   FlatList,
@@ -16,12 +16,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export const VoyageSummaryScreen = () => {
+  const queryClient = useQueryClient();
   const store = useCreateVoyageStore();
   const router = useRouter();
   const createVoyageMutation = useMutation({
     mutationFn: createVoyage,
     mutationKey: ["createVoyage"],
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voyages"] });
       Toast.show({
         type: "success",
         text1: "Voyage créé avec succès",
@@ -37,6 +39,7 @@ export const VoyageSummaryScreen = () => {
     mutationFn: updateVoyage,
     mutationKey: ["updateVoyage"],
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voyages"] });
       Toast.show({
         type: "success",
         text1: "Voyage mis à jour avec succès",
@@ -267,20 +270,20 @@ export const VoyageSummaryScreen = () => {
             onPress={() => {
               if (store.type === "create") {
                 createVoyageMutation.mutate({
-                  bl_list: store.bls!.map((bl) => bl.id),
+                  bl_list: store.bls!.map((bl) => ({ id: bl.id })),
                   idChauffeur: store.selectedChauffeur!.id,
                   idVehicule: store.selectedVehicle!.id,
-                  depot_depart: store.selectedDepot!.code,
+                  depot_depart: store.selectedDepot!.id,
                   km_depart: store.kmDepart,
                   date_depart: store.dateDepart!.toISOString(),
                 });
               } else {
                 updateVoyageMutation.mutate({
                   idVoyage: store.idVoyage!,
-                  bl_list: store.bls!.map((bl) => bl.id),
+                  bl_list: store.bls!.map((bl) => ({ id: bl.id })),
                   idChauffeur: store.selectedChauffeur!.id,
                   idVehicule: store.selectedVehicle!.id,
-                  depot_depart: store.selectedDepot!.code,
+                  depot_depart: store.selectedDepot!.id,
                   km_depart: store.kmDepart,
                   date_depart: store.dateDepart!.toISOString(),
                 });

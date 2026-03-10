@@ -7,7 +7,20 @@ interface RequestOptions {
   headers?: Record<string, string>;
   pathname?: string;
   isDebug?: boolean;
+  withPagination?: boolean;
 }
+
+export type Pagination = {
+  page: number;
+  perPage: number;
+  total: number;
+  totalPages: number;
+};
+
+export type PaginatedResult<T> = {
+  data: T | null;
+  pagination: Pagination | null;
+};
 
 class ApiClient {
   private baseUrl: string;
@@ -22,13 +35,22 @@ class ApiClient {
     };
   }
 
-  async request<T = any>(options: RequestOptions = {}): Promise<T | null> {
+  async request<T = any>(
+    options: RequestOptions & { withPagination: true },
+  ): Promise<PaginatedResult<T>>;
+  async request<T = any>(
+    options?: RequestOptions & { withPagination?: false },
+  ): Promise<T | null>;
+  async request<T = any>(
+    options: RequestOptions = {},
+  ): Promise<T | null | PaginatedResult<T>> {
     const {
       method = "GET",
       body,
       headers = {},
       pathname = "",
       isDebug = false,
+      withPagination = false,
     } = options;
 
     const url = this.baseUrl + pathname;
@@ -78,6 +100,13 @@ class ApiClient {
       }
 
       throw new Error(data.message || "An error occurred");
+    }
+
+    if (withPagination) {
+      return {
+        data: (data.data as T) ?? null,
+        pagination: (data.pagination as Pagination) ?? null,
+      };
     }
 
     return data.data as T | null;
