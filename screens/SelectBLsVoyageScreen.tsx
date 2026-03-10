@@ -9,7 +9,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export const CreateVoyageScreen = () => {
   const { data, isLoading } = useQuery({
@@ -64,7 +63,7 @@ export const CreateVoyageScreen = () => {
   }, [data, debouncedSearch, store.type, store.bls]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={{ flex: 1 }}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>
@@ -125,7 +124,7 @@ export const CreateVoyageScreen = () => {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

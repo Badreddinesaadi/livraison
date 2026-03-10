@@ -29,7 +29,7 @@ export default function StackLayout() {
                 ? "Créer un voyage"
                 : "Modifier le voyage"}
             </Text>
-            <Text style={{ fontSize: 8 }}>{"DEBUG: " + s.route.name}</Text>
+            {/* <Text style={{ fontSize: 8 }}>{"DEBUG: " + s.route.name}</Text> */}
           </View>
         ),
       }}

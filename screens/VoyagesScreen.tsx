@@ -27,7 +27,7 @@ import {
   UIManager,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 if (
   Platform.OS === "android" &&
@@ -179,7 +179,7 @@ const VoyageCard = ({
           <DetailRow
             icon="map-marker-alt"
             label="Dépôt départ"
-            value={item.depot_depart || "—"}
+            value={item.depot_nom || "—"}
           />
           <DetailRow
             icon="car"
@@ -266,14 +266,6 @@ export const VoyagesScreen = () => {
   const { data: chauffersList } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
-    select: (data) =>
-      data
-        ?.map((chauffeur) => ({
-          ...chauffeur,
-          name: chauffeur.name.trim(),
-        }))
-        .filter((chauffeur) => chauffeur.fonction === "Chauffeur")
-        .sort((a, b) => a.name.localeCompare(b.name)),
   });
   const { data: vehiclesList } = useQuery({
     queryKey: ["vehicles", "full-list"],
@@ -291,6 +283,11 @@ export const VoyagesScreen = () => {
     mutationFn: deleteVoyage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voyages", "list"] });
+      Toast.show({
+        type: "success",
+        text1: "Voyage supprimé",
+        text2: "Le voyage a été supprimé avec succès.",
+      });
     },
   });
 
@@ -344,9 +341,7 @@ export const VoyagesScreen = () => {
     }
 
     if (item.depot_depart) {
-      const foundedDepot = depotsList?.find(
-        (d) => d.code.trim() === item.depot_depart.trim(),
-      );
+      const foundedDepot = depotsList?.find((d) => d.id === item.depot_depart);
       if (foundedDepot) {
         store.setSelectedDepot(foundedDepot);
       }
@@ -381,14 +376,21 @@ export const VoyagesScreen = () => {
     if (!debouncedSearch) return flattenedData;
 
     const q = debouncedSearch.toLowerCase();
-    return flattenedData.filter((v) =>
-      v.bl_list?.some((bl) => bl.code?.toLowerCase().includes(q)),
+    return flattenedData.filter(
+      (v) =>
+        v.bl_list?.some((bl) => bl.code?.toLowerCase().includes(q)) ||
+        v.nomChauffeur?.toLowerCase().includes(q),
     );
   }, [data, debouncedSearch]);
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, paddingHorizontal: 14, backgroundColor: "#f7f8fa" }}
+    <View
+      style={{
+        flex: 1,
+        paddingHorizontal: 14,
+        marginTop: 4,
+        backgroundColor: "#f7f8fa",
+      }}
     >
       <View style={{ flex: 1 }}>
         {/* Search bar */}
@@ -487,6 +489,6 @@ export const VoyagesScreen = () => {
           }
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };

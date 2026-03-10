@@ -20,7 +20,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 export const SelectChauffeurScreen = () => {
   const { data: chauffersList, isLoading: isChauffeursLoading } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
@@ -40,7 +39,7 @@ export const SelectChauffeurScreen = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>
@@ -271,7 +270,7 @@ export const SelectChauffeurScreen = () => {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -12,7 +12,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DriverScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -42,7 +41,7 @@ export default function DriverScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={closeMenu}>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {/* HEADER */}
         <View style={styles.header}>
           <Image
@@ -89,7 +88,7 @@ export default function DriverScreen() {
             }}
           />
         </View>
-      </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 }

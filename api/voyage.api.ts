@@ -35,14 +35,15 @@ export type VoyageListItem = {
   nomChauffeur: string;
   idVehicule: number;
   km_depart: number;
-  depot_depart: string;
+  depot_depart: number;
+  depot_nom: string;
   bl_list: BLItem[];
 };
 export const listVoyage = async ({ page }: { page: number }) => {
   const result = await client.request<VoyageListItem[]>({
     pathname: `/sdkboard/api/homescreen/voyage.php?page=${page}`,
     method: "GET",
-    isDebug: false,
+    isDebug: true,
     withPagination: true,
   });
 
@@ -53,7 +54,7 @@ export const listVoyage = async ({ page }: { page: number }) => {
 };
 
 export const updateVoyage = async (
-  request: CreateVoyageRequest & { idVoyage: number },
+  request: CreateVoyageRequest & { id: number },
 ) => {
   //log body
   const data = await client.request({
@@ -69,7 +70,7 @@ export const deleteVoyage = async (idVoyage: number) => {
   const data = await client.request({
     pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "DELETE",
-    body: { idVoyage },
+    body: { id: idVoyage },
     isDebug: true,
   });
   return data;

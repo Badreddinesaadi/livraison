@@ -3,6 +3,7 @@ import { queryClient } from "@/constants/query";
 import { SessionProvider, useSession } from "@/stores/auth.store";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React from "react";
 import Toast from "react-native-toast-message";
 export default function Layout() {
@@ -20,6 +21,7 @@ const InnerLayout = () => {
 
   return (
     <>
+      <StatusBar style="inverted" />
       <SplashScreenController />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={!!session.user}>

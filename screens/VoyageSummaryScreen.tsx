@@ -12,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export const VoyageSummaryScreen = () => {
@@ -52,7 +51,7 @@ export const VoyageSummaryScreen = () => {
     },
   });
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={{ flex: 1 }}>
         <Text style={styles.pageTitle}>
           Veuillez confirmer les détails du voyage avant de le créer
@@ -279,7 +278,7 @@ export const VoyageSummaryScreen = () => {
                 });
               } else {
                 updateVoyageMutation.mutate({
-                  idVoyage: store.idVoyage!,
+                  id: store.idVoyage!,
                   bl_list: store.bls!.map((bl) => ({ id: bl.id })),
                   idChauffeur: store.selectedChauffeur!.id,
                   idVehicule: store.selectedVehicle!.id,
@@ -297,7 +296,7 @@ export const VoyageSummaryScreen = () => {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
