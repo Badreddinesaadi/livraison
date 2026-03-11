@@ -36,15 +36,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
   const [[isFinished, session], setSession] = useStorageState("sessionToken");
 
-  // console.log(
-  //   "SessionProvider render - isFinished:",
-  //   isFinished,
-  //   "session:",
-  //   session,
-  //   "hasSession:",
-  //   !!session,
-  // );
-
   const { data, isLoading, refetch } = useQuery({
     queryFn: () => {
       // console.log("getCurrentUser queryFn called with session:", session);
