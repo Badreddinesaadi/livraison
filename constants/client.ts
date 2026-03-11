@@ -56,10 +56,12 @@ class ApiClient {
     const url = this.baseUrl + pathname;
     const mergedHeaders = { ...this.defaultHeaders, ...headers };
 
-    // get the token from local storage and add it to the headers if it exists
-    let sessionToken = await SecureStore.getItemAsync("sessionToken");
-    if (sessionToken) {
-      mergedHeaders["auth_token"] = sessionToken;
+    if (!mergedHeaders["auth_token"]) {
+      // get the token from local storage and add it to the headers if it exists
+      let sessionToken = await SecureStore.getItemAsync("sessionToken");
+      if (sessionToken) {
+        mergedHeaders["auth_token"] = sessionToken;
+      }
     }
 
     const fetchOptions: RequestInit = {

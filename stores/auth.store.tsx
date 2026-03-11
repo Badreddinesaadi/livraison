@@ -48,10 +48,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const { data, isLoading, refetch } = useQuery({
     queryFn: () => {
       // console.log("getCurrentUser queryFn called with session:", session);
-      return getCurrentUser(session!);
+      return getCurrentUser();
     },
     queryKey: ["currentUser"],
-    initialData: null,
     enabled: !isFinished && !!session,
   });
 
@@ -60,10 +59,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
       signInWithEmailAndPassword(email, password),
 
     onSuccess: (data) => {
+      console.log("Sign-in successful, received data:", data);
       queryClient.setQueryData(["currentUser"], data || null);
       setSession(data?.token || null);
     },
   });
+
+  const signOut = () => {
+    queryClient.setQueryData(["currentUser"], null);
+    setSession(null);
+  };
 
   useEffect(() => {
     // console.log("SessionProvider - currentUser:", data);
@@ -104,10 +109,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
             },
           );
         },
-        signOut: () => {
-          queryClient.setQueryData(["currentUser"], null);
-          setSession(null);
-        },
+        signOut,
         user: data,
         isLoading: isFinished || isLoading,
         signInIsPending: signInMutation.isPending,

@@ -49,6 +49,9 @@ export async function setStorageItemAsync(key: string, value: string | null) {
       await deleteValue(key);
     } else {
       await save(key, value);
+      console.log(
+        "Token stored securely. of key: " + key + ", value: " + value,
+      );
     }
   }
 }

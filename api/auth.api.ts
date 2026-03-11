@@ -1,5 +1,6 @@
 import { client } from "@/constants/client";
 import { User } from "@/types/auth.types";
+import * as SecureStore from "expo-secure-store";
 
 export const signInWithEmailAndPassword = async (
   username: string,
@@ -14,15 +15,14 @@ export const signInWithEmailAndPassword = async (
   return data;
 };
 
-export const getCurrentUser = async (
-  sessionToken: string,
-): Promise<User | null> => {
+export const getCurrentUser = async (): Promise<User | null> => {
+  let sessionToken = await SecureStore.getItemAsync("sessionToken");
   // console.log("getCurrentUser called with token:", sessionToken);
   const data = await client.request<User>({
     method: "GET",
     pathname: "/sdkboard/api/users/users.php",
     headers: {
-      session_token: sessionToken,
+      auth_token: sessionToken!,
     },
   });
   // console.log("getCurrentUser API response:", data);

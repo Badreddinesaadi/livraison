@@ -5,6 +5,7 @@ import { deleteVoyage, listVoyage, VoyageListItem } from "@/api/voyage.api";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { BL } from "@/types/bl.types";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -77,7 +78,7 @@ const VoyageCard = ({
   onUpdate: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
-
+  const { user } = useSession();
   const bls = item.bl_list;
   const departDate = item.date_depart
     ? new Date(item.date_depart).toLocaleDateString("fr-FR", {
@@ -222,26 +223,33 @@ const VoyageCard = ({
               </Text>
             </Pressable>
 
-            <Pressable
-              onPress={onDelete}
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: "#ff4d4f18",
-                gap: 6,
-              }}
-            >
-              <FontAwesome5 name="trash-alt" size={14} color="#ff4d4f" />
-              <Text
-                style={{ color: "#ff4d4f", fontWeight: "600", fontSize: 13 }}
-              >
-                Supprimer
-              </Text>
-            </Pressable>
+            {user?.role === "adv" ||
+              (user?.role === "admin" && (
+                <Pressable
+                  onPress={onDelete}
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingVertical: 10,
+                    borderRadius: 8,
+                    backgroundColor: "#ff4d4f18",
+                    gap: 6,
+                  }}
+                >
+                  <FontAwesome5 name="trash-alt" size={14} color="#ff4d4f" />
+                  <Text
+                    style={{
+                      color: "#ff4d4f",
+                      fontWeight: "600",
+                      fontSize: 13,
+                    }}
+                  >
+                    Supprimer
+                  </Text>
+                </Pressable>
+              ))}
           </View>
         </View>
       )}
