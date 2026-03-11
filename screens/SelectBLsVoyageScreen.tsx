@@ -116,7 +116,7 @@ export const CreateVoyageScreen = () => {
         <View style={{ marginBottom: 10 }}>
           <Button
             preset="filled"
-            disabled={!store.bls || store.bls.length === 0}
+            disabled={isLoading || !store.bls || store.bls.length === 0}
             text={`Suivant (${store.bls?.length || 0})`}
             onPress={() => {
               router.push("/voyages/create/photo");

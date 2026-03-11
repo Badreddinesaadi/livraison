@@ -28,7 +28,7 @@ export const VoyageSummaryScreen = () => {
         text1: "Voyage créé avec succès",
       });
       // reset store
-      router.replace("/(app)");
+      router.replace("/(app)/voyages");
       setTimeout(() => {
         store.resetAll();
       }, 2000);
@@ -41,10 +41,10 @@ export const VoyageSummaryScreen = () => {
       queryClient.invalidateQueries({ queryKey: ["voyages"] });
       Toast.show({
         type: "success",
-        text1: "Voyage mis à jour avec succès",
+        text1: `Voyage #${store.idVoyage} mis à jour avec succès`,
       });
       // reset store
-      router.replace("/(app)");
+      router.replace("/(app)/voyages");
       setTimeout(() => {
         store.resetAll();
       }, 2000);

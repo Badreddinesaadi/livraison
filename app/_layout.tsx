@@ -27,9 +27,9 @@ const InnerLayout = () => {
         <Stack.Protected guard={!!session.user}>
           <Stack.Screen name="(app)" />
         </Stack.Protected>
-        <Stack.Protected guard={!!session.user}>
+        {/* <Stack.Protected guard={!!session.user}>
           <Stack.Screen name="(driver)/index" />
-        </Stack.Protected>
+        </Stack.Protected> */}
 
         <Stack.Protected guard={!session.user}>
           <Stack.Screen name="sign-in" />

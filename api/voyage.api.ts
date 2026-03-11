@@ -15,7 +15,7 @@ export const createVoyage = async (request: CreateVoyageRequest) => {
     pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "POST",
     body: request,
-    isDebug: true,
+    isDebug: false,
   });
   return data;
 };
@@ -43,7 +43,7 @@ export const listVoyage = async ({ page }: { page: number }) => {
   const result = await client.request<VoyageListItem[]>({
     pathname: `/sdkboard/api/homescreen/voyage.php?page=${page}`,
     method: "GET",
-    isDebug: true,
+    isDebug: false,
     withPagination: true,
   });
 
@@ -61,7 +61,7 @@ export const updateVoyage = async (
     pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "PUT",
     body: request,
-    isDebug: true,
+    isDebug: false,
   });
   return data;
 };
@@ -71,7 +71,7 @@ export const deleteVoyage = async (idVoyage: number) => {
     pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "DELETE",
     body: { id: idVoyage },
-    isDebug: true,
+    isDebug: false,
   });
   return data;
 };
