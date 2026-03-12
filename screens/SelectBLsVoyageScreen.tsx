@@ -5,27 +5,12 @@ import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { BL } from "@/types/bl.types";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 
 export const CreateVoyageScreen = () => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["bls", "list"],
-    queryFn: listBLSEnCours,
-    select: (data) => {
-      return data?.map((bl) => ({
-        id: bl.id,
-        num_bl: bl.code,
-        datetime_document: bl.datetime_document,
-        nomClient: bl.nomClient,
-      }));
-    },
-  });
-  const store = useCreateVoyageStore();
-  const router = useRouter();
-
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -40,8 +25,34 @@ export const CreateVoyageScreen = () => {
     };
   }, [searchText]);
 
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: ["bls", "list", debouncedSearch],
+      queryFn: ({ pageParam }) =>
+        listBLSEnCours({ page: pageParam, codeQuery: debouncedSearch }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => {
+        const pagination = lastPage.pagination;
+        if (!pagination || pagination.page >= pagination.totalPages) {
+          return undefined;
+        }
+        return pagination.page + 1;
+      },
+    });
+  const store = useCreateVoyageStore();
+  const router = useRouter();
+
   const filteredData = useMemo(() => {
-    const apiBls = data ?? [];
+    const apiBls =
+      data?.pages.flatMap((page) =>
+        (page.data ?? []).map((bl) => ({
+          id: bl.id,
+          num_bl: bl.code,
+          datetime_document: bl.datetime_document,
+          nomClient: bl.nomClient,
+        })),
+      ) ?? [];
+
     const mergedData =
       store.type === "update"
         ? (() => {
@@ -55,12 +66,8 @@ export const CreateVoyageScreen = () => {
           })()
         : apiBls;
 
-    if (!debouncedSearch) return mergedData;
-
-    return mergedData.filter((bl) =>
-      bl.num_bl.toLowerCase().includes(debouncedSearch.toLowerCase()),
-    );
-  }, [data, debouncedSearch, store.type, store.bls]);
+    return mergedData;
+  }, [data, store.type, store.bls]);
 
   return (
     <View style={styles.container}>
@@ -95,13 +102,12 @@ export const CreateVoyageScreen = () => {
             />
           )}
         </View>
-        <TextInput style={styles.input} placeholder="Nom du voyage" />
         {isLoading ? (
           <Loader />
         ) : (
           <FlatList
             data={filteredData}
-            keyExtractor={(bl, i) => bl.id.toString()}
+            keyExtractor={(bl) => bl.id.toString()}
             renderItem={({ item: bl }) => (
               <BLCard
                 key={bl.id}
@@ -111,6 +117,13 @@ export const CreateVoyageScreen = () => {
                 removeBL={store.removeBL}
               />
             )}
+            onEndReachedThreshold={0.3}
+            onEndReached={() => {
+              if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+              }
+            }}
+            ListFooterComponent={isFetchingNextPage ? <Loader /> : null}
           />
         )}
         <View style={{ marginBottom: 10 }}>
@@ -119,7 +132,7 @@ export const CreateVoyageScreen = () => {
             disabled={isLoading || !store.bls || store.bls.length === 0}
             text={`Suivant (${store.bls?.length || 0})`}
             onPress={() => {
-              router.push("/voyages/create/photo");
+              router.navigate("/voyages/create/photo");
             }}
           />
         </View>

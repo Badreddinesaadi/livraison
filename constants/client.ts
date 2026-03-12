@@ -64,13 +64,20 @@ class ApiClient {
       }
     }
 
+    const isFormDataBody =
+      typeof FormData !== "undefined" && body instanceof FormData;
+
+    if (isFormDataBody) {
+      delete mergedHeaders["Content-Type"];
+    }
+
     const fetchOptions: RequestInit = {
       method,
       headers: mergedHeaders,
     };
 
     if (body) {
-      fetchOptions.body = JSON.stringify(body);
+      fetchOptions.body = isFormDataBody ? body : JSON.stringify(body);
     }
 
     if (isDebug) {

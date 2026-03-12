@@ -51,6 +51,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
     onSuccess: (data) => {
       console.log("Sign-in successful, received data:", data);
+      queryClient.invalidateQueries();
       queryClient.setQueryData(["currentUser"], data || null);
       setSession(data?.token || null);
     },

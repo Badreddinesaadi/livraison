@@ -6,6 +6,7 @@ import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
+import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { BL } from "@/types/bl.types";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -16,7 +17,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -38,6 +39,7 @@ if (
 }
 
 const PRIMARY = "#ED5623";
+const SUCCESS = "#16a34a";
 
 const DetailRow = ({
   icon,
@@ -72,14 +74,22 @@ const VoyageCard = ({
   item,
   onDelete,
   onUpdate,
+  onOpenCloseBL,
 }: {
   item: VoyageListItem;
   onDelete: () => void;
   onUpdate: () => void;
+  onOpenCloseBL: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const { user } = useSession();
+  // const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
+  const isAdminOrAdv = false;
   const bls = item.bl_list;
+  // opened bls count
+  const blsEncoursCount = useMemo(() => {
+    return bls?.filter((bl) => bl.statut === "Encours").length ?? 0;
+  }, [bls]);
   const departDate = item.date_depart
     ? new Date(item.date_depart).toLocaleDateString("fr-FR", {
         day: "2-digit",
@@ -123,13 +133,18 @@ const VoyageCard = ({
             width: 42,
             height: 42,
             borderRadius: 21,
-            backgroundColor: PRIMARY + "1a",
+            backgroundColor:
+              item.statut === "terminer" ? SUCCESS + "33" : PRIMARY + "33",
             alignItems: "center",
             justifyContent: "center",
             marginRight: 12,
           }}
         >
-          <FontAwesome5 name="truck" size={16} color={PRIMARY} />
+          <FontAwesome5
+            name="truck"
+            size={16}
+            color={item.statut === "terminer" ? SUCCESS : PRIMARY}
+          />
         </View>
 
         <View style={{ flex: 1 }}>
@@ -172,11 +187,65 @@ const VoyageCard = ({
             paddingVertical: 12,
           }}
         >
-          <DetailRow
-            icon="file-alt"
-            label="BLs"
-            value={bls?.map((b) => b.code).join("  •  ") ?? "—"}
-          />
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              marginBottom: 6,
+            }}
+          >
+            <FontAwesome5
+              name="file-alt"
+              size={13}
+              color={PRIMARY}
+              style={{ width: 18, marginTop: 1 }}
+            />
+            <Text style={{ fontSize: 13, color: "#888", width: 96 }}>BLs</Text>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                flexWrap: "wrap",
+                columnGap: 10,
+                rowGap: 6,
+              }}
+            >
+              {bls?.length ? (
+                bls.map((bl) => {
+                  const isDelivered = bl.statut === "Livré";
+                  return (
+                    <View
+                      key={bl.id}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: isDelivered ? SUCCESS : "#222",
+                          fontWeight: isDelivered ? "700" : "400",
+                        }}
+                      >
+                        {bl.code}
+                      </Text>
+                      {isDelivered && (
+                        <FontAwesome5
+                          name="check-circle"
+                          size={12}
+                          color={SUCCESS}
+                        />
+                      )}
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={{ fontSize: 13, color: "#222" }}>—</Text>
+              )}
+            </View>
+          </View>
           <DetailRow
             icon="map-marker-alt"
             label="Dépôt départ"
@@ -223,33 +292,64 @@ const VoyageCard = ({
               </Text>
             </Pressable>
 
-            {user?.role === "adv" ||
-              (user?.role === "admin" && (
-                <Pressable
-                  onPress={onDelete}
+            {isAdminOrAdv && (
+              <Pressable
+                onPress={onDelete}
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor: "#ff4d4f18",
+                  gap: 6,
+                }}
+              >
+                <FontAwesome5 name="trash-alt" size={14} color="#ff4d4f" />
+                <Text
                   style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    paddingVertical: 10,
-                    borderRadius: 8,
-                    backgroundColor: "#ff4d4f18",
-                    gap: 6,
+                    color: "#ff4d4f",
+                    fontWeight: "600",
+                    fontSize: 13,
                   }}
                 >
-                  <FontAwesome5 name="trash-alt" size={14} color="#ff4d4f" />
-                  <Text
-                    style={{
-                      color: "#ff4d4f",
-                      fontWeight: "600",
-                      fontSize: 13,
-                    }}
-                  >
-                    Supprimer
-                  </Text>
-                </Pressable>
-              ))}
+                  Supprimer
+                </Text>
+              </Pressable>
+            )}
+
+            {item.statut !== "terminer" && !isAdminOrAdv && (
+              <Pressable
+                onPress={onOpenCloseBL}
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor:
+                    blsEncoursCount > 0 ? PRIMARY + "18" : "#25f27079",
+                  gap: 6,
+                }}
+              >
+                <FontAwesome5
+                  name={blsEncoursCount > 0 ? "times-circle" : "check-circle"}
+                  size={14}
+                  color={blsEncoursCount > 0 ? PRIMARY : "#0c5c2a"}
+                />
+                <Text
+                  style={{
+                    color: blsEncoursCount > 0 ? PRIMARY : "#0c5c2a",
+                    fontWeight: "600",
+                    fontSize: 13,
+                  }}
+                >
+                  {blsEncoursCount > 0 ? "Clôturer BL" : "Achever le voyage"}
+                </Text>
+              </Pressable>
+            )}
           </View>
         </View>
       )}
@@ -285,6 +385,8 @@ export const VoyagesScreen = () => {
   });
   const router = useRouter();
   const store = useCreateVoyageStore();
+  const setCloseBLContext = useCloseBLStore((s) => s.setContext);
+  const openCloseBLSheet = useCloseBLStore((s) => s.openSheet);
   const queryClient = useQueryClient();
 
   const { mutate: deleteMutate } = useMutation({
@@ -362,8 +464,20 @@ export const VoyagesScreen = () => {
     }
 
     store.setType("update");
-    router.push("/voyages/create/chauffeur");
+    router.navigate("/voyages/create/chauffeur");
   };
+
+  const handleOpenCloseBLSheet = useCallback(
+    (item: VoyageListItem) => {
+      // only send opened bls
+      setCloseBLContext(
+        item.id,
+        item.bl_list.filter((bl) => bl.statut === "Encours") ?? [],
+      );
+      openCloseBLSheet();
+    },
+    [setCloseBLContext, openCloseBLSheet],
+  );
 
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -432,7 +546,7 @@ export const VoyagesScreen = () => {
                 fontSize: 14,
                 color: "#222",
               }}
-              placeholder="Rechercher par N° BL ou chauffeur..."
+              placeholder="Rechercher par N° voyage"
               placeholderTextColor="#bbb"
               value={searchText}
               onChangeText={setSearchText}
@@ -453,7 +567,7 @@ export const VoyagesScreen = () => {
               onPress={() => {
                 store.resetAll();
                 store.setType("create");
-                router.push("/voyages/create/chauffeur");
+                router.navigate("/voyages/create/chauffeur");
               }}
             />
           </View>
@@ -472,6 +586,7 @@ export const VoyagesScreen = () => {
               item={item}
               onDelete={() => handleDelete(item.id)}
               onUpdate={() => handleUpdate(item)}
+              onOpenCloseBL={() => handleOpenCloseBLSheet(item)}
             />
           )}
           showsVerticalScrollIndicator={false}

@@ -265,7 +265,7 @@ export const SelectChauffeurScreen = () => {
             preset="filled"
             text="Suivant"
             onPress={() => {
-              router.push("/voyages/create/select-bls");
+              router.navigate("/voyages/create/select-bls");
             }}
           />
         </View>

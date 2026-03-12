@@ -1,4 +1,4 @@
-import { client } from "@/constants/client";
+import { client, Pagination } from "@/constants/client";
 
 type BLResponse = {
   id: number;
@@ -7,10 +7,62 @@ type BLResponse = {
   datetime_document: string;
   nomClient: string;
 };
-export const listBLSEnCours = async (): Promise<BLResponse[] | null> => {
+export const listBLSEnCours = async ({
+  page,
+  codeQuery,
+}: {
+  page: number;
+  codeQuery?: string;
+}): Promise<{
+  data: BLResponse[] | null;
+  pagination: Pagination | null;
+}> => {
   const data = await client.request<BLResponse[]>({
-    pathname: "/sdkboard/api/homescreen/bl_voyage_list.php",
+    pathname:
+      "/sdkboard/api/homescreen/bl_voyage_list.php?page=" +
+      page +
+      (codeQuery ? "&codeQuery=" + codeQuery : ""),
     method: "GET",
+    withPagination: true,
+    isDebug: false,
+  });
+  return {
+    data: data.data,
+    pagination: data.pagination as Pagination | null,
+  };
+};
+
+export const closeBL = async ({
+  idVoyage,
+  images,
+  status,
+  idBL,
+}: {
+  idVoyage: number;
+  idBL: number;
+  images: {
+    uri: string;
+    name: string;
+    type: string;
+  }[];
+  status: string;
+}) => {
+  const formdata = new FormData();
+  formdata.append("idBL", idBL.toString());
+  formdata.append("idVoyage", idVoyage.toString());
+  formdata.append("status", status);
+  images.forEach((image, index) => {
+    formdata.append("images[]", image as any);
+    if (index === 0) {
+      formdata.append("image", image as any);
+    }
+  });
+
+  const data = await client.request({
+    pathname: "/sdkboard/api/homescreen/voyage_chauffeur.php",
+    method: "POST",
+    body: formdata,
+    isDebug: false,
   });
   return data;
 };

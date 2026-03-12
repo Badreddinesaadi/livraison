@@ -26,6 +26,7 @@ export type BLItem = {
   nomClient: string;
   datetime_document: string;
   images: string[];
+  statut: "Livré" | "Encours";
 };
 
 export type VoyageListItem = {
@@ -35,13 +36,20 @@ export type VoyageListItem = {
   nomChauffeur: string;
   idVehicule: number;
   km_depart: number;
+  statut: "encours" | "terminer";
   depot_depart: number;
   depot_nom: string;
   bl_list: BLItem[];
 };
-export const listVoyage = async ({ page }: { page: number }) => {
+export const listVoyage = async ({
+  page,
+  codeQuery,
+}: {
+  page: number;
+  codeQuery?: string;
+}) => {
   const result = await client.request<VoyageListItem[]>({
-    pathname: `/sdkboard/api/homescreen/voyage.php?page=${page}`,
+    pathname: `/sdkboard/api/homescreen/voyage.php?page=${page}${codeQuery ? `&code=${codeQuery}` : ""}`,
     method: "GET",
     isDebug: false,
     withPagination: true,
