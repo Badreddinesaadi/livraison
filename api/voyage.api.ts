@@ -83,3 +83,28 @@ export const deleteVoyage = async (idVoyage: number) => {
   });
   return data;
 };
+
+export const changeVoyageStatus = async (
+  request: {
+    status: VoyageListItem["statut"];
+  } & { id: number },
+) => {
+  //log body
+  const data = await client.request({
+    pathname: "/sdkboard/api/homescreen/voyage.php",
+    method: "PUT",
+    body: request,
+    isDebug: false,
+  });
+  return data;
+};
+
+export const getVoyageById = async ({ id }: { id: number }) => {
+  const result = await client.request<VoyageListItem>({
+    pathname: `/sdkboard/api/homescreen/voyage.php?idVoyage=${id}`,
+    method: "GET",
+    isDebug: false,
+  });
+
+  return result;
+};

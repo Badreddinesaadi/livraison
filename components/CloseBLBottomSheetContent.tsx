@@ -15,6 +15,10 @@ export default function CloseBLBottomSheetContent({
   onSelectAll,
   onSelectBL,
 }: CloseBLBottomSheetContentProps) {
+  const isBlsHaveSameClient = bls.every(
+    (bl) => bl.nomClient === bls[0].nomClient,
+  );
+
   return (
     <BottomSheetFlatList<BLItem>
       data={bls}
@@ -36,24 +40,27 @@ export default function CloseBLBottomSheetContent({
 
           {bls.length > 0 && (
             <>
-              <Pressable
-                onPress={onSelectAll}
-                style={{
-                  paddingVertical: 12,
-                  paddingHorizontal: 12,
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: "#eee",
-                  backgroundColor: "#fff7f3",
-                  marginBottom: 12,
-                }}
-              >
-                <Text style={{ fontWeight: "600", color: PRIMARY }}>
-                  Clôturer tous les BLs
-                </Text>
-              </Pressable>
+              {isBlsHaveSameClient && bls.length > 1 && (
+                <Pressable
+                  onPress={onSelectAll}
+                  style={{
+                    paddingVertical: 12,
+                    paddingHorizontal: 12,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: "#eee",
+                    backgroundColor: "#fff7f3",
+                    marginBottom: 12,
+                  }}
+                >
+                  <Text style={{ fontWeight: "600", color: PRIMARY }}>
+                    Clôturer tous les BLs
+                  </Text>
+                </Pressable>
+              )}
               <Text style={{ fontSize: 13, color: "#888", marginBottom: 8 }}>
-                Ou choisir un BL
+                {isBlsHaveSameClient && bls.length > 1 ? "Ou c" : "C"}hoisir un
+                BL
               </Text>
             </>
           )}

@@ -1,10 +1,16 @@
 import { ListDepots } from "@/api/depots.api";
 import { ListChauffeurs } from "@/api/users.api";
 import { ListVehicles } from "@/api/vehicle.api";
-import { deleteVoyage, listVoyage, VoyageListItem } from "@/api/voyage.api";
+import {
+  changeVoyageStatus,
+  deleteVoyage,
+  listVoyage,
+  VoyageListItem,
+} from "@/api/voyage.api";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
-import { Colors } from "@/constants/theme";
+import { DetailRow } from "@/components/voyageCard";
+import { Colors, PRIMARY, SUCCESS } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
@@ -19,7 +25,6 @@ import {
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Alert,
   FlatList,
   LayoutAnimation,
   Platform,
@@ -38,53 +43,23 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const PRIMARY = "#ED5623";
-const SUCCESS = "#16a34a";
-
-const DetailRow = ({
-  icon,
-  label,
-  value,
-}: {
-  icon: string;
-  label: string;
-  value: string;
-}) => (
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "flex-start",
-      marginBottom: 6,
-    }}
-  >
-    <FontAwesome5
-      name={icon as any}
-      size={13}
-      color={PRIMARY}
-      style={{ width: 18, marginTop: 1 }}
-    />
-    <Text style={{ fontSize: 13, color: "#888", width: 96 }}>{label}</Text>
-    <Text style={{ fontSize: 13, color: "#222", flex: 1, flexWrap: "wrap" }}>
-      {value}
-    </Text>
-  </View>
-);
-
 const VoyageCard = ({
   item,
   onDelete,
   onUpdate,
   onOpenCloseBL,
+  onAcheveVoyage,
 }: {
   item: VoyageListItem;
   onDelete: () => void;
   onUpdate: () => void;
   onOpenCloseBL: () => void;
+  onAcheveVoyage: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const { user } = useSession();
-  // const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
-  const isAdminOrAdv = false;
+  const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
+  // const isAdminOrAdv = false;
   const bls = item.bl_list;
   // opened bls count
   const blsEncoursCount = useMemo(() => {
@@ -158,16 +133,40 @@ const VoyageCard = ({
 
         <View style={{ alignItems: "flex-end", marginRight: 10 }}>
           <Text style={{ fontSize: 12, color: "#aaa" }}>{departDate}</Text>
-          <Text
+          <View
             style={{
-              fontSize: 12,
-              color: PRIMARY,
-              fontWeight: "600",
-              marginTop: 2,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
             }}
           >
-            {bls?.length ?? 0} BL{bls?.length !== 1 ? "s" : ""}
-          </Text>
+            <Text
+              style={{
+                fontSize: 12,
+                color: PRIMARY,
+                fontWeight: "600",
+                marginTop: 2,
+              }}
+            >
+              {blsEncoursCount !== 0 &&
+                `${blsEncoursCount} ${blsEncoursCount > 1 ? "BLs" : "BL"} en cours`}
+            </Text>
+            <Text
+              style={{
+                fontSize: 12,
+                color: SUCCESS,
+                fontWeight: "600",
+                marginTop: 2,
+              }}
+            >
+              {bls?.length && bls?.length - blsEncoursCount !== 0
+                ? bls?.length - blsEncoursCount
+                : ""}{" "}
+              {bls?.length && bls?.length - blsEncoursCount !== 0
+                ? "Livré"
+                : ""}
+            </Text>
+          </View>
         </View>
 
         <FontAwesome5
@@ -273,25 +272,91 @@ const VoyageCard = ({
               borderTopColor: "#f2f2f2",
             }}
           >
-            <Pressable
-              onPress={onUpdate}
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "18",
-                gap: 6,
-              }}
-            >
-              <FontAwesome5 name="edit" size={14} color={PRIMARY} />
-              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
-                Modifier
-              </Text>
-            </Pressable>
-
+            {isAdminOrAdv && item.statut !== "terminer" && (
+              <Pressable
+                onPress={onUpdate}
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor: PRIMARY + "18",
+                  gap: 6,
+                }}
+              >
+                <FontAwesome5 name="edit" size={14} color={PRIMARY} />
+                <Text
+                  style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}
+                >
+                  Modifier
+                </Text>
+              </Pressable>
+            )}
+            {item.statut !== "terminer" &&
+              !isAdminOrAdv &&
+              blsEncoursCount > 0 && (
+                <Pressable
+                  onPress={onOpenCloseBL}
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingVertical: 10,
+                    borderRadius: 8,
+                    backgroundColor: "#25f27079",
+                    gap: 6,
+                  }}
+                >
+                  <FontAwesome5
+                    name={"check-circle"}
+                    size={14}
+                    color={"#0c5c2a"}
+                  />
+                  <Text
+                    style={{
+                      color: "#0c5c2a",
+                      fontWeight: "600",
+                      fontSize: 13,
+                    }}
+                  >
+                    Clôturer BL
+                  </Text>
+                </Pressable>
+              )}
+            {isAdminOrAdv && item.statut !== "terminer" && (
+              <Pressable
+                onPress={onAcheveVoyage}
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor:
+                    blsEncoursCount > 0 ? PRIMARY + "18" : "#25f27079",
+                  gap: 6,
+                }}
+              >
+                <FontAwesome5
+                  name="check-circle"
+                  size={14}
+                  color={blsEncoursCount > 0 ? PRIMARY : "#0c5c2a"}
+                />
+                <Text
+                  style={{
+                    color: blsEncoursCount > 0 ? PRIMARY : "#0c5c2a",
+                    fontWeight: "600",
+                    fontSize: 13,
+                  }}
+                >
+                  Achever
+                </Text>
+              </Pressable>
+            )}
             {isAdminOrAdv && (
               <Pressable
                 onPress={onDelete}
@@ -315,38 +380,6 @@ const VoyageCard = ({
                   }}
                 >
                   Supprimer
-                </Text>
-              </Pressable>
-            )}
-
-            {item.statut !== "terminer" && !isAdminOrAdv && (
-              <Pressable
-                onPress={onOpenCloseBL}
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 10,
-                  borderRadius: 8,
-                  backgroundColor:
-                    blsEncoursCount > 0 ? PRIMARY + "18" : "#25f27079",
-                  gap: 6,
-                }}
-              >
-                <FontAwesome5
-                  name={blsEncoursCount > 0 ? "times-circle" : "check-circle"}
-                  size={14}
-                  color={blsEncoursCount > 0 ? PRIMARY : "#0c5c2a"}
-                />
-                <Text
-                  style={{
-                    color: blsEncoursCount > 0 ? PRIMARY : "#0c5c2a",
-                    fontWeight: "600",
-                    fontSize: 13,
-                  }}
-                >
-                  {blsEncoursCount > 0 ? "Clôturer BL" : "Achever le voyage"}
                 </Text>
               </Pressable>
             )}
@@ -387,7 +420,20 @@ export const VoyagesScreen = () => {
   const store = useCreateVoyageStore();
   const setCloseBLContext = useCloseBLStore((s) => s.setContext);
   const openCloseBLSheet = useCloseBLStore((s) => s.openSheet);
+  const openAcheveConfirmSheet = useCloseBLStore((s) => s.openAcheveConfirm);
+  const openDeleteConfirmSheet = useCloseBLStore((s) => s.openDeleteConfirm);
+  const confirmedVoyageAction = useCloseBLStore((s) => s.confirmedVoyageAction);
+  const clearConfirmedVoyageAction = useCloseBLStore(
+    (s) => s.clearConfirmedVoyageAction,
+  );
+  const finishVoyageAction = useCloseBLStore((s) => s.finishVoyageAction);
   const queryClient = useQueryClient();
+
+  const finishVoyageActionIfPending = useCallback(() => {
+    if (useCloseBLStore.getState().isVoyageActionPending) {
+      finishVoyageAction();
+    }
+  }, [finishVoyageAction]);
 
   const { mutate: deleteMutate } = useMutation({
     mutationFn: deleteVoyage,
@@ -399,21 +445,47 @@ export const VoyagesScreen = () => {
         text2: "Le voyage a été supprimé avec succès.",
       });
     },
+    onSettled: finishVoyageActionIfPending,
+  });
+  const { mutate: acheveVoyageMutate } = useMutation({
+    mutationFn: changeVoyageStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voyages", "list"] });
+      Toast.show({
+        type: "success",
+        text1: "Voyage achevé",
+        text2: "Le voyage a été achevé avec succès.",
+      });
+    },
+    onSettled: finishVoyageActionIfPending,
   });
 
+  useEffect(() => {
+    if (!confirmedVoyageAction) {
+      return;
+    }
+
+    if (confirmedVoyageAction.action === "achever") {
+      acheveVoyageMutate({
+        status: "terminer",
+        id: confirmedVoyageAction.voyageId,
+      });
+    }
+
+    if (confirmedVoyageAction.action === "supprimer") {
+      deleteMutate(confirmedVoyageAction.voyageId);
+    }
+
+    clearConfirmedVoyageAction();
+  }, [
+    confirmedVoyageAction,
+    acheveVoyageMutate,
+    deleteMutate,
+    clearConfirmedVoyageAction,
+  ]);
+
   const handleDelete = (idVoyage: number) => {
-    Alert.alert(
-      "Supprimer le voyage",
-      `Êtes-vous sûr de vouloir supprimer le voyage #${idVoyage} ?`,
-      [
-        { text: "Annuler", style: "cancel" },
-        {
-          text: "Supprimer",
-          style: "destructive",
-          onPress: () => deleteMutate(idVoyage),
-        },
-      ],
-    );
+    openDeleteConfirmSheet(idVoyage);
   };
 
   const handleUpdate = (item: VoyageListItem) => {
@@ -477,6 +549,16 @@ export const VoyagesScreen = () => {
       openCloseBLSheet();
     },
     [setCloseBLContext, openCloseBLSheet],
+  );
+
+  const handleAchevingVoyage = useCallback(
+    (item: VoyageListItem) => {
+      const blsEncoursCount =
+        item.bl_list?.filter((bl) => bl.statut === "Encours").length ?? 0;
+
+      openAcheveConfirmSheet(item.id, blsEncoursCount);
+    },
+    [openAcheveConfirmSheet],
   );
 
   const [searchText, setSearchText] = useState("");
@@ -587,6 +669,7 @@ export const VoyagesScreen = () => {
               onDelete={() => handleDelete(item.id)}
               onUpdate={() => handleUpdate(item)}
               onOpenCloseBL={() => handleOpenCloseBLSheet(item)}
+              onAcheveVoyage={() => handleAchevingVoyage(item)}
             />
           )}
           showsVerticalScrollIndicator={false}

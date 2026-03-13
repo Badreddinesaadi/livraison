@@ -1,4 +1,5 @@
 import CloseBLBottomSheetContent from "@/components/CloseBLBottomSheetContent";
+import VoyageActionConfirmBottomSheetContent from "@/components/VoyageActionConfirmBottomSheetContent";
 import { Colors } from "@/constants/theme";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
@@ -14,12 +15,23 @@ export default function StackLayout() {
   const Type = useCreateVoyageStore((state) => state.type);
   const idVoyage = useCreateVoyageStore((state) => state.idVoyage);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["50%"], []);
 
   const closeBLVoyageId = useCloseBLStore((s) => s.voyageId);
   const closeBLList = useCloseBLStore((s) => s.bls);
+  const sheetType = useCloseBLStore((s) => s.sheetType);
+  const voyageActionType = useCloseBLStore((s) => s.voyageActionType);
+  const isVoyageActionConfirmSheet = sheetType === "voyage-action-confirm";
+  const snapPoints = useMemo(
+    () => (isVoyageActionConfirmSheet ? ["23%"] : ["50%"]),
+    [isVoyageActionConfirmSheet],
+  );
+  const pendingUndeliveredCount = useCloseBLStore(
+    (s) => s.pendingUndeliveredCount,
+  );
   const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
+  const isVoyageActionPending = useCloseBLStore((s) => s.isVoyageActionPending);
   const closeSheet = useCloseBLStore((s) => s.closeSheet);
+  const confirmVoyageAction = useCloseBLStore((s) => s.confirmVoyageAction);
   const selectAllCloseBL = useCloseBLStore((s) => s.selectAll);
   const selectSingleCloseBL = useCloseBLStore((s) => s.selectBL);
   const router = useRouter();
@@ -109,6 +121,7 @@ export default function StackLayout() {
         ref={bottomSheetRef}
         index={-1}
         snapPoints={snapPoints}
+        enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
         onChange={(index) => {
@@ -117,11 +130,22 @@ export default function StackLayout() {
           }
         }}
       >
-        <CloseBLBottomSheetContent
-          bls={closeBLList}
-          onSelectAll={handleSelectAllBLs}
-          onSelectBL={handleSelectBL}
-        />
+        {isVoyageActionConfirmSheet && voyageActionType ? (
+          <VoyageActionConfirmBottomSheetContent
+            variant={voyageActionType}
+            voyageId={closeBLVoyageId}
+            pendingUndeliveredCount={pendingUndeliveredCount}
+            isLoading={isVoyageActionPending}
+            onCancel={closeSheet}
+            onConfirm={confirmVoyageAction}
+          />
+        ) : (
+          <CloseBLBottomSheetContent
+            bls={closeBLList}
+            onSelectAll={handleSelectAllBLs}
+            onSelectBL={handleSelectBL}
+          />
+        )}
       </BottomSheet>
     </GestureHandlerRootView>
   );

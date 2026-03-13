@@ -1,7 +1,7 @@
 import { closeBL } from "@/api/BLS.api";
 import { Button } from "@/components/ui/button";
 import { useCloseBLStore } from "@/stores/close-bl.store";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
@@ -28,7 +28,7 @@ export const CloseBLScreen = () => {
   const closeBLStore = useCloseBLStore();
   const [permission, requestPermission] = useCameraPermissions();
   const [photos, setPhotos] = useState<UploadPhoto[]>([]);
-
+  const queryClient = useQueryClient();
   const selectedBL = closeBLStore.selectedBL;
   const voyageId = closeBLStore.voyageId;
   const targetBLId = Number(blId ?? selectedBL?.id);
@@ -42,6 +42,7 @@ export const CloseBLScreen = () => {
         text2: `Le BL ${selectedBL?.code ?? `#${targetBLId}`} est marqué comme livré.`,
       });
       closeBLStore.reset();
+      queryClient.invalidateQueries({ queryKey: ["voyages"] });
       router.back();
     },
     onError: (error) => {
@@ -142,7 +143,7 @@ export const CloseBLScreen = () => {
 
         <View style={styles.actionRow}>
           <Button
-            preset="ghost"
+            preset="default"
             text={`Prendre une photo (${photos.length})`}
             onPress={takePhoto}
           />

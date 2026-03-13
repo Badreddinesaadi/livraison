@@ -45,8 +45,8 @@ export default function LoginScreen() {
       return;
     }
 
-    signIn(email, password, () => {
-      setError("Email ou mot de passe incorrect");
+    signIn(email, password, (message) => {
+      setError(message);
     });
   };
 
