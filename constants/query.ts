@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import { Platform } from "react-native";
 import Toast from "react-native-toast-message";
 
 export const queryClient = new QueryClient({
@@ -28,4 +29,7 @@ declare global {
 }
 
 // This code is for all users
-window.__TANSTACK_QUERY_CLIENT__ = queryClient;
+
+if (Platform.OS !== "web") {
+  window.__TANSTACK_QUERY_CLIENT__ = queryClient;
+}
