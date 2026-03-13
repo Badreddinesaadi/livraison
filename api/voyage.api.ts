@@ -31,15 +31,21 @@ export type BLItem = {
 
 export type VoyageListItem = {
   id: number;
-  date_depart: string;
-  idChauffeur: number;
-  nomChauffeur: string;
-  idVehicule: number;
+  date_depart: string | null;
+  idChauffeur: number | null;
+  nomChauffeur: string | null;
+  idVehicule: number | null;
   km_depart: number;
   statut: "encours" | "terminer";
   depot_depart: number;
   depot_nom: string;
   bl_list: BLItem[];
+  km_retour: number;
+  date_retour: string | null;
+  date_create: string | null;
+  idCreate: number | null;
+  vehicule_nom: string | null;
+  vehicule_immatriculation: string | null;
 };
 export const listVoyage = async ({
   page,

@@ -86,7 +86,7 @@ export default function StackLayout() {
           header: (s) => (
             <View
               style={{
-                height: 80,
+                height: 60,
                 backgroundColor: Colors.light.background,
                 padding: 16,
                 alignItems: "flex-end",
