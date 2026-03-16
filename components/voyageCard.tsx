@@ -234,28 +234,24 @@ export const VoyageCard = ({
               borderTopColor: "#f2f2f2",
             }}
           >
-            {isAdminOrAdv && (
-              <Pressable
-                onPress={onMore}
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 10,
-                  borderRadius: 8,
-                  backgroundColor: PRIMARY + "18",
-                  gap: 6,
-                }}
-              >
-                <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
-                <Text
-                  style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}
-                >
-                  Plus
-                </Text>
-              </Pressable>
-            )}
+            <Pressable
+              onPress={onMore}
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 10,
+                borderRadius: 8,
+                backgroundColor: PRIMARY + "18",
+                gap: 6,
+              }}
+            >
+              <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
+              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
+                Plus
+              </Text>
+            </Pressable>
             {item.statut !== "terminer" &&
               !isAdminOrAdv &&
               blsEncoursCount > 0 && (
