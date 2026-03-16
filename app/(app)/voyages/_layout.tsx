@@ -1,4 +1,5 @@
 import CloseBLBottomSheetContent from "@/components/CloseBLBottomSheetContent";
+import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
 import VoyageActionConfirmBottomSheetContent from "@/components/VoyageActionConfirmBottomSheetContent";
 import VoyageMoreActionsBottomSheetContent from "@/components/VoyageMoreActionsBottomSheetContent";
 import { Colors } from "@/constants/theme";
@@ -25,12 +26,16 @@ export default function StackLayout() {
   const sheetType = useCloseBLStore((s) => s.sheetType);
   const voyageActionType = useCloseBLStore((s) => s.voyageActionType);
   const chooseMoreAction = useCloseBLStore((s) => s.chooseMoreAction);
+  const selectorSheetConfig = useCloseBLStore((s) => s.selectorSheetConfig);
+  const chooseSelectorOption = useCloseBLStore((s) => s.chooseSelectorOption);
 
   const snapPoints = useMemo(() => {
     if (sheetType === "voyage-action-confirm") {
       return ["23%"];
     } else if (sheetType === "voyage-more-actions") {
       return ["30%"];
+    } else if (sheetType === "selector-options") {
+      return ["50%"];
     } else {
       return ["50%"];
     }
@@ -168,6 +173,13 @@ export default function StackLayout() {
             voyageId={closeBLVoyageId}
             onUpdate={() => chooseMoreAction("modifier")}
             onShowDetails={() => chooseMoreAction("details")}
+          />
+        ) : sheetType === "selector-options" && selectorSheetConfig ? (
+          <SelectOptionBottomSheetContent
+            title={selectorSheetConfig.title}
+            options={selectorSheetConfig.options}
+            selectedId={selectorSheetConfig.selectedId}
+            onSelect={chooseSelectorOption}
           />
         ) : (
           <CloseBLBottomSheetContent

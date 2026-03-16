@@ -199,6 +199,28 @@ export const VoyageCard = ({
                           color={SUCCESS}
                         />
                       )}
+                      {(bl.images?.length ?? 0) > 0 && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 2,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: SUCCESS,
+                            }}
+                          >
+                            {bl.images?.length ?? 0}
+                          </Text>
+                          <FontAwesome5
+                            name="file-image"
+                            size={12}
+                            color={SUCCESS}
+                          />
+                        </View>
+                      )}
                     </View>
                   );
                 })

@@ -4,13 +4,13 @@ import { ListVehicles } from "@/api/vehicle.api";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
+import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome6 } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Picker } from "@react-native-picker/picker";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -34,9 +34,86 @@ export const SelectChauffeurScreen = () => {
     queryFn: ListDepots,
   });
   const createVoyageStore = useCreateVoyageStore();
+  const openSelectorOptions = useCloseBLStore((s) => s.openSelectorOptions);
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const chauffeurOptions = useMemo(
+    () =>
+      (chauffersList ?? []).map((chauffeur) => ({
+        id: chauffeur.id,
+        label: chauffeur.name,
+        subLabel: chauffeur.telephone || undefined,
+      })),
+    [chauffersList],
+  );
+
+  const vehicleOptions = useMemo(
+    () =>
+      (vehiclesList ?? []).map((vehicle) => ({
+        id: vehicle.id,
+        label: `${vehicle.immatriculation} (${vehicle.vehiculeMarque})`,
+        subLabel: vehicle.nameVehicule || undefined,
+      })),
+    [vehiclesList],
+  );
+
+  const depotOptions = useMemo(
+    () =>
+      (depotsList ?? []).map((depot) => ({
+        id: depot.id,
+        label: depot.code,
+        subLabel: depot.nom || undefined,
+      })),
+    [depotsList],
+  );
+
+  const openChauffeurSelector = useCallback(() => {
+    openSelectorOptions({
+      title: "Sélectionner un chauffeur",
+      options: chauffeurOptions,
+      selectedId: createVoyageStore.selectedChauffeur?.id,
+      onSelect: (id: number) => {
+        const selectedChauffeur = chauffersList?.find(
+          (chauffeur) => chauffeur.id === id,
+        );
+        if (selectedChauffeur) {
+          createVoyageStore.setSelectedChauffeur(selectedChauffeur);
+        }
+      },
+    });
+  }, [openSelectorOptions, chauffeurOptions, chauffersList, createVoyageStore]);
+
+  const openVehicleSelector = useCallback(() => {
+    openSelectorOptions({
+      title: "Sélectionner un véhicule",
+      options: vehicleOptions,
+      selectedId: createVoyageStore.selectedVehicle?.id,
+      onSelect: (id: number) => {
+        const selectedVehicle = vehiclesList?.find(
+          (vehicle) => vehicle.id === id,
+        );
+        if (selectedVehicle) {
+          createVoyageStore.setSelectedVehicle(selectedVehicle);
+        }
+      },
+    });
+  }, [openSelectorOptions, vehicleOptions, vehiclesList, createVoyageStore]);
+
+  const openDepotSelector = useCallback(() => {
+    openSelectorOptions({
+      title: "Sélectionner un dépôt",
+      options: depotOptions,
+      selectedId: createVoyageStore.selectedDepot?.id,
+      onSelect: (id: number) => {
+        const selectedDepot = depotsList?.find((depot) => depot.id === id);
+        if (selectedDepot) {
+          createVoyageStore.setSelectedDepot(selectedDepot);
+        }
+      },
+    });
+  }, [openSelectorOptions, depotOptions, depotsList, createVoyageStore]);
 
   return (
     <View style={styles.container}>
@@ -64,32 +141,16 @@ export const SelectChauffeurScreen = () => {
                 />
                 <Text style={styles.sectionTitle}>Chauffeur</Text>
               </View>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  dropdownIconColor={Colors.light.primary}
-                  selectedValue={createVoyageStore.selectedChauffeur?.id}
-                  onValueChange={(itemValue) => {
-                    const selectedChauffeur = chauffersList?.find(
-                      (chauffeur) => chauffeur.id === itemValue,
-                    );
-                    if (selectedChauffeur) {
-                      createVoyageStore.setSelectedChauffeur(selectedChauffeur);
-                    }
-                  }}
-                >
-                  <Picker.Item
-                    label="Sélectionner un chauffeur"
-                    value={undefined}
-                  />
-                  {chauffersList?.map((chauffeur) => (
-                    <Picker.Item
-                      key={chauffeur.id}
-                      label={chauffeur.name}
-                      value={chauffeur.id}
-                    />
-                  ))}
-                </Picker>
-              </View>
+              <Pressable
+                style={styles.dateButton}
+                onPress={openChauffeurSelector}
+              >
+                <Text style={styles.dateButtonText}>
+                  {createVoyageStore.selectedChauffeur?.name ||
+                    "Sélectionner un chauffeur"}
+                </Text>
+                <FontAwesome6 name="chevron-right" size={14} color="#888" />
+              </Pressable>
             </View>
 
             <View style={styles.card}>
@@ -101,32 +162,17 @@ export const SelectChauffeurScreen = () => {
                 />
                 <Text style={styles.sectionTitle}>Véhicule</Text>
               </View>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  dropdownIconColor={Colors.light.primary}
-                  selectedValue={createVoyageStore.selectedVehicle?.id}
-                  onValueChange={(itemValue) => {
-                    const selectedVehicle = vehiclesList?.find(
-                      (vehicle) => vehicle.id === itemValue,
-                    );
-                    if (selectedVehicle) {
-                      createVoyageStore.setSelectedVehicle(selectedVehicle);
-                    }
-                  }}
-                >
-                  <Picker.Item
-                    label="Sélectionner un véhicule"
-                    value={undefined}
-                  />
-                  {vehiclesList?.map((vehicle) => (
-                    <Picker.Item
-                      key={vehicle.id}
-                      label={`${vehicle.immatriculation} (${vehicle.vehiculeMarque})`}
-                      value={vehicle.id}
-                    />
-                  ))}
-                </Picker>
-              </View>
+              <Pressable
+                style={styles.dateButton}
+                onPress={openVehicleSelector}
+              >
+                <Text style={styles.dateButtonText}>
+                  {createVoyageStore.selectedVehicle
+                    ? `${createVoyageStore.selectedVehicle.immatriculation} (${createVoyageStore.selectedVehicle.vehiculeMarque})`
+                    : "Sélectionner un véhicule"}
+                </Text>
+                <FontAwesome6 name="chevron-right" size={14} color="#888" />
+              </Pressable>
             </View>
 
             <View style={styles.card}>
@@ -138,32 +184,14 @@ export const SelectChauffeurScreen = () => {
                 />
                 <Text style={styles.sectionTitle}>Depot de depart</Text>
               </View>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  dropdownIconColor={Colors.light.primary}
-                  selectedValue={createVoyageStore.selectedDepot?.id}
-                  onValueChange={(itemValue) => {
-                    const selectedDepot = depotsList?.find(
-                      (depot) => depot.id === itemValue,
-                    );
-                    if (selectedDepot) {
-                      createVoyageStore.setSelectedDepot(selectedDepot);
-                    }
-                  }}
-                >
-                  <Picker.Item
-                    label="Sélectionner un dépôt"
-                    value={undefined}
-                  />
-                  {depotsList?.map((depot) => (
-                    <Picker.Item
-                      key={depot.id}
-                      label={depot.code}
-                      value={depot.id}
-                    />
-                  ))}
-                </Picker>
-              </View>
+              <Pressable style={styles.dateButton} onPress={openDepotSelector}>
+                <Text style={styles.dateButtonText}>
+                  {createVoyageStore.selectedDepot
+                    ? `${createVoyageStore.selectedDepot.code} — ${createVoyageStore.selectedDepot.nom}`
+                    : "Sélectionner un dépôt"}
+                </Text>
+                <FontAwesome6 name="chevron-right" size={14} color="#888" />
+              </Pressable>
             </View>
 
             <View style={styles.card}>
@@ -321,12 +349,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#1a1a2e",
-  },
-  pickerWrapper: {
-    borderColor: "#e8e8e8",
-    borderWidth: 1,
-    borderRadius: 10,
-    overflow: "hidden",
   },
   kmInput: {
     height: 48,
