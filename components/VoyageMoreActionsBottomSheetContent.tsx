@@ -1,3 +1,4 @@
+import { useSession } from "@/stores/auth.store";
 import { Pressable, Text, View } from "react-native";
 
 type VoyageMoreActionsBottomSheetContentProps = {
@@ -13,6 +14,7 @@ export default function VoyageMoreActionsBottomSheetContent({
   onUpdate,
   onShowDetails,
 }: VoyageMoreActionsBottomSheetContentProps) {
+  const { user } = useSession();
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
       <Text
@@ -35,22 +37,22 @@ export default function VoyageMoreActionsBottomSheetContent({
       >
         Voyage #{voyageId ?? "—"}
       </Text>
-
-      <Pressable
-        onPress={onUpdate}
-        style={{
-          paddingVertical: 12,
-          paddingHorizontal: 12,
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: "#eee",
-          backgroundColor: "#fff",
-          marginBottom: 10,
-        }}
-      >
-        <Text style={{ fontWeight: "600" }}>Modifier</Text>
-      </Pressable>
-
+      {(user?.role === "admin" || user?.role === "adv") && (
+        <Pressable
+          onPress={onUpdate}
+          style={{
+            paddingVertical: 12,
+            paddingHorizontal: 12,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: "#eee",
+            backgroundColor: "#fff",
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ fontWeight: "600" }}>Modifier</Text>
+        </Pressable>
+      )}
       <Pressable
         onPress={onShowDetails}
         style={{

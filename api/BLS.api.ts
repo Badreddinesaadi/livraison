@@ -62,7 +62,7 @@ export const closeBL = async ({
     pathname: "/sdkboard/api/homescreen/voyage_chauffeur.php",
     method: "POST",
     body: formdata,
-    isDebug: false,
+    isDebug: true,
   });
   return data;
 };

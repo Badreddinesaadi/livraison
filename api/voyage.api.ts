@@ -112,11 +112,11 @@ export const changeVoyageStatus = async (
 };
 
 export const getVoyageById = async ({ id }: { id: number }) => {
-  const result = await client.request<VoyageListItem>({
-    pathname: `/sdkboard/api/homescreen/voyage.php?idVoyage=${id}`,
+  const result = await client.request<VoyageListItem[]>({
+    pathname: `/sdkboard/api/homescreen/voyage.php?id=${id}`,
     method: "GET",
     isDebug: false,
   });
 
-  return result;
+  return result?.[0] ?? null;
 };

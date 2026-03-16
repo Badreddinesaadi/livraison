@@ -1,16 +1,23 @@
 import CloseBLBottomSheetContent from "@/components/CloseBLBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
+import { Button } from "@/components/ui/button";
 import VoyageActionConfirmBottomSheetContent from "@/components/VoyageActionConfirmBottomSheetContent";
 import VoyageMoreActionsBottomSheetContent from "@/components/VoyageMoreActionsBottomSheetContent";
 import { Colors } from "@/constants/theme";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Pressable, Text, TouchableWithoutFeedback, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -93,6 +100,46 @@ export default function StackLayout() {
     [],
   );
   const { top } = useSafeAreaInsets();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const rotation = useRef(new Animated.Value(0));
+  const animationRef = useRef<any>(null);
+  const timeoutRef = useRef<any>(null);
+
+  const startSpin = () => {
+    try {
+      rotation.current.setValue(0);
+      animationRef.current = Animated.loop(
+        Animated.timing(rotation.current, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      );
+      animationRef.current.start();
+    } catch (e) {
+      // noop
+    }
+  };
+
+  const stopSpin = () => {
+    try {
+      animationRef.current?.stop();
+    } catch (e) {
+      // noop
+    }
+    rotation.current.setValue(0);
+    animationRef.current = null;
+  };
+
+  useEffect(() => {
+    return () => {
+      stopSpin();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack
@@ -105,8 +152,9 @@ export default function StackLayout() {
                 height: 60,
                 backgroundColor: Colors.light.background,
                 padding: 16,
-                alignItems: "flex-end",
+                alignItems: "center",
                 flexDirection: "row",
+                justifyContent: "space-between",
                 columnGap: 16,
               }}
             >
@@ -127,19 +175,31 @@ export default function StackLayout() {
                     ? "Créer un voyage"
                     : "Modifier le voyage #" + idVoyage)}
               </Text>
-              <Pressable
+              <Button
+                preset="ghost"
                 onPress={() => {
+                  if (isRefreshing) return;
+                  setIsRefreshing(true);
+                  startSpin();
                   queryClient.invalidateQueries();
-                  Toast.show({
-                    type: "success",
-                    text1: "Debug",
-                    text2: "Invalidated all queries",
-                  });
+                  timeoutRef.current = setTimeout(() => {
+                    stopSpin();
+                    setIsRefreshing(false);
+                  }, 1500);
                 }}
-                style={{ marginLeft: 12 }}
-              >
-                <Text style={{ fontSize: 12 }}>Actualiser</Text>
-              </Pressable>
+                size="sm"
+                LeftAccessory={() => {
+                  const spin = rotation.current.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ["0deg", "360deg"],
+                  });
+                  return (
+                    <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                      <FontAwesome name="refresh" size={24} color="black" />
+                    </Animated.View>
+                  );
+                }}
+              ></Button>
               {/* <Text style={{ fontSize: 8 }}>{"DEBUG: " + s.route.name}</Text> */}
             </View>
           ),

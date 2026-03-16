@@ -237,7 +237,12 @@ export const VoyageCard = ({
           <DetailRow
             icon="car"
             label="Véhicule"
-            value={item.vehicule_nom ? String(item.vehicule_nom) : "—"}
+            value={
+              item.vehicule_nom
+                ? String(item.vehicule_nom) +
+                  ` (${item.vehicule_immatriculation})`
+                : "—"
+            }
           />
           <DetailRow
             icon="tachometer-alt"
