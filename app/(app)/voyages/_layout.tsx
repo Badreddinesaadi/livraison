@@ -6,14 +6,16 @@ import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Text, TouchableWithoutFeedback, View } from "react-native";
+import { Pressable, Text, TouchableWithoutFeedback, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export default function StackLayout() {
+  const queryClient = useQueryClient();
   const Type = useCreateVoyageStore((state) => state.type);
   const idVoyage = useCreateVoyageStore((state) => state.idVoyage);
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -120,6 +122,19 @@ export default function StackLayout() {
                     ? "Créer un voyage"
                     : "Modifier le voyage #" + idVoyage)}
               </Text>
+              <Pressable
+                onPress={() => {
+                  queryClient.invalidateQueries();
+                  Toast.show({
+                    type: "success",
+                    text1: "Debug",
+                    text2: "Invalidated all queries",
+                  });
+                }}
+                style={{ marginLeft: 12 }}
+              >
+                <Text style={{ fontSize: 12 }}>Actualiser</Text>
+              </Pressable>
               {/* <Text style={{ fontSize: 8 }}>{"DEBUG: " + s.route.name}</Text> */}
             </View>
           ),

@@ -11,6 +11,7 @@ import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { VoyageCard } from "@/components/voyageCard";
 import { Colors } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { BL } from "@/types/bl.types";
@@ -41,6 +42,7 @@ if (
 }
 
 export const VoyagesScreen = () => {
+  const { user } = useSession();
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     useInfiniteQuery({
       queryKey: ["voyages", "list"],
@@ -77,6 +79,8 @@ export const VoyagesScreen = () => {
   const clearConfirmedVoyageAction = useCloseBLStore(
     (s) => s.clearConfirmedVoyageAction,
   );
+  const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
+
   const finishVoyageAction = useCloseBLStore((s) => s.finishVoyageAction);
   const queryClient = useQueryClient();
 
@@ -323,24 +327,26 @@ export const VoyagesScreen = () => {
               clearButtonMode="while-editing"
             />
           </View>
-          <View>
-            <Button
-              preset="filled"
-              LeftAccessory={() => (
-                <FontAwesome5
-                  name="plus"
-                  size={24}
-                  color={Colors.light.background}
-                />
-              )}
-              size="md"
-              onPress={() => {
-                store.resetAll();
-                store.setType("create");
-                router.navigate("/voyages/create/chauffeur");
-              }}
-            />
-          </View>
+          {isAdminOrAdv && (
+            <View>
+              <Button
+                preset="filled"
+                LeftAccessory={() => (
+                  <FontAwesome5
+                    name="plus"
+                    size={24}
+                    color={Colors.light.background}
+                  />
+                )}
+                size="md"
+                onPress={() => {
+                  store.resetAll();
+                  store.setType("create");
+                  router.navigate("/voyages/create/chauffeur");
+                }}
+              />
+            </View>
+          )}
         </View>
 
         {/* Result count */}

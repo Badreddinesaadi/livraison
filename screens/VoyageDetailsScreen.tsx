@@ -77,7 +77,7 @@ export const VoyageDetailsScreen = () => {
     dateUpload: string | null;
   } | null>(null);
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["voyageDetails", voyageId],
+    queryKey: ["voyages", "voyageDetails", voyageId],
     queryFn: () => getVoyageById({ id: parseInt(voyageId, 10) }),
   });
 
