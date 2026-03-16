@@ -2,8 +2,17 @@ import { BLItem } from "@/api/voyage.api";
 import { create } from "zustand";
 
 type CloseBLMode = "all" | "single" | null;
-type SheetType = "close-bl" | "voyage-action-confirm" | null;
+type SheetType =
+  | "close-bl"
+  | "voyage-action-confirm"
+  | "voyage-more-actions"
+  | null;
 type VoyageActionType = "achever" | "supprimer" | null;
+type MoreActionType = "modifier" | "details" | null;
+type MoreActionHandler = (
+  action: Exclude<MoreActionType, null>,
+  voyageId: number,
+) => void;
 
 type ConfirmedVoyageAction = {
   action: Exclude<VoyageActionType, null>;
@@ -17,6 +26,7 @@ type CloseBLState = {
   bls: BLItem[];
   pendingUndeliveredCount: number;
   confirmedVoyageAction: ConfirmedVoyageAction | null;
+  moreActionHandler: MoreActionHandler | null;
   isVoyageActionPending: boolean;
   isSheetOpen: boolean;
   mode: CloseBLMode;
@@ -29,6 +39,8 @@ type CloseBLState = {
   openDeleteConfirm: (voyageId: number) => void;
   confirmVoyageAction: () => void;
   clearConfirmedVoyageAction: () => void;
+  openMoreActions: (voyageId: number, handler: MoreActionHandler) => void;
+  chooseMoreAction: (action: Exclude<MoreActionType, null>) => void;
   finishVoyageAction: () => void;
   openSheet: () => void;
   closeSheet: () => void;
@@ -44,6 +56,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
   bls: [],
   pendingUndeliveredCount: 0,
   confirmedVoyageAction: null,
+  moreActionHandler: null,
   isVoyageActionPending: false,
   isSheetOpen: false,
   mode: null,
@@ -55,6 +68,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       voyageId,
       bls,
       pendingUndeliveredCount: 0,
+      moreActionHandler: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
@@ -66,6 +80,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       voyageId,
       bls: [],
       pendingUndeliveredCount,
+      moreActionHandler: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
@@ -78,6 +93,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       voyageId,
       bls: [],
       pendingUndeliveredCount: 0,
+      moreActionHandler: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
@@ -99,6 +115,29 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       };
     }),
   clearConfirmedVoyageAction: () => set({ confirmedVoyageAction: null }),
+  openMoreActions: (voyageId: number, handler: MoreActionHandler) =>
+    set({
+      sheetType: "voyage-more-actions",
+      voyageActionType: null,
+      voyageId,
+      bls: [],
+      pendingUndeliveredCount: 0,
+      mode: null,
+      selectedBL: null,
+      isVoyageActionPending: false,
+      isSheetOpen: true,
+      moreActionHandler: handler,
+    }),
+  chooseMoreAction: (action: Exclude<MoreActionType, null>) =>
+    set((state) => {
+      if (state.voyageId && state.moreActionHandler) {
+        state.moreActionHandler(action, state.voyageId);
+      }
+
+      return {
+        isSheetOpen: false,
+      };
+    }),
   finishVoyageAction: () =>
     set({
       confirmedVoyageAction: null,
@@ -117,6 +156,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       bls: [],
       pendingUndeliveredCount: 0,
       confirmedVoyageAction: null,
+      moreActionHandler: null,
       isVoyageActionPending: false,
       isSheetOpen: false,
       mode: null,

@@ -25,10 +25,16 @@ export type BLItem = {
   code: string;
   nomClient: string;
   datetime_document: string;
-  images: string[];
+  images: Image[] | null;
   statut: "Livré" | "Encours";
 };
 
+type Image = {
+  id: number;
+  nom_fichier: string;
+  chemin_fichier: string;
+  date_upload: string;
+};
 export type VoyageListItem = {
   id: number;
   date_depart: string | null;
@@ -92,7 +98,7 @@ export const deleteVoyage = async (idVoyage: number) => {
 
 export const changeVoyageStatus = async (
   request: {
-    status: VoyageListItem["statut"];
+    statut: VoyageListItem["statut"];
   } & { id: number },
 ) => {
   //log body
@@ -100,7 +106,7 @@ export const changeVoyageStatus = async (
     pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "PUT",
     body: request,
-    isDebug: false,
+    isDebug: true,
   });
   return data;
 };

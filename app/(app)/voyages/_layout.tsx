@@ -1,5 +1,6 @@
 import CloseBLBottomSheetContent from "@/components/CloseBLBottomSheetContent";
 import VoyageActionConfirmBottomSheetContent from "@/components/VoyageActionConfirmBottomSheetContent";
+import VoyageMoreActionsBottomSheetContent from "@/components/VoyageMoreActionsBottomSheetContent";
 import { Colors } from "@/constants/theme";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
@@ -9,6 +10,7 @@ import { Stack, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Text, TouchableWithoutFeedback, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export default function StackLayout() {
@@ -20,11 +22,17 @@ export default function StackLayout() {
   const closeBLList = useCloseBLStore((s) => s.bls);
   const sheetType = useCloseBLStore((s) => s.sheetType);
   const voyageActionType = useCloseBLStore((s) => s.voyageActionType);
-  const isVoyageActionConfirmSheet = sheetType === "voyage-action-confirm";
-  const snapPoints = useMemo(
-    () => (isVoyageActionConfirmSheet ? ["23%"] : ["50%"]),
-    [isVoyageActionConfirmSheet],
-  );
+  const chooseMoreAction = useCloseBLStore((s) => s.chooseMoreAction);
+
+  const snapPoints = useMemo(() => {
+    if (sheetType === "voyage-action-confirm") {
+      return ["23%"];
+    } else if (sheetType === "voyage-more-actions") {
+      return ["30%"];
+    } else {
+      return ["50%"];
+    }
+  }, [sheetType]);
   const pendingUndeliveredCount = useCloseBLStore(
     (s) => s.pendingUndeliveredCount,
   );
@@ -77,7 +85,7 @@ export default function StackLayout() {
     ),
     [],
   );
-
+  const { top } = useSafeAreaInsets();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack
@@ -86,6 +94,7 @@ export default function StackLayout() {
           header: (s) => (
             <View
               style={{
+                marginTop: top,
                 height: 60,
                 backgroundColor: Colors.light.background,
                 padding: 16,
@@ -130,7 +139,7 @@ export default function StackLayout() {
           }
         }}
       >
-        {isVoyageActionConfirmSheet && voyageActionType ? (
+        {sheetType === "voyage-action-confirm" && voyageActionType ? (
           <VoyageActionConfirmBottomSheetContent
             variant={voyageActionType}
             voyageId={closeBLVoyageId}
@@ -138,6 +147,12 @@ export default function StackLayout() {
             isLoading={isVoyageActionPending}
             onCancel={closeSheet}
             onConfirm={confirmVoyageAction}
+          />
+        ) : sheetType === "voyage-more-actions" ? (
+          <VoyageMoreActionsBottomSheetContent
+            voyageId={closeBLVoyageId}
+            onUpdate={() => chooseMoreAction("modifier")}
+            onShowDetails={() => chooseMoreAction("details")}
           />
         ) : (
           <CloseBLBottomSheetContent
@@ -157,4 +172,5 @@ const headerTitles: Record<string, string> = {
   photo: "Récapitulatif du voyage",
   index: "List des voyages",
   "action-bl/[blId]": "Action sur le BL",
+  "details/[voyageId]": "Détails du voyage",
 };

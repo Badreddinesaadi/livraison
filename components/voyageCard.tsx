@@ -8,20 +8,20 @@ import { LayoutAnimation, Pressable, Text, View } from "react-native";
 export const VoyageCard = ({
   item,
   onDelete,
-  onUpdate,
+  onMore,
   onOpenCloseBL,
   onAcheveVoyage,
 }: {
   item: VoyageListItem;
   onDelete: () => void;
-  onUpdate: () => void;
+  onMore: () => void;
   onOpenCloseBL: () => void;
   onAcheveVoyage: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const { user } = useSession();
   const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
-  //   const isAdminOrAdv = false;
+  // const isAdminOrAdv = false;
   const bls = item.bl_list;
   // opened bls count
   const blsEncoursCount = useMemo(() => {
@@ -234,9 +234,9 @@ export const VoyageCard = ({
               borderTopColor: "#f2f2f2",
             }}
           >
-            {isAdminOrAdv && item.statut !== "terminer" && (
+            {isAdminOrAdv && (
               <Pressable
-                onPress={onUpdate}
+                onPress={onMore}
                 style={{
                   flex: 1,
                   flexDirection: "row",
@@ -248,11 +248,11 @@ export const VoyageCard = ({
                   gap: 6,
                 }}
               >
-                <FontAwesome5 name="edit" size={14} color={PRIMARY} />
+                <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
                 <Text
                   style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}
                 >
-                  Modifier
+                  Plus
                 </Text>
               </Pressable>
             )}
