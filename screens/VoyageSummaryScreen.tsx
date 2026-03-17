@@ -4,7 +4,7 @@ import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import {
   FlatList,
   StyleSheet,
@@ -17,6 +17,7 @@ import Toast from "react-native-toast-message";
 export const VoyageSummaryScreen = () => {
   const queryClient = useQueryClient();
   const store = useCreateVoyageStore();
+  const navigation = useNavigation();
   const router = useRouter();
   const createVoyageMutation = useMutation({
     mutationFn: createVoyage,
@@ -28,6 +29,7 @@ export const VoyageSummaryScreen = () => {
         text1: "Voyage créé avec succès",
       });
       // reset store
+      router.dismissAll();
       router.replace("/(app)/voyages");
       setTimeout(() => {
         store.resetAll();
@@ -44,6 +46,7 @@ export const VoyageSummaryScreen = () => {
         text1: `Voyage #${store.idVoyage} mis à jour avec succès`,
       });
       // reset store
+      router.dismissAll();
       router.replace("/(app)/voyages");
       setTimeout(() => {
         store.resetAll();
@@ -74,7 +77,10 @@ export const VoyageSummaryScreen = () => {
                   <Text style={styles.cardLabel}>Chauffeur</Text>
                   <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => router.replace("/voyages/create/chauffeur")}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.replace("/voyages/create/chauffeur");
+                    }}
                   >
                     <FontAwesome6
                       name="pen"
@@ -104,7 +110,10 @@ export const VoyageSummaryScreen = () => {
                   <Text style={styles.cardLabel}>Véhicule</Text>
                   <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => router.replace("/voyages/create/chauffeur")}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.replace("/voyages/create/chauffeur");
+                    }}
                   >
                     <FontAwesome6
                       name="pen"
@@ -136,7 +145,10 @@ export const VoyageSummaryScreen = () => {
                   <Text style={styles.cardLabel}>Dépôt</Text>
                   <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => router.replace("/voyages/create/chauffeur")}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.replace("/voyages/create/chauffeur");
+                    }}
                   >
                     <FontAwesome6
                       name="pen"
@@ -163,7 +175,10 @@ export const VoyageSummaryScreen = () => {
                   <Text style={styles.cardLabel}>Km départ</Text>
                   <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => router.replace("/voyages/create/chauffeur")}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.replace("/voyages/create/chauffeur");
+                    }}
                   >
                     <FontAwesome6
                       name="pen"
@@ -188,7 +203,10 @@ export const VoyageSummaryScreen = () => {
                   <Text style={styles.cardLabel}>Date et heure de départ</Text>
                   <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => router.replace("/voyages/create/chauffeur")}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.replace("/voyages/create/chauffeur");
+                    }}
                   >
                     <FontAwesome6
                       name="pen"
@@ -223,7 +241,10 @@ export const VoyageSummaryScreen = () => {
                   </Text>
                   <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => router.replace("/voyages/create/select-bls")}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.replace("/voyages/create/select-bls");
+                    }}
                   >
                     <FontAwesome6
                       name="pen"
@@ -292,7 +313,10 @@ export const VoyageSummaryScreen = () => {
           <Button
             preset="ghost"
             text="Retour"
-            onPress={() => router.replace("/(app)")}
+            onPress={() => {
+              router.dismissAll();
+              router.replace("/(app)/voyages");
+            }}
           />
         </View>
       </View>
