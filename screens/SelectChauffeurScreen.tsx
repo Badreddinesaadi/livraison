@@ -20,6 +20,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 export const SelectChauffeurScreen = () => {
   const { data: chauffersList, isLoading: isChauffeursLoading } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
@@ -201,21 +202,39 @@ export const SelectChauffeurScreen = () => {
                   size={18}
                   color={Colors.light.primary}
                 />
-                <Text style={styles.sectionTitle}>Km départ</Text>
+                <Text style={styles.sectionTitle}>
+                  Km départ (min:{" "}
+                  {createVoyageStore.selectedVehicle?.km_reel + " km" || 0})
+                </Text>
               </View>
               <TextInput
-                style={styles.kmInput}
+                style={[
+                  styles.kmInput,
+                  !createVoyageStore.selectedVehicle && { opacity: 0.6 },
+                ]}
                 keyboardType="numeric"
-                placeholder="Kilométrage au départ..."
+                placeholder={
+                  createVoyageStore.selectedVehicle
+                    ? "Kilométrage au départ..."
+                    : "Sélectionnez d'abord un véhicule"
+                }
                 placeholderTextColor="#999"
+                editable={Boolean(createVoyageStore.selectedVehicle)}
                 value={
                   createVoyageStore.kmDepart
                     ? String(createVoyageStore.kmDepart)
                     : ""
                 }
                 onChangeText={(val) => {
+                  if (val === "") {
+                    createVoyageStore.setKmDepart(0);
+                    return;
+                  }
+
                   const parsed = parseInt(val, 10);
-                  createVoyageStore.setKmDepart(isNaN(parsed) ? 0 : parsed);
+                  if (isNaN(parsed)) return;
+
+                  createVoyageStore.setKmDepart(parsed);
                 }}
               />
             </View>
@@ -293,6 +312,31 @@ export const SelectChauffeurScreen = () => {
             preset="filled"
             text="Suivant"
             onPress={() => {
+              const vehicle = createVoyageStore.selectedVehicle;
+              const kmDepart = createVoyageStore.kmDepart;
+
+              if (!vehicle) {
+                Toast.show({
+                  type: "error",
+                  text1: "Véhicule manquant",
+                  text2:
+                    "Veuillez sélectionner un véhicule avant de poursuivre.",
+                });
+                return;
+              }
+
+              const vehicleKmRaw = vehicle.km_reel;
+              const vehicleKm = vehicleKmRaw ? parseInt(vehicleKmRaw, 10) : NaN;
+
+              if (!isNaN(vehicleKm) && kmDepart < vehicleKm) {
+                Toast.show({
+                  type: "error",
+                  text1: "Kilométrage invalide",
+                  text2: `Le kilométrage doit être supérieur au kilométrage réel du véhicule (${vehicleKm}).`,
+                });
+                return;
+              }
+
               router.navigate("/voyages/create/select-bls");
             }}
           />

@@ -1,3 +1,4 @@
+import OfflineNotice from "@/components/OfflineNotice";
 import { SplashScreenController } from "@/components/splash";
 import { queryClient } from "@/constants/query";
 import { SessionProvider, useSession } from "@/stores/auth.store";
@@ -34,6 +35,7 @@ const InnerLayout = () => {
           <Stack.Screen name="sign-in" />
         </Stack.Protected>
       </Stack>
+      <OfflineNotice />
       <Toast />
     </>
   );
