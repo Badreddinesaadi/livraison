@@ -54,7 +54,7 @@ export const SelectChauffeurScreen = () => {
       (vehiclesList ?? []).map((vehicle) => ({
         id: vehicle.id,
         label: `${vehicle.immatriculation} (${vehicle.vehiculeMarque})`,
-        subLabel: vehicle.nameVehicule || undefined,
+        subLabel: vehicle.vehiculeMarque || undefined,
       })),
     [vehiclesList],
   );
