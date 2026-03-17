@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -28,6 +29,7 @@ export const CloseBLScreen = () => {
   const closeBLStore = useCloseBLStore();
   const [permission, requestPermission] = useCameraPermissions();
   const [photos, setPhotos] = useState<UploadPhoto[]>([]);
+  const [isCapturingLocation, setIsCapturingLocation] = useState(false);
   const queryClient = useQueryClient();
   const selectedBL = closeBLStore.selectedBL;
   const voyageId = closeBLStore.voyageId;
@@ -70,7 +72,7 @@ export const CloseBLScreen = () => {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleMarkAsDelivered = () => {
+  const handleMarkAsDelivered = async () => {
     if (photos.length === 0) {
       Toast.show({
         type: "error",
@@ -89,12 +91,42 @@ export const CloseBLScreen = () => {
       return;
     }
 
-    closeBLMutate({
-      idVoyage: voyageId,
-      idBL: targetBLId,
-      status: "livre",
-      images: photos,
-    });
+    setIsCapturingLocation(true);
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        Toast.show({
+          type: "error",
+          text1: "Localisation requise",
+          text2: "Veuillez autoriser la localisation pour clôturer le BL.",
+        });
+        return;
+      }
+
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      const { latitude, longitude } = position.coords;
+
+      closeBLMutate({
+        idVoyage: voyageId,
+        idBL: targetBLId,
+        coordinates: { x: longitude, y: latitude },
+        status: "livre",
+        images: photos,
+      });
+    } catch {
+      Toast.show({
+        type: "error",
+        text1: "Position indisponible",
+        text2: "Impossible de récupérer votre position actuelle.",
+      });
+    } finally {
+      setIsCapturingLocation(false);
+    }
   };
 
   if (!permission) {
@@ -176,7 +208,7 @@ export const CloseBLScreen = () => {
             preset="filled"
             text="Marquer comme livré"
             disabled={photos.length === 0}
-            isLoading={isPending}
+            isLoading={isPending || isCapturingLocation}
             onPress={handleMarkAsDelivered}
           />
         </View>

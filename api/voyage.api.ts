@@ -76,7 +76,7 @@ export const listVoyage = async ({
       ...(idChauffeur ? { idChauffeur } : {}),
       ...(idDepot ? { idDepot } : {}),
     },
-    isDebug: true,
+    isDebug: false,
     withPagination: true,
   });
 

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { VoyageCard } from "@/components/voyageCard";
 import { Colors, PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
-import { useCloseBLStore } from "@/stores/close-bl.store";
+import { useCloseBLStore, VoyageFilterItem } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { BL } from "@/types/bl.types";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -333,25 +333,30 @@ export const VoyagesScreen = () => {
   );
 
   const handleOpenFiltersSheet = useCallback(() => {
+    const isAdminOrAdvisory = user?.role === "admin" || user?.role === "adv";
+    const items: VoyageFilterItem[] = [
+      {
+        key: "chauffeur",
+        label: "Chauffeur",
+        valueLabel: selectedChauffeurLabel,
+      },
+      {
+        key: "vehicule",
+        label: "Véhicule",
+        valueLabel: selectedVehiculeLabel,
+      },
+      {
+        key: "depot",
+        label: "Dépôt",
+        valueLabel: selectedDepotLabel,
+      },
+    ];
+    if (!isAdminOrAdvisory) {
+      items.splice(0, 1); // remove chauffeur filter for non admin/adv users
+    }
     openVoyageFiltersSheet({
       title: "Filtrer les voyages",
-      items: [
-        {
-          key: "chauffeur",
-          label: "Chauffeur",
-          valueLabel: selectedChauffeurLabel,
-        },
-        {
-          key: "vehicule",
-          label: "Véhicule",
-          valueLabel: selectedVehiculeLabel,
-        },
-        {
-          key: "depot",
-          label: "Dépôt",
-          valueLabel: selectedDepotLabel,
-        },
-      ],
+      items,
       onPressItem: handleOpenFilterSelector,
       onReset: () => {
         setSelectedChauffeurId(undefined);
@@ -367,6 +372,7 @@ export const VoyagesScreen = () => {
     selectedDepotLabel,
     handleOpenFilterSelector,
     closeBottomSheet,
+    user?.role,
   ]);
 
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =

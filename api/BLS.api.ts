@@ -37,6 +37,7 @@ export const closeBL = async ({
   images,
   status,
   idBL,
+  coordinates,
 }: {
   idVoyage: number;
   idBL: number;
@@ -46,6 +47,7 @@ export const closeBL = async ({
     type: string;
   }[];
   status: string;
+  coordinates: { x: number; y: number };
 }) => {
   const formdata = new FormData();
   formdata.append("idBL", idBL.toString());
@@ -57,6 +59,7 @@ export const closeBL = async ({
       formdata.append("image", image as any);
     }
   });
+  formdata.append("coordinates", JSON.stringify(coordinates));
 
   const data = await client.request({
     pathname: "/sdkboard/api/homescreen/voyage_chauffeur.php",

@@ -29,7 +29,7 @@ type SelectorSheetConfig = {
 
 export type VoyageFilterKey = "chauffeur" | "vehicule" | "depot";
 
-type VoyageFilterItem = {
+export type VoyageFilterItem = {
   key: VoyageFilterKey;
   label: string;
   valueLabel?: string;
