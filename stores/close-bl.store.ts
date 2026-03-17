@@ -7,6 +7,7 @@ type SheetType =
   | "voyage-action-confirm"
   | "voyage-more-actions"
   | "selector-options"
+  | "voyage-filters"
   | null;
 type VoyageActionType = "achever" | "supprimer" | null;
 type MoreActionType = "modifier" | "details" | null;
@@ -26,6 +27,21 @@ type SelectorSheetConfig = {
   onSelect: (id: number) => void;
 };
 
+export type VoyageFilterKey = "chauffeur" | "vehicule" | "depot";
+
+type VoyageFilterItem = {
+  key: VoyageFilterKey;
+  label: string;
+  valueLabel?: string;
+};
+
+type VoyageFiltersSheetConfig = {
+  title: string;
+  items: VoyageFilterItem[];
+  onPressItem: (key: VoyageFilterKey) => void;
+  onReset?: () => void;
+};
+
 type ConfirmedVoyageAction = {
   action: Exclude<VoyageActionType, null>;
   voyageId: number;
@@ -40,6 +56,7 @@ type CloseBLState = {
   confirmedVoyageAction: ConfirmedVoyageAction | null;
   moreActionHandler: MoreActionHandler | null;
   selectorSheetConfig: SelectorSheetConfig | null;
+  voyageFiltersSheetConfig: VoyageFiltersSheetConfig | null;
   isVoyageActionPending: boolean;
   isSheetOpen: boolean;
   mode: CloseBLMode;
@@ -56,6 +73,8 @@ type CloseBLState = {
   chooseMoreAction: (action: Exclude<MoreActionType, null>) => void;
   openSelectorOptions: (config: SelectorSheetConfig) => void;
   chooseSelectorOption: (id: number) => void;
+  openVoyageFilters: (config: VoyageFiltersSheetConfig) => void;
+  chooseVoyageFilterItem: (key: VoyageFilterKey) => void;
   finishVoyageAction: () => void;
   openSheet: () => void;
   closeSheet: () => void;
@@ -64,7 +83,7 @@ type CloseBLState = {
   reset: () => void;
 };
 
-export const useCloseBLStore = create<CloseBLState>((set) => ({
+export const useCloseBLStore = create<CloseBLState>((set, get) => ({
   sheetType: null,
   voyageActionType: null,
   voyageId: null,
@@ -73,6 +92,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
   confirmedVoyageAction: null,
   moreActionHandler: null,
   selectorSheetConfig: null,
+  voyageFiltersSheetConfig: null,
   isVoyageActionPending: false,
   isSheetOpen: false,
   mode: null,
@@ -86,6 +106,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       pendingUndeliveredCount: 0,
       moreActionHandler: null,
       selectorSheetConfig: null,
+      voyageFiltersSheetConfig: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
@@ -99,6 +120,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       pendingUndeliveredCount,
       moreActionHandler: null,
       selectorSheetConfig: null,
+      voyageFiltersSheetConfig: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
@@ -113,6 +135,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       pendingUndeliveredCount: 0,
       moreActionHandler: null,
       selectorSheetConfig: null,
+      voyageFiltersSheetConfig: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
@@ -147,6 +170,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       isSheetOpen: true,
       moreActionHandler: handler,
       selectorSheetConfig: null,
+      voyageFiltersSheetConfig: null,
     }),
   chooseMoreAction: (action: Exclude<MoreActionType, null>) =>
     set((state) => {
@@ -171,6 +195,22 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       isSheetOpen: true,
       moreActionHandler: null,
       selectorSheetConfig: config,
+      voyageFiltersSheetConfig: null,
+    }),
+  openVoyageFilters: (config: VoyageFiltersSheetConfig) =>
+    set({
+      sheetType: "voyage-filters",
+      voyageActionType: null,
+      voyageId: null,
+      bls: [],
+      pendingUndeliveredCount: 0,
+      mode: null,
+      selectedBL: null,
+      isVoyageActionPending: false,
+      isSheetOpen: true,
+      moreActionHandler: null,
+      selectorSheetConfig: null,
+      voyageFiltersSheetConfig: config,
     }),
   chooseSelectorOption: (id: number) =>
     set((state) => {
@@ -180,6 +220,9 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
         isSheetOpen: false,
       };
     }),
+  chooseVoyageFilterItem: (key: VoyageFilterKey) => {
+    get().voyageFiltersSheetConfig?.onPressItem(key);
+  },
   finishVoyageAction: () =>
     set({
       confirmedVoyageAction: null,
@@ -200,6 +243,7 @@ export const useCloseBLStore = create<CloseBLState>((set) => ({
       confirmedVoyageAction: null,
       moreActionHandler: null,
       selectorSheetConfig: null,
+      voyageFiltersSheetConfig: null,
       isVoyageActionPending: false,
       isSheetOpen: false,
       mode: null,

@@ -2,6 +2,7 @@ import CloseBLBottomSheetContent from "@/components/CloseBLBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
 import { Button } from "@/components/ui/button";
 import VoyageActionConfirmBottomSheetContent from "@/components/VoyageActionConfirmBottomSheetContent";
+import VoyageFiltersBottomSheetContent from "@/components/VoyageFiltersBottomSheetContent";
 import VoyageMoreActionsBottomSheetContent from "@/components/VoyageMoreActionsBottomSheetContent";
 import { Colors } from "@/constants/theme";
 import { useCloseBLStore } from "@/stores/close-bl.store";
@@ -34,13 +35,21 @@ export default function StackLayout() {
   const voyageActionType = useCloseBLStore((s) => s.voyageActionType);
   const chooseMoreAction = useCloseBLStore((s) => s.chooseMoreAction);
   const selectorSheetConfig = useCloseBLStore((s) => s.selectorSheetConfig);
+  const voyageFiltersSheetConfig = useCloseBLStore(
+    (s) => s.voyageFiltersSheetConfig,
+  );
   const chooseSelectorOption = useCloseBLStore((s) => s.chooseSelectorOption);
+  const chooseVoyageFilterItem = useCloseBLStore(
+    (s) => s.chooseVoyageFilterItem,
+  );
 
   const snapPoints = useMemo(() => {
     if (sheetType === "voyage-action-confirm") {
       return ["23%"];
     } else if (sheetType === "voyage-more-actions") {
       return ["30%"];
+    } else if (sheetType === "voyage-filters") {
+      return ["45%"];
     } else if (sheetType === "selector-options") {
       return ["50%"];
     } else {
@@ -117,7 +126,7 @@ export default function StackLayout() {
         }),
       );
       animationRef.current.start();
-    } catch (e) {
+    } catch {
       // noop
     }
   };
@@ -125,7 +134,7 @@ export default function StackLayout() {
   const stopSpin = () => {
     try {
       animationRef.current?.stop();
-    } catch (e) {
+    } catch {
       // noop
     }
     rotation.current.setValue(0);
@@ -240,6 +249,13 @@ export default function StackLayout() {
             options={selectorSheetConfig.options}
             selectedId={selectorSheetConfig.selectedId}
             onSelect={chooseSelectorOption}
+          />
+        ) : sheetType === "voyage-filters" && voyageFiltersSheetConfig ? (
+          <VoyageFiltersBottomSheetContent
+            title={voyageFiltersSheetConfig.title}
+            items={voyageFiltersSheetConfig.items}
+            onSelectItem={chooseVoyageFilterItem}
+            onReset={voyageFiltersSheetConfig.onReset}
           />
         ) : (
           <CloseBLBottomSheetContent

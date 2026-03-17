@@ -10,7 +10,7 @@ import {
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { VoyageCard } from "@/components/voyageCard";
-import { Colors } from "@/constants/theme";
+import { Colors, PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
@@ -43,19 +43,6 @@ if (
 
 export const VoyagesScreen = () => {
   const { user } = useSession();
-  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    useInfiniteQuery({
-      queryKey: ["voyages", "list"],
-      queryFn: ({ pageParam }) => listVoyage({ page: pageParam }),
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) => {
-        const pagination = lastPage.pagination;
-        if (!pagination || pagination.page >= pagination.totalPages) {
-          return undefined;
-        }
-        return pagination.page + 1;
-      },
-    });
   const { data: chauffersList } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
@@ -75,6 +62,11 @@ export const VoyagesScreen = () => {
   const openAcheveConfirmSheet = useCloseBLStore((s) => s.openAcheveConfirm);
   const openDeleteConfirmSheet = useCloseBLStore((s) => s.openDeleteConfirm);
   const openMoreActionsSheet = useCloseBLStore((s) => s.openMoreActions);
+  const openSelectorOptionsSheet = useCloseBLStore(
+    (s) => s.openSelectorOptions,
+  );
+  const openVoyageFiltersSheet = useCloseBLStore((s) => s.openVoyageFilters);
+  const closeBottomSheet = useCloseBLStore((s) => s.closeSheet);
   const confirmedVoyageAction = useCloseBLStore((s) => s.confirmedVoyageAction);
   const clearConfirmedVoyageAction = useCloseBLStore(
     (s) => s.clearConfirmedVoyageAction,
@@ -223,7 +215,24 @@ export const VoyagesScreen = () => {
 
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedChauffeurId, setSelectedChauffeurId] = useState<
+    number | undefined
+  >(undefined);
+  const [selectedVehiculeId, setSelectedVehiculeId] = useState<
+    number | undefined
+  >(undefined);
+  const [selectedDepotId, setSelectedDepotId] = useState<number | undefined>(
+    undefined,
+  );
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const filtersCount = useMemo(() => {
+    return (
+      (selectedChauffeurId ? 1 : 0) +
+      (selectedVehiculeId ? 1 : 0) +
+      (selectedDepotId ? 1 : 0)
+    );
+  }, [selectedChauffeurId, selectedVehiculeId, selectedDepotId]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -235,17 +244,164 @@ export const VoyagesScreen = () => {
     };
   }, [searchText]);
 
-  const listData = useMemo(() => {
-    const flattenedData = data?.pages.flatMap((page) => page.data ?? []) ?? [];
-    if (!debouncedSearch) return flattenedData;
-
-    const q = debouncedSearch.toLowerCase();
-    return flattenedData.filter(
-      (v) =>
-        v.bl_list?.some((bl) => bl.code?.toLowerCase().includes(q)) ||
-        v.nomChauffeur?.toLowerCase().includes(q),
+  const selectedChauffeurLabel = useMemo(() => {
+    return (
+      chauffersList?.find((chauffeur) => chauffeur.id === selectedChauffeurId)
+        ?.name ?? "Tous"
     );
-  }, [data, debouncedSearch]);
+  }, [chauffersList, selectedChauffeurId]);
+
+  const selectedVehiculeLabel = useMemo(() => {
+    const vehicle = vehiclesList?.find((v) => v.id === selectedVehiculeId);
+    if (!vehicle) return "Tous";
+
+    return [vehicle.vehiculeMarque, vehicle.immatriculation]
+      .filter(Boolean)
+      .join(" - ");
+  }, [vehiclesList, selectedVehiculeId]);
+
+  const selectedDepotLabel = useMemo(() => {
+    return (
+      depotsList?.find((depot) => depot.id === selectedDepotId)?.nom ?? "Tous"
+    );
+  }, [depotsList, selectedDepotId]);
+
+  const handleOpenFilterSelector = useCallback(
+    (key: "chauffeur" | "vehicule" | "depot") => {
+      if (key === "chauffeur") {
+        openSelectorOptionsSheet({
+          title: "Filtrer par chauffeur",
+          options: [
+            { id: 0, label: "Tous" },
+            ...(chauffersList ?? []).map((item) => ({
+              id: item.id,
+              label: item.name,
+            })),
+          ],
+          selectedId: selectedChauffeurId ?? 0,
+          onSelect: (id) => {
+            setSelectedChauffeurId(id === 0 ? undefined : id);
+          },
+        });
+        return;
+      }
+
+      if (key === "vehicule") {
+        openSelectorOptionsSheet({
+          title: "Filtrer par véhicule",
+          options: [
+            { id: 0, label: "Tous" },
+            ...(vehiclesList ?? []).map((item) => ({
+              id: item.id,
+              label: item.vehiculeMarque || item.immatriculation,
+              subLabel: item.immatriculation,
+            })),
+          ],
+          selectedId: selectedVehiculeId ?? 0,
+          onSelect: (id) => {
+            setSelectedVehiculeId(id === 0 ? undefined : id);
+          },
+        });
+        return;
+      }
+
+      openSelectorOptionsSheet({
+        title: "Filtrer par dépôt",
+        options: [
+          { id: 0, label: "Tous" },
+          ...(depotsList ?? []).map((item) => ({
+            id: item.id,
+            label: item.nom,
+            subLabel: item.code,
+          })),
+        ],
+        selectedId: selectedDepotId ?? 0,
+        onSelect: (id) => {
+          setSelectedDepotId(id === 0 ? undefined : id);
+        },
+      });
+    },
+    [
+      openSelectorOptionsSheet,
+      chauffersList,
+      selectedChauffeurId,
+      vehiclesList,
+      selectedVehiculeId,
+      depotsList,
+      selectedDepotId,
+    ],
+  );
+
+  const handleOpenFiltersSheet = useCallback(() => {
+    openVoyageFiltersSheet({
+      title: "Filtrer les voyages",
+      items: [
+        {
+          key: "chauffeur",
+          label: "Chauffeur",
+          valueLabel: selectedChauffeurLabel,
+        },
+        {
+          key: "vehicule",
+          label: "Véhicule",
+          valueLabel: selectedVehiculeLabel,
+        },
+        {
+          key: "depot",
+          label: "Dépôt",
+          valueLabel: selectedDepotLabel,
+        },
+      ],
+      onPressItem: handleOpenFilterSelector,
+      onReset: () => {
+        setSelectedChauffeurId(undefined);
+        setSelectedVehiculeId(undefined);
+        setSelectedDepotId(undefined);
+        closeBottomSheet();
+      },
+    });
+  }, [
+    openVoyageFiltersSheet,
+    selectedChauffeurLabel,
+    selectedVehiculeLabel,
+    selectedDepotLabel,
+    handleOpenFilterSelector,
+    closeBottomSheet,
+  ]);
+
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: [
+        "voyages",
+        "list",
+        {
+          codeQuery: debouncedSearch || undefined,
+          idChauffeur: selectedChauffeurId,
+          idVehicule: selectedVehiculeId,
+          idDepot: selectedDepotId,
+        },
+      ],
+      queryFn: ({ pageParam }) =>
+        listVoyage({
+          page: pageParam,
+          codeQuery: debouncedSearch || undefined,
+          idChauffeur: selectedChauffeurId,
+          idVehicule: selectedVehiculeId,
+          idDepot: selectedDepotId,
+        }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => {
+        const pagination = lastPage.pagination;
+        if (!pagination || pagination.page >= pagination.totalPages) {
+          return undefined;
+        }
+        return pagination.page + 1;
+      },
+    });
+
+  const listData = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data ?? []) ?? [];
+  }, [data]);
 
   const handleMoreAction = useCallback(
     (action: "modifier" | "details", voyageId: number) => {
@@ -327,6 +483,37 @@ export const VoyagesScreen = () => {
               clearButtonMode="while-editing"
             />
           </View>
+
+          <Button
+            preset="ghost"
+            LeftAccessory={() => (
+              <View>
+                {filtersCount > 0 && (
+                  <View
+                    style={{
+                      backgroundColor: PRIMARY,
+                      width: 15,
+                      height: 15,
+                      borderRadius: 10,
+                      position: "absolute",
+                      top: -5,
+                      right: -5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      zIndex: 1,
+                    }}
+                  >
+                    <Text style={{ color: "#fff", fontSize: 12 }}>
+                      {filtersCount}
+                    </Text>
+                  </View>
+                )}
+                <FontAwesome5 name="filter" size={20} color="#222" />
+              </View>
+            )}
+            size="md"
+            onPress={handleOpenFiltersSheet}
+          />
           {isAdminOrAdv && (
             <View>
               <Button

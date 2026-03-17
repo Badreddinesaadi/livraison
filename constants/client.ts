@@ -6,6 +6,10 @@ interface RequestOptions {
   body?: any;
   headers?: Record<string, string>;
   pathname?: string;
+  /** Add search params to be appended to the request URL */
+  searchParams?:
+    | Record<string, string | number | boolean | null | undefined>
+    | URLSearchParams;
   isDebug?: boolean;
   withPagination?: boolean;
 }
@@ -54,6 +58,31 @@ class ApiClient {
     } = options;
 
     const url = this.baseUrl + pathname;
+    let finalUrl = url;
+
+    if (
+      options.searchParams &&
+      !(options.searchParams instanceof URLSearchParams)
+    ) {
+      const entries: [string, string][] = Object.entries(
+        options.searchParams,
+      ).reduce(
+        (acc, [k, v]) => {
+          if (v === undefined || v === null) return acc;
+          acc.push([k, String(v)]);
+          return acc;
+        },
+        [] as [string, string][],
+      );
+
+      if (entries.length) {
+        const params = new URLSearchParams(entries);
+        finalUrl += (url.includes("?") ? "&" : "?") + params.toString();
+      }
+    } else if (options.searchParams instanceof URLSearchParams) {
+      const params = options.searchParams.toString();
+      if (params) finalUrl += (url.includes("?") ? "&" : "?") + params;
+    }
     const mergedHeaders = { ...this.defaultHeaders, ...headers };
 
     if (!mergedHeaders["auth_token"]) {
@@ -82,14 +111,14 @@ class ApiClient {
 
     if (isDebug) {
       console.log("\n====== API REQUEST DEBUG ======");
-      console.log("URL:", url);
+      console.log("URL:", finalUrl);
       console.log("Method:", method);
       console.log("Headers:", JSON.stringify(mergedHeaders, null, 2));
       console.log("Body:", body ? JSON.stringify(body, null, 2) : "(none)");
       console.log("==============================\n");
     }
 
-    const response = await fetch(url, fetchOptions);
+    const response = await fetch(finalUrl, fetchOptions);
     const data = await response.json();
 
     if (isDebug) {

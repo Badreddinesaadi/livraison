@@ -56,14 +56,27 @@ export type VoyageListItem = {
 export const listVoyage = async ({
   page,
   codeQuery,
+  idVehicule,
+  idChauffeur,
+  idDepot,
 }: {
   page: number;
   codeQuery?: string;
+  idVehicule?: number;
+  idChauffeur?: number;
+  idDepot?: number;
 }) => {
   const result = await client.request<VoyageListItem[]>({
-    pathname: `/sdkboard/api/homescreen/voyage.php?page=${page}${codeQuery ? `&code=${codeQuery}` : ""}`,
+    pathname: `/sdkboard/api/homescreen/voyage.php`,
     method: "GET",
-    isDebug: false,
+    searchParams: {
+      page,
+      ...(codeQuery ? { code: codeQuery } : {}),
+      ...(idVehicule ? { idVehicule } : {}),
+      ...(idChauffeur ? { idChauffeur } : {}),
+      ...(idDepot ? { idDepot } : {}),
+    },
+    isDebug: true,
     withPagination: true,
   });
 

@@ -12,10 +12,10 @@ export type Chauffeur = {
 export type Vehicle = {
   id: number;
   immatriculation: string;
-  nameVehicule: string;
   vehiculeType: string;
   vehiculeMarque: string;
   km_reel: string | null;
+  compteurActuel: number | null;
 };
 export type Depot = {
   id: number;
