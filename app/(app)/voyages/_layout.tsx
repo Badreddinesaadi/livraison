@@ -216,6 +216,7 @@ export default function StackLayout() {
       />
 
       <BottomSheet
+        onClose={closeSheet}
         ref={bottomSheetRef}
         index={-1}
         snapPoints={snapPoints}

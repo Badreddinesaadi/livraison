@@ -118,9 +118,9 @@ export const VoyageSummaryScreen = () => {
                     ? `${store.selectedVehicle.immatriculation} (${store.selectedVehicle.vehiculeMarque})`
                     : "—"}
                 </Text>
-                {store.selectedVehicle?.nameVehicule ? (
+                {store.selectedVehicle?.vehiculeMarque ? (
                   <Text style={styles.cardSub}>
-                    {store.selectedVehicle.nameVehicule}
+                    {store.selectedVehicle.vehiculeMarque}
                   </Text>
                 ) : null}
               </View>
