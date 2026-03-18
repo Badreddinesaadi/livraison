@@ -21,6 +21,7 @@ export const createVoyage = async (request: CreateVoyageRequest) => {
 };
 
 export type BLItem = {
+  idVoyageBL: number;
   id: number;
   code: string;
   nomClient: string;
@@ -46,7 +47,7 @@ export type VoyageListItem = {
   depot_depart: number;
   depot_nom: string;
   bl_list: BLItem[];
-  km_retour: number;
+  km_retour: number | null;
   date_retour: string | null;
   date_create: string | null;
   idCreate: number | null;
@@ -59,12 +60,14 @@ export const listVoyage = async ({
   idVehicule,
   idChauffeur,
   idDepot,
+  idClient,
 }: {
   page: number;
   codeQuery?: string;
   idVehicule?: number;
   idChauffeur?: number;
   idDepot?: number;
+  idClient?: number;
 }) => {
   const result = await client.request<VoyageListItem[]>({
     pathname: `/sdkboard/api/homescreen/voyage.php`,
@@ -75,6 +78,7 @@ export const listVoyage = async ({
       ...(idVehicule ? { idVehicule } : {}),
       ...(idChauffeur ? { idChauffeur } : {}),
       ...(idDepot ? { idDepot } : {}),
+      ...(idClient ? { idClient } : {}),
     },
     isDebug: false,
     withPagination: true,

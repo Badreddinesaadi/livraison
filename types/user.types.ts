@@ -8,6 +8,13 @@ export type Chauffeur = {
   photoIdentite: string;
   photo: string;
 };
+export type Client = {
+  id: number;
+  societe: string;
+  ville: string;
+  telephone: string;
+  adresse: string;
+};
 
 export type Vehicle = {
   id: number;

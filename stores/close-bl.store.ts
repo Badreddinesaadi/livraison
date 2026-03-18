@@ -24,10 +24,12 @@ type SelectorSheetConfig = {
   title: string;
   options: SelectorOption[];
   selectedId?: number;
+  enableSearch?: boolean;
+  searchPlaceholder?: string;
   onSelect: (id: number) => void;
 };
 
-export type VoyageFilterKey = "chauffeur" | "vehicule" | "depot";
+export type VoyageFilterKey = "chauffeur" | "vehicule" | "depot" | "client";
 
 export type VoyageFilterItem = {
   key: VoyageFilterKey;

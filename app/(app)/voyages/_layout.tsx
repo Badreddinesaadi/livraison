@@ -45,17 +45,17 @@ export default function StackLayout() {
 
   const snapPoints = useMemo(() => {
     if (sheetType === "voyage-action-confirm") {
-      return [voyageActionType === "achever" ? "36%" : "23%"];
+      return [voyageActionType === "achever" ? "70%" : "23%"];
     } else if (sheetType === "voyage-more-actions") {
       return ["30%"];
     } else if (sheetType === "voyage-filters") {
-      return ["45%"];
+      return ["55%"];
     } else if (sheetType === "selector-options") {
       return ["50%"];
     } else {
       return ["50%"];
     }
-  }, [sheetType]);
+  }, [sheetType, voyageActionType]);
   const pendingUndeliveredCount = useCloseBLStore(
     (s) => s.pendingUndeliveredCount,
   );
@@ -251,6 +251,8 @@ export default function StackLayout() {
             title={selectorSheetConfig.title}
             options={selectorSheetConfig.options}
             selectedId={selectorSheetConfig.selectedId}
+            enableSearch={selectorSheetConfig.enableSearch}
+            searchPlaceholder={selectorSheetConfig.searchPlaceholder}
             onSelect={chooseSelectorOption}
           />
         ) : sheetType === "voyage-filters" && voyageFiltersSheetConfig ? (

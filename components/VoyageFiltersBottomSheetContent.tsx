@@ -1,3 +1,4 @@
+import { PRIMARY } from "@/constants/theme";
 import { VoyageFilterKey } from "@/stores/close-bl.store";
 import { Pressable, Text, View } from "react-native";
 
@@ -42,7 +43,7 @@ export default function VoyageFiltersBottomSheetContent({
             paddingHorizontal: 12,
             borderRadius: 10,
             borderWidth: 1,
-            borderColor: "#eee",
+            borderColor: item.valueLabel !== "Tous" ? PRIMARY : "#eee",
             backgroundColor: "#fff",
             marginBottom: 10,
           }}

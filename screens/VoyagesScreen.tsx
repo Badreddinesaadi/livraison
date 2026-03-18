@@ -1,5 +1,5 @@
 import { ListDepots } from "@/api/depots.api";
-import { ListChauffeurs } from "@/api/users.api";
+import { ListChauffeurs, ListClients } from "@/api/users.api";
 import { ListVehicles } from "@/api/vehicle.api";
 import {
   changeVoyageStatus,
@@ -54,6 +54,10 @@ export const VoyagesScreen = () => {
   const { data: depotsList } = useQuery({
     queryKey: ["depots", "full-list"],
     queryFn: ListDepots,
+  });
+  const { data: clientsList } = useQuery({
+    queryKey: ["clients", "full-list"],
+    queryFn: ListClients,
   });
   const router = useRouter();
   const store = useCreateVoyageStore();
@@ -233,15 +237,24 @@ export const VoyagesScreen = () => {
   const [selectedDepotId, setSelectedDepotId] = useState<number | undefined>(
     undefined,
   );
+  const [selectedClientId, setSelectedClientId] = useState<number | undefined>(
+    undefined,
+  );
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const filtersCount = useMemo(() => {
     return (
       (selectedChauffeurId ? 1 : 0) +
       (selectedVehiculeId ? 1 : 0) +
-      (selectedDepotId ? 1 : 0)
+      (selectedDepotId ? 1 : 0) +
+      (selectedClientId ? 1 : 0)
     );
-  }, [selectedChauffeurId, selectedVehiculeId, selectedDepotId]);
+  }, [
+    selectedChauffeurId,
+    selectedVehiculeId,
+    selectedDepotId,
+    selectedClientId,
+  ]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -275,8 +288,15 @@ export const VoyagesScreen = () => {
     );
   }, [depotsList, selectedDepotId]);
 
+  const selectedClientLabel = useMemo(() => {
+    return (
+      clientsList?.find((client) => client.id === selectedClientId)?.societe ??
+      "Tous"
+    );
+  }, [clientsList, selectedClientId]);
+
   const handleOpenFilterSelector = useCallback(
-    (key: "chauffeur" | "vehicule" | "depot") => {
+    (key: "chauffeur" | "vehicule" | "depot" | "client") => {
       if (key === "chauffeur") {
         openSelectorOptionsSheet({
           title: "Filtrer par chauffeur",
@@ -314,6 +334,27 @@ export const VoyagesScreen = () => {
         return;
       }
 
+      if (key === "client") {
+        openSelectorOptionsSheet({
+          title: "Filtrer par client",
+          options: [
+            { id: 0, label: "Tous" },
+            ...(clientsList ?? []).map((item) => ({
+              id: item.id,
+              label: item.societe,
+              subLabel: item.ville,
+            })),
+          ],
+          selectedId: selectedClientId ?? 0,
+          enableSearch: true,
+          searchPlaceholder: "Rechercher un client par société",
+          onSelect: (id) => {
+            setSelectedClientId(id === 0 ? undefined : id);
+          },
+        });
+        return;
+      }
+
       openSelectorOptionsSheet({
         title: "Filtrer par dépôt",
         options: [
@@ -336,6 +377,8 @@ export const VoyagesScreen = () => {
       selectedChauffeurId,
       vehiclesList,
       selectedVehiculeId,
+      clientsList,
+      selectedClientId,
       depotsList,
       selectedDepotId,
     ],
@@ -359,6 +402,11 @@ export const VoyagesScreen = () => {
         label: "Dépôt",
         valueLabel: selectedDepotLabel,
       },
+      {
+        key: "client",
+        label: "Client",
+        valueLabel: selectedClientLabel,
+      },
     ];
     if (!isAdminOrAdvisory) {
       items.splice(0, 1); // remove chauffeur filter for non admin/adv users
@@ -371,6 +419,7 @@ export const VoyagesScreen = () => {
         setSelectedChauffeurId(undefined);
         setSelectedVehiculeId(undefined);
         setSelectedDepotId(undefined);
+        setSelectedClientId(undefined);
         closeBottomSheet();
       },
     });
@@ -379,6 +428,7 @@ export const VoyagesScreen = () => {
     selectedChauffeurLabel,
     selectedVehiculeLabel,
     selectedDepotLabel,
+    selectedClientLabel,
     handleOpenFilterSelector,
     closeBottomSheet,
     user?.role,
@@ -394,6 +444,7 @@ export const VoyagesScreen = () => {
           idChauffeur: selectedChauffeurId,
           idVehicule: selectedVehiculeId,
           idDepot: selectedDepotId,
+          idClient: selectedClientId,
         },
       ],
       queryFn: ({ pageParam }) =>
@@ -403,6 +454,7 @@ export const VoyagesScreen = () => {
           idChauffeur: selectedChauffeurId,
           idVehicule: selectedVehiculeId,
           idDepot: selectedDepotId,
+          idClient: selectedClientId,
         }),
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {

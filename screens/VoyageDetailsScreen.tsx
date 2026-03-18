@@ -258,15 +258,45 @@ export const VoyageDetailsScreen = () => {
                         marginBottom: 6,
                       }}
                     >
-                      <Text
+                      <View
                         style={{
-                          fontSize: 13,
-                          color: bl.statut === "Livré" ? SUCCESS : "#222",
-                          fontWeight: "700",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 6,
                         }}
                       >
-                        {bl.code}
-                      </Text>
+                        <Text
+                          style={{
+                            fontSize: 13,
+                            color: bl.statut === "Livré" ? SUCCESS : "#222",
+                            fontWeight: "700",
+                          }}
+                        >
+                          {bl.code}
+                        </Text>
+                        {(bl.images?.length ?? 0) > 0 && (
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              gap: 2,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                color: SUCCESS,
+                              }}
+                            >
+                              {bl.images?.length ?? 0}
+                            </Text>
+                            <FontAwesome5
+                              name="file-image"
+                              size={12}
+                              color={SUCCESS}
+                            />
+                          </View>
+                        )}
+                      </View>
                       {bl.statut === "Livré" ? (
                         <FontAwesome5
                           name="check-circle"

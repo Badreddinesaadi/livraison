@@ -1,6 +1,7 @@
 import { PRIMARY } from "@/constants/theme";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { Pressable, Text, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
 
 type SelectOption = {
   id: number;
@@ -14,6 +15,8 @@ type SelectOptionBottomSheetContentProps = {
   onSelect: (id: number) => void;
   selectedId?: number;
   emptyLabel?: string;
+  enableSearch?: boolean;
+  searchPlaceholder?: string;
 };
 
 export default function SelectOptionBottomSheetContent({
@@ -22,10 +25,47 @@ export default function SelectOptionBottomSheetContent({
   onSelect,
   selectedId,
   emptyLabel = "Aucune option disponible",
+  enableSearch = false,
+  searchPlaceholder = "Rechercher...",
 }: SelectOptionBottomSheetContentProps) {
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!enableSearch) {
+      setDebouncedSearch("");
+      return;
+    }
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(searchText.trim().toLowerCase());
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [searchText, enableSearch]);
+
+  const filteredOptions = useMemo(() => {
+    if (!enableSearch || !debouncedSearch) {
+      return options;
+    }
+
+    return options.filter((item) =>
+      item.label.toLowerCase().includes(debouncedSearch),
+    );
+  }, [options, enableSearch, debouncedSearch]);
+
   return (
     <BottomSheetFlatList<SelectOption>
-      data={options}
+      data={filteredOptions}
       keyExtractor={(item: SelectOption) => String(item.id)}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 10 }}
@@ -41,6 +81,31 @@ export default function SelectOptionBottomSheetContent({
           >
             {title}
           </Text>
+
+          {enableSearch ? (
+            <View
+              style={{
+                marginBottom: 12,
+                borderWidth: 1,
+                borderColor: "#e8e8e8",
+                borderRadius: 10,
+                backgroundColor: "#fff",
+                paddingHorizontal: 12,
+              }}
+            >
+              <TextInput
+                value={searchText}
+                onChangeText={setSearchText}
+                placeholder={searchPlaceholder}
+                placeholderTextColor="#bbb"
+                style={{
+                  height: 42,
+                  fontSize: 14,
+                  color: "#222",
+                }}
+              />
+            </View>
+          ) : null}
         </View>
       }
       renderItem={({ item }: { item: SelectOption }) => {
@@ -74,7 +139,11 @@ export default function SelectOptionBottomSheetContent({
           </Pressable>
         );
       }}
-      ListEmptyComponent={<Text style={{ color: "#aaa" }}>{emptyLabel}</Text>}
+      ListEmptyComponent={
+        <Text style={{ color: "#aaa" }}>
+          {enableSearch && debouncedSearch ? "Aucun client trouvé" : emptyLabel}
+        </Text>
+      }
     />
   );
 }

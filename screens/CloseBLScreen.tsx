@@ -30,6 +30,7 @@ export const CloseBLScreen = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [photos, setPhotos] = useState<UploadPhoto[]>([]);
   const [isCapturingLocation, setIsCapturingLocation] = useState(false);
+  const [isPhotoCooldown, setIsPhotoCooldown] = useState(false);
   const queryClient = useQueryClient();
   const selectedBL = closeBLStore.selectedBL;
   const voyageId = closeBLStore.voyageId;
@@ -57,6 +58,15 @@ export const CloseBLScreen = () => {
   });
 
   const takePhoto = async () => {
+    if (photos.length >= 10) {
+      Toast.show({
+        type: "error",
+        text1: "Limite atteinte",
+        text2: "Vous ne pouvez pas ajouter plus de 10 photos.",
+      });
+      return;
+    }
+
     const picture = await cameraRef.current?.takePictureAsync({ quality: 0.7 });
     if (picture?.uri) {
       const photo: UploadPhoto = {
@@ -65,6 +75,10 @@ export const CloseBLScreen = () => {
         type: "image/jpeg",
       };
       setPhotos((prev) => [...prev, photo]);
+
+      // Start a short cooldown where the "Marquer comme livré" button shows loading
+      setIsPhotoCooldown(true);
+      setTimeout(() => setIsPhotoCooldown(false), 1500);
     }
   };
 
@@ -207,8 +221,8 @@ export const CloseBLScreen = () => {
           <Button
             preset="filled"
             text="Marquer comme livré"
-            disabled={photos.length === 0}
-            isLoading={isPending || isCapturingLocation}
+            disabled={photos.length === 0 || isPhotoCooldown}
+            isLoading={isPending || isCapturingLocation || isPhotoCooldown}
             onPress={handleMarkAsDelivered}
           />
         </View>
