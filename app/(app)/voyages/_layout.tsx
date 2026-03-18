@@ -45,7 +45,7 @@ export default function StackLayout() {
 
   const snapPoints = useMemo(() => {
     if (sheetType === "voyage-action-confirm") {
-      return ["23%"];
+      return [voyageActionType === "achever" ? "36%" : "23%"];
     } else if (sheetType === "voyage-more-actions") {
       return ["30%"];
     } else if (sheetType === "voyage-filters") {
@@ -59,6 +59,7 @@ export default function StackLayout() {
   const pendingUndeliveredCount = useCloseBLStore(
     (s) => s.pendingUndeliveredCount,
   );
+  const voyageKmDepart = useCloseBLStore((s) => s.voyageKmDepart);
   const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
   const isVoyageActionPending = useCloseBLStore((s) => s.isVoyageActionPending);
   const closeSheet = useCloseBLStore((s) => s.closeSheet);
@@ -234,6 +235,7 @@ export default function StackLayout() {
             variant={voyageActionType}
             voyageId={closeBLVoyageId}
             pendingUndeliveredCount={pendingUndeliveredCount}
+            kmDepart={voyageKmDepart}
             isLoading={isVoyageActionPending}
             onCancel={closeSheet}
             onConfirm={confirmVoyageAction}

@@ -113,9 +113,17 @@ export const VoyagesScreen = () => {
     }
 
     if (confirmedVoyageAction.action === "achever") {
+      if (typeof confirmedVoyageAction.kmRetour !== "number") {
+        finishVoyageActionIfPending();
+        clearConfirmedVoyageAction();
+        return;
+      }
+
       acheveVoyageMutate({
         statut: "terminer",
         id: confirmedVoyageAction.voyageId,
+        km_retour: confirmedVoyageAction.kmRetour,
+        date_retour: new Date().toISOString(),
       });
     }
 
@@ -129,6 +137,7 @@ export const VoyagesScreen = () => {
     acheveVoyageMutate,
     deleteMutate,
     clearConfirmedVoyageAction,
+    finishVoyageActionIfPending,
   ]);
 
   const handleDelete = (idVoyage: number) => {
@@ -208,7 +217,7 @@ export const VoyagesScreen = () => {
       const blsEncoursCount =
         item.bl_list?.filter((bl) => bl.statut === "Encours").length ?? 0;
 
-      openAcheveConfirmSheet(item.id, blsEncoursCount);
+      openAcheveConfirmSheet(item.id, blsEncoursCount, item.km_depart);
     },
     [openAcheveConfirmSheet],
   );

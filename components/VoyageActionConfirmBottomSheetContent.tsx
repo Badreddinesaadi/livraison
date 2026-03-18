@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
 
 type VoyageActionConfirmVariant = "achever" | "supprimer";
 
@@ -6,8 +7,9 @@ type VoyageActionConfirmBottomSheetContentProps = {
   variant: VoyageActionConfirmVariant;
   voyageId: number | null;
   pendingUndeliveredCount?: number;
+  kmDepart?: number | null;
   isLoading?: boolean;
-  onConfirm: () => void;
+  onConfirm: (kmRetour?: number) => void;
   onCancel: () => void;
 };
 
@@ -58,15 +60,57 @@ export default function VoyageActionConfirmBottomSheetContent({
   variant,
   voyageId,
   pendingUndeliveredCount = 0,
+  kmDepart,
   isLoading = false,
   onConfirm,
   onCancel,
 }: VoyageActionConfirmBottomSheetContentProps) {
+  const [kmRetourInput, setKmRetourInput] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const isAchever = variant === "achever";
+
+  const parsedKmRetour = useMemo(() => {
+    if (!kmRetourInput.trim()) {
+      return null;
+    }
+
+    const parsed = Number(kmRetourInput);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return null;
+    }
+
+    return parsed;
+  }, [kmRetourInput]);
+
   const content = buildContentConfig(
     variant,
     voyageId,
     pendingUndeliveredCount,
   );
+
+  const handleConfirmPress = () => {
+    if (isLoading) {
+      return;
+    }
+
+    if (isAchever) {
+      if (parsedKmRetour === null) {
+        setErrorMessage("Veuillez saisir un kilométrage valide.");
+        return;
+      }
+
+      if (typeof kmDepart === "number" && parsedKmRetour < kmDepart) {
+        setErrorMessage(
+          `Le kilométrage actuel doit être supérieur ou égal à ${kmDepart} km.`,
+        );
+        return;
+      }
+    }
+
+    setErrorMessage(null);
+
+    onConfirm(parsedKmRetour ?? undefined);
+  };
 
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
@@ -92,6 +136,66 @@ export default function VoyageActionConfirmBottomSheetContent({
         {content.message}
       </Text>
 
+      {isAchever ? (
+        <View style={{ marginBottom: 16 }}>
+          <Text
+            style={{
+              fontSize: 13,
+              color: "#444",
+              marginBottom: 8,
+              fontWeight: "600",
+            }}
+          >
+            Km actuel du véhicule
+          </Text>
+          <TextInput
+            value={kmRetourInput}
+            onChangeText={(text) => {
+              setKmRetourInput(text.replace(/[^0-9]/g, ""));
+              if (errorMessage) {
+                setErrorMessage(null);
+              }
+            }}
+            placeholder="Ex: 125000"
+            keyboardType="number-pad"
+            editable={!isLoading}
+            style={{
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 10,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              fontSize: 14,
+              color: "#1a1a2e",
+              backgroundColor: "#fff",
+            }}
+          />
+          {typeof kmDepart === "number" ? (
+            <Text
+              style={{
+                marginTop: 6,
+                fontSize: 12,
+                color: "#666",
+              }}
+            >
+              Km départ: {kmDepart} km
+            </Text>
+          ) : null}
+          {errorMessage ? (
+            <Text
+              style={{
+                marginTop: 6,
+                fontSize: 12,
+                color: DANGER,
+                fontWeight: "600",
+              }}
+            >
+              {errorMessage}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+
       <View style={{ flexDirection: "row", columnGap: 10 }}>
         <Pressable
           onPress={onCancel}
@@ -114,7 +218,7 @@ export default function VoyageActionConfirmBottomSheetContent({
         </Pressable>
 
         <Pressable
-          onPress={onConfirm}
+          onPress={handleConfirmPress}
           disabled={isLoading}
           style={{
             flex: 1,

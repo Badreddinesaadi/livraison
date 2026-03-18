@@ -109,11 +109,12 @@ export const deleteVoyage = async (idVoyage: number) => {
   return data;
 };
 
-export const changeVoyageStatus = async (
-  request: {
-    statut: VoyageListItem["statut"];
-  } & { id: number },
-) => {
+export const changeVoyageStatus = async (request: {
+  statut: VoyageListItem["statut"];
+  id: number;
+  km_retour?: number;
+  date_retour: string;
+}) => {
   //log body
   const data = await client.request({
     pathname: "/sdkboard/api/homescreen/voyage.php",
