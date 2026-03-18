@@ -10,7 +10,6 @@ async function save(key: string, value: string) {
 async function getValueFor(key: string) {
   let result = await SecureStore.getItemAsync(key);
   if (result) {
-    console.log("stored token is 🔐: " + result);
   } else {
     console.log("No values stored under in key: " + key);
   }

@@ -11,13 +11,11 @@ export const signInWithEmailAndPassword = async (
     body: { username, password },
     pathname: "/sdkboard/api/users/authentification.php",
   });
-  // console.log("API response:", data);
   return data;
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {
   let sessionToken = await SecureStore.getItemAsync("sessionToken");
-  // console.log("getCurrentUser called with token:", sessionToken);
   const data = await client.request<User>({
     method: "GET",
     pathname: "/sdkboard/api/users/users.php",
@@ -25,7 +23,6 @@ export const getCurrentUser = async (): Promise<User | null> => {
       auth_token: sessionToken!,
     },
   });
-  // console.log("getCurrentUser API response:", data);
 
   return data;
 };

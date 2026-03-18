@@ -169,7 +169,6 @@ export const VoyagesScreen = () => {
           datetime_document: bl.datetime_document,
           nomClient: bl.nomClient,
         }));
-        console.log("BLs à ajouter au store :", blIds);
         store.setBls(blIds);
       }
 

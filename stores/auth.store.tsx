@@ -38,7 +38,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const { data, isLoading, refetch } = useQuery({
     queryFn: () => {
-      // console.log("getCurrentUser queryFn called with session:", session);
       return getCurrentUser();
     },
     queryKey: ["currentUser"],
@@ -62,19 +61,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
     setSession(null);
   };
 
-  useEffect(() => {
-    // console.log("SessionProvider - currentUser:", data);
-  }, [data]);
+  useEffect(() => {}, [data]);
 
   useEffect(() => {
-    // console.log(
-    //   "Session effect - isFinished:",
-    //   isFinished,
-    //   "session:",
-    //   session,
-    // );
     if (!isFinished && session) {
-      // console.log("Session loaded, refetching user data");
       refetch();
     }
   }, [isFinished, session, refetch]);
