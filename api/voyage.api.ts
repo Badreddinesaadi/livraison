@@ -74,13 +74,13 @@ export const listVoyage = async ({
     method: "GET",
     searchParams: {
       page,
-      ...(codeQuery ? { code: codeQuery } : {}),
+      ...(codeQuery ? { codeQuery } : {}),
       ...(idVehicule ? { idVehicule } : {}),
       ...(idChauffeur ? { idChauffeur } : {}),
       ...(idDepot ? { idDepot } : {}),
       ...(idClient ? { idClient } : {}),
     },
-    isDebug: false,
+    isDebug: true,
     withPagination: true,
   });
 
