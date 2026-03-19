@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "npx tsgo --noEmit"
+    "typecheck": "npx tsgo --noEmit",
+    "upgrade-deps": "npx expo install --fix --pnpm"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -22,22 +23,23 @@
     "@react-navigation/native-stack": "^7.3.16",
     "@tanstack/react-query": "^5.90.21",
     "expo": "^55.0.0",
-    "expo-camera": "~55.0.9",
-    "expo-constants": "~55.0.7",
+    "expo-build-properties": "~55.0.10",
+    "expo-camera": "~55.0.10",
+    "expo-constants": "~55.0.9",
     "expo-font": "~55.0.4",
-    "expo-haptics": "~55.0.8",
+    "expo-haptics": "~55.0.9",
     "expo-image": "~55.0.6",
-    "expo-linking": "~55.0.7",
-    "expo-location": "~55.1.2",
-    "expo-media-library": "~55.0.9",
-    "expo-network": "~55.0.8",
-    "expo-router": "~55.0.5",
-    "expo-secure-store": "~55.0.8",
-    "expo-splash-screen": "~55.0.10",
+    "expo-linking": "~55.0.8",
+    "expo-location": "~55.1.4",
+    "expo-media-library": "~55.0.10",
+    "expo-network": "~55.0.9",
+    "expo-router": "~55.0.7",
+    "expo-secure-store": "~55.0.9",
+    "expo-splash-screen": "~55.0.12",
     "expo-status-bar": "~55.0.4",
     "expo-symbols": "~55.0.5",
-    "expo-system-ui": "~55.0.9",
-    "expo-web-browser": "~55.0.9",
+    "expo-system-ui": "~55.0.10",
+    "expo-web-browser": "~55.0.10",
     "lottie-react-native": "~7.3.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -58,5 +60,10 @@
     "typescript": "~5.9.2"
   },
   "private": true,
-  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc"
+  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc",
+  "pnpm": {
+    "overrides": {
+      "hermes-compiler": "250829098.0.4"
+    }
+  }
 }
