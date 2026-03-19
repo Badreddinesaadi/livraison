@@ -4,7 +4,7 @@ import { Colors } from "@/constants/theme";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   FlatList,
   StyleSheet,
@@ -17,13 +17,14 @@ import Toast from "react-native-toast-message";
 export const VoyageSummaryScreen = () => {
   const queryClient = useQueryClient();
   const store = useCreateVoyageStore();
-  const navigation = useNavigation();
   const router = useRouter();
   const createVoyageMutation = useMutation({
     mutationFn: createVoyage,
     mutationKey: ["createVoyage"],
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voyages"] });
+      queryClient.invalidateQueries({ queryKey: ["bls"] });
+
       Toast.show({
         type: "success",
         text1: "Voyage créé avec succès",
@@ -41,6 +42,7 @@ export const VoyageSummaryScreen = () => {
     mutationKey: ["updateVoyage"],
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voyages"] });
+      queryClient.invalidateQueries({ queryKey: ["bls"] });
       Toast.show({
         type: "success",
         text1: `Voyage #${store.idVoyage} mis à jour avec succès`,

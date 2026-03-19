@@ -89,7 +89,8 @@ export const VoyagesScreen = () => {
   const { mutate: deleteMutate } = useMutation({
     mutationFn: deleteVoyage,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["voyages", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["voyages"] });
+      queryClient.invalidateQueries({ queryKey: ["bls"] });
       Toast.show({
         type: "success",
         text1: "Voyage supprimé",
@@ -101,7 +102,8 @@ export const VoyagesScreen = () => {
   const { mutate: acheveVoyageMutate } = useMutation({
     mutationFn: changeVoyageStatus,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["voyages", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["voyages"] });
+      queryClient.invalidateQueries({ queryKey: ["bls"] });
       Toast.show({
         type: "success",
         text1: "Voyage achevé",

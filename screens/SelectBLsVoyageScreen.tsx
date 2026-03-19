@@ -25,7 +25,7 @@ export const CreateVoyageScreen = () => {
     };
   }, [searchText]);
 
-  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+  const { data, isFetchingNextPage, fetchNextPage, hasNextPage, isFetching } =
     useInfiniteQuery({
       queryKey: ["bls", "list", debouncedSearch],
       queryFn: ({ pageParam }) =>
@@ -38,6 +38,7 @@ export const CreateVoyageScreen = () => {
         }
         return pagination.page + 1;
       },
+      staleTime: 0,
     });
   const store = useCreateVoyageStore();
   const router = useRouter();
@@ -102,7 +103,7 @@ export const CreateVoyageScreen = () => {
             />
           )}
         </View>
-        {isLoading ? (
+        {isFetching ? (
           <Loader />
         ) : (
           <FlatList
@@ -129,7 +130,7 @@ export const CreateVoyageScreen = () => {
         <View style={{ marginBottom: 10 }}>
           <Button
             preset="filled"
-            disabled={isLoading || !store.bls || store.bls.length === 0}
+            disabled={isFetching || !store.bls || store.bls.length === 0}
             text={`Suivant (${store.bls?.length || 0})`}
             onPress={() => {
               router.navigate("/voyages/create/photo");
