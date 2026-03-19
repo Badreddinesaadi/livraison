@@ -48,6 +48,7 @@ type ConfirmedVoyageAction = {
   action: Exclude<VoyageActionType, null>;
   voyageId: number;
   kmRetour?: number;
+  dateRetour?: string;
 };
 
 type CloseBLState = {
@@ -55,6 +56,7 @@ type CloseBLState = {
   voyageActionType: VoyageActionType;
   voyageId: number | null;
   voyageKmDepart: number | null;
+  voyageDateDepart: string | null;
   bls: BLItem[];
   pendingUndeliveredCount: number;
   confirmedVoyageAction: ConfirmedVoyageAction | null;
@@ -70,9 +72,10 @@ type CloseBLState = {
     voyageId: number,
     pendingUndeliveredCount: number,
     voyageKmDepart: number,
+    voyageDateDepart?: string | null,
   ) => void;
   openDeleteConfirm: (voyageId: number) => void;
-  confirmVoyageAction: (kmRetour?: number) => void;
+  confirmVoyageAction: (kmRetour?: number, dateRetour?: string) => void;
   clearConfirmedVoyageAction: () => void;
   openMoreActions: (voyageId: number, handler: MoreActionHandler) => void;
   chooseMoreAction: (action: Exclude<MoreActionType, null>) => void;
@@ -93,6 +96,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
   voyageActionType: null,
   voyageId: null,
   voyageKmDepart: null,
+  voyageDateDepart: null,
   bls: [],
   pendingUndeliveredCount: 0,
   confirmedVoyageAction: null,
@@ -109,6 +113,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       voyageActionType: null,
       voyageId,
       voyageKmDepart: null,
+      voyageDateDepart: null,
       bls,
       pendingUndeliveredCount: 0,
       moreActionHandler: null,
@@ -122,12 +127,14 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
     voyageId: number,
     pendingUndeliveredCount: number,
     voyageKmDepart: number,
+    voyageDateDepart?: string | null,
   ) =>
     set({
       sheetType: "voyage-action-confirm",
       voyageActionType: "achever",
       voyageId,
       voyageKmDepart,
+      voyageDateDepart: voyageDateDepart ?? null,
       bls: [],
       pendingUndeliveredCount,
       moreActionHandler: null,
@@ -144,6 +151,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       voyageActionType: "supprimer",
       voyageId,
       voyageKmDepart: null,
+      voyageDateDepart: null,
       bls: [],
       pendingUndeliveredCount: 0,
       moreActionHandler: null,
@@ -154,7 +162,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       isVoyageActionPending: false,
       isSheetOpen: true,
     }),
-  confirmVoyageAction: (kmRetour?: number) =>
+  confirmVoyageAction: (kmRetour?: number, dateRetour?: string) =>
     set((state) => {
       if (state.isVoyageActionPending) {
         return state;
@@ -163,9 +171,12 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       const hasVoyageAction =
         state.voyageId !== null && state.voyageActionType !== null;
       const hasValidKmRetour = typeof kmRetour === "number" && kmRetour > 0;
+      const hasValidDateRetour =
+        typeof dateRetour === "string" && dateRetour.trim().length > 0;
       const canConfirm =
         hasVoyageAction &&
-        (state.voyageActionType === "supprimer" || hasValidKmRetour);
+        (state.voyageActionType === "supprimer" ||
+          (hasValidKmRetour && hasValidDateRetour));
 
       return {
         confirmedVoyageAction:
@@ -173,8 +184,10 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
             ? {
                 action: state.voyageActionType,
                 voyageId: state.voyageId,
-                ...(state.voyageActionType === "achever" && hasValidKmRetour
-                  ? { kmRetour }
+                ...(state.voyageActionType === "achever" &&
+                hasValidKmRetour &&
+                hasValidDateRetour
+                  ? { kmRetour, dateRetour }
                   : {}),
               }
             : null,
@@ -188,6 +201,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       voyageActionType: null,
       voyageId,
       voyageKmDepart: null,
+      voyageDateDepart: null,
       bls: [],
       pendingUndeliveredCount: 0,
       mode: null,
@@ -214,6 +228,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       voyageActionType: null,
       voyageId: null,
       voyageKmDepart: null,
+      voyageDateDepart: null,
       bls: [],
       pendingUndeliveredCount: 0,
       mode: null,
@@ -230,6 +245,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       voyageActionType: null,
       voyageId: null,
       voyageKmDepart: null,
+      voyageDateDepart: null,
       bls: [],
       pendingUndeliveredCount: 0,
       mode: null,
@@ -267,6 +283,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       voyageActionType: null,
       voyageId: null,
       voyageKmDepart: null,
+      voyageDateDepart: null,
       bls: [],
       pendingUndeliveredCount: 0,
       confirmedVoyageAction: null,

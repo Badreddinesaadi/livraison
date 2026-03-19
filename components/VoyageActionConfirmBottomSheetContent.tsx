@@ -1,3 +1,4 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useMemo, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
@@ -8,8 +9,9 @@ type VoyageActionConfirmBottomSheetContentProps = {
   voyageId: number | null;
   pendingUndeliveredCount?: number;
   kmDepart?: number | null;
+  minDateRetour?: string | null;
   isLoading?: boolean;
-  onConfirm: (kmRetour?: number) => void;
+  onConfirm: (kmRetour?: number, dateRetour?: string) => void;
   onCancel: () => void;
 };
 
@@ -61,11 +63,15 @@ export default function VoyageActionConfirmBottomSheetContent({
   voyageId,
   pendingUndeliveredCount = 0,
   kmDepart,
+  minDateRetour,
   isLoading = false,
   onConfirm,
   onCancel,
 }: VoyageActionConfirmBottomSheetContentProps) {
   const [kmRetourInput, setKmRetourInput] = useState("");
+  const [dateRetour, setDateRetour] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isAchever = variant === "achever";
 
@@ -88,6 +94,33 @@ export default function VoyageActionConfirmBottomSheetContent({
     pendingUndeliveredCount,
   );
 
+  const dateRetourLabel = useMemo(() => {
+    if (!dateRetour) {
+      return "Sélectionner la date et l'heure retour";
+    }
+
+    return dateRetour.toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, [dateRetour]);
+
+  const minDateRetourValue = useMemo(() => {
+    if (!minDateRetour) {
+      return undefined;
+    }
+
+    const parsed = new Date(minDateRetour);
+    if (Number.isNaN(parsed.getTime())) {
+      return undefined;
+    }
+
+    return parsed;
+  }, [minDateRetour]);
+
   const handleConfirmPress = () => {
     if (isLoading) {
       return;
@@ -96,6 +129,30 @@ export default function VoyageActionConfirmBottomSheetContent({
     if (isAchever) {
       if (parsedKmRetour === null) {
         setErrorMessage("Veuillez saisir un kilométrage valide.");
+        return;
+      }
+
+      if (!dateRetour) {
+        setErrorMessage("Veuillez sélectionner la date retour.");
+        return;
+      }
+
+      if (
+        minDateRetourValue &&
+        dateRetour.getTime() < minDateRetourValue.getTime()
+      ) {
+        setErrorMessage(
+          `La date/heure retour ne peut pas être avant le ${minDateRetourValue.toLocaleString(
+            "fr-FR",
+            {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            },
+          )}.`,
+        );
         return;
       }
 
@@ -109,7 +166,7 @@ export default function VoyageActionConfirmBottomSheetContent({
 
     setErrorMessage(null);
 
-    onConfirm(parsedKmRetour ?? undefined);
+    onConfirm(parsedKmRetour ?? undefined, dateRetour?.toISOString());
   };
 
   return (
@@ -181,6 +238,99 @@ export default function VoyageActionConfirmBottomSheetContent({
               Km départ: {kmDepart} km
             </Text>
           ) : null}
+
+          <Text
+            style={{
+              fontSize: 13,
+              color: "#444",
+              marginTop: 14,
+              marginBottom: 8,
+              fontWeight: "600",
+            }}
+          >
+            Date et heure retour
+          </Text>
+          <Pressable
+            onPress={() => {
+              if (isLoading) return;
+              setShowDatePicker(true);
+              setShowTimePicker(false);
+              if (errorMessage) {
+                setErrorMessage(null);
+              }
+            }}
+            style={{
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 10,
+              paddingHorizontal: 12,
+              paddingVertical: 12,
+              backgroundColor: "#fff",
+            }}
+          >
+            <Text
+              style={{ fontSize: 14, color: dateRetour ? "#1a1a2e" : "#999" }}
+            >
+              {dateRetourLabel}
+            </Text>
+          </Pressable>
+
+          {showDatePicker ? (
+            <DateTimePicker
+              value={dateRetour || new Date()}
+              mode="date"
+              display="default"
+              minimumDate={minDateRetourValue}
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+
+                if (event.type === "set" && selectedDate) {
+                  const currentDate =
+                    dateRetour || minDateRetourValue || new Date();
+                  const mergedDate = new Date(selectedDate);
+                  mergedDate.setHours(
+                    currentDate.getHours(),
+                    currentDate.getMinutes(),
+                    0,
+                    0,
+                  );
+                  setDateRetour(mergedDate);
+                  setShowTimePicker(true);
+                  if (errorMessage) {
+                    setErrorMessage(null);
+                  }
+                }
+              }}
+            />
+          ) : null}
+
+          {showTimePicker ? (
+            <DateTimePicker
+              value={dateRetour || minDateRetourValue || new Date()}
+              mode="time"
+              display="default"
+              onChange={(event, selectedTime) => {
+                setShowTimePicker(false);
+
+                if (event.type === "set" && selectedTime) {
+                  const currentDate =
+                    dateRetour || minDateRetourValue || new Date();
+                  const mergedDateTime = new Date(currentDate);
+                  mergedDateTime.setHours(
+                    selectedTime.getHours(),
+                    selectedTime.getMinutes(),
+                    0,
+                    0,
+                  );
+                  setDateRetour(mergedDateTime);
+                  if (errorMessage) {
+                    setErrorMessage(null);
+                  }
+                }
+              }}
+            />
+          ) : null}
+
           {errorMessage ? (
             <Text
               style={{

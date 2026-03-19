@@ -119,7 +119,10 @@ export const VoyagesScreen = () => {
     }
 
     if (confirmedVoyageAction.action === "achever") {
-      if (typeof confirmedVoyageAction.kmRetour !== "number") {
+      if (
+        typeof confirmedVoyageAction.kmRetour !== "number" ||
+        !confirmedVoyageAction.dateRetour
+      ) {
         finishVoyageActionIfPending();
         clearConfirmedVoyageAction();
         return;
@@ -129,7 +132,7 @@ export const VoyagesScreen = () => {
         statut: "terminer",
         id: confirmedVoyageAction.voyageId,
         km_retour: confirmedVoyageAction.kmRetour,
-        date_retour: new Date().toISOString(),
+        date_retour: confirmedVoyageAction.dateRetour,
       });
     }
 
@@ -222,7 +225,12 @@ export const VoyagesScreen = () => {
       const blsEncoursCount =
         item.bl_list?.filter((bl) => bl.statut === "Encours").length ?? 0;
 
-      openAcheveConfirmSheet(item.id, blsEncoursCount, item.km_depart);
+      openAcheveConfirmSheet(
+        item.id,
+        blsEncoursCount,
+        item.km_depart,
+        item.date_depart,
+      );
     },
     [openAcheveConfirmSheet],
   );

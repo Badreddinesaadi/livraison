@@ -86,7 +86,7 @@ export const VoyageCard = ({
 
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: "700", fontSize: 15, color: "#1a1a2e" }}>
-            Voyage #{item.id}
+            {item.vehicule_immatriculation}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
             {item.nomChauffeur}

@@ -60,6 +60,7 @@ export default function StackLayout() {
     (s) => s.pendingUndeliveredCount,
   );
   const voyageKmDepart = useCloseBLStore((s) => s.voyageKmDepart);
+  const voyageDateDepart = useCloseBLStore((s) => s.voyageDateDepart);
   const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
   const isVoyageActionPending = useCloseBLStore((s) => s.isVoyageActionPending);
   const closeSheet = useCloseBLStore((s) => s.closeSheet);
@@ -236,6 +237,7 @@ export default function StackLayout() {
             voyageId={closeBLVoyageId}
             pendingUndeliveredCount={pendingUndeliveredCount}
             kmDepart={voyageKmDepart}
+            minDateRetour={voyageDateDepart}
             isLoading={isVoyageActionPending}
             onCancel={closeSheet}
             onConfirm={confirmVoyageAction}
