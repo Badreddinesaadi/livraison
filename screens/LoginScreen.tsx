@@ -1,7 +1,7 @@
 import { useSession } from "@/stores/auth.store";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNetInfo } from "@react-native-community/netinfo";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Image,

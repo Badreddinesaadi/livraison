@@ -51,7 +51,7 @@ export default function StackLayout() {
     } else if (sheetType === "voyage-filters") {
       return ["55%"];
     } else if (sheetType === "selector-options") {
-      return ["50%"];
+      return ["60%"];
     } else {
       return ["50%"];
     }

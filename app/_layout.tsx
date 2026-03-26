@@ -36,7 +36,7 @@ const InnerLayout = () => {
         </Stack.Protected>
       </Stack>
       <OfflineNotice />
-      <Toast />
+      <Toast visibilityTime={2000} />
     </>
   );
 };

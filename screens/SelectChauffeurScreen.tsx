@@ -203,8 +203,12 @@ export const SelectChauffeurScreen = () => {
                   color={Colors.light.primary}
                 />
                 <Text style={styles.sectionTitle}>
-                  Km départ (min:{" "}
-                  {createVoyageStore.selectedVehicle?.km_reel + " km" || 0})
+                  Km départ{" "}
+                  {createVoyageStore.selectedVehicle?.km_reel
+                    ? "(min: " +
+                        createVoyageStore.selectedVehicle?.km_reel +
+                        " km" || 0 + " km)"
+                    : ""}
                 </Text>
               </View>
               <TextInput
