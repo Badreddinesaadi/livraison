@@ -220,6 +220,7 @@ export default function StackLayout() {
       <BottomSheet
         onClose={closeSheet}
         ref={bottomSheetRef}
+        keyboardBlurBehavior="restore"
         index={-1}
         snapPoints={snapPoints}
         enableDynamicSizing={false}
