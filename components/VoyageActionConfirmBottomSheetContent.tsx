@@ -1,6 +1,7 @@
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useMemo, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 type VoyageActionConfirmVariant = "achever" | "supprimer";
 
@@ -205,7 +206,7 @@ export default function VoyageActionConfirmBottomSheetContent({
           >
             Km actuel du véhicule
           </Text>
-          <TextInput
+          <BottomSheetTextInput
             value={kmRetourInput}
             onChangeText={(text) => {
               setKmRetourInput(text.replace(/[^0-9]/g, ""));

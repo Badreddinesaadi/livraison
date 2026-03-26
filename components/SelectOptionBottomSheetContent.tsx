@@ -1,7 +1,10 @@
 import { PRIMARY } from "@/constants/theme";
-import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetFlatList,
+  BottomSheetTextInput,
+} from "@gorhom/bottom-sheet";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { ListRenderItem, Pressable, Text, TextInput, View } from "react-native";
+import { ListRenderItem, Pressable, Text, View } from "react-native";
 
 type SelectOption = {
   id: number;
@@ -152,7 +155,7 @@ export default function SelectOptionBottomSheetContent({
             alignItems: "center",
           }}
         >
-          <TextInput
+          <BottomSheetTextInput
             value={searchText}
             onChangeText={setSearchText}
             placeholder={searchPlaceholder}
