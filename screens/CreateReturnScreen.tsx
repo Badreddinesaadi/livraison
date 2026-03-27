@@ -2,7 +2,7 @@ import {
   createReturn,
   OUINon,
   Reclamation,
-  UploadReturnPhoto,
+  UploadReturnFile,
 } from "@/api/return.api";
 import { ListClients } from "@/api/users.api";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { useCloseBLStore } from "@/stores/close-bl.store";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -84,8 +84,8 @@ export const CreateReturnScreen = () => {
   const [reglement, setReglement] = useState<OUINon>("non");
   const [retourMse, setRetourMse] = useState<OUINon>("non");
   const [reclamation, setReclamation] = useState<Reclamation | null>(null);
-  const [photos, setPhotos] = useState<UploadReturnPhoto[]>([]);
-  const [isPhotoCooldown, setIsPhotoCooldown] = useState(false);
+  const [files, setFiles] = useState<UploadReturnFile[]>([]);
+  const [isFileCooldown, setIsFileCooldown] = useState(false);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
   const hasCameraPermission = permission?.granted === true;
 
@@ -130,67 +130,72 @@ export const CreateReturnScreen = () => {
       return;
     }
 
-    if (photos.length >= 10) {
+    if (files.length >= 10) {
       Toast.show({
         type: "error",
         text1: "Limite atteinte",
-        text2: "Vous ne pouvez pas ajouter plus de 10 photos.",
+        text2: "Vous ne pouvez pas ajouter plus de 10 fichiers.",
       });
       return;
     }
 
     const picture = await cameraRef.current?.takePictureAsync({ quality: 0.7 });
     if (picture?.uri) {
-      const photo: UploadReturnPhoto = {
+      const photo: UploadReturnFile = {
         uri: picture.uri,
         name: `return-${Date.now()}.jpg`,
         type: "image/jpeg",
       };
-      setPhotos((prev) => [...prev, photo]);
-      setIsPhotoCooldown(true);
-      setTimeout(() => setIsPhotoCooldown(false), 800);
+      setFiles((prev) => [...prev, photo]);
+      setIsFileCooldown(true);
+      setTimeout(() => setIsFileCooldown(false), 800);
     }
   };
 
-  const pickFromLibrary = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== "granted") {
-      Toast.show({
-        type: "error",
-        text1: "Accès galerie refusé",
-        text2:
-          "Veuillez autoriser l'accès à la galerie pour joindre des photos.",
-      });
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true,
-      quality: 0.7,
-      selectionLimit: 0,
+  const pickFromDeviceStorage = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      multiple: true,
+      copyToCacheDirectory: true,
     });
 
     if (result.canceled || result.assets.length === 0) {
       return;
     }
 
-    const pickedPhotos: UploadReturnPhoto[] = result.assets.map(
-      (asset, index) => ({
-        uri: asset.uri,
-        name: asset.fileName ?? `return-gallery-${Date.now()}-${index}.jpg`,
-        type: asset.mimeType ?? "image/jpeg",
-      }),
-    );
+    const remainingSlots = Math.max(0, 10 - files.length);
+    if (remainingSlots === 0) {
+      Toast.show({
+        type: "error",
+        text1: "Limite atteinte",
+        text2: "Vous ne pouvez pas ajouter plus de 10 fichiers.",
+      });
+      return;
+    }
 
-    setPhotos((prev) => [...prev, ...pickedPhotos]);
-    setIsPhotoCooldown(true);
-    setTimeout(() => setIsPhotoCooldown(false), 800);
+    const selectedFiles = result.assets
+      .slice(0, remainingSlots)
+      .map((asset) => ({
+        uri: asset.uri,
+        name: asset.name,
+        type: asset.mimeType ?? "application/octet-stream",
+      }));
+
+    if (result.assets.length > remainingSlots) {
+      Toast.show({
+        type: "info",
+        text1: "Fichiers limités",
+        text2: `Seuls ${remainingSlots} fichiers ont été ajoutés.`,
+      });
+    }
+
+    setFiles((prev) => [...prev, ...selectedFiles]);
+    setIsFileCooldown(true);
+    setTimeout(() => setIsFileCooldown(false), 800);
   };
 
-  const removePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const openYesNoSelector = (
@@ -228,11 +233,11 @@ export const CreateReturnScreen = () => {
       return;
     }
 
-    if (photos.length === 0) {
+    if (files.length === 0) {
       Toast.show({
         type: "error",
-        text1: "Photo requise",
-        text2: "Veuillez prendre au moins une photo.",
+        text1: "Fichier requis",
+        text2: "Veuillez joindre au moins un fichier.",
       });
       return;
     }
@@ -250,7 +255,7 @@ export const CreateReturnScreen = () => {
       reglement,
       retour_Mse: retourMse,
       client_id: String(clientId),
-      images: photos,
+      files,
     };
     if (reclamation) {
       //@ts-expect-error
@@ -365,7 +370,7 @@ export const CreateReturnScreen = () => {
         <View style={styles.cameraCard}>
           <View style={styles.sectionHeader}>
             <FontAwesome5 name="camera" size={14} color={PRIMARY} />
-            <Text style={styles.sectionTitle}>Photos du retour</Text>
+            <Text style={styles.sectionTitle}>Fichiers du retour</Text>
           </View>
 
           <View style={styles.cameraContainer}>
@@ -377,7 +382,7 @@ export const CreateReturnScreen = () => {
                 <Text style={styles.cameraPlaceholderText}>
                   {hasCameraPermission
                     ? "Caméra masquée"
-                    : "Caméra non autorisée (galerie disponible)"}
+                    : "Caméra non autorisée (fichiers depuis l'appareil)"}
                 </Text>
               </View>
             )}
@@ -387,9 +392,10 @@ export const CreateReturnScreen = () => {
             <View style={styles.actionButtonWrap}>
               <Button
                 preset="default"
+                textStyle={{ fontSize: 13 }}
                 text={
                   isCameraVisible
-                    ? `Prendre une photo (${photos.length})`
+                    ? `Prendre une photo (${files.length})`
                     : "Prendre une photo"
                 }
                 onPress={takePhoto}
@@ -399,23 +405,35 @@ export const CreateReturnScreen = () => {
               <Button
                 preset="default"
                 textStyle={{ fontSize: 13 }}
-                text="Choisir depuis l'appareil"
-                onPress={pickFromLibrary}
+                text="Choisir des fichiers"
+                onPress={pickFromDeviceStorage}
               />
             </View>
           </View>
 
           <FlatList
-            data={photos}
+            data={files}
             horizontal
-            keyExtractor={(item, index) => `${item.uri}-${index}`}
+            keyExtractor={(item, index) => `${item.uri}-${item.name}-${index}`}
             contentContainerStyle={styles.previewList}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item, index }) => (
               <View style={styles.previewItemWrap}>
-                <Image source={{ uri: item.uri }} style={styles.previewImage} />
+                {item.type.startsWith("image/") ? (
+                  <Image
+                    source={{ uri: item.uri }}
+                    style={styles.previewImage}
+                  />
+                ) : (
+                  <View style={styles.previewFilePlaceholder}>
+                    <FontAwesome5 name="file-alt" size={20} color="#555" />
+                    <Text numberOfLines={2} style={styles.previewFileName}>
+                      {item.name}
+                    </Text>
+                  </View>
+                )}
                 <Pressable
-                  onPress={() => removePhoto(index)}
+                  onPress={() => removeFile(index)}
                   style={styles.deleteBadge}
                 >
                   <Text style={styles.deleteBadgeText}>x</Text>
@@ -423,7 +441,9 @@ export const CreateReturnScreen = () => {
               </View>
             )}
             ListEmptyComponent={
-              <Text style={styles.emptyPreviewText}>Aucune photo capturée</Text>
+              <Text style={styles.emptyPreviewText}>
+                Aucun fichier sélectionné
+              </Text>
             }
           />
         </View>
@@ -433,8 +453,8 @@ export const CreateReturnScreen = () => {
         <Button
           preset="filled"
           text="Créer le retour"
-          disabled={isPhotoCooldown || user?.role !== "chauffeur"}
-          isLoading={isPending || isPhotoCooldown}
+          disabled={isFileCooldown || user?.role !== "chauffeur"}
+          isLoading={isPending || isFileCooldown}
           onPress={submit}
         />
       </View>
@@ -577,7 +597,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   previewItemWrap: {
-    width: 90,
+    width: 108,
     height: 90,
     borderRadius: 10,
     overflow: "hidden",
@@ -587,6 +607,19 @@ const styles = StyleSheet.create({
   previewImage: {
     width: "100%",
     height: "100%",
+  },
+  previewFilePlaceholder: {
+    flex: 1,
+    backgroundColor: "#f0f1f2",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+    rowGap: 6,
+  },
+  previewFileName: {
+    color: "#4d4d4d",
+    fontSize: 11,
+    textAlign: "center",
   },
   deleteBadge: {
     position: "absolute",

@@ -26,6 +26,7 @@
     "expo-build-properties": "~55.0.10",
     "expo-camera": "~55.0.10",
     "expo-constants": "~55.0.9",
+    "expo-document-picker": "~55.0.9",
     "expo-font": "~55.0.4",
     "expo-haptics": "~55.0.9",
     "expo-image": "~55.0.6",

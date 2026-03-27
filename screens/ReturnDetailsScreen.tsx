@@ -29,25 +29,11 @@ const formatUploadDate = (value?: string | null) => {
 };
 
 const buildImageUrl = (cheminFichier?: string, nomFichier?: string) => {
-  const rawPath = (cheminFichier ?? "").trim();
-  const fileName = (nomFichier ?? "").trim();
-
-  if (!rawPath && !fileName) {
+  if (!cheminFichier) {
     return null;
   }
 
-  const basePath = rawPath || fileName;
-
-  if (/^(https?:)?\/\//i.test(basePath)) {
-    return basePath;
-  }
-
-  const normalizedBaseUrl = (apiUrl ?? "").replace(/\/$/, "");
-  if (!normalizedBaseUrl) {
-    return basePath;
-  }
-
-  return `${normalizedBaseUrl}/sdkboard/${basePath.replace(/^\/+/, "")}`;
+  return `${apiUrl}/sdkboard/${cheminFichier}`;
 };
 
 export const ReturnDetailsScreen = () => {
@@ -212,7 +198,6 @@ export const ReturnDetailsScreen = () => {
                     image.chemin_fichier,
                     image.nom_fichier,
                   );
-
                   if (!imageUrl) {
                     return null;
                   }

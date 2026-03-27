@@ -27,7 +27,7 @@ export type Return = {
   images: Image[] | null;
 };
 
-export type UploadReturnPhoto = {
+export type UploadReturnFile = {
   uri: string;
   name: string;
   type: string;
@@ -39,7 +39,7 @@ export type CreateReturnRequest = {
   retour_Mse: OUINon;
   reclamation?: Reclamation;
   client_id: string;
-  images: UploadReturnPhoto[];
+  files: UploadReturnFile[];
 };
 
 export const listReturn = async ({
@@ -90,11 +90,11 @@ export const createReturn = async (request: CreateReturnRequest) => {
   }
   formData.append("client_id", request.client_id);
 
-  request.images.forEach((image) => {
-    formData.append("images[]", {
-      uri: image.uri,
-      name: image.name,
-      type: image.type,
+  request.files.forEach((file) => {
+    formData.append("files[]", {
+      uri: file.uri,
+      name: file.name,
+      type: file.type,
     } as any);
   });
 
