@@ -552,7 +552,7 @@ export const VoyagesScreen = () => {
                 fontSize: 14,
                 color: "#222",
               }}
-              placeholder="Rechercher par N° voyage"
+              placeholder="Rechercher..."
               placeholderTextColor="#bbb"
               value={searchText}
               onChangeText={setSearchText}

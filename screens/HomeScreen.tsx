@@ -3,7 +3,7 @@ import { Colors } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Image,
@@ -96,6 +96,22 @@ export default function HomeScreen() {
             )}
             onPress={() => {
               router.navigate("/voyages");
+            }}
+          />
+          <Button
+            preset="filled"
+            text="Retours chauffeur"
+            LeftAccessory={() => (
+              <View>
+                <MaterialCommunityIcons
+                  name="backup-restore"
+                  size={24}
+                  color={Colors.light.background}
+                />
+              </View>
+            )}
+            onPress={() => {
+              router.navigate("/returns");
             }}
           />
           {/* <Button

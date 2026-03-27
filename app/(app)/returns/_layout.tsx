@@ -1,16 +1,13 @@
-import CloseBLBottomSheetContent from "@/components/CloseBLBottomSheetContent";
+import ReturnActionConfirmBottomSheetContent from "@/components/ReturnActionConfirmBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
-import { Button } from "@/components/ui/button";
-import VoyageActionConfirmBottomSheetContent from "@/components/VoyageActionConfirmBottomSheetContent";
 import VoyageFiltersBottomSheetContent from "@/components/VoyageFiltersBottomSheetContent";
-import VoyageMoreActionsBottomSheetContent from "@/components/VoyageMoreActionsBottomSheetContent";
+import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useCloseBLStore } from "@/stores/close-bl.store";
-import { useCreateVoyageStore } from "@/stores/voyage.store";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { useQueryClient } from "@tanstack/react-query";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -21,105 +18,39 @@ import {
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 
 export default function StackLayout() {
   const queryClient = useQueryClient();
-  const Type = useCreateVoyageStore((state) => state.type);
-  const idVoyage = useCreateVoyageStore((state) => state.idVoyage);
   const bottomSheetRef = useRef<BottomSheet>(null);
-
-  const closeBLVoyageId = useCloseBLStore((s) => s.voyageId);
-  const closeBLList = useCloseBLStore((s) => s.bls);
   const sheetType = useCloseBLStore((s) => s.sheetType);
-  const voyageActionType = useCloseBLStore((s) => s.voyageActionType);
-  const chooseMoreAction = useCloseBLStore((s) => s.chooseMoreAction);
   const selectorSheetConfig = useCloseBLStore((s) => s.selectorSheetConfig);
   const voyageFiltersSheetConfig = useCloseBLStore(
     (s) => s.voyageFiltersSheetConfig,
   );
+  const returnActionReturnId = useCloseBLStore((s) => s.returnActionReturnId);
+  const isReturnActionPending = useCloseBLStore((s) => s.isReturnActionPending);
   const chooseSelectorOption = useCloseBLStore((s) => s.chooseSelectorOption);
   const chooseVoyageFilterItem = useCloseBLStore(
     (s) => s.chooseVoyageFilterItem,
   );
-
+  const confirmReturnAction = useCloseBLStore((s) => s.confirmReturnAction);
+  const closeSheet = useCloseBLStore((s) => s.closeSheet);
+  const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
   const snapPoints = useMemo(() => {
-    if (sheetType === "voyage-action-confirm") {
-      return [voyageActionType === "achever" ? "45%" : "23%"];
-    } else if (sheetType === "voyage-more-actions") {
-      return ["30%"];
-    } else if (sheetType === "voyage-filters") {
-      return ["55%"];
-    } else if (sheetType === "selector-options") {
-      return ["60%"];
-    } else {
+    if (sheetType === "return-action-confirm") {
+      return ["25%"];
+    }
+    if (sheetType === "voyage-filters") {
       return ["50%"];
     }
-  }, [sheetType, voyageActionType]);
-  const pendingUndeliveredCount = useCloseBLStore(
-    (s) => s.pendingUndeliveredCount,
-  );
-  const voyageKmDepart = useCloseBLStore((s) => s.voyageKmDepart);
-  const voyageDateDepart = useCloseBLStore((s) => s.voyageDateDepart);
-  const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
-  const isVoyageActionPending = useCloseBLStore((s) => s.isVoyageActionPending);
-  const closeSheet = useCloseBLStore((s) => s.closeSheet);
-  const confirmVoyageAction = useCloseBLStore((s) => s.confirmVoyageAction);
-  const selectAllCloseBL = useCloseBLStore((s) => s.selectAll);
-  const selectSingleCloseBL = useCloseBLStore((s) => s.selectBL);
-  const router = useRouter();
+    return ["60%"];
+  }, [sheetType]);
 
-  useEffect(() => {
-    if (isSheetOpen) {
-      bottomSheetRef.current?.snapToIndex(0);
-      return;
-    }
-    bottomSheetRef.current?.close();
-  }, [isSheetOpen]);
-
-  const handleSelectAllBLs = () => {
-    const firstBL = closeBLList[0];
-    if (!firstBL) {
-      Toast.show({
-        type: "error",
-        text1: "Aucun BL à clôturer",
-        text2: "Ce voyage ne contient pas de BL en cours.",
-      });
-      closeSheet();
-      return;
-    }
-
-    selectAllCloseBL();
-    closeSheet();
-    router.navigate({
-      pathname: "/voyages/action-bl/[blId]",
-      params: { blId: String(firstBL.id) },
-    });
-  };
-
-  const handleSelectBL = (blId: number) => {
-    const selectedBL = closeBLList.find((bl) => bl.id === blId);
-    if (!selectedBL) {
-      return;
-    }
-    selectSingleCloseBL(selectedBL);
-    closeSheet();
-    router.navigate({
-      pathname: "/voyages/action-bl/[blId]",
-      params: { blId: String(selectedBL.id) },
-    });
-  };
-
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-      />
-    ),
-    [],
-  );
+  const isManagedSheetOpen =
+    isSheetOpen &&
+    (sheetType === "selector-options" ||
+      sheetType === "voyage-filters" ||
+      sheetType === "return-action-confirm");
   const { top } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const rotation = useRef(new Animated.Value(0));
@@ -161,6 +92,26 @@ export default function StackLayout() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isManagedSheetOpen) {
+      bottomSheetRef.current?.snapToIndex(0);
+      return;
+    }
+    bottomSheetRef.current?.close();
+  }, [isManagedSheetOpen]);
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+      />
+    ),
+    [],
+  );
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack
@@ -188,13 +139,10 @@ export default function StackLayout() {
                   }
                 }}
               >
-                <FontAwesome5 name="arrow-left" size={24} color="black" />
+                <FontAwesome name="arrow-left" size={24} color="black" />
               </TouchableWithoutFeedback>
               <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                {headerTitles[s.route.name] ??
-                  (Type === "create"
-                    ? "Créer un voyage"
-                    : "Modifier le voyage #" + idVoyage)}
+                {headerTitles[s.route.name] ?? "Retours"}
               </Text>
               <Button
                 preset="ghost"
@@ -202,7 +150,7 @@ export default function StackLayout() {
                   if (isRefreshing) return;
                   setIsRefreshing(true);
                   startSpin();
-                  queryClient.invalidateQueries();
+                  queryClient.invalidateQueries({ queryKey: ["returns"] });
                   timeoutRef.current = setTimeout(() => {
                     stopSpin();
                     setIsRefreshing(false);
@@ -221,7 +169,6 @@ export default function StackLayout() {
                   );
                 }}
               ></Button>
-              {/* <Text style={{ fontSize: 8 }}>{"DEBUG: " + s.route.name}</Text> */}
             </View>
           ),
         }}
@@ -242,24 +189,7 @@ export default function StackLayout() {
           }
         }}
       >
-        {sheetType === "voyage-action-confirm" && voyageActionType ? (
-          <VoyageActionConfirmBottomSheetContent
-            variant={voyageActionType}
-            voyageId={closeBLVoyageId}
-            pendingUndeliveredCount={pendingUndeliveredCount}
-            kmDepart={voyageKmDepart}
-            minDateRetour={voyageDateDepart}
-            isLoading={isVoyageActionPending}
-            onCancel={closeSheet}
-            onConfirm={confirmVoyageAction}
-          />
-        ) : sheetType === "voyage-more-actions" ? (
-          <VoyageMoreActionsBottomSheetContent
-            voyageId={closeBLVoyageId}
-            onUpdate={() => chooseMoreAction("modifier")}
-            onShowDetails={() => chooseMoreAction("details")}
-          />
-        ) : sheetType === "selector-options" && selectorSheetConfig ? (
+        {sheetType === "selector-options" && selectorSheetConfig ? (
           <SelectOptionBottomSheetContent
             title={selectorSheetConfig.title}
             options={selectorSheetConfig.options}
@@ -275,12 +205,17 @@ export default function StackLayout() {
             onSelectItem={chooseVoyageFilterItem}
             onReset={voyageFiltersSheetConfig.onReset}
           />
-        ) : (
-          <CloseBLBottomSheetContent
-            bls={closeBLList}
-            onSelectAll={handleSelectAllBLs}
-            onSelectBL={handleSelectBL}
+        ) : sheetType === "return-action-confirm" ? (
+          <ReturnActionConfirmBottomSheetContent
+            returnId={returnActionReturnId}
+            isLoading={isReturnActionPending}
+            onCancel={closeSheet}
+            onConfirm={confirmReturnAction}
           />
+        ) : (
+          <View style={{ padding: 16 }}>
+            <Text style={{ color: "#888" }}>Aucune option disponible</Text>
+          </View>
         )}
       </BottomSheet>
     </GestureHandlerRootView>
@@ -288,10 +223,7 @@ export default function StackLayout() {
 }
 
 const headerTitles: Record<string, string> = {
-  chauffeur: "Remplir les donnes du voyage",
-  "select-bls": "Sélectionner les BLs",
-  photo: "Récapitulatif du voyage",
-  index: "List des voyages",
-  "action-bl/[blId]": "Action sur le BL",
-  "details/[voyageId]": "Détails du voyage",
+  index: "List des retours",
+  "create/index": "Créer un retour",
+  "details/[returnId]": "Détails du retour",
 };

@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -32,17 +32,64 @@ export const CloseBLScreen = () => {
   const [isCapturingLocation, setIsCapturingLocation] = useState(false);
   const [isPhotoCooldown, setIsPhotoCooldown] = useState(false);
   const queryClient = useQueryClient();
+  const mode = closeBLStore.mode;
   const selectedBL = closeBLStore.selectedBL;
+  const allOpenBls = closeBLStore.bls;
   const voyageId = closeBLStore.voyageId;
-  const targetBLId = Number(blId ?? selectedBL?.id);
+  const paramBLId = blId ? Number(blId) : null;
+  const targetBLId =
+    typeof paramBLId === "number" && Number.isFinite(paramBLId)
+      ? paramBLId
+      : (selectedBL?.id ?? null);
+  const targetBLIds = useMemo(() => {
+    if (mode === "all") {
+      return allOpenBls
+        .map((bl) => bl.id)
+        .filter((id): id is number => Number.isFinite(id));
+    }
+
+    if (typeof targetBLId === "number" && Number.isFinite(targetBLId)) {
+      return [targetBLId];
+    }
+
+    return [];
+  }, [mode, allOpenBls, targetBLId]);
+  const isCloseAllMode = mode === "all";
 
   const { mutate: closeBLMutate, isPending } = useMutation({
-    mutationFn: closeBL,
-    onSuccess: () => {
+    mutationFn: async ({
+      idVoyage,
+      idsBL,
+      images,
+      coordinates,
+    }: {
+      idVoyage: number;
+      idsBL: number[];
+      images: UploadPhoto[];
+      coordinates: { x: number; y: number };
+    }) => {
+      await Promise.all(
+        idsBL.map((idBL) =>
+          closeBL({
+            idVoyage,
+            idBL,
+            images,
+            status: "livre",
+            coordinates,
+          }),
+        ),
+      );
+
+      return idsBL.length;
+    },
+    onSuccess: (closedCount) => {
       Toast.show({
         type: "success",
-        text1: "BL clôturé",
-        text2: `Le BL ${selectedBL?.code ?? `#${targetBLId}`} est marqué comme livré.`,
+        text1: closedCount > 1 ? "BLs clôturés" : "BL clôturé",
+        text2:
+          closedCount > 1
+            ? `${closedCount} BLs sont marqués comme livrés.`
+            : `Le BL ${selectedBL?.code ?? (targetBLId ? `#${targetBLId}` : "")} est marqué comme livré.`,
       });
       closeBLStore.reset();
       queryClient.invalidateQueries({ queryKey: ["voyages"] });
@@ -69,9 +116,12 @@ export const CloseBLScreen = () => {
 
     const picture = await cameraRef.current?.takePictureAsync({ quality: 0.7 });
     if (picture?.uri) {
+      const photoNameBase = isCloseAllMode
+        ? `voyage-${voyageId ?? "unknown"}`
+        : `bl-${targetBLId ?? "unknown"}`;
       const photo: UploadPhoto = {
         uri: picture.uri,
-        name: `bl-${targetBLId}-${Date.now()}.jpg`,
+        name: `${photoNameBase}-${Date.now()}.jpg`,
         type: "image/jpeg",
       };
       setPhotos((prev) => [...prev, photo]);
@@ -96,11 +146,11 @@ export const CloseBLScreen = () => {
       return;
     }
 
-    if (!voyageId || !targetBLId) {
+    if (!voyageId || targetBLIds.length === 0) {
       Toast.show({
         type: "error",
         text1: "Contexte BL invalide",
-        text2: "Impossible de retrouver le voyage ou le BL sélectionné.",
+        text2: "Impossible de retrouver le voyage ou les BLs sélectionnés.",
       });
       return;
     }
@@ -127,9 +177,8 @@ export const CloseBLScreen = () => {
 
       closeBLMutate({
         idVoyage: voyageId,
-        idBL: targetBLId,
+        idsBL: targetBLIds,
         coordinates: { x: longitude, y: latitude },
-        status: "livre",
         images: photos,
       });
     } catch {
@@ -178,7 +227,9 @@ export const CloseBLScreen = () => {
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            Photo de livraison du BL {selectedBL?.code ?? `#${targetBLId}`}
+            {isCloseAllMode
+              ? `Photo de livraison pour ${targetBLIds.length} BLs`
+              : `Photo de livraison du BL ${selectedBL?.code ?? (targetBLId ? `#${targetBLId}` : "")}`}
           </Text>
           <Text style={styles.subtitle}>Voyage #{voyageId ?? "-"}</Text>
         </View>
@@ -220,7 +271,11 @@ export const CloseBLScreen = () => {
         <View style={styles.footer}>
           <Button
             preset="filled"
-            text="Marquer comme livré"
+            text={
+              isCloseAllMode
+                ? "Marquer tous comme livrés"
+                : "Marquer comme livré"
+            }
             disabled={photos.length === 0 || isPhotoCooldown}
             isLoading={isPending || isCapturingLocation || isPhotoCooldown}
             onPress={handleMarkAsDelivered}

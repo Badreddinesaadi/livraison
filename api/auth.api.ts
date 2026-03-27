@@ -10,6 +10,7 @@ export const signInWithEmailAndPassword = async (
     method: "POST",
     body: { username, password },
     pathname: "/sdkboard/api/users/authentification.php",
+    isDebug: true,
   });
   return data;
 };
