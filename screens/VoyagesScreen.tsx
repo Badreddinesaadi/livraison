@@ -24,22 +24,8 @@ import {
 } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  FlatList,
-  Platform,
-  Text,
-  TextInput,
-  UIManager,
-  View,
-} from "react-native";
+import { FlatList, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
-
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 export const VoyagesScreen = () => {
   const { user } = useSession();
