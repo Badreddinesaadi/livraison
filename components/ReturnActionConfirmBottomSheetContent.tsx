@@ -1,3 +1,4 @@
+import { SUCCESS } from "@/constants/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { useState } from "react";
@@ -255,23 +256,22 @@ export default function ReturnActionConfirmBottomSheetContent({
             >
               <Text style={{ color: "#fff", fontWeight: "700" }}>Refuser</Text>
             </Pressable>
+            <Pressable
+              onPress={() => handleChooseAction("terminer")}
+              disabled={isLoading}
+              style={{
+                paddingVertical: 12,
+                borderRadius: 10,
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: SUCCESS,
+                opacity: isLoading ? 0.7 : 1,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Accepter</Text>
+            </Pressable>
           </View>
-
-          <Pressable
-            onPress={() => handleChooseAction("terminer")}
-            disabled={isLoading}
-            style={{
-              marginTop: 10,
-              paddingVertical: 12,
-              borderRadius: 10,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: PRIMARY,
-              opacity: isLoading ? 0.7 : 1,
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "700" }}>Accepter</Text>
-          </Pressable>
         </>
       )}
     </View>

@@ -40,7 +40,11 @@ export const ReturnsScreen = () => {
   const openReturnValidateConfirm = useCloseBLStore(
     (s) => s.openReturnValidateConfirm,
   );
+  const openReturnDeleteConfirm = useCloseBLStore(
+    (s) => s.openReturnDeleteConfirm,
+  );
   const finishReturnAction = useCloseBLStore((s) => s.finishReturnAction);
+  const finishReturnDelete = useCloseBLStore((s) => s.finishReturnDelete);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedChauffeurId, setSelectedChauffeurId] = useState<
@@ -83,6 +87,7 @@ export const ReturnsScreen = () => {
         text2: error.message || "Impossible de supprimer ce retour.",
       });
     },
+    onSettled: finishReturnDelete,
   });
 
   const { mutate: validateReturnMutate, isPending: isValidatingReturn } =
@@ -118,11 +123,17 @@ export const ReturnsScreen = () => {
         return;
       }
 
-      const options = [{ id: 1, label: "Supprimer le retour" }];
+      const options: { id: number; label: string; type?: "highlight" }[] = [
+        { id: 1, label: "Supprimer le retour" },
+      ];
       const canValidate =
         isAdminOrAdv && item.statut !== "terminer" && item.statut !== "refuser";
       if (canValidate) {
-        options.unshift({ id: 2, label: "Traiter le retour" });
+        options.unshift({
+          id: 2,
+          label: "Traiter le retour",
+          type: "highlight",
+        });
       }
 
       openSelectorOptionsSheet({
@@ -141,7 +152,9 @@ export const ReturnsScreen = () => {
           }
 
           if (id === 1 && !isDeleting) {
-            deleteReturnMutate(parsedId);
+            openReturnDeleteConfirm(parsedId, (targetId) => {
+              deleteReturnMutate(targetId);
+            });
           }
         },
       });
@@ -153,6 +166,7 @@ export const ReturnsScreen = () => {
       openReturnValidateConfirm,
       validateReturnMutate,
       isDeleting,
+      openReturnDeleteConfirm,
       deleteReturnMutate,
     ],
   );

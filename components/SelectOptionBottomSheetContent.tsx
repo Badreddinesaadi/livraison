@@ -1,4 +1,4 @@
-import { PRIMARY } from "@/constants/theme";
+import { PRIMARY, SUCCESS } from "@/constants/theme";
 import {
   BottomSheetFlatList,
   BottomSheetTextInput,
@@ -11,6 +11,7 @@ type SelectOption = {
   label: string;
   valueLabel?: string;
   subLabel?: string;
+  type?: "highlight";
 };
 
 type SelectOptionBottomSheetContentProps = {
@@ -46,7 +47,8 @@ const SelectOptionItem = memo(function SelectOptionItem({
         paddingHorizontal: 12,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: isSelected ? PRIMARY : "#eee",
+        borderColor:
+          item.type === "highlight" ? SUCCESS : isSelected ? PRIMARY : "#eee",
         backgroundColor: "#fff",
         marginBottom: 10,
       }}
@@ -54,7 +56,8 @@ const SelectOptionItem = memo(function SelectOptionItem({
       <Text
         style={{
           fontWeight: "600",
-          color: isSelected ? PRIMARY : "#222",
+          color:
+            item.type === "highlight" ? SUCCESS : isSelected ? PRIMARY : "#222",
         }}
       >
         {item.label}

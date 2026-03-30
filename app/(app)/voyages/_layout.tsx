@@ -120,7 +120,7 @@ export default function StackLayout() {
     ),
     [],
   );
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const rotation = useRef(new Animated.Value(0));
   const animationRef = useRef<any>(null);
@@ -241,6 +241,7 @@ export default function StackLayout() {
             closeSheet();
           }
         }}
+        bottomInset={bottom}
       >
         {sheetType === "voyage-action-confirm" && voyageActionType ? (
           <VoyageActionConfirmBottomSheetContent

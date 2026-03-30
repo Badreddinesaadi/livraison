@@ -4,11 +4,22 @@ import { apiUrl } from "@/constants/query";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { Directory, File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
+import * as IntentLauncher from "expo-intent-launcher";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Alert,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
@@ -141,6 +152,18 @@ const getFileIcon = (name?: string | null) => {
   if (["zip", "rar", "7z", "tar", "gz"].includes(extension))
     return "file-archive";
   return "file-alt";
+};
+
+const getOpenUriCandidates = (uri: string) => {
+  const candidates = [uri];
+
+  // SAF URIs with /tree/.../document/... can fail with some open handlers.
+  const normalizedUri = uri.replace(/\/tree\/[^/]+\/document\//, "/document/");
+  if (normalizedUri !== uri) {
+    candidates.push(normalizedUri);
+  }
+
+  return Array.from(new Set(candidates));
 };
 
 export const ReturnDetailsScreen = () => {
@@ -310,6 +333,60 @@ export const ReturnDetailsScreen = () => {
           text2: persistedFile.name,
           type: "success",
         });
+
+        const openCandidates = getOpenUriCandidates(persistedFile.uri);
+        const mimeType = getMimeTypeFromFileName(persistedFile.name);
+        let isOpened = false;
+        let openError: unknown = null;
+
+        for (const uriCandidate of openCandidates) {
+          try {
+            if (Platform.OS === "android") {
+              try {
+                await IntentLauncher.startActivityAsync(
+                  "android.intent.action.VIEW",
+                  {
+                    data: uriCandidate,
+                    flags: 1,
+                    type: mimeType,
+                  },
+                );
+              } catch {
+                await IntentLauncher.startActivityAsync(
+                  "android.intent.action.VIEW",
+                  {
+                    data: uriCandidate,
+                    flags: 1,
+                  },
+                );
+              }
+            } else {
+              const canOpen = await Linking.canOpenURL(uriCandidate);
+              if (!canOpen) {
+                continue;
+              }
+
+              await Linking.openURL(uriCandidate);
+            }
+
+            isOpened = true;
+            break;
+          } catch (candidateErr) {
+            openError = candidateErr;
+          }
+        }
+
+        if (!isOpened) {
+          console.error("Error opening saved file:", {
+            candidates: openCandidates,
+            error: openError,
+          });
+          Toast.show({
+            text1: "Fichier enregistré",
+            text2: "Impossible d'ouvrir automatiquement ce fichier.",
+            type: "info",
+          });
+        }
       } catch (err) {
         const message =
           err instanceof Error ? err.message.toLowerCase() : String(err);
@@ -381,12 +458,7 @@ export const ReturnDetailsScreen = () => {
               <Text
                 style={{ fontSize: 18, fontWeight: "700", color: "#1a1a2e" }}
               >
-                R{data?.id} #
-                {retourDate?.toLocaleDateString("fr-FR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "2-digit",
-                }) || "Date non disponible"}
+                R{data?.id}-{data?.date ? format(data?.date, "yyMMdd") : "—"}
               </Text>
               <View
                 style={{

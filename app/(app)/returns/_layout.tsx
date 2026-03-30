@@ -1,4 +1,5 @@
 import ReturnActionConfirmBottomSheetContent from "@/components/ReturnActionConfirmBottomSheetContent";
+import ReturnDeleteConfirmBottomSheetContent from "@/components/ReturnDeleteConfirmBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
 import VoyageFiltersBottomSheetContent from "@/components/VoyageFiltersBottomSheetContent";
 import { Button } from "@/components/ui/button";
@@ -28,17 +29,23 @@ export default function StackLayout() {
     (s) => s.voyageFiltersSheetConfig,
   );
   const returnActionReturnId = useCloseBLStore((s) => s.returnActionReturnId);
+  const returnDeleteReturnId = useCloseBLStore((s) => s.returnDeleteReturnId);
   const isReturnActionPending = useCloseBLStore((s) => s.isReturnActionPending);
+  const isReturnDeletePending = useCloseBLStore((s) => s.isReturnDeletePending);
   const chooseSelectorOption = useCloseBLStore((s) => s.chooseSelectorOption);
   const chooseVoyageFilterItem = useCloseBLStore(
     (s) => s.chooseVoyageFilterItem,
   );
   const confirmReturnAction = useCloseBLStore((s) => s.confirmReturnAction);
+  const confirmReturnDelete = useCloseBLStore((s) => s.confirmReturnDelete);
   const closeSheet = useCloseBLStore((s) => s.closeSheet);
   const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
   const snapPoints = useMemo(() => {
     if (sheetType === "return-action-confirm") {
       return ["45%"];
+    }
+    if (sheetType === "return-delete-confirm") {
+      return ["30%"];
     }
     if (sheetType === "voyage-filters") {
       return ["50%"];
@@ -50,7 +57,8 @@ export default function StackLayout() {
     isSheetOpen &&
     (sheetType === "selector-options" ||
       sheetType === "voyage-filters" ||
-      sheetType === "return-action-confirm");
+      sheetType === "return-action-confirm" ||
+      sheetType === "return-delete-confirm");
   const { top, bottom } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const rotation = useRef(new Animated.Value(0));
@@ -187,6 +195,7 @@ export default function StackLayout() {
             closeSheet();
           }
         }}
+        bottomInset={bottom}
       >
         {sheetType === "selector-options" && selectorSheetConfig ? (
           <SelectOptionBottomSheetContent
@@ -203,6 +212,13 @@ export default function StackLayout() {
             items={voyageFiltersSheetConfig.items}
             onSelectItem={chooseVoyageFilterItem}
             onReset={voyageFiltersSheetConfig.onReset}
+          />
+        ) : sheetType === "return-delete-confirm" ? (
+          <ReturnDeleteConfirmBottomSheetContent
+            returnId={returnDeleteReturnId}
+            isLoading={isReturnDeletePending}
+            onCancel={closeSheet}
+            onConfirm={confirmReturnDelete}
           />
         ) : sheetType === "return-action-confirm" ? (
           <ReturnActionConfirmBottomSheetContent

@@ -6,6 +6,7 @@ type SheetType =
   | "close-bl"
   | "voyage-action-confirm"
   | "return-action-confirm"
+  | "return-delete-confirm"
   | "voyage-more-actions"
   | "selector-options"
   | "voyage-filters"
@@ -25,6 +26,7 @@ type ReturnActionHandler = (
   returnId: number,
   payload: ReturnActionPayload,
 ) => void;
+type ReturnDeleteHandler = (returnId: number) => void;
 type SelectorOption = {
   id: number;
   label: string;
@@ -73,10 +75,13 @@ type CloseBLState = {
   moreActionHandler: MoreActionHandler | null;
   returnActionHandler: ReturnActionHandler | null;
   returnActionReturnId: number | null;
+  returnDeleteHandler: ReturnDeleteHandler | null;
+  returnDeleteReturnId: number | null;
   selectorSheetConfig: SelectorSheetConfig | null;
   voyageFiltersSheetConfig: VoyageFiltersSheetConfig | null;
   isVoyageActionPending: boolean;
   isReturnActionPending: boolean;
+  isReturnDeletePending: boolean;
   isSheetOpen: boolean;
   mode: CloseBLMode;
   selectedBL: BLItem | null;
@@ -96,8 +101,14 @@ type CloseBLState = {
     returnId: number,
     handler: ReturnActionHandler,
   ) => void;
+  openReturnDeleteConfirm: (
+    returnId: number,
+    handler: ReturnDeleteHandler,
+  ) => void;
   confirmReturnAction: (payload: ReturnActionPayload) => void;
+  confirmReturnDelete: () => void;
   finishReturnAction: () => void;
+  finishReturnDelete: () => void;
   openSelectorOptions: (config: SelectorSheetConfig) => void;
   chooseSelectorOption: (id: number) => void;
   openVoyageFilters: (config: VoyageFiltersSheetConfig) => void;
@@ -122,10 +133,13 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
   moreActionHandler: null,
   returnActionHandler: null,
   returnActionReturnId: null,
+  returnDeleteHandler: null,
+  returnDeleteReturnId: null,
   selectorSheetConfig: null,
   voyageFiltersSheetConfig: null,
   isVoyageActionPending: false,
   isReturnActionPending: false,
+  isReturnDeletePending: false,
   isSheetOpen: false,
   mode: null,
   selectedBL: null,
@@ -141,12 +155,15 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       moreActionHandler: null,
       returnActionHandler: null,
       returnActionReturnId: null,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
       isReturnActionPending: false,
+      isReturnDeletePending: false,
     }),
   openAcheveConfirm: (
     voyageId: number,
@@ -165,12 +182,15 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       moreActionHandler: null,
       returnActionHandler: null,
       returnActionReturnId: null,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
       isReturnActionPending: false,
+      isReturnDeletePending: false,
       isSheetOpen: true,
     }),
   openDeleteConfirm: (voyageId: number) =>
@@ -185,12 +205,15 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       moreActionHandler: null,
       returnActionHandler: null,
       returnActionReturnId: null,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: null,
       mode: null,
       selectedBL: null,
       isVoyageActionPending: false,
       isReturnActionPending: false,
+      isReturnDeletePending: false,
       isSheetOpen: true,
     }),
   confirmVoyageAction: (kmRetour?: number, dateRetour?: string) =>
@@ -224,6 +247,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
             : null,
         isVoyageActionPending: canConfirm,
         isReturnActionPending: false,
+        isReturnDeletePending: false,
       };
     }),
   clearConfirmedVoyageAction: () => set({ confirmedVoyageAction: null }),
@@ -241,8 +265,11 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       isVoyageActionPending: false,
       isSheetOpen: true,
       moreActionHandler: handler,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: null,
+      isReturnDeletePending: false,
     }),
   chooseMoreAction: (action: Exclude<MoreActionType, null>) =>
     set((state) => {
@@ -271,6 +298,32 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       moreActionHandler: null,
       returnActionHandler: handler,
       returnActionReturnId: returnId,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
+      selectorSheetConfig: null,
+      voyageFiltersSheetConfig: null,
+      isReturnDeletePending: false,
+    }),
+  openReturnDeleteConfirm: (returnId: number, handler: ReturnDeleteHandler) =>
+    set({
+      sheetType: "return-delete-confirm",
+      voyageActionType: null,
+      voyageId: null,
+      voyageKmDepart: null,
+      voyageDateDepart: null,
+      bls: [],
+      pendingUndeliveredCount: 0,
+      mode: null,
+      selectedBL: null,
+      isVoyageActionPending: false,
+      isReturnActionPending: false,
+      isReturnDeletePending: false,
+      isSheetOpen: true,
+      moreActionHandler: null,
+      returnActionHandler: null,
+      returnActionReturnId: null,
+      returnDeleteHandler: handler,
+      returnDeleteReturnId: returnId,
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: null,
     }),
@@ -291,11 +344,34 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
         isSheetOpen: false,
       };
     }),
+  confirmReturnDelete: () =>
+    set((state) => {
+      if (
+        state.isReturnDeletePending ||
+        state.returnDeleteReturnId === null ||
+        !state.returnDeleteHandler
+      ) {
+        return state;
+      }
+
+      state.returnDeleteHandler(state.returnDeleteReturnId);
+
+      return {
+        isReturnDeletePending: true,
+        isSheetOpen: false,
+      };
+    }),
   finishReturnAction: () =>
     set({
       isReturnActionPending: false,
       returnActionReturnId: null,
       returnActionHandler: null,
+    }),
+  finishReturnDelete: () =>
+    set({
+      isReturnDeletePending: false,
+      returnDeleteReturnId: null,
+      returnDeleteHandler: null,
     }),
   openSelectorOptions: (config: SelectorSheetConfig) =>
     set({
@@ -314,8 +390,11 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       moreActionHandler: null,
       returnActionHandler: null,
       returnActionReturnId: null,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
       selectorSheetConfig: config,
       voyageFiltersSheetConfig: null,
+      isReturnDeletePending: false,
     }),
   openVoyageFilters: (config: VoyageFiltersSheetConfig) =>
     set({
@@ -334,8 +413,11 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       moreActionHandler: null,
       returnActionHandler: null,
       returnActionReturnId: null,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: config,
+      isReturnDeletePending: false,
     }),
   chooseSelectorOption: (id: number) =>
     set((state) => {
@@ -358,6 +440,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       confirmedVoyageAction: null,
       isVoyageActionPending: false,
       isReturnActionPending: false,
+      isReturnDeletePending: false,
       isSheetOpen: false,
     }),
   openSheet: () => set({ isSheetOpen: true }),
@@ -377,10 +460,13 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       moreActionHandler: null,
       returnActionHandler: null,
       returnActionReturnId: null,
+      returnDeleteHandler: null,
+      returnDeleteReturnId: null,
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: null,
       isVoyageActionPending: false,
       isReturnActionPending: false,
+      isReturnDeletePending: false,
       isSheetOpen: false,
       mode: null,
       selectedBL: null,

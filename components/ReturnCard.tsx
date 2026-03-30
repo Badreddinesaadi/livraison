@@ -1,9 +1,9 @@
 import { Return } from "@/api/return.api";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { LayoutAnimation, Pressable, Text, View } from "react-native";
-
 const getReturnStatusUi = (status: Return["statut"]) => {
   if (status === "terminer") {
     return {
@@ -49,10 +49,6 @@ export const ReturnCard = ({
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded((v) => !v);
   };
-  const retourDate = useMemo(
-    () => (item?.date ? new Date(item.date) : null),
-    [item.date],
-  );
 
   return (
     <Pressable
@@ -94,12 +90,7 @@ export const ReturnCard = ({
 
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: "700", fontSize: 15, color: "#1a1a2e" }}>
-            R{item.id} #
-            {retourDate?.toLocaleDateString("fr-FR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "2-digit",
-            }) || "Date non disponible"}
+            R{item.id}-{item?.date ? format(item?.date, "yyMMdd") : "—"}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
             {item.nomChauffeur || "Chauffeur inconnu"}
