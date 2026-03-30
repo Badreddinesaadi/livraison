@@ -92,8 +92,8 @@ export const ReturnsScreen = () => {
         queryClient.invalidateQueries({ queryKey: ["returns"] });
         Toast.show({
           type: "success",
-          text1: "Retour validé",
-          text2: "Le retour a été marqué comme valide.",
+          text1: "Retour mis à jour",
+          text2: "Le statut du retour a été mis à jour.",
         });
       },
       onError: (error) => {
@@ -119,9 +119,10 @@ export const ReturnsScreen = () => {
       }
 
       const options = [{ id: 1, label: "Supprimer le retour" }];
-      const canValidate = isAdminOrAdv && item.statut !== "terminer";
+      const canValidate =
+        isAdminOrAdv && item.statut !== "terminer" && item.statut !== "refuser";
       if (canValidate) {
-        options.unshift({ id: 2, label: "Marquer le retour comme valide" });
+        options.unshift({ id: 2, label: "Traiter le retour" });
       }
 
       openSelectorOptionsSheet({
@@ -129,8 +130,12 @@ export const ReturnsScreen = () => {
         options,
         onSelect: (id) => {
           if (id === 2 && !isValidatingReturn) {
-            openReturnValidateConfirm(parsedId, (targetId) => {
-              validateReturnMutate({ id: String(targetId) });
+            openReturnValidateConfirm(parsedId, (targetId, payload) => {
+              validateReturnMutate({
+                id: String(targetId),
+                statut: payload.statut,
+                commentaire: payload.commentaire,
+              });
             });
             return;
           }

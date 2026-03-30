@@ -38,7 +38,7 @@ export default function StackLayout() {
   const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
   const snapPoints = useMemo(() => {
     if (sheetType === "return-action-confirm") {
-      return ["25%"];
+      return ["45%"];
     }
     if (sheetType === "voyage-filters") {
       return ["50%"];

@@ -16,7 +16,15 @@ type MoreActionHandler = (
   action: Exclude<MoreActionType, null>,
   voyageId: number,
 ) => void;
-type ReturnActionHandler = (returnId: number) => void;
+type ReturnActionStatus = "terminer" | "refuser";
+type ReturnActionPayload = {
+  statut: ReturnActionStatus;
+  commentaire: string;
+};
+type ReturnActionHandler = (
+  returnId: number,
+  payload: ReturnActionPayload,
+) => void;
 type SelectorOption = {
   id: number;
   label: string;
@@ -88,7 +96,7 @@ type CloseBLState = {
     returnId: number,
     handler: ReturnActionHandler,
   ) => void;
-  confirmReturnAction: () => void;
+  confirmReturnAction: (payload: ReturnActionPayload) => void;
   finishReturnAction: () => void;
   openSelectorOptions: (config: SelectorSheetConfig) => void;
   chooseSelectorOption: (id: number) => void;
@@ -266,7 +274,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
       selectorSheetConfig: null,
       voyageFiltersSheetConfig: null,
     }),
-  confirmReturnAction: () =>
+  confirmReturnAction: (payload: ReturnActionPayload) =>
     set((state) => {
       if (
         state.isReturnActionPending ||
@@ -276,7 +284,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
         return state;
       }
 
-      state.returnActionHandler(state.returnActionReturnId);
+      state.returnActionHandler(state.returnActionReturnId, payload);
 
       return {
         isReturnActionPending: true,

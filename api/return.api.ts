@@ -18,8 +18,10 @@ export type Return = {
   Bl_cachetet: OUINon;
   reglement: OUINon;
   retour_Mse: OUINon;
+  date: string | undefined;
   reclamation: Reclamation;
-  statut: "terminer" | "envoyer" | "";
+  commentaire: string | null | undefined;
+  statut: "terminer" | "envoyer" | "refuser" | "";
   nomChauffeur: string | null;
   chauffeur_id: number | null;
   client_id: number | null;
@@ -116,13 +118,22 @@ export const deleteReturn = async (returnId: number) => {
   return data;
 };
 
-export const ValidateReturn = async ({ id }: { id: string }) => {
+export const ValidateReturn = async ({
+  id,
+  statut,
+  commentaire,
+}: {
+  id: string;
+  statut: "terminer" | "refuser";
+  commentaire: string;
+}) => {
   return client.request({
     pathname: `/sdkboard/api/homescreen/retour_chauffeur.php`,
     method: "PUT",
     body: {
       id,
-      statut: "terminer",
+      statut,
+      commentaire,
     },
     isDebug: true,
   });

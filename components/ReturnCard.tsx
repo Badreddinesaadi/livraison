@@ -13,13 +13,21 @@ const getReturnStatusUi = (status: Return["statut"]) => {
       icon: "check-circle" as const,
     };
   }
-
-  return {
-    label: status === "envoyer" ? "Envoyé" : "En cours",
-    color: PRIMARY,
-    bg: PRIMARY + "22",
-    icon: "clock" as const,
-  };
+  if (status === "refuser") {
+    return {
+      label: "Refusé",
+      color: "#ff4d4d",
+      bg: "#ff4d4d" + "22",
+      icon: "times-circle" as const,
+    };
+  } else {
+    return {
+      label: "En cours",
+      color: PRIMARY,
+      bg: PRIMARY + "22",
+      icon: "clock" as const,
+    };
+  }
 };
 
 export const ReturnCard = ({
@@ -41,6 +49,10 @@ export const ReturnCard = ({
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded((v) => !v);
   };
+  const retourDate = useMemo(
+    () => (item?.date ? new Date(item.date) : null),
+    [item.date],
+  );
 
   return (
     <Pressable
@@ -77,12 +89,17 @@ export const ReturnCard = ({
             marginRight: 12,
           }}
         >
-          <FontAwesome5 name="undo-alt" size={16} color={statusUi.color} />
+          <FontAwesome5 name={statusUi.icon} size={16} color={statusUi.color} />
         </View>
 
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: "700", fontSize: 15, color: "#1a1a2e" }}>
-            Retour #{item.id}
+            R{item.id} #
+            {retourDate?.toLocaleDateString("fr-FR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            }) || "Date non disponible"}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
             {item.nomChauffeur || "Chauffeur inconnu"}

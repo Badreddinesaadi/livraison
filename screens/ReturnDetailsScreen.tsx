@@ -56,15 +56,25 @@ export const ReturnDetailsScreen = () => {
         bg: SUCCESS + "22",
         color: SUCCESS,
       };
+    } else if (data?.statut === "refuser") {
+      return {
+        label: "Refusé",
+        bg: "#ff4d4d" + "22",
+        color: "#ff4d4d",
+      };
+    } else {
+      return {
+        label: data?.statut === "envoyer" ? "Envoyé" : "En cours",
+        bg: PRIMARY + "22",
+        color: PRIMARY,
+      };
     }
-
-    return {
-      label: data?.statut === "envoyer" ? "Envoyé" : "En cours",
-      bg: PRIMARY + "22",
-      color: PRIMARY,
-    };
   }, [data?.statut]);
 
+  const retourDate = useMemo(
+    () => (data?.date ? new Date(data.date) : null),
+    [data?.date],
+  );
   return (
     <View
       style={{
@@ -116,7 +126,12 @@ export const ReturnDetailsScreen = () => {
               <Text
                 style={{ fontSize: 18, fontWeight: "700", color: "#1a1a2e" }}
               >
-                Retour #{data.id}
+                R{data?.id} #
+                {retourDate?.toLocaleDateString("fr-FR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "2-digit",
+                }) || "Date non disponible"}
               </Text>
               <View
                 style={{
@@ -163,6 +178,54 @@ export const ReturnDetailsScreen = () => {
               label="Règlement"
               value={data.reglement === "oui" ? "Oui" : "Non"}
             />
+            {data.commentaire && (
+              <View
+                style={{
+                  marginTop: 8,
+                  borderWidth: 1,
+                  borderColor:
+                    data.statut === "refuser" ? "#ffd6d6" : "#ffe2d7",
+                  backgroundColor:
+                    data.statut === "refuser" ? "#fff6f6" : "#fff8f4",
+                  borderRadius: 10,
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    columnGap: 8,
+                    marginBottom: 6,
+                  }}
+                >
+                  <FontAwesome5
+                    name="comment-alt"
+                    size={13}
+                    color={data.statut === "refuser" ? "#ff4d4d" : PRIMARY}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "700",
+                      color: "#1a1a2e",
+                    }}
+                  >
+                    Commentaire
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#333",
+                    lineHeight: 20,
+                  }}
+                >
+                  {data.commentaire?.trim() || "Aucun commentaire renseigné"}
+                </Text>
+              </View>
+            )}
           </View>
 
           <View
