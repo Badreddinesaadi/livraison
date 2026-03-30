@@ -4,11 +4,13 @@ import { apiUrl } from "@/constants/query";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { Directory, File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 const formatUploadDate = (value?: string | null) => {
   if (!value) {
@@ -29,12 +31,116 @@ const formatUploadDate = (value?: string | null) => {
   });
 };
 
-const buildImageUrl = (cheminFichier?: string, nomFichier?: string) => {
+const buildFileUrl = (cheminFichier?: string) => {
   if (!cheminFichier) {
     return null;
   }
 
   return `${apiUrl}/sdkboard/${cheminFichier}`;
+};
+
+const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "heic"];
+
+const getFileName = (path?: string | null, fallback = "Fichier") => {
+  if (!path) {
+    return fallback;
+  }
+
+  const normalized = path.replace(/\\/g, "/");
+  const segments = normalized.split("/").filter(Boolean);
+  return segments[segments.length - 1] || fallback;
+};
+
+const sanitizeFileName = (name: string) =>
+  name.replace(/[<>:"/\\|?*]/g, "_").trim() || "fichier";
+
+const isNameConflictError = (err: unknown) => {
+  const message =
+    err instanceof Error
+      ? err.message.toLowerCase()
+      : String(err).toLowerCase();
+
+  return (
+    message.includes("already exists") ||
+    message.includes("same name") ||
+    message.includes("file location")
+  );
+};
+
+const buildUniqueFileName = (name: string) => {
+  const extension = getFileExtension(name);
+  const baseName = extension
+    ? name.slice(0, Math.max(0, name.length - extension.length - 1))
+    : name;
+
+  return `${baseName}-${Date.now()}${extension ? `.${extension}` : ""}`;
+};
+
+const getFileExtension = (name?: string | null) => {
+  if (!name) {
+    return "";
+  }
+
+  const dotIndex = name.lastIndexOf(".");
+  if (dotIndex < 0 || dotIndex === name.length - 1) {
+    return "";
+  }
+
+  return name.slice(dotIndex + 1).toLowerCase();
+};
+
+const getMimeTypeFromFileName = (name: string) => {
+  const extension = getFileExtension(name);
+
+  const mimeByExtension: Record<string, string> = {
+    pdf: "application/pdf",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    csv: "text/csv",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    txt: "text/plain",
+    rtf: "application/rtf",
+    zip: "application/zip",
+    rar: "application/vnd.rar",
+    "7z": "application/x-7z-compressed",
+    tar: "application/x-tar",
+    gz: "application/gzip",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    webp: "image/webp",
+    bmp: "image/bmp",
+    heic: "image/heic",
+  };
+
+  return mimeByExtension[extension] ?? "application/octet-stream";
+};
+
+const getDisplayNameWithoutExtension = (name: string) => {
+  const extension = getFileExtension(name);
+  if (!extension) {
+    return name;
+  }
+
+  return name.slice(0, Math.max(0, name.length - extension.length - 1));
+};
+
+const isImageFile = (name?: string | null) => {
+  const extension = getFileExtension(name);
+  return IMAGE_EXTENSIONS.includes(extension);
+};
+
+const getFileIcon = (name?: string | null) => {
+  const extension = getFileExtension(name);
+
+  if (extension === "pdf") return "file-pdf";
+  if (["xls", "xlsx", "csv"].includes(extension)) return "file-excel";
+  if (["doc", "docx", "txt", "rtf"].includes(extension)) return "file-word";
+  if (["zip", "rar", "7z", "tar", "gz"].includes(extension))
+    return "file-archive";
+  return "file-alt";
 };
 
 export const ReturnDetailsScreen = () => {
@@ -43,6 +149,9 @@ export const ReturnDetailsScreen = () => {
     uri: string;
     dateUpload: string | null;
   } | null>(null);
+  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(
+    null,
+  );
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["returns", "details", returnId],
@@ -76,6 +185,151 @@ export const ReturnDetailsScreen = () => {
     () => (data?.date ? new Date(data.date) : null),
     [data?.date],
   );
+
+  const handleDownloadFile = useCallback(
+    async (fileUrl: string, sourceName?: string | null, fileId?: string) => {
+      const fallbackName = `retour-${returnId ?? "fichier"}-${Date.now()}`;
+      const baseName = getFileName(sourceName, fallbackName);
+      const safeName = sanitizeFileName(baseName);
+
+      try {
+        if (fileId) {
+          setDownloadingFileId(fileId);
+        }
+
+        const selectedDirectory = await Directory.pickDirectoryAsync();
+        const tempDownloadsDir = new Directory(Paths.cache, "downloads");
+        if (!tempDownloadsDir.exists) {
+          tempDownloadsDir.create({ idempotent: true, intermediates: true });
+        }
+
+        const tempFileName = `${Date.now()}-${safeName}`;
+        const tempDestination = new File(tempDownloadsDir, tempFileName);
+        const downloadedTempFile = await File.downloadFileAsync(
+          fileUrl,
+          tempDestination,
+          {
+            idempotent: true,
+          },
+        );
+        let savedFile: File | null = null;
+        const maxAttempts = 6;
+
+        if (selectedDirectory.uri.startsWith("content://")) {
+          const fileBytes = await downloadedTempFile.bytes();
+          let lastConflictError: unknown = null;
+
+          for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+            const candidateName =
+              attempt === 0 ? safeName : buildUniqueFileName(safeName);
+
+            try {
+              const mimeType = getMimeTypeFromFileName(candidateName);
+              const displayName =
+                getDisplayNameWithoutExtension(candidateName).trim() ||
+                `fichier-${Date.now()}`;
+
+              const candidateFile = selectedDirectory.createFile(
+                displayName,
+                mimeType,
+              );
+              candidateFile.write(fileBytes);
+              savedFile = candidateFile;
+              lastConflictError = null;
+              break;
+            } catch (createErr) {
+              if (isNameConflictError(createErr)) {
+                lastConflictError = createErr;
+                continue;
+              }
+
+              throw createErr;
+            }
+          }
+
+          if (!savedFile) {
+            throw (
+              lastConflictError ??
+              new Error("Impossible de sauvegarder le fichier.")
+            );
+          }
+
+          if (downloadedTempFile.exists) {
+            downloadedTempFile.delete();
+          }
+        } else {
+          let lastConflictError: unknown = null;
+
+          for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+            const candidateName =
+              attempt === 0 ? safeName : buildUniqueFileName(safeName);
+            const candidateDestination = new File(
+              selectedDirectory,
+              candidateName,
+            );
+
+            if (candidateDestination.exists) {
+              try {
+                candidateDestination.delete();
+              } catch {
+                // Could be a folder or protected file: treat as conflict and retry with another name.
+              }
+            }
+
+            if (candidateDestination.exists) {
+              continue;
+            }
+
+            try {
+              downloadedTempFile.move(candidateDestination);
+              savedFile = candidateDestination;
+              lastConflictError = null;
+              break;
+            } catch (moveErr) {
+              if (isNameConflictError(moveErr)) {
+                lastConflictError = moveErr;
+                continue;
+              }
+
+              throw moveErr;
+            }
+          }
+
+          if (!savedFile) {
+            throw (
+              lastConflictError ??
+              new Error("Impossible de sauvegarder le fichier.")
+            );
+          }
+        }
+
+        const persistedFile = savedFile as File;
+
+        Toast.show({
+          text1: "Téléchargement réussi",
+          text2: persistedFile.name,
+          type: "success",
+        });
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message.toLowerCase() : String(err);
+        if (message.includes("cancel")) {
+          return;
+        }
+
+        console.error("Error downloading file:", err);
+        console.log("File URL:", fileUrl);
+        Alert.alert(
+          "Erreur",
+          "Impossible de télécharger ce fichier pour le moment.",
+        );
+      } finally {
+        setDownloadingFileId(null);
+      }
+    },
+    [returnId],
+  );
+
   return (
     <SafeAreaView
       style={{
@@ -251,30 +505,27 @@ export const ReturnDetailsScreen = () => {
               <Text
                 style={{ fontSize: 15, fontWeight: "700", color: "#1a1a2e" }}
               >
-                Images ({data.images?.length ?? 0})
+                Fichiers ({data.images?.length ?? 0})
               </Text>
             </View>
 
             {data.images && data.images.length > 0 ? (
               <View style={{ rowGap: 10 }}>
-                {data.images.map((image) => {
-                  const imageUrl = buildImageUrl(
-                    image.chemin_fichier,
-                    image.nom_fichier,
-                  );
-                  if (!imageUrl) {
+                {data.images.map((file, index) => {
+                  const fileUrl = buildFileUrl(file.chemin_fichier);
+                  if (!fileUrl) {
                     return null;
                   }
 
+                  const fallbackName = `Fichier ${index + 1}`;
+                  const fileName = getFileName(file.nom_fichier, fallbackName);
+                  const fileIsImage = isImageFile(fileName);
+                  const fileIcon = getFileIcon(fileName);
+                  const isDownloading = downloadingFileId === file.id;
+
                   return (
-                    <Pressable
-                      key={image.id}
-                      onPress={() =>
-                        setPreviewImage({
-                          uri: imageUrl,
-                          dateUpload: image.date_upload ?? null,
-                        })
-                      }
+                    <View
+                      key={file.id}
                       style={{
                         borderWidth: 1,
                         borderColor: "#eee",
@@ -283,33 +534,140 @@ export const ReturnDetailsScreen = () => {
                         padding: 10,
                       }}
                     >
-                      <Image
-                        source={{ uri: imageUrl }}
-                        style={{
-                          width: "100%",
-                          height: 220,
-                          borderRadius: 8,
-                          backgroundColor: "#f2f2f2",
-                        }}
-                        contentFit="cover"
-                        transition={120}
-                      />
+                      {fileIsImage ? (
+                        <Pressable
+                          onPress={() =>
+                            setPreviewImage({
+                              uri: fileUrl,
+                              dateUpload: file.date_upload ?? null,
+                            })
+                          }
+                          style={{ marginBottom: 10 }}
+                        >
+                          <Image
+                            source={{ uri: fileUrl }}
+                            style={{
+                              width: "100%",
+                              height: 180,
+                              borderRadius: 8,
+                              backgroundColor: "#f2f2f2",
+                            }}
+                            contentFit="cover"
+                            transition={120}
+                          />
+                        </Pressable>
+                      ) : (
+                        <View
+                          style={{
+                            height: 56,
+                            borderRadius: 8,
+                            backgroundColor: "#f7f8fa",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginBottom: 10,
+                          }}
+                        >
+                          <FontAwesome5
+                            name={fileIcon as any}
+                            size={20}
+                            color={PRIMARY}
+                          />
+                        </View>
+                      )}
+
                       <Text
                         style={{
-                          marginTop: 8,
+                          fontSize: 13,
+                          color: "#1a1a2e",
+                          fontWeight: "700",
+                        }}
+                        numberOfLines={2}
+                      >
+                        {fileName}
+                      </Text>
+
+                      <Text
+                        style={{
+                          marginTop: 6,
                           fontSize: 12,
                           color: "#777",
                           fontWeight: "500",
                         }}
                       >
-                        Upload: {formatUploadDate(image.date_upload)}
+                        Upload: {formatUploadDate(file.date_upload)}
                       </Text>
-                    </Pressable>
+
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          marginTop: 10,
+                          columnGap: 10,
+                        }}
+                      >
+                        {fileIsImage ? (
+                          <Pressable
+                            onPress={() =>
+                              setPreviewImage({
+                                uri: fileUrl,
+                                dateUpload: file.date_upload ?? null,
+                              })
+                            }
+                            style={{
+                              paddingHorizontal: 12,
+                              paddingVertical: 8,
+                              borderRadius: 8,
+                              borderWidth: 1,
+                              borderColor: "#ddd",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                color: "#555",
+                                fontWeight: "700",
+                              }}
+                            >
+                              Aperçu
+                            </Text>
+                          </Pressable>
+                        ) : null}
+
+                        <Pressable
+                          onPress={() =>
+                            handleDownloadFile(
+                              fileUrl,
+                              file.nom_fichier,
+                              file.id,
+                            )
+                          }
+                          disabled={isDownloading}
+                          style={{
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            borderRadius: 8,
+                            backgroundColor: PRIMARY,
+                            opacity: isDownloading ? 0.7 : 1,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              color: "#fff",
+                              fontWeight: "700",
+                            }}
+                          >
+                            {isDownloading
+                              ? "Téléchargement..."
+                              : "Télécharger"}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
                   );
                 })}
               </View>
             ) : (
-              <Text style={{ fontSize: 13, color: "#888" }}>Aucune image</Text>
+              <Text style={{ fontSize: 13, color: "#888" }}>Aucun fichier</Text>
             )}
           </View>
         </ScrollView>
