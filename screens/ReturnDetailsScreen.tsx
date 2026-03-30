@@ -8,6 +8,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const formatUploadDate = (value?: string | null) => {
   if (!value) {
@@ -76,11 +77,11 @@ export const ReturnDetailsScreen = () => {
     [data?.date],
   );
   return (
-    <View
+    <SafeAreaView
       style={{
         flex: 1,
         paddingHorizontal: 14,
-        marginTop: 4,
+        // marginTop: 4,
         backgroundColor: "#f7f8fa",
       }}
     >
@@ -366,7 +367,7 @@ export const ReturnDetailsScreen = () => {
           </View>
         </Pressable>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 

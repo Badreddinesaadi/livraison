@@ -51,7 +51,7 @@ export default function StackLayout() {
     (sheetType === "selector-options" ||
       sheetType === "voyage-filters" ||
       sheetType === "return-action-confirm");
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const rotation = useRef(new Animated.Value(0));
   const animationRef = useRef<any>(null);
@@ -111,9 +111,8 @@ export default function StackLayout() {
     ),
     [],
   );
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, paddingBottom: bottom }}>
       <Stack
         screenOptions={{
           animation: "ios_from_right",

@@ -93,7 +93,7 @@ export const createReturn = async (request: CreateReturnRequest) => {
   formData.append("client_id", request.client_id);
 
   request.files.forEach((file) => {
-    formData.append("files[]", {
+    formData.append("images[]", {
       uri: file.uri,
       name: file.name,
       type: file.type,
