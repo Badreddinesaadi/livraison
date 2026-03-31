@@ -114,6 +114,22 @@ export default function HomeScreen() {
               router.navigate("/returns");
             }}
           />
+          <Button
+            preset="filled"
+            text="Lieux de projets"
+            LeftAccessory={() => (
+              <View>
+                <MaterialCommunityIcons
+                  name="map-marker-radius"
+                  size={24}
+                  color={Colors.light.background}
+                />
+              </View>
+            )}
+            onPress={() => {
+              router.navigate("/projet-locations");
+            }}
+          />
           {/* <Button
             preset="filled"
             text="Demarrez un nouvelle voyage"
