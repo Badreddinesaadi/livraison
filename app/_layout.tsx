@@ -25,7 +25,7 @@ const InnerLayout = () => {
       <SplashScreenController />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={!!session.user}>
-          <Stack.Screen name="(app)" />
+          <Stack.Screen name="(app)/(drawer)" />
         </Stack.Protected>
         {/* <Stack.Protected guard={!!session.user}>
           <Stack.Screen name="(driver)/index" />

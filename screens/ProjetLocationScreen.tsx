@@ -163,7 +163,7 @@ export const ProjetLocationScreen = () => {
         onSelect: (id) => {
           if (id === 1) {
             router.navigate({
-              pathname: "/(app)/projet-locations/create",
+              pathname: "/(app)/(drawer)/(stack)/projet-locations/create",
               params: { projetId: String(item.id) },
             });
             return;
@@ -246,7 +246,9 @@ export const ProjetLocationScreen = () => {
               )}
               size="md"
               onPress={() => {
-                router.navigate("/(app)/projet-locations/create");
+                router.navigate(
+                  "/(app)/(drawer)/(stack)/projet-locations/create",
+                );
               }}
             />
           </View>

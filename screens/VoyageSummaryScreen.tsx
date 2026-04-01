@@ -31,7 +31,7 @@ export const VoyageSummaryScreen = () => {
       });
       // reset store
       router.dismissAll();
-      router.replace("/(app)/voyages");
+      router.replace("/(app)/(drawer)/(stack)/voyages");
       setTimeout(() => {
         store.resetAll();
       }, 2000);
@@ -49,7 +49,7 @@ export const VoyageSummaryScreen = () => {
       });
       // reset store
       router.dismissAll();
-      router.replace("/(app)/voyages");
+      router.replace("/(app)/(drawer)/(stack)/voyages");
       setTimeout(() => {
         store.resetAll();
       }, 2000);
@@ -317,7 +317,7 @@ export const VoyageSummaryScreen = () => {
             text="Retour"
             onPress={() => {
               router.dismissAll();
-              router.replace("/(app)/voyages");
+              router.replace("/(app)/(drawer)/(stack)/voyages");
             }}
           />
         </View>

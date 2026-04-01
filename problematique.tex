@@ -1,0 +1,166 @@
+    \documentclass[12pt,a4paper]{article}
+
+    \usepackage[T1]{fontenc}
+    \usepackage[utf8]{inputenc}
+    \usepackage[french]{babel}
+    \usepackage{geometry}
+    \usepackage{enumitem}
+    \usepackage{microtype}
+    \usepackage{graphicx}
+
+    \geometry{margin=2.5cm}
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{0.6em}
+
+    \begin{document}
+
+    \begin{center}
+    {\LARGE \textbf{Problématique}}\\[0.6em]
+    \end{center}
+
+    \section*{Contexte}
+    SDKWOOD distribue des matériaux en bois et des produits associés vers des chantiers, des clients et des partenaires. Chaque jour, des chauffeurs chargent des commandes au dépôt, réalisent des livraisons, et reviennent avec des informations de terrain (retours, anomalies, pièces manquantes, refus, dommages, etc.).
+
+    Dans ce type d'activité, la qualité du suivi est un point clé. Il faut savoir, rapidement et de façon fiable, ce qui a été chargé, ce qui a été livré, ce qui a été refusé, et ce qui doit être traité ensuite au bureau.
+
+    \section*{Situation actuelle : suivi manuel}
+    Aujourd'hui, une grande partie de ces opérations est faite avec du papier (carnets, fiches, formulaires, bons de livraison). Les informations sont notées à la main pendant le chargement, la livraison, et le retour.
+
+    Ce fonctionnement présente un schéma courant :
+    \begin{itemize}[leftmargin=1.2em]
+    \item Le chauffeur part avec des documents papier et complète les informations pendant la tournée.
+    \item En fin de journée (ou plus tard), ces informations sont ramenées au bureau.
+    \item Une personne de l'ADV (Administration des ventes) ressaisit les données dans des fichiers ou outils internes, ou bien classe les documents.
+    \end{itemize}
+
+    \section*{Problèmes rencontrés}
+    Le suivi manuel peut fonctionner sur de petits volumes, mais il montre vite ses limites dès que l'activité augmente ou que les équipes doivent réagir vite.
+
+    Les principaux problèmes observés sont les suivants :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Perte et dégradation d'information} : un document peut être perdu, abîmé, illisible, ou incomplet.
+    \item \textbf{Erreurs de saisie} : la ressaisie au bureau augmente le risque d'erreurs et crée des écarts entre le terrain et l'administratif.
+    \item \textbf{Retards de mise à jour} : l'information n'est disponible qu'après le retour du chauffeur et après traitement, donc trop tard pour décider.
+    \item \textbf{Manque de visibilité} : il est difficile de répondre vite à des questions simples (``où en est ce bon de livraison ?'', ``ce retour a-t-il été déclaré ?'').
+    \item \textbf{Gestion difficile des retours et des anomalies} : sans preuve claire et sans statut, un retour peut rester en attente, être oublié, ou être traité plusieurs fois.
+    \item \textbf{Litiges plus longs} : en cas de contestation (quantité, état, livraison partielle), il manque souvent des éléments fiables et datés.
+    \item \textbf{Charge de travail au bureau} : la saisie manuelle prend du temps, surtout quand les documents arrivent en lot.
+    \end{itemize}
+
+    Ces difficultés ont un impact direct : ralentissement du service, stress opérationnel, manque de fiabilité des informations, et difficulté à piloter l'activité.
+
+    \section*{Besoin : supprimer la double saisie et fiabiliser le suivi}
+    Le besoin principal est de capter l'information une seule fois, au bon moment, au plus proche de l'action. En pratique, cela veut dire :
+    \begin{itemize}[leftmargin=1.2em]
+    \item enregistrer les voyages, les bons de livraison et les retours sans passer par un papier intermédiaire ;
+    \item structurer les informations (statuts, commentaires, pièces justificatives) pour qu'elles soient comparables et exploitables ;
+    \item rendre l'information disponible rapidement pour les équipes au dépôt et au bureau.
+    \end{itemize}
+
+    \newpage
+
+    \section*{Étude de l'existant :}
+    Il existe des solutions du marché qui répondent au besoin de suivi des livraisons et des opérations terrain. Deux exemples connus sont \textbf{Onfleet} et \textbf{Samsara}.
+
+    \subsection*{Onfleet}
+    Onfleet est une solution de gestion de livraisons : elle aide à organiser les tournées, suivre l'avancement, et collecter une preuve de livraison. Elle est surtout adaptée aux processus de livraison standard.
+
+    \begin{center}
+    \IfFileExists{assets/onfleet-logo.png}{
+    \includegraphics[width=0.35\textwidth]{assets/onfleet-logo.png}
+    }{
+    \textit{Logo Onfleet : fichier assets/onfleet-logo.png non trouvé.}
+    }
+    \end{center}
+
+    \subsection*{Ce que Onfleet apporte}
+    Onfleet est adapté lorsque l'objectif principal est d'organiser des livraisons, de suivre l'avancement d'une tournée, et d'obtenir une preuve de livraison.
+
+    Principaux bénéfices :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Mise en place rapide} : une solution prête à l'emploi, sans développement spécifique.
+    \item \textbf{Suivi des livraisons} : meilleure visibilité sur l'état des livraisons et sur l'avancement des chauffeurs.
+    \item \textbf{Preuve de livraison} : collecte d'éléments de confirmation (signature, photo, horodatage selon configuration).
+    \item \textbf{Fonctions standard} : notifications et suivi client possibles selon les usages.
+    \end{itemize}
+
+    \subsection*{Limites dans le contexte de l'entreprise}
+    Dans une entreprise de distribution de matériaux en bois, le besoin ne se limite pas à ``livrer une commande''. Il faut aussi gérer des documents internes (bons de livraison), des retours chauffeurs, et des étapes de traitement au bureau.
+
+    Principales limites possibles dans ce contexte :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Couverture métier partielle} : les processus spécifiques (retours chauffeurs, validation ADV, statuts internes) peuvent ne pas correspondre exactement au standard.
+    \item \textbf{Adaptation limitée} : certaines règles internes, champs et statuts peuvent être difficiles à aligner sans compromis.
+    \item \textbf{Dépendance à un éditeur} : évolution du produit, coûts d'abonnement, et choix d'hébergement des données sont imposés par la solution.
+    \item \textbf{Intégration} : le lien avec les outils internes (stocks, facturation, référentiels) peut demander un effort et rester contraint.
+    \end{itemize}
+
+    \subsection*{Samsara}
+    Samsara est une solution de gestion d'opérations terrain orientée flotte : elle aide à suivre l'activité des véhicules et à structurer des processus terrain. Elle est surtout utilisée quand le suivi de la flotte, la sécurité et le pilotage opérationnel sont prioritaires.
+
+    \begin{center}
+    \IfFileExists{assets/samsara-logo.png}{
+    \includegraphics[width=0.35\textwidth]{assets/samsara-logo.png}
+    }{
+    \textit{Logo Samsara : fichier assets/samsara-logo.png non trouvé.}
+    }
+    \end{center}
+    \subsection*{Ce que Samsara apporte}
+    Samsara répond à plusieurs objectifs similaires à Onfleet (visibilité, traçabilité, suivi d'exécution), mais avec un positionnement davantage orienté flotte et pilotage.
+
+    Principaux apports dans ce cadre :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Suivi flotte et activité} : meilleure vision des déplacements et de l'activité, utile pour planifier et réagir.
+    \item \textbf{Standardisation terrain} : aide à structurer certaines étapes (départ, arrivée, incidents) via des contrôles simples.
+    \item \textbf{Pilotage} : indicateurs pour mieux comprendre les volumes, les retards et les situations récurrentes.
+    \end{itemize}
+
+    \subsection*{Limites dans le contexte de l'entreprise}
+    Dans une entreprise de distribution de matériaux en bois, le besoin clé inclut aussi la gestion fine des bons de livraison et des retours, avec des statuts et des circuits de traitement adaptés. Comme pour Onfleet, une partie des limites dépend de l'adéquation entre le standard de l'outil et les règles internes.
+
+    Principales limites possibles dans ce contexte :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Focalisation flotte} : la solution est souvent centrée sur le suivi des véhicules et peut couvrir moins finement le cycle documentaire (BL, retours) selon l'organisation.
+    \item \textbf{Paramétrage et intégration} : l'alignement avec des règles et statuts internes peut demander des choix et du temps.
+    \item \textbf{Coûts et dépendance} : l'abonnement, les options et les contraintes contractuelles restent des facteurs à considérer, comme pour une solution SaaS.
+    \end{itemize}
+
+    \section*{Synthèse de la problématique}
+    La problématique est celle d'une activité logistique qui dépend de preuves et d'informations terrain, mais dont le suivi est encore largement manuel. Le papier crée des délais, des erreurs, et une faible visibilité.
+
+    Cette situation met en évidence un besoin de fiabiliser la capture d'information sur le terrain, de réduire la double saisie, et de rendre les statuts plus visibles pour accélérer la décision et le traitement au bureau.
+
+    \newpage
+
+    \section*{Solution proposée : une application mobile pour digitaliser les opérations}
+    L'objectif est de remplacer l'enregistrement papier et la ressaisie par un enregistrement direct, simple et structuré, au moment où l'action se produit. L'application accompagne le chauffeur et les équipes internes sur les tâches du quotidien : préparation et suivi des voyages, gestion des bons de livraison, enregistrement des retours, et consultation des détails.
+
+    L'enjeu n'est pas de complexifier le travail terrain. Au contraire, la solution doit rendre la saisie plus rapide et plus fiable, tout en réduisant la charge de traitement au bureau.
+
+    \subsection*{Pourquoi une application mobile plutôt qu'une application web}
+    Une application web est adaptée à un poste de travail fixe. Dans ce contexte, une partie importante des opérations se fait en déplacement : chargement au dépôt, livraisons sur chantier, retours en fin de tournée.
+
+    Le chauffeur n'a pas forcément un ordinateur portable, et il n'est pas réaliste de lui demander d'en transporter un. Le téléphone, au contraire, est déjà présent, tient dans la poche, et peut être utilisé en quelques secondes.
+
+    Le choix du mobile répond donc à des contraintes simples :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Mobilité} : saisie possible sur site, au moment où l'événement se produit.
+    \item \textbf{Vitesse d'usage} : une action courte sur téléphone est plus simple qu'une saisie sur un navigateur.
+    \item \textbf{Fonctions utiles sur le terrain} : photo, localisation, et horodatage sont naturels sur mobile.
+    \item \textbf{Confort opérationnel} : pas de matériel en plus à transporter, pas de poste à installer.
+    \end{itemize}
+
+    \subsection*{Bénéfices d'une solution digitale}
+    Passer d'un suivi papier à une solution digitale apporte des gains concrets :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Fiabilité} : des champs structurés réduisent les oublis et les ambiguïtés.
+    \item \textbf{Traçabilité} : chaque action peut être datée et associée à un voyage, un bon de livraison, un chauffeur.
+    \item \textbf{Réactivité} : les équipes peuvent consulter plus vite l'état des livraisons et des retours.
+    \item \textbf{Réduction des délais} : moins d'attente entre le terrain et le traitement administratif.
+    \item \textbf{Réduction des coûts indirects} : moins de papier, moins de classement, moins de ressaisie.
+    \item \textbf{Meilleure qualité de service} : les réponses aux clients sont plus rapides et basées sur des informations claires.
+    \end{itemize}
+
+    Au-delà du suivi quotidien, la donnée digitale permet aussi d'améliorer le pilotage : identifier les points qui reviennent souvent (retours fréquents, types d'anomalies), suivre les volumes, et ajuster les processus.
+
+    \end{document}

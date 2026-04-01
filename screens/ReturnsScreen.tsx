@@ -415,7 +415,7 @@ export const ReturnsScreen = () => {
                 )}
                 size="md"
                 onPress={() => {
-                  router.navigate("/(app)/returns/create");
+                  router.navigate("/(app)/(drawer)/(stack)/returns/create");
                 }}
               />
             </View>
