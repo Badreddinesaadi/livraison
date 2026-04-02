@@ -134,7 +134,7 @@ export default function StackLayout() {
               <TouchableWithoutFeedback
                 onPress={() => {
                   if (s.route.name === "index") {
-                    s.navigation.replace("/(app)/(drawer)/(stack)/index", {});
+                    s.navigation.replace("(app)/(drawer)");
                   } else {
                     s.navigation.goBack();
                   }

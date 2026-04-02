@@ -167,6 +167,11 @@ export const VoyageDetailsScreen = () => {
               value={data.nomChauffeur || "—"}
             />
             <DetailRow
+              icon="user"
+              label="Ville"
+              value={data.ville_nom || "—"}
+            />
+            <DetailRow
               icon="calendar"
               label="Départ"
               value={formatDate(data.date_depart)}

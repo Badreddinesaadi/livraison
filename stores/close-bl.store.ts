@@ -41,7 +41,14 @@ type SelectorSheetConfig = {
   onSelect: (id: number) => void;
 };
 
-export type VoyageFilterKey = "chauffeur" | "vehicule" | "depot" | "client";
+export type VoyageFilterKey =
+  | "chauffeur"
+  | "vehicule"
+  | "depot"
+  | "ville"
+  | "client"
+  | "rotation-vehicule"
+  | "rotation-interval";
 
 export type VoyageFilterItem = {
   key: VoyageFilterKey;

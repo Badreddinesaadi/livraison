@@ -234,6 +234,7 @@ export const VoyageCard = ({
             label="Dépôt départ"
             value={item.depot_nom || "—"}
           />
+          <DetailRow icon="city" label="Ville" value={item.ville_nom || "—"} />
           <DetailRow
             icon="car"
             label="Véhicule"

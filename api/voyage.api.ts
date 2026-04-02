@@ -6,6 +6,7 @@ export type CreateVoyageRequest = {
   idVehicule: number;
   depot_depart: number;
   km_depart: number;
+  idVille: number;
   bl_list: { id: number }[];
 };
 
@@ -53,6 +54,8 @@ export type VoyageListItem = {
   idCreate: number | null;
   vehicule_nom: string | null;
   vehicule_immatriculation: string | null;
+  idVille: number | null;
+  ville_nom: string | null;
 };
 export const listVoyage = async ({
   page,
@@ -60,6 +63,7 @@ export const listVoyage = async ({
   idVehicule,
   idChauffeur,
   idDepot,
+  idVille,
   idClient,
 }: {
   page: number;
@@ -67,6 +71,7 @@ export const listVoyage = async ({
   idVehicule?: number;
   idChauffeur?: number;
   idDepot?: number;
+  idVille?: number;
   idClient?: number;
 }) => {
   const result = await client.request<VoyageListItem[]>({
@@ -78,6 +83,7 @@ export const listVoyage = async ({
       ...(idVehicule ? { idVehicule } : {}),
       ...(idChauffeur ? { idChauffeur } : {}),
       ...(idDepot ? { idDepot } : {}),
+      ...(idVille ? { idVille } : {}),
       ...(idClient ? { idClient } : {}),
     },
     isDebug: true,
@@ -98,7 +104,7 @@ export const updateVoyage = async (
     pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "PUT",
     body: request,
-    isDebug: false,
+    isDebug: true,
   });
   return data;
 };
@@ -108,7 +114,7 @@ export const deleteVoyage = async (idVoyage: number) => {
     pathname: "/sdkboard/api/homescreen/voyage.php",
     method: "DELETE",
     body: { id: idVoyage },
-    isDebug: false,
+    isDebug: true,
   });
   return data;
 };

@@ -166,6 +166,34 @@ export const VoyageSummaryScreen = () => {
                 </Text>
               </View>
 
+              {/* Ville */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <FontAwesome6
+                    name="city"
+                    size={18}
+                    color={Colors.light.primary}
+                  />
+                  <Text style={styles.cardLabel}>Ville</Text>
+                  <TouchableOpacity
+                    style={styles.editBtn}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.replace("/voyages/create/chauffeur");
+                    }}
+                  >
+                    <FontAwesome6
+                      name="pen"
+                      size={14}
+                      color={Colors.light.primary}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.cardValue}>
+                  {store.selectedVille?.designation ?? "—"}
+                </Text>
+              </View>
+
               {/* Km départ */}
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -284,6 +312,7 @@ export const VoyageSummaryScreen = () => {
               !store.selectedChauffeur ||
               !store.selectedVehicle ||
               !store.selectedDepot ||
+              !store.selectedVille ||
               !store.kmDepart ||
               !store.dateDepart ||
               !store.bls ||
@@ -296,6 +325,7 @@ export const VoyageSummaryScreen = () => {
                   idChauffeur: store.selectedChauffeur!.id,
                   idVehicule: store.selectedVehicle!.id,
                   depot_depart: store.selectedDepot!.id,
+                  idVille: store.selectedVille!.id,
                   km_depart: store.kmDepart,
                   date_depart: store.dateDepart!.toISOString(),
                 });
@@ -306,6 +336,7 @@ export const VoyageSummaryScreen = () => {
                   idChauffeur: store.selectedChauffeur!.id,
                   idVehicule: store.selectedVehicle!.id,
                   depot_depart: store.selectedDepot!.id,
+                  idVille: store.selectedVille!.id,
                   km_depart: store.kmDepart,
                   date_depart: store.dateDepart!.toISOString(),
                 });

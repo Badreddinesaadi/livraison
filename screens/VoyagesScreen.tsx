@@ -1,6 +1,7 @@
 import { ListDepots } from "@/api/depots.api";
 import { ListChauffeurs, ListClients } from "@/api/users.api";
 import { ListVehicles } from "@/api/vehicle.api";
+import { ListVilles } from "@/api/villes.api";
 import {
   changeVoyageStatus,
   deleteVoyage,
@@ -40,6 +41,10 @@ export const VoyagesScreen = () => {
   const { data: depotsList } = useQuery({
     queryKey: ["depots", "full-list"],
     queryFn: ListDepots,
+  });
+  const { data: villesList } = useQuery({
+    queryKey: ["villes", "full-list"],
+    queryFn: ListVilles,
   });
   const { data: clientsList } = useQuery({
     queryKey: ["clients", "full-list"],
@@ -181,6 +186,12 @@ export const VoyagesScreen = () => {
           store.setSelectedDepot(foundedDepot);
         }
       }
+      if (typeof item.idVille === "number") {
+        const foundedVille = villesList?.find((v) => v.id === item.idVille);
+        if (foundedVille) {
+          store.setSelectedVille(foundedVille);
+        }
+      }
       if (item.km_depart) {
         store.setKmDepart(item.km_depart);
       }
@@ -191,7 +202,7 @@ export const VoyagesScreen = () => {
       store.setType("update");
       router.navigate("/voyages/create/chauffeur");
     },
-    [store, chauffersList, vehiclesList, depotsList, router],
+    [store, chauffersList, vehiclesList, depotsList, villesList, router],
   );
 
   const handleOpenCloseBLSheet = useCallback(
@@ -232,6 +243,9 @@ export const VoyagesScreen = () => {
   const [selectedDepotId, setSelectedDepotId] = useState<number | undefined>(
     undefined,
   );
+  const [selectedVilleId, setSelectedVilleId] = useState<number | undefined>(
+    undefined,
+  );
   const [selectedClientId, setSelectedClientId] = useState<number | undefined>(
     undefined,
   );
@@ -242,12 +256,14 @@ export const VoyagesScreen = () => {
       (selectedChauffeurId ? 1 : 0) +
       (selectedVehiculeId ? 1 : 0) +
       (selectedDepotId ? 1 : 0) +
+      (selectedVilleId ? 1 : 0) +
       (selectedClientId ? 1 : 0)
     );
   }, [
     selectedChauffeurId,
     selectedVehiculeId,
     selectedDepotId,
+    selectedVilleId,
     selectedClientId,
   ]);
 
@@ -290,8 +306,15 @@ export const VoyagesScreen = () => {
     );
   }, [clientsList, selectedClientId]);
 
+  const selectedVilleLabel = useMemo(() => {
+    return (
+      villesList?.find((ville) => ville.id === selectedVilleId)?.designation ??
+      "Tous"
+    );
+  }, [villesList, selectedVilleId]);
+
   const handleOpenFilterSelector = useCallback(
-    (key: "chauffeur" | "vehicule" | "depot" | "client") => {
+    (key: "chauffeur" | "vehicule" | "depot" | "ville" | "client") => {
       if (key === "chauffeur") {
         openSelectorOptionsSheet({
           title: "Filtrer par chauffeur",
@@ -350,6 +373,26 @@ export const VoyagesScreen = () => {
         return;
       }
 
+      if (key === "ville") {
+        openSelectorOptionsSheet({
+          title: "Filtrer par ville",
+          options: [
+            { id: 0, label: "Tous" },
+            ...(villesList ?? []).map((item) => ({
+              id: item.id,
+              label: item.designation,
+            })),
+          ],
+          selectedId: selectedVilleId ?? 0,
+          enableSearch: true,
+          searchPlaceholder: "Rechercher une ville",
+          onSelect: (id) => {
+            setSelectedVilleId(id === 0 ? undefined : id);
+          },
+        });
+        return;
+      }
+
       openSelectorOptionsSheet({
         title: "Filtrer par dépôt",
         options: [
@@ -376,6 +419,8 @@ export const VoyagesScreen = () => {
       selectedClientId,
       depotsList,
       selectedDepotId,
+      villesList,
+      selectedVilleId,
     ],
   );
 
@@ -398,6 +443,11 @@ export const VoyagesScreen = () => {
         valueLabel: selectedDepotLabel,
       },
       {
+        key: "ville",
+        label: "Ville",
+        valueLabel: selectedVilleLabel,
+      },
+      {
         key: "client",
         label: "Client",
         valueLabel: selectedClientLabel,
@@ -414,6 +464,7 @@ export const VoyagesScreen = () => {
         setSelectedChauffeurId(undefined);
         setSelectedVehiculeId(undefined);
         setSelectedDepotId(undefined);
+        setSelectedVilleId(undefined);
         setSelectedClientId(undefined);
         closeBottomSheet();
       },
@@ -423,6 +474,7 @@ export const VoyagesScreen = () => {
     selectedChauffeurLabel,
     selectedVehiculeLabel,
     selectedDepotLabel,
+    selectedVilleLabel,
     selectedClientLabel,
     handleOpenFilterSelector,
     closeBottomSheet,
@@ -439,6 +491,7 @@ export const VoyagesScreen = () => {
           idChauffeur: selectedChauffeurId,
           idVehicule: selectedVehiculeId,
           idDepot: selectedDepotId,
+          idVille: selectedVilleId,
           idClient: selectedClientId,
         },
       ],
@@ -449,6 +502,7 @@ export const VoyagesScreen = () => {
           idChauffeur: selectedChauffeurId,
           idVehicule: selectedVehiculeId,
           idDepot: selectedDepotId,
+          idVille: selectedVilleId,
           idClient: selectedClientId,
         }),
       initialPageParam: 1,

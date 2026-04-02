@@ -1,5 +1,3 @@
-import ReturnActionConfirmBottomSheetContent from "@/components/ReturnActionConfirmBottomSheetContent";
-import ReturnDeleteConfirmBottomSheetContent from "@/components/ReturnDeleteConfirmBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
 import VoyageFiltersBottomSheetContent from "@/components/VoyageFiltersBottomSheetContent";
 import { Button } from "@/components/ui/button";
@@ -28,37 +26,24 @@ export default function StackLayout() {
   const voyageFiltersSheetConfig = useCloseBLStore(
     (s) => s.voyageFiltersSheetConfig,
   );
-  const returnActionReturnId = useCloseBLStore((s) => s.returnActionReturnId);
-  const returnDeleteReturnId = useCloseBLStore((s) => s.returnDeleteReturnId);
-  const isReturnActionPending = useCloseBLStore((s) => s.isReturnActionPending);
-  const isReturnDeletePending = useCloseBLStore((s) => s.isReturnDeletePending);
   const chooseSelectorOption = useCloseBLStore((s) => s.chooseSelectorOption);
   const chooseVoyageFilterItem = useCloseBLStore(
     (s) => s.chooseVoyageFilterItem,
   );
-  const confirmReturnAction = useCloseBLStore((s) => s.confirmReturnAction);
-  const confirmReturnDelete = useCloseBLStore((s) => s.confirmReturnDelete);
   const closeSheet = useCloseBLStore((s) => s.closeSheet);
   const isSheetOpen = useCloseBLStore((s) => s.isSheetOpen);
+
   const snapPoints = useMemo(() => {
-    if (sheetType === "return-action-confirm") {
+    if (sheetType === "voyage-filters") {
       return ["45%"];
     }
-    if (sheetType === "return-delete-confirm") {
-      return ["30%"];
-    }
-    if (sheetType === "voyage-filters") {
-      return ["50%"];
-    }
+
     return ["60%"];
   }, [sheetType]);
 
   const isManagedSheetOpen =
     isSheetOpen &&
-    (sheetType === "selector-options" ||
-      sheetType === "voyage-filters" ||
-      sheetType === "return-action-confirm" ||
-      sheetType === "return-delete-confirm");
+    (sheetType === "selector-options" || sheetType === "voyage-filters");
   const { top, bottom } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const rotation = useRef(new Animated.Value(0));
@@ -119,6 +104,7 @@ export default function StackLayout() {
     ),
     [],
   );
+
   return (
     <GestureHandlerRootView style={{ flex: 1, paddingBottom: bottom }}>
       <Stack
@@ -149,7 +135,7 @@ export default function StackLayout() {
                 <FontAwesome name="arrow-left" size={24} color="black" />
               </TouchableWithoutFeedback>
               <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                {headerTitles[s.route.name] ?? "Retours"}
+                {headerTitles[s.route.name] ?? "Rotation chauffeur"}
               </Text>
               <Button
                 preset="ghost"
@@ -157,7 +143,9 @@ export default function StackLayout() {
                   if (isRefreshing) return;
                   setIsRefreshing(true);
                   startSpin();
-                  queryClient.invalidateQueries({ queryKey: ["returns"] });
+                  queryClient.invalidateQueries({
+                    queryKey: ["rotations", "chauffeur"],
+                  });
                   timeoutRef.current = setTimeout(() => {
                     stopSpin();
                     setIsRefreshing(false);
@@ -213,20 +201,6 @@ export default function StackLayout() {
             onSelectItem={chooseVoyageFilterItem}
             onReset={voyageFiltersSheetConfig.onReset}
           />
-        ) : sheetType === "return-delete-confirm" ? (
-          <ReturnDeleteConfirmBottomSheetContent
-            returnId={returnDeleteReturnId}
-            isLoading={isReturnDeletePending}
-            onCancel={closeSheet}
-            onConfirm={confirmReturnDelete}
-          />
-        ) : sheetType === "return-action-confirm" ? (
-          <ReturnActionConfirmBottomSheetContent
-            returnId={returnActionReturnId}
-            isLoading={isReturnActionPending}
-            onCancel={closeSheet}
-            onConfirm={confirmReturnAction}
-          />
         ) : (
           <View style={{ padding: 16 }}>
             <Text style={{ color: "#888" }}>Aucune option disponible</Text>
@@ -238,7 +212,5 @@ export default function StackLayout() {
 }
 
 const headerTitles: Record<string, string> = {
-  index: "List des retours",
-  "create/index": "Créer un retour",
-  "details/[returnId]": "Détails du retour",
+  index: "Liste des rotations",
 };

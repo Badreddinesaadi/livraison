@@ -116,6 +116,22 @@ export default function HomeScreen() {
           />
           <Button
             preset="filled"
+            text="Rotation chauffeur"
+            LeftAccessory={() => (
+              <View>
+                <MaterialCommunityIcons
+                  name="cached"
+                  size={24}
+                  color={Colors.light.background}
+                />
+              </View>
+            )}
+            onPress={() => {
+              router.navigate("/rotation-chauffeur");
+            }}
+          />
+          <Button
+            preset="filled"
             text="Lieux de projets"
             LeftAccessory={() => (
               <View>

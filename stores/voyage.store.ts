@@ -1,3 +1,4 @@
+import type { Ville } from "@/api/villes.api";
 import { BL } from "@/types/bl.types";
 import { Chauffeur, Depot, Vehicle } from "@/types/user.types";
 import { create } from "zustand";
@@ -15,6 +16,8 @@ type BlsState = {
   setSelectedVehicle: (vehicle: Vehicle) => void;
   selectedDepot: Depot | null;
   setSelectedDepot: (depot: Depot) => void;
+  selectedVille: Ville | null;
+  setSelectedVille: (ville: Ville) => void;
   kmDepart: number;
   setKmDepart: (km: number) => void;
   dateDepart: Date | null;
@@ -51,6 +54,8 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
   setSelectedVehicle: (vehicle: Vehicle) => set({ selectedVehicle: vehicle }),
   selectedDepot: null,
   setSelectedDepot: (depot: Depot) => set({ selectedDepot: depot }),
+  selectedVille: null,
+  setSelectedVille: (ville: Ville) => set({ selectedVille: ville }),
   kmDepart: 0,
   setKmDepart: (km: number) => set({ kmDepart: km }),
   dateDepart: null,
@@ -63,6 +68,7 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
       selectedChauffeur: null,
       selectedVehicle: null,
       selectedDepot: null,
+      selectedVille: null,
       kmDepart: 0,
       dateDepart: null,
       idVoyage: null,

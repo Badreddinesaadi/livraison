@@ -11,10 +11,15 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type DrawerIconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
+type DrawerRoute =
+  | "/voyages"
+  | "/returns"
+  | "/rotation-chauffeur"
+  | "/projet-locations";
 
 type DrawerMenuItem = {
   label: string;
-  route: string;
+  route: DrawerRoute;
   icon: DrawerIconName;
 };
 
@@ -22,14 +27,27 @@ const DRAWER_ITEMS: DrawerMenuItem[] = [
   { label: "Voyages", route: "/voyages", icon: "truck-fast" },
   { label: "Retours", route: "/returns", icon: "backup-restore" },
   {
+    label: "Rotation chauffeur",
+    route: "/rotation-chauffeur",
+    icon: "cached",
+  },
+  {
     label: "Projet locations",
     route: "/projet-locations",
     icon: "map-marker-radius",
   },
 ];
 
-function isRouteActive(pathname: string, route: string) {
-  return pathname === route || pathname.startsWith(`${route}/`);
+function isRouteActive(pathname: string, route: DrawerRoute) {
+  const normalizedRoute = route.endsWith("/index")
+    ? route.slice(0, -"/index".length)
+    : route;
+
+  return (
+    pathname === route ||
+    pathname === normalizedRoute ||
+    pathname.startsWith(`${normalizedRoute}/`)
+  );
 }
 
 export function AppDrawerContent(props: DrawerContentComponentProps) {
@@ -38,7 +56,7 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
   const insets = useSafeAreaInsets();
   const { user, signOut } = useSession();
 
-  const handleNavigate = (route: string) => {
+  const handleNavigate = (route: DrawerRoute) => {
     router.navigate(route);
     props.navigation.closeDrawer();
   };

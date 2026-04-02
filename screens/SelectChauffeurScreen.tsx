@@ -1,6 +1,7 @@
 import { ListDepots } from "@/api/depots.api";
 import { ListChauffeurs } from "@/api/users.api";
 import { ListVehicles } from "@/api/vehicle.api";
+import { ListVilles } from "@/api/villes.api";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
@@ -33,6 +34,10 @@ export const SelectChauffeurScreen = () => {
   const { data: depotsList, isLoading: isDepotsLoading } = useQuery({
     queryKey: ["depots", "full-list"],
     queryFn: ListDepots,
+  });
+  const { data: villesList, isLoading: isVillesLoading } = useQuery({
+    queryKey: ["villes", "full-list"],
+    queryFn: ListVilles,
   });
   const createVoyageStore = useCreateVoyageStore();
   const openSelectorOptions = useCloseBLStore((s) => s.openSelectorOptions);
@@ -68,6 +73,15 @@ export const SelectChauffeurScreen = () => {
         subLabel: depot.nom || undefined,
       })),
     [depotsList],
+  );
+
+  const villeOptions = useMemo(
+    () =>
+      (villesList ?? []).map((ville) => ({
+        id: ville.id,
+        label: ville.designation,
+      })),
+    [villesList],
   );
 
   const openChauffeurSelector = useCallback(() => {
@@ -116,6 +130,20 @@ export const SelectChauffeurScreen = () => {
     });
   }, [openSelectorOptions, depotOptions, depotsList, createVoyageStore]);
 
+  const openVilleSelector = useCallback(() => {
+    openSelectorOptions({
+      title: "Sélectionner une ville",
+      options: villeOptions,
+      selectedId: createVoyageStore.selectedVille?.id,
+      onSelect: (id: number) => {
+        const selectedVille = villesList?.find((ville) => ville.id === id);
+        if (selectedVille) {
+          createVoyageStore.setSelectedVille(selectedVille);
+        }
+      },
+    });
+  }, [openSelectorOptions, villeOptions, villesList, createVoyageStore]);
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -125,7 +153,10 @@ export const SelectChauffeurScreen = () => {
           </Text>
         </View>
 
-        {isChauffeursLoading || isVehiclesLoading || isDepotsLoading ? (
+        {isChauffeursLoading ||
+        isVehiclesLoading ||
+        isDepotsLoading ||
+        isVillesLoading ? (
           <Loader />
         ) : (
           <ScrollView
@@ -190,6 +221,24 @@ export const SelectChauffeurScreen = () => {
                   {createVoyageStore.selectedDepot
                     ? `${createVoyageStore.selectedDepot.code} — ${createVoyageStore.selectedDepot.nom}`
                     : "Sélectionner un dépôt"}
+                </Text>
+                <FontAwesome6 name="chevron-right" size={14} color="#888" />
+              </Pressable>
+            </View>
+
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
+                <FontAwesome6
+                  name="city"
+                  size={18}
+                  color={Colors.light.primary}
+                />
+                <Text style={styles.sectionTitle}>Ville</Text>
+              </View>
+              <Pressable style={styles.dateButton} onPress={openVilleSelector}>
+                <Text style={styles.dateButtonText}>
+                  {createVoyageStore.selectedVille?.designation ||
+                    "Sélectionner une ville"}
                 </Text>
                 <FontAwesome6 name="chevron-right" size={14} color="#888" />
               </Pressable>
@@ -309,6 +358,7 @@ export const SelectChauffeurScreen = () => {
           <Button
             disabled={
               !createVoyageStore.selectedDepot ||
+              !createVoyageStore.selectedVille ||
               !createVoyageStore.selectedChauffeur ||
               !createVoyageStore.kmDepart ||
               !createVoyageStore.dateDepart

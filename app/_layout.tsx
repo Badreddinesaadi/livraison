@@ -21,7 +21,7 @@ const InnerLayout = () => {
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SplashScreenController />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={!!session.user}>

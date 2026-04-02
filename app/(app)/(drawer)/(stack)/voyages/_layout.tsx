@@ -49,7 +49,7 @@ export default function StackLayout() {
     } else if (sheetType === "voyage-more-actions") {
       return ["30%"];
     } else if (sheetType === "voyage-filters") {
-      return ["55%"];
+      return ["65%"];
     } else if (sheetType === "selector-options") {
       return ["60%"];
     } else {
