@@ -11,19 +11,29 @@
     \geometry{margin=2.5cm}
     \setlength{\parindent}{0pt}
     \setlength{\parskip}{0.6em}
+    \setcounter{secnumdepth}{3}
+    \renewcommand{\thesection}{1.\arabic{section}}
+    \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+    \renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
 
     \begin{document}
 
-    \begin{center}
-    {\LARGE \textbf{Problématique}}\\[0.6em]
-    \end{center}
+    \begin{titlepage}
+    \centering
+    \vspace*{\fill}
+    {\Huge \textbf{CHAPITRE 1}}\\[0.8em]
+    {\LARGE \linespread{0.9}\selectfont \textbf{CADRE ET CONTEXTE GÉNÉRAL}\\[0.4em]\textbf{DU PROJET}}
+    \vspace*{\fill}
+    \end{titlepage}
 
-    \section*{Contexte}
+    \section{Problématique}
+
+    \subsection{Contexte}
     SDKWOOD distribue des matériaux en bois et des produits associés vers des chantiers, des clients et des partenaires. Chaque jour, des chauffeurs chargent des commandes au dépôt, réalisent des livraisons, et reviennent avec des informations de terrain (retours, anomalies, pièces manquantes, refus, dommages, etc.).
 
     Dans ce type d'activité, la qualité du suivi est un point clé. Il faut savoir, rapidement et de façon fiable, ce qui a été chargé, ce qui a été livré, ce qui a été refusé, et ce qui doit être traité ensuite au bureau.
 
-    \section*{Situation actuelle : suivi manuel}
+    \subsection{Situation actuelle : suivi manuel}
     Aujourd'hui, une grande partie de ces opérations est faite avec du papier (carnets, fiches, formulaires, bons de livraison). Les informations sont notées à la main pendant le chargement, la livraison, et le retour.
 
     Ce fonctionnement présente un schéma courant :
@@ -33,7 +43,7 @@
     \item Une personne de l'ADV (Administration des ventes) ressaisit les données dans des fichiers ou outils internes, ou bien classe les documents.
     \end{itemize}
 
-    \section*{Problèmes rencontrés}
+    \subsection{Problèmes rencontrés}
     Le suivi manuel peut fonctionner sur de petits volumes, mais il montre vite ses limites dès que l'activité augmente ou que les équipes doivent réagir vite.
 
     Les principaux problèmes observés sont les suivants :
@@ -49,7 +59,7 @@
 
     Ces difficultés ont un impact direct : ralentissement du service, stress opérationnel, manque de fiabilité des informations, et difficulté à piloter l'activité.
 
-    \section*{Besoin : supprimer la double saisie et fiabiliser le suivi}
+    \subsection{Besoin : supprimer la double saisie et fiabiliser le suivi}
     Le besoin principal est de capter l'information une seule fois, au bon moment, au plus proche de l'action. En pratique, cela veut dire :
     \begin{itemize}[leftmargin=1.2em]
     \item enregistrer les voyages, les bons de livraison et les retours sans passer par un papier intermédiaire ;
@@ -59,21 +69,24 @@
 
     \newpage
 
-    \section*{Étude de l'existant :}
+    \subsection{Étude de l'existant}
     Il existe des solutions du marché qui répondent au besoin de suivi des livraisons et des opérations terrain. Deux exemples connus sont \textbf{Onfleet} et \textbf{Samsara}.
 
-    \subsection*{Onfleet}
+    \subsubsection{Onfleet}
     Onfleet est une solution de gestion de livraisons : elle aide à organiser les tournées, suivre l'avancement, et collecter une preuve de livraison. Elle est surtout adaptée aux processus de livraison standard.
 
-    \begin{center}
+    \begin{figure}[h]
+    \centering
     \IfFileExists{assets/onfleet-logo.png}{
     \includegraphics[width=0.35\textwidth]{assets/onfleet-logo.png}
     }{
     \textit{Logo Onfleet : fichier assets/onfleet-logo.png non trouvé.}
     }
-    \end{center}
+    \caption{Logo Onfleet}
+    \label{fig:onfleet-logo}
+    \end{figure}
 
-    \subsection*{Ce que Onfleet apporte}
+    \subsubsection{Ce que Onfleet apporte}
     Onfleet est adapté lorsque l'objectif principal est d'organiser des livraisons, de suivre l'avancement d'une tournée, et d'obtenir une preuve de livraison.
 
     Principaux bénéfices :
@@ -84,7 +97,7 @@
     \item \textbf{Fonctions standard} : notifications et suivi client possibles selon les usages.
     \end{itemize}
 
-    \subsection*{Limites dans le contexte de l'entreprise}
+    \subsubsection{Limites dans le contexte de l'entreprise}
     Dans une entreprise de distribution de matériaux en bois, le besoin ne se limite pas à ``livrer une commande''. Il faut aussi gérer des documents internes (bons de livraison), des retours chauffeurs, et des étapes de traitement au bureau.
 
     Principales limites possibles dans ce contexte :
@@ -95,17 +108,20 @@
     \item \textbf{Intégration} : le lien avec les outils internes (stocks, facturation, référentiels) peut demander un effort et rester contraint.
     \end{itemize}
 
-    \subsection*{Samsara}
+    \subsubsection{Samsara}
     Samsara est une solution de gestion d'opérations terrain orientée flotte : elle aide à suivre l'activité des véhicules et à structurer des processus terrain. Elle est surtout utilisée quand le suivi de la flotte, la sécurité et le pilotage opérationnel sont prioritaires.
 
-    \begin{center}
+    \begin{figure}[h]
+    \centering
     \IfFileExists{assets/samsara-logo.png}{
     \includegraphics[width=0.35\textwidth]{assets/samsara-logo.png}
     }{
     \textit{Logo Samsara : fichier assets/samsara-logo.png non trouvé.}
     }
-    \end{center}
-    \subsection*{Ce que Samsara apporte}
+    \caption{Logo Samsara}
+    \label{fig:samsara-logo}
+    \end{figure}
+    \subsubsection{Ce que Samsara apporte}
     Samsara répond à plusieurs objectifs similaires à Onfleet (visibilité, traçabilité, suivi d'exécution), mais avec un positionnement davantage orienté flotte et pilotage.
 
     Principaux apports dans ce cadre :
@@ -115,7 +131,7 @@
     \item \textbf{Pilotage} : indicateurs pour mieux comprendre les volumes, les retards et les situations récurrentes.
     \end{itemize}
 
-    \subsection*{Limites dans le contexte de l'entreprise}
+    \subsubsection{Limites dans le contexte de l'entreprise}
     Dans une entreprise de distribution de matériaux en bois, le besoin clé inclut aussi la gestion fine des bons de livraison et des retours, avec des statuts et des circuits de traitement adaptés. Comme pour Onfleet, une partie des limites dépend de l'adéquation entre le standard de l'outil et les règles internes.
 
     Principales limites possibles dans ce contexte :
@@ -125,19 +141,51 @@
     \item \textbf{Coûts et dépendance} : l'abonnement, les options et les contraintes contractuelles restent des facteurs à considérer, comme pour une solution SaaS.
     \end{itemize}
 
-    \section*{Synthèse de la problématique}
+    \subsection{Méthodologie de gestion de projet : Scrum}
+    Dans un contexte marqué par l'évolution rapide des exigences et la nécessité de garantir la qualité à chaque livraison, notre équipe a adopté la méthodologie Scrum, un cadre agile reconnu pour sa capacité à piloter efficacement les projets logiciels complexes.
+
+    Scrum structure le travail en \textit{Sprints}, généralement de 1 à 3 semaines dans notre projet, durant lesquels l'équipe conçoit, développe, teste et livre un incrément fonctionnel du produit. Cette approche itérative permet une adaptation continue des priorités, une intégration rapide des retours et une amélioration progressive de la qualité.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/scrum.jpg}{
+    \includegraphics[width=0.78\textwidth]{assets/scrum.jpg}
+    }{
+    \textit{Figure Scrum : fichier assets/scrum.jpg non trouvé.}
+    }
+    \caption{Cycle de vie de la méthodologie Scrum}
+    \label{fig:scrum-cycle}
+    \end{figure}
+
+    \subsubsection{Rôles au sein de l'équipe}
+    Trois rôles clés structurent cette démarche collaborative :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Le Product Owner} incarne la vision du produit. Il définit et priorise les besoins métier à travers le Product Backlog, veillant à ce que l'équipe se concentre sur les fonctionnalités à plus forte valeur ajoutée.
+    \item \textbf{L'équipe de développement}, composée de développeurs et de testeurs, s'auto-organise pour transformer les exigences fonctionnelles en solutions opérationnelles.
+    \item \textbf{Le Scrum Master} veille à la bonne application du cadre Scrum, facilite les échanges au sein de l'équipe, supprime les obstacles et soutient la dynamique d'amélioration continue.
+    \end{itemize}
+
+    \subsubsection{Rituels agiles et interactions}
+    Chaque journée débute par un \textit{Daily Scrum}, une réunion courte permettant à chaque membre de l'équipe de partager ses avancements, ses éventuels blocages ainsi que ses objectifs journaliers. Ce rituel favorise la planification des validations, l'identification des fonctionnalités prêtes à être testées, et renforce la collaboration entre les différents intervenants, notamment entre les développeurs et l'analyste test.
+
+    À la fin de chaque Sprint, une \textit{Sprint Review} permet de présenter les livrables aux parties prenantes et de recueillir leurs retours. Une \textit{Sprint Retrospective} est ensuite organisée afin d'analyser le déroulement du Sprint, d'identifier les axes d'amélioration et de renforcer la collaboration.
+
+    \subsubsection{Suivi et traçabilité}
+    Le suivi des tâches, des tests, des anomalies et des priorités est réalisé à l'aide d'un tableau Trello, permettant une gestion visuelle du Product Backlog, des user stories, des cas de test et des tickets QA. Cette organisation favorise la transparence, la réactivité et une coordination fluide entre tous les acteurs du projet.
+
+    \subsection{Synthèse de la problématique}
     La problématique est celle d'une activité logistique qui dépend de preuves et d'informations terrain, mais dont le suivi est encore largement manuel. Le papier crée des délais, des erreurs, et une faible visibilité.
 
     Cette situation met en évidence un besoin de fiabiliser la capture d'information sur le terrain, de réduire la double saisie, et de rendre les statuts plus visibles pour accélérer la décision et le traitement au bureau.
 
     \newpage
 
-    \section*{Solution proposée : une application mobile pour digitaliser les opérations}
+    \subsection{Solution proposée : une application mobile pour digitaliser les opérations}
     L'objectif est de remplacer l'enregistrement papier et la ressaisie par un enregistrement direct, simple et structuré, au moment où l'action se produit. L'application accompagne le chauffeur et les équipes internes sur les tâches du quotidien : préparation et suivi des voyages, gestion des bons de livraison, enregistrement des retours, et consultation des détails.
 
     L'enjeu n'est pas de complexifier le travail terrain. Au contraire, la solution doit rendre la saisie plus rapide et plus fiable, tout en réduisant la charge de traitement au bureau.
 
-    \subsection*{Pourquoi une application mobile plutôt qu'une application web}
+    \subsubsection{Pourquoi une application mobile plutôt qu'une application web}
     Une application web est adaptée à un poste de travail fixe. Dans ce contexte, une partie importante des opérations se fait en déplacement : chargement au dépôt, livraisons sur chantier, retours en fin de tournée.
 
     Le chauffeur n'a pas forcément un ordinateur portable, et il n'est pas réaliste de lui demander d'en transporter un. Le téléphone, au contraire, est déjà présent, tient dans la poche, et peut être utilisé en quelques secondes.
@@ -150,7 +198,7 @@
     \item \textbf{Confort opérationnel} : pas de matériel en plus à transporter, pas de poste à installer.
     \end{itemize}
 
-    \subsection*{Bénéfices d'une solution digitale}
+    \subsubsection{Bénéfices d'une solution digitale}
     Passer d'un suivi papier à une solution digitale apporte des gains concrets :
     \begin{itemize}[leftmargin=1.2em]
     \item \textbf{Fiabilité} : des champs structurés réduisent les oublis et les ambiguïtés.

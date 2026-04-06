@@ -109,7 +109,7 @@ class ApiClient {
       fetchOptions.body = isFormDataBody ? body : JSON.stringify(body);
     }
 
-    if (isDebug) {
+    if (isDebug && __DEV__) {
       console.log("\n====== API REQUEST DEBUG ======");
       console.log("URL:", finalUrl);
       console.log("Method:", method);
@@ -121,7 +121,7 @@ class ApiClient {
     const response = await fetch(finalUrl, fetchOptions);
     const data = await response.json();
 
-    if (isDebug) {
+    if (isDebug && __DEV__) {
       console.log("\n====== API RESPONSE DEBUG ======");
       console.log("Status:", response.status, response.statusText);
       console.log("Response Data:", JSON.stringify(data, null, 2));
@@ -129,7 +129,9 @@ class ApiClient {
     }
 
     if (data.status === false) {
-      console.log("API Error (status is false):", data.message);
+      if (__DEV__) {
+        console.log("API Error (status is false):", data.message);
+      }
 
       if (data.code === 76) {
         // token is expired
