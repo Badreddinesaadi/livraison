@@ -1,6 +1,8 @@
 import { createVoyage, updateVoyage } from "@/api/voyage.api";
 import { Button } from "@/components/ui/button";
+import { hasVoyagePermission } from "@/constants/permissions";
 import { Colors } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,9 +17,14 @@ import {
 import Toast from "react-native-toast-message";
 
 export const VoyageSummaryScreen = () => {
+  const { user } = useSession();
   const queryClient = useQueryClient();
   const store = useCreateVoyageStore();
   const router = useRouter();
+  const canCreateVoyage = hasVoyagePermission(user, "CREATE");
+  const canUpdateVoyage = hasVoyagePermission(user, "UPDATE");
+  const canEditVoyage =
+    store.type === "create" ? canCreateVoyage : canUpdateVoyage;
   const createVoyageMutation = useMutation({
     mutationFn: createVoyage,
     mutationKey: ["createVoyage"],
@@ -55,6 +62,34 @@ export const VoyageSummaryScreen = () => {
       }, 2000);
     },
   });
+
+  if (!canEditVoyage) {
+    return (
+      <View style={styles.container}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 20,
+            rowGap: 12,
+          }}
+        >
+          <Text style={{ color: "#666", textAlign: "center" }}>
+            {store.type === "create"
+              ? "Vous n'avez pas la permission de créer un voyage."
+              : "Vous n'avez pas la permission de modifier un voyage."}
+          </Text>
+          <Button
+            preset="ghost"
+            text="Retour"
+            onPress={() => router.replace("/(app)/(drawer)/(stack)/voyages")}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -307,8 +342,13 @@ export const VoyageSummaryScreen = () => {
                 ? "Confirmer le voyage"
                 : "Mettre à jour le voyage"
             }
-            isLoading={createVoyageMutation.isPending}
+            isLoading={
+              store.type === "create"
+                ? createVoyageMutation.isPending
+                : updateVoyageMutation.isPending
+            }
             disabled={
+              !canEditVoyage ||
               !store.selectedChauffeur ||
               !store.selectedVehicle ||
               !store.selectedDepot ||
@@ -319,6 +359,18 @@ export const VoyageSummaryScreen = () => {
               store.bls.length === 0
             }
             onPress={() => {
+              if (!canEditVoyage) {
+                Toast.show({
+                  type: "error",
+                  text1: "Permission refusée",
+                  text2:
+                    store.type === "create"
+                      ? "Vous n'avez pas la permission de créer un voyage."
+                      : "Vous n'avez pas la permission de modifier un voyage.",
+                });
+                return;
+              }
+
               if (store.type === "create") {
                 createVoyageMutation.mutate({
                   bl_list: store.bls!.map((bl) => ({ id: bl.id })),

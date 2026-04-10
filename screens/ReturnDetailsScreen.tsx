@@ -1,7 +1,9 @@
 import { getReturnById } from "@/api/return.api";
 import Loader from "@/components/Loader";
+import { hasRetourPermission } from "@/constants/permissions";
 import { apiUrl } from "@/constants/query";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -167,6 +169,8 @@ const getOpenUriCandidates = (uri: string) => {
 };
 
 export const ReturnDetailsScreen = () => {
+  const { user } = useSession();
+  const canListReturns = hasRetourPermission(user, "LIST");
   const { returnId } = useLocalSearchParams<{ returnId: string }>();
   const [previewImage, setPreviewImage] = useState<{
     uri: string;
@@ -179,7 +183,7 @@ export const ReturnDetailsScreen = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["returns", "details", returnId],
     queryFn: () => getReturnById({ id: String(returnId) }),
-    enabled: Boolean(returnId),
+    enabled: canListReturns && Boolean(returnId),
   });
 
   const statusUi = useMemo(() => {
@@ -208,6 +212,32 @@ export const ReturnDetailsScreen = () => {
     () => (data?.date ? new Date(data.date) : null),
     [data?.date],
   );
+
+  if (!canListReturns) {
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          backgroundColor: "#f7f8fa",
+        }}
+      >
+        <FontAwesome5 name="lock" size={34} color="#bbb" />
+        <Text
+          style={{
+            marginTop: 12,
+            color: "#666",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Vous n'avez pas la permission de consulter les retours.
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   const handleDownloadFile = useCallback(
     async (fileUrl: string, sourceName?: string | null, fileId?: string) => {

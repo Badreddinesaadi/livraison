@@ -1,3 +1,9 @@
+import {
+  canAccessProjetModule,
+  canAccessRetourModule,
+  canAccessRotationModule,
+  canAccessVoyageModule,
+} from "@/constants/permissions";
 import { Colors } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -55,6 +61,10 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const { user, signOut } = useSession();
+  const canShowVoyageModule = canAccessVoyageModule(user);
+  const canShowRetourModule = canAccessRetourModule(user);
+  const canShowProjetModule = canAccessProjetModule(user);
+  const canShowRotationModule = canAccessRotationModule(user);
 
   const handleNavigate = (route: DrawerRoute) => {
     router.navigate(route);
@@ -106,7 +116,25 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
         </View>
 
         <View style={styles.itemsContainer}>
-          {DRAWER_ITEMS.map((item) => {
+          {DRAWER_ITEMS.filter((item) => {
+            if (item.route === "/voyages") {
+              return canShowVoyageModule;
+            }
+
+            if (item.route === "/returns") {
+              return canShowRetourModule;
+            }
+
+            if (item.route === "/projet-locations") {
+              return canShowProjetModule;
+            }
+
+            if (item.route === "/rotation-chauffeur") {
+              return canShowRotationModule;
+            }
+
+            return true;
+          }).map((item) => {
             const isActive = isRouteActive(pathname, item.route);
 
             return (

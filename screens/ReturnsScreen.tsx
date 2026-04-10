@@ -3,6 +3,7 @@ import { ListChauffeurs, ListClients } from "@/api/users.api";
 import Loader from "@/components/Loader";
 import { ReturnCard } from "@/components/ReturnCard";
 import { Button } from "@/components/ui/button";
+import { hasRetourPermission } from "@/constants/permissions";
 import { Colors, PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore, VoyageFilterItem } from "@/stores/close-bl.store";
@@ -22,15 +23,20 @@ export const ReturnsScreen = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useSession();
-  const canCreateReturn = user?.role === "chauffeur";
-  const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
+  const canListReturns = hasRetourPermission(user, "LIST");
+  const canCreateReturn = hasRetourPermission(user, "CREATE");
+  const canUpdateReturn = hasRetourPermission(user, "UPDATE");
+  const canDeleteReturn = hasRetourPermission(user, "DELETE");
+  const canManageReturns = canUpdateReturn || canDeleteReturn;
   const { data: chauffersList } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
+    enabled: canListReturns,
   });
   const { data: clientsList } = useQuery({
     queryKey: ["clients", "full-list"],
     queryFn: ListClients,
+    enabled: canListReturns,
   });
   const openSelectorOptionsSheet = useCloseBLStore(
     (s) => s.openSelectorOptions,
@@ -113,6 +119,15 @@ export const ReturnsScreen = () => {
 
   const openMoreOptions = useCallback(
     (item: { id: string; statut: string }) => {
+      if (!canManageReturns) {
+        Toast.show({
+          type: "error",
+          text1: "Permission refusée",
+          text2: "Vous n'avez pas la permission de modifier ce retour.",
+        });
+        return;
+      }
+
       const parsedId = Number(item.id);
       if (!Number.isFinite(parsedId)) {
         Toast.show({
@@ -123,17 +138,31 @@ export const ReturnsScreen = () => {
         return;
       }
 
-      const options: { id: number; label: string; type?: "highlight" }[] = [
-        { id: 1, label: "Supprimer le retour" },
-      ];
+      const options: { id: number; label: string; type?: "highlight" }[] = [];
       const canValidate =
-        isAdminOrAdv && item.statut !== "terminer" && item.statut !== "refuser";
+        canUpdateReturn &&
+        item.statut !== "terminer" &&
+        item.statut !== "refuser";
+
       if (canValidate) {
         options.unshift({
           id: 2,
           label: "Traiter le retour",
           type: "highlight",
         });
+      }
+
+      if (canDeleteReturn) {
+        options.push({ id: 1, label: "Supprimer le retour" });
+      }
+
+      if (options.length === 0) {
+        Toast.show({
+          type: "info",
+          text1: "Aucune action",
+          text2: "Aucune action n'est disponible pour ce retour.",
+        });
+        return;
       }
 
       openSelectorOptionsSheet({
@@ -151,7 +180,7 @@ export const ReturnsScreen = () => {
             return;
           }
 
-          if (id === 1 && !isDeleting) {
+          if (id === 1 && canDeleteReturn && !isDeleting) {
             openReturnDeleteConfirm(parsedId, (targetId) => {
               deleteReturnMutate(targetId);
             });
@@ -160,7 +189,9 @@ export const ReturnsScreen = () => {
       });
     },
     [
-      isAdminOrAdv,
+      canManageReturns,
+      canUpdateReturn,
+      canDeleteReturn,
       openSelectorOptionsSheet,
       isValidatingReturn,
       openReturnValidateConfirm,
@@ -246,7 +277,7 @@ export const ReturnsScreen = () => {
       },
     ];
 
-    if (!isAdminOrAdv) {
+    if (!canManageReturns) {
       items.splice(0, 1);
     }
 
@@ -267,7 +298,7 @@ export const ReturnsScreen = () => {
   }, [
     selectedChauffeurLabel,
     selectedClientLabel,
-    isAdminOrAdv,
+    canManageReturns,
     openVoyageFiltersSheet,
     handleOpenFilterSelector,
     closeBottomSheet,
@@ -289,6 +320,7 @@ export const ReturnsScreen = () => {
           chauffeur_id: selectedChauffeurId,
           client_id: selectedClientId,
         }),
+      enabled: canListReturns,
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
         const pagination = lastPage.pagination;
@@ -324,6 +356,32 @@ export const ReturnsScreen = () => {
       return searchIn.includes(debouncedSearch);
     });
   }, [data, debouncedSearch]);
+
+  if (!canListReturns) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          backgroundColor: "#f7f8fa",
+        }}
+      >
+        <FontAwesome5 name="lock" size={34} color="#bbb" />
+        <Text
+          style={{
+            marginTop: 12,
+            color: "#666",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Vous n'avez pas la permission d'accéder au module Retour.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -432,6 +490,7 @@ export const ReturnsScreen = () => {
           renderItem={({ item }) => (
             <ReturnCard
               item={item}
+              canManageReturn={canManageReturns}
               onShowDetails={() => {
                 router.navigate({
                   pathname: "/returns/details/[returnId]",

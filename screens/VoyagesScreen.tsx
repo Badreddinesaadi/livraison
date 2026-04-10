@@ -11,9 +11,14 @@ import {
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { VoyageCard } from "@/components/voyageCard";
+import { hasVoyagePermission } from "@/constants/permissions";
 import { Colors, PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
-import { useCloseBLStore, VoyageFilterItem } from "@/stores/close-bl.store";
+import {
+  useCloseBLStore,
+  VoyageFilterItem,
+  VoyageFilterKey,
+} from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { BL } from "@/types/bl.types";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -30,25 +35,36 @@ import Toast from "react-native-toast-message";
 
 export const VoyagesScreen = () => {
   const { user } = useSession();
+  const canListVoyages = hasVoyagePermission(user, "LIST");
+  const canCreateVoyages = hasVoyagePermission(user, "CREATE");
+  const canUpdateVoyages = hasVoyagePermission(user, "UPDATE");
+  const canDeleteVoyages = hasVoyagePermission(user, "DELETE");
+  const canManageVoyages =
+    canCreateVoyages || canUpdateVoyages || canDeleteVoyages;
   const { data: chauffersList } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
+    enabled: canListVoyages,
   });
   const { data: vehiclesList } = useQuery({
     queryKey: ["vehicles", "full-list"],
     queryFn: ListVehicles,
+    enabled: canListVoyages,
   });
   const { data: depotsList } = useQuery({
     queryKey: ["depots", "full-list"],
     queryFn: ListDepots,
+    enabled: canListVoyages,
   });
   const { data: villesList } = useQuery({
     queryKey: ["villes", "full-list"],
     queryFn: ListVilles,
+    enabled: canListVoyages,
   });
   const { data: clientsList } = useQuery({
     queryKey: ["clients", "full-list"],
     queryFn: ListClients,
+    enabled: canListVoyages,
   });
   const router = useRouter();
   const store = useCreateVoyageStore();
@@ -66,7 +82,6 @@ export const VoyagesScreen = () => {
   const clearConfirmedVoyageAction = useCloseBLStore(
     (s) => s.clearConfirmedVoyageAction,
   );
-  const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
 
   const finishVoyageAction = useCloseBLStore((s) => s.finishVoyageAction);
   const queryClient = useQueryClient();
@@ -110,6 +125,17 @@ export const VoyagesScreen = () => {
     }
 
     if (confirmedVoyageAction.action === "achever") {
+      if (!canUpdateVoyages) {
+        finishVoyageActionIfPending();
+        clearConfirmedVoyageAction();
+        Toast.show({
+          type: "error",
+          text1: "Permission refusée",
+          text2: "Vous n'avez pas la permission de modifier les voyages.",
+        });
+        return;
+      }
+
       if (
         typeof confirmedVoyageAction.kmRetour !== "number" ||
         !confirmedVoyageAction.dateRetour
@@ -128,6 +154,17 @@ export const VoyagesScreen = () => {
     }
 
     if (confirmedVoyageAction.action === "supprimer") {
+      if (!canDeleteVoyages) {
+        finishVoyageActionIfPending();
+        clearConfirmedVoyageAction();
+        Toast.show({
+          type: "error",
+          text1: "Permission refusée",
+          text2: "Vous n'avez pas la permission de supprimer les voyages.",
+        });
+        return;
+      }
+
       deleteMutate(confirmedVoyageAction.voyageId);
     }
 
@@ -138,14 +175,34 @@ export const VoyagesScreen = () => {
     deleteMutate,
     clearConfirmedVoyageAction,
     finishVoyageActionIfPending,
+    canUpdateVoyages,
+    canDeleteVoyages,
   ]);
 
   const handleDelete = (idVoyage: number) => {
+    if (!canDeleteVoyages) {
+      Toast.show({
+        type: "error",
+        text1: "Permission refusée",
+        text2: "Vous n'avez pas la permission de supprimer les voyages.",
+      });
+      return;
+    }
+
     openDeleteConfirmSheet(idVoyage);
   };
 
   const handleUpdate = useCallback(
     (item: VoyageListItem) => {
+      if (!canUpdateVoyages) {
+        Toast.show({
+          type: "error",
+          text1: "Permission refusée",
+          text2: "Vous n'avez pas la permission de modifier les voyages.",
+        });
+        return;
+      }
+
       store.resetAll();
       store.setIdVoyage(item.id);
 
@@ -202,11 +259,28 @@ export const VoyagesScreen = () => {
       store.setType("update");
       router.navigate("/voyages/create/chauffeur");
     },
-    [store, chauffersList, vehiclesList, depotsList, villesList, router],
+    [
+      canUpdateVoyages,
+      store,
+      chauffersList,
+      vehiclesList,
+      depotsList,
+      villesList,
+      router,
+    ],
   );
 
   const handleOpenCloseBLSheet = useCallback(
     (item: VoyageListItem) => {
+      if (!canUpdateVoyages) {
+        Toast.show({
+          type: "error",
+          text1: "Permission refusée",
+          text2: "Vous n'avez pas la permission de modifier les voyages.",
+        });
+        return;
+      }
+
       // only send opened bls
       setCloseBLContext(
         item.id,
@@ -214,11 +288,20 @@ export const VoyagesScreen = () => {
       );
       openCloseBLSheet();
     },
-    [setCloseBLContext, openCloseBLSheet],
+    [canUpdateVoyages, setCloseBLContext, openCloseBLSheet],
   );
 
   const handleAchevingVoyage = useCallback(
     (item: VoyageListItem) => {
+      if (!canUpdateVoyages) {
+        Toast.show({
+          type: "error",
+          text1: "Permission refusée",
+          text2: "Vous n'avez pas la permission de modifier les voyages.",
+        });
+        return;
+      }
+
       const blsEncoursCount =
         item.bl_list?.filter((bl) => bl.statut === "Encours").length ?? 0;
 
@@ -229,7 +312,7 @@ export const VoyagesScreen = () => {
         item.date_depart,
       );
     },
-    [openAcheveConfirmSheet],
+    [canUpdateVoyages, openAcheveConfirmSheet],
   );
 
   const [searchText, setSearchText] = useState("");
@@ -314,7 +397,11 @@ export const VoyagesScreen = () => {
   }, [villesList, selectedVilleId]);
 
   const handleOpenFilterSelector = useCallback(
-    (key: "chauffeur" | "vehicule" | "depot" | "ville" | "client") => {
+    (key: VoyageFilterKey) => {
+      if (key === "rotation-vehicule" || key === "rotation-interval") {
+        return;
+      }
+
       if (key === "chauffeur") {
         openSelectorOptionsSheet({
           title: "Filtrer par chauffeur",
@@ -425,7 +512,6 @@ export const VoyagesScreen = () => {
   );
 
   const handleOpenFiltersSheet = useCallback(() => {
-    const isAdminOrAdvisory = user?.role === "admin" || user?.role === "adv";
     const items: VoyageFilterItem[] = [
       {
         key: "chauffeur",
@@ -453,8 +539,8 @@ export const VoyagesScreen = () => {
         valueLabel: selectedClientLabel,
       },
     ];
-    if (!isAdminOrAdvisory) {
-      items.splice(0, 1); // remove chauffeur filter for non admin/adv users
+    if (!canManageVoyages) {
+      items.splice(0, 1); // remove chauffeur filter for users with basic permissions
     }
     openVoyageFiltersSheet({
       title: "Filtrer les voyages",
@@ -478,7 +564,7 @@ export const VoyagesScreen = () => {
     selectedClientLabel,
     handleOpenFilterSelector,
     closeBottomSheet,
-    user?.role,
+    canManageVoyages,
   ]);
 
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
@@ -505,6 +591,7 @@ export const VoyagesScreen = () => {
           idVille: selectedVilleId,
           idClient: selectedClientId,
         }),
+      enabled: canListVoyages,
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
         const pagination = lastPage.pagination;
@@ -529,6 +616,15 @@ export const VoyagesScreen = () => {
         return;
       }
 
+      if (!canUpdateVoyages) {
+        Toast.show({
+          type: "error",
+          text1: "Permission refusée",
+          text2: "Vous n'avez pas la permission de modifier les voyages.",
+        });
+        return;
+      }
+
       const selectedVoyage = listData.find((voyage) => voyage.id === voyageId);
 
       if (selectedVoyage) {
@@ -541,7 +637,7 @@ export const VoyagesScreen = () => {
         });
       }
     },
-    [listData, router, handleUpdate],
+    [canUpdateVoyages, listData, router, handleUpdate],
   );
 
   const handleOpenMoreSheet = useCallback(
@@ -550,6 +646,32 @@ export const VoyagesScreen = () => {
     },
     [openMoreActionsSheet, handleMoreAction],
   );
+
+  if (!canListVoyages) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          backgroundColor: "#f7f8fa",
+        }}
+      >
+        <FontAwesome5 name="lock" size={34} color="#bbb" />
+        <Text
+          style={{
+            marginTop: 12,
+            color: "#666",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Vous n'avez pas la permission d'accéder au module Voyage.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -630,7 +752,7 @@ export const VoyagesScreen = () => {
             size="md"
             onPress={handleOpenFiltersSheet}
           />
-          {isAdminOrAdv && (
+          {canCreateVoyages && (
             <View>
               <Button
                 preset="filled"
@@ -663,6 +785,8 @@ export const VoyagesScreen = () => {
           renderItem={({ item }) => (
             <VoyageCard
               item={item}
+              canUpdateVoyage={canUpdateVoyages}
+              canDeleteVoyage={canDeleteVoyages}
               onDelete={() => handleDelete(item.id)}
               onMore={() => handleOpenMoreSheet(item)}
               onOpenCloseBL={() => handleOpenCloseBLSheet(item)}

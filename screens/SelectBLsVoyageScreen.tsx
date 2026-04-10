@@ -1,7 +1,9 @@
 import { listBLSEnCours } from "@/api/BLS.api";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
+import { hasVoyagePermission } from "@/constants/permissions";
 import { Colors } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { BL } from "@/types/bl.types";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -11,6 +13,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 
 export const CreateVoyageScreen = () => {
+  const { user } = useSession();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -42,6 +45,10 @@ export const CreateVoyageScreen = () => {
     });
   const store = useCreateVoyageStore();
   const router = useRouter();
+  const canCreateVoyage = hasVoyagePermission(user, "CREATE");
+  const canUpdateVoyage = hasVoyagePermission(user, "UPDATE");
+  const canEditVoyage =
+    store.type === "create" ? canCreateVoyage : canUpdateVoyage;
 
   const filteredData = useMemo(() => {
     const apiBls =
@@ -69,6 +76,33 @@ export const CreateVoyageScreen = () => {
 
     return mergedData;
   }, [data, store.type, store.bls]);
+
+  if (!canEditVoyage) {
+    return (
+      <View style={styles.container}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 20,
+            rowGap: 12,
+          }}
+        >
+          <Text style={{ color: "#666", textAlign: "center" }}>
+            {store.type === "create"
+              ? "Vous n'avez pas la permission de créer un voyage."
+              : "Vous n'avez pas la permission de modifier un voyage."}
+          </Text>
+          <Button
+            preset="ghost"
+            text="Retour"
+            onPress={() => router.replace("/(app)/(drawer)/(stack)/voyages")}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

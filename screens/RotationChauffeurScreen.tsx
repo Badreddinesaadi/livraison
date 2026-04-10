@@ -3,7 +3,9 @@ import { ListVehicles } from "@/api/vehicle.api";
 import Loader from "@/components/Loader";
 import { RotationChauffeurCard } from "@/components/RotationChauffeurCard";
 import { Button } from "@/components/ui/button";
+import { hasRotationPermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore, VoyageFilterItem } from "@/stores/close-bl.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -38,6 +40,8 @@ const formatDateLabel = (date?: Date | null) => {
 };
 
 export const RotationChauffeurScreen = () => {
+  const { user } = useSession();
+  const canListRotations = hasRotationPermission(user, "LIST");
   const openSelectorOptionsSheet = useCloseBLStore(
     (state) => state.openSelectorOptions,
   );
@@ -57,6 +61,7 @@ export const RotationChauffeurScreen = () => {
   const { data: vehiclesList } = useQuery({
     queryKey: ["vehicles", "full-list"],
     queryFn: ListVehicles,
+    enabled: canListRotations,
   });
 
   const intervalRange = useMemo(() => {
@@ -218,6 +223,7 @@ export const RotationChauffeurScreen = () => {
           date_du: intervalRange.date_du,
           date_au: intervalRange.date_au,
         }),
+      enabled: canListRotations,
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
         const pagination = lastPage.pagination;
@@ -232,6 +238,32 @@ export const RotationChauffeurScreen = () => {
   const listData = useMemo(() => {
     return data?.pages.flatMap((page) => page.data ?? []) ?? [];
   }, [data]);
+
+  if (!canListRotations) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          backgroundColor: "#f7f8fa",
+        }}
+      >
+        <FontAwesome5 name="lock" size={34} color="#bbb" />
+        <Text
+          style={{
+            marginTop: 12,
+            color: "#666",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Vous n'avez pas la permission d'acceder au module Rotation.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View

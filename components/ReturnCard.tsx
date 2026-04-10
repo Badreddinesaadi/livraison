@@ -32,10 +32,12 @@ const getReturnStatusUi = (status: Return["statut"]) => {
 
 export const ReturnCard = ({
   item,
+  canManageReturn = true,
   onShowDetails,
   onMore,
 }: {
   item: Return;
+  canManageReturn?: boolean;
   onShowDetails: () => void;
   onMore: () => void;
 }) => {
@@ -183,20 +185,22 @@ export const ReturnCard = ({
                 Détails
               </Text>
             </Pressable>
-            <Pressable
-              onPress={onMore}
-              style={{
-                width: 48,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "12",
-              }}
-            >
-              <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
-            </Pressable>
+            {canManageReturn && (
+              <Pressable
+                onPress={onMore}
+                style={{
+                  width: 48,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor: PRIMARY + "12",
+                }}
+              >
+                <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
+              </Pressable>
+            )}
           </View>
         </View>
       )}

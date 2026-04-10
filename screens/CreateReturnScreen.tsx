@@ -6,6 +6,7 @@ import {
 } from "@/api/return.api";
 import { ListClients } from "@/api/users.api";
 import { Button } from "@/components/ui/button";
+import { hasRetourPermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore } from "@/stores/close-bl.store";
@@ -68,6 +69,7 @@ export const CreateReturnScreen = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useSession();
+  const canCreateReturn = hasRetourPermission(user, "CREATE");
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const openSelectorOptionsSheet = useCloseBLStore(
@@ -77,6 +79,7 @@ export const CreateReturnScreen = () => {
   const { data: clientsList } = useQuery({
     queryKey: ["clients", "full-list"],
     queryFn: ListClients,
+    enabled: canCreateReturn,
   });
 
   const [clientId, setClientId] = useState<number | undefined>(undefined);
@@ -215,11 +218,11 @@ export const CreateReturnScreen = () => {
   };
 
   const submit = () => {
-    if (user?.role !== "chauffeur") {
+    if (!canCreateReturn) {
       Toast.show({
         type: "error",
         text1: "Accès refusé",
-        text2: "Seuls les chauffeurs peuvent créer un retour.",
+        text2: "Vous n'avez pas la permission de créer un retour.",
       });
       return;
     }
@@ -263,6 +266,16 @@ export const CreateReturnScreen = () => {
     }
     createReturnMutate(requestData);
   };
+
+  if (!canCreateReturn) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.infoText}>
+          Vous n'avez pas la permission de créer un retour.
+        </Text>
+      </View>
+    );
+  }
 
   if (!permission) {
     return (
@@ -453,7 +466,7 @@ export const CreateReturnScreen = () => {
         <Button
           preset="filled"
           text="Créer le retour"
-          disabled={isFileCooldown || user?.role !== "chauffeur"}
+          disabled={isFileCooldown || !canCreateReturn}
           isLoading={isPending || isFileCooldown}
           onPress={submit}
         />

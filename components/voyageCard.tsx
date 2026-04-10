@@ -1,27 +1,28 @@
 import { VoyageListItem } from "@/api/voyage.api";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
-import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import { LayoutAnimation, Pressable, Text, View } from "react-native";
 
 export const VoyageCard = ({
   item,
+  canUpdateVoyage,
+  canDeleteVoyage,
   onDelete,
   onMore,
   onOpenCloseBL,
   onAcheveVoyage,
 }: {
   item: VoyageListItem;
+  canUpdateVoyage: boolean;
+  canDeleteVoyage: boolean;
   onDelete: () => void;
   onMore: () => void;
   onOpenCloseBL: () => void;
   onAcheveVoyage: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const { user } = useSession();
-  const isAdminOrAdv = user?.role === "adv" || user?.role === "admin";
-  // const isAdminOrAdv = false;
+  const canManageVoyage = canUpdateVoyage || canDeleteVoyage;
   const bls = item.bl_list;
   // opened bls count
   const blsEncoursCount = useMemo(() => {
@@ -281,7 +282,8 @@ export const VoyageCard = ({
               </Text>
             </Pressable>
             {item.statut !== "terminer" &&
-              !isAdminOrAdv &&
+              canUpdateVoyage &&
+              !canDeleteVoyage &&
               blsEncoursCount > 0 && (
                 <Pressable
                   onPress={onOpenCloseBL}
@@ -312,7 +314,7 @@ export const VoyageCard = ({
                   </Text>
                 </Pressable>
               )}
-            {isAdminOrAdv && item.statut !== "terminer" && (
+            {canManageVoyage && item.statut !== "terminer" && (
               <Pressable
                 onPress={onAcheveVoyage}
                 style={{
@@ -343,7 +345,7 @@ export const VoyageCard = ({
                 </Text>
               </Pressable>
             )}
-            {isAdminOrAdv && (
+            {canDeleteVoyage && (
               <Pressable
                 onPress={onDelete}
                 style={{

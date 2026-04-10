@@ -1,8 +1,10 @@
 import { getVoyageById } from "@/api/voyage.api";
 import Loader from "@/components/Loader";
 import { DetailRow } from "@/components/voyageCard";
+import { hasVoyagePermission } from "@/constants/permissions";
 import { apiUrl } from "@/constants/query";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -71,6 +73,8 @@ const buildImageUrl = (cheminFichier?: string, nomFichier?: string) => {
 };
 
 export const VoyageDetailsScreen = () => {
+  const { user } = useSession();
+  const canListVoyages = hasVoyagePermission(user, "LIST");
   const { voyageId } = useLocalSearchParams<{ voyageId: string }>();
   const [previewImage, setPreviewImage] = useState<{
     uri: string;
@@ -79,11 +83,38 @@ export const VoyageDetailsScreen = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["voyages", "voyageDetails", voyageId],
     queryFn: () => getVoyageById({ id: parseInt(voyageId, 10) }),
+    enabled: canListVoyages && Boolean(voyageId),
   });
 
   const blsEncoursCount =
     data?.bl_list?.filter((bl) => bl.statut === "Encours").length ?? 0;
   const blsLivreCount = (data?.bl_list?.length ?? 0) - blsEncoursCount;
+
+  if (!canListVoyages) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          backgroundColor: "#f7f8fa",
+        }}
+      >
+        <FontAwesome5 name="lock" size={34} color="#bbb" />
+        <Text
+          style={{
+            marginTop: 12,
+            color: "#666",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Vous n'avez pas la permission de consulter les voyages.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View

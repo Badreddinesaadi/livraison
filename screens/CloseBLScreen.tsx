@@ -1,5 +1,7 @@
 import { closeBL } from "@/api/BLS.api";
 import { Button } from "@/components/ui/button";
+import { hasVoyagePermission } from "@/constants/permissions";
+import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -17,6 +19,8 @@ type UploadPhoto = {
 };
 
 export const CloseBLScreen = () => {
+  const { user } = useSession();
+  const canUpdateVoyages = hasVoyagePermission(user, "UPDATE");
   const router = useRouter();
   const { blId } = useLocalSearchParams<{ blId?: string }>();
   const cameraRef = useRef<CameraView>(null);
@@ -131,6 +135,15 @@ export const CloseBLScreen = () => {
   };
 
   const handleMarkAsDelivered = async () => {
+    if (!canUpdateVoyages) {
+      Toast.show({
+        type: "error",
+        text1: "Permission refusée",
+        text2: "Vous n'avez pas la permission de modifier les voyages.",
+      });
+      return;
+    }
+
     if (photos.length === 0) {
       Toast.show({
         type: "error",
@@ -185,6 +198,16 @@ export const CloseBLScreen = () => {
       setIsCapturingLocation(false);
     }
   };
+
+  if (!canUpdateVoyages) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.infoText}>
+          Vous n'avez pas la permission de clôturer un BL.
+        </Text>
+      </View>
+    );
+  }
 
   if (!permission) {
     return (

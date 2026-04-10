@@ -7,7 +7,9 @@ import {
 import Loader from "@/components/Loader";
 import { ProjetLocationCard } from "@/components/ProjetLocationCard";
 import { Button } from "@/components/ui/button";
+import { hasProjetPermission } from "@/constants/permissions";
 import { Colors } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useProjetLocationSheetStore } from "@/stores/projet-location.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import {
@@ -29,6 +31,13 @@ const PROJET_OPTIONS: { id: number; label: string; value?: Projet }[] = [
 export const ProjetLocationScreen = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useSession();
+  const canListProjetLocation = hasProjetPermission(user, "LIST");
+  const canCreateProjetLocation = hasProjetPermission(user, "CREATE");
+  const canUpdateProjetLocation = hasProjetPermission(user, "UPDATE");
+  const canDeleteProjetLocation = hasProjetPermission(user, "DELETE");
+  const canManageProjetLocation =
+    canUpdateProjetLocation || canDeleteProjetLocation;
   const openSelectorOptionsSheet = useProjetLocationSheetStore(
     (s) => s.openSelectorOptions,
   );
@@ -96,6 +105,7 @@ export const ProjetLocationScreen = () => {
         listProjetLocation({
           page: pageParam,
         }),
+      enabled: canListProjetLocation,
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
         const pagination = lastPage.pagination;
@@ -154,14 +164,39 @@ export const ProjetLocationScreen = () => {
 
   const handleOpenMoreOptions = useCallback(
     (item: ProjetLocation) => {
+      if (!canManageProjetLocation) {
+        Toast.show({
+          type: "error",
+          text1: "Permission refusee",
+          text2: "Vous n'avez pas la permission de modifier ce lieu.",
+        });
+        return;
+      }
+
+      const options: { id: number; label: string }[] = [];
+
+      if (canUpdateProjetLocation) {
+        options.push({ id: 1, label: "Modifier" });
+      }
+
+      if (canDeleteProjetLocation) {
+        options.push({ id: 2, label: "Supprimer" });
+      }
+
+      if (options.length === 0) {
+        Toast.show({
+          type: "info",
+          text1: "Aucune action",
+          text2: "Aucune action n'est disponible pour ce lieu.",
+        });
+        return;
+      }
+
       openSelectorOptionsSheet({
         title: "Actions disponibles",
-        options: [
-          { id: 1, label: "Modifier" },
-          { id: 2, label: "Supprimer" },
-        ],
+        options,
         onSelect: (id) => {
-          if (id === 1) {
+          if (id === 1 && canUpdateProjetLocation) {
             router.navigate({
               pathname: "/(app)/(drawer)/(stack)/projet-locations/create",
               params: { projetId: String(item.id) },
@@ -169,7 +204,7 @@ export const ProjetLocationScreen = () => {
             return;
           }
 
-          if (id === 2 && !isDeleting) {
+          if (id === 2 && canDeleteProjetLocation && !isDeleting) {
             openDeleteConfirm(item.id, (targetId) => {
               deleteProjetLocationMutate(targetId);
             });
@@ -178,6 +213,9 @@ export const ProjetLocationScreen = () => {
       });
     },
     [
+      canManageProjetLocation,
+      canUpdateProjetLocation,
+      canDeleteProjetLocation,
       openSelectorOptionsSheet,
       router,
       isDeleting,
@@ -185,6 +223,32 @@ export const ProjetLocationScreen = () => {
       deleteProjetLocationMutate,
     ],
   );
+
+  if (!canListProjetLocation) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          backgroundColor: "#f7f8fa",
+        }}
+      >
+        <FontAwesome5 name="lock" size={34} color="#bbb" />
+        <Text
+          style={{
+            marginTop: 12,
+            color: "#666",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Vous n'avez pas la permission d'acceder au module Projet.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -234,24 +298,26 @@ export const ProjetLocationScreen = () => {
             />
           </View>
 
-          <View>
-            <Button
-              preset="filled"
-              LeftAccessory={() => (
-                <FontAwesome5
-                  name="plus"
-                  size={22}
-                  color={Colors.light.background}
-                />
-              )}
-              size="md"
-              onPress={() => {
-                router.navigate(
-                  "/(app)/(drawer)/(stack)/projet-locations/create",
-                );
-              }}
-            />
-          </View>
+          {canCreateProjetLocation && (
+            <View>
+              <Button
+                preset="filled"
+                LeftAccessory={() => (
+                  <FontAwesome5
+                    name="plus"
+                    size={22}
+                    color={Colors.light.background}
+                  />
+                )}
+                size="md"
+                onPress={() => {
+                  router.navigate(
+                    "/(app)/(drawer)/(stack)/projet-locations/create",
+                  );
+                }}
+              />
+            </View>
+          )}
         </View>
 
         <Text style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>
@@ -265,6 +331,7 @@ export const ProjetLocationScreen = () => {
           renderItem={({ item }) => (
             <ProjetLocationCard
               item={item}
+              canManageProjetLocation={canManageProjetLocation}
               onMore={() => handleOpenMoreOptions(item)}
             />
           )}

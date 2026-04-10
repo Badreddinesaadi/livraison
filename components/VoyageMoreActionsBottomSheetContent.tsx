@@ -1,3 +1,4 @@
+import { hasVoyagePermission } from "@/constants/permissions";
 import { useSession } from "@/stores/auth.store";
 import { Pressable, Text, View } from "react-native";
 
@@ -15,6 +16,7 @@ export default function VoyageMoreActionsBottomSheetContent({
   onShowDetails,
 }: VoyageMoreActionsBottomSheetContentProps) {
   const { user } = useSession();
+  const canUpdateVoyage = hasVoyagePermission(user, "UPDATE");
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
       <Text
@@ -37,7 +39,7 @@ export default function VoyageMoreActionsBottomSheetContent({
       >
         Voyage #{voyageId ?? "—"}
       </Text>
-      {(user?.role === "admin" || user?.role === "adv") && (
+      {canUpdateVoyage && (
         <Pressable
           onPress={onUpdate}
           style={{

@@ -21,8 +21,16 @@ export type User = {
     | "chauffeur"
     | "commercial";
   name: string;
+  permission: Permissions;
 };
-
+type Permissions = {
+  [key in "voyage" | "retour" | "rotation" | "projet"]: (
+    | "CREATE"
+    | "UPDATE"
+    | "LIST"
+    | "DELETE"
+  )[];
+};
 export type AuthLoginResponse = {
   status: boolean;
   message: string;

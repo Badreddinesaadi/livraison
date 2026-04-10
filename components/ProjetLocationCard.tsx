@@ -17,6 +17,7 @@ import Toast from "react-native-toast-message";
 
 type ProjetLocationCardProps = {
   item: ProjetLocation;
+  canManageProjetLocation?: boolean;
   onMore: () => void;
 };
 
@@ -87,6 +88,7 @@ const buildFileUrl = (cheminFichier?: string) => {
 
 export const ProjetLocationCard = ({
   item,
+  canManageProjetLocation = true,
   onMore,
 }: ProjetLocationCardProps) => {
   const [expanded, setExpanded] = useState(false);
@@ -370,20 +372,22 @@ export const ProjetLocationCard = ({
             >
               <FontAwesome5 name="phone" size={14} color={PRIMARY} />
             </Pressable>
-            <Pressable
-              onPress={onMore}
-              style={{
-                width: 44,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "12",
-              }}
-            >
-              <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
-            </Pressable>
+            {canManageProjetLocation && (
+              <Pressable
+                onPress={onMore}
+                style={{
+                  width: 44,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor: PRIMARY + "12",
+                }}
+              >
+                <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
+              </Pressable>
+            )}
           </View>
         </View>
       )}

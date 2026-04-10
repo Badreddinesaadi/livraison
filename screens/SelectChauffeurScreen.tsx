@@ -4,7 +4,9 @@ import { ListVehicles } from "@/api/vehicle.api";
 import { ListVilles } from "@/api/villes.api";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
+import { hasVoyagePermission } from "@/constants/permissions";
 import { Colors } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -23,6 +25,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 export const SelectChauffeurScreen = () => {
+  const { user } = useSession();
   const { data: chauffersList, isLoading: isChauffeursLoading } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
@@ -44,6 +47,10 @@ export const SelectChauffeurScreen = () => {
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const canCreateVoyage = hasVoyagePermission(user, "CREATE");
+  const canUpdateVoyage = hasVoyagePermission(user, "UPDATE");
+  const canEditVoyage =
+    createVoyageStore.type === "create" ? canCreateVoyage : canUpdateVoyage;
 
   const chauffeurOptions = useMemo(
     () =>
@@ -143,6 +150,33 @@ export const SelectChauffeurScreen = () => {
       },
     });
   }, [openSelectorOptions, villeOptions, villesList, createVoyageStore]);
+
+  if (!canEditVoyage) {
+    return (
+      <View style={styles.container}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 20,
+            rowGap: 12,
+          }}
+        >
+          <Text style={{ color: "#666", textAlign: "center" }}>
+            {createVoyageStore.type === "create"
+              ? "Vous n'avez pas la permission de créer un voyage."
+              : "Vous n'avez pas la permission de modifier un voyage."}
+          </Text>
+          <Button
+            preset="ghost"
+            text="Retour"
+            onPress={() => router.replace("/(app)/(drawer)/(stack)/voyages")}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

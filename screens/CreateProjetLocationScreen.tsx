@@ -6,8 +6,10 @@ import {
   UploadProjetLocationFile,
 } from "@/api/projet-location.api";
 import { Button } from "@/components/ui/button";
+import { hasProjetPermission } from "@/constants/permissions";
 import { apiUrl } from "@/constants/query";
 import { PRIMARY } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { useProjetLocationSheetStore } from "@/stores/projet-location.store";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -124,8 +126,14 @@ const buildFileUrl = (cheminFichier?: string) => {
 export const CreateProjetLocationScreen = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useSession();
   const { projetId } = useLocalSearchParams<{ projetId?: string }>();
   const isEditing = Boolean(projetId);
+  const canCreateProjetLocation = hasProjetPermission(user, "CREATE");
+  const canUpdateProjetLocation = hasProjetPermission(user, "UPDATE");
+  const canEditProjetLocation = isEditing
+    ? canUpdateProjetLocation
+    : canCreateProjetLocation;
   const actionType = isEditing ? "update" : "create";
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
@@ -149,7 +157,7 @@ export const CreateProjetLocationScreen = () => {
   const { data: existingData, isLoading: isLoadingExisting } = useQuery({
     queryKey: ["projet-locations", "details", projetId],
     queryFn: () => getProjetLocationById({ id: String(projetId) }),
-    enabled: Boolean(projetId),
+    enabled: Boolean(projetId) && canUpdateProjetLocation,
   });
 
   useEffect(() => {
@@ -381,6 +389,17 @@ export const CreateProjetLocationScreen = () => {
   };
 
   const handleSubmit = async () => {
+    if (!canEditProjetLocation) {
+      Toast.show({
+        type: "error",
+        text1: "Acces refuse",
+        text2: isEditing
+          ? "Vous n'avez pas la permission de modifier un lieu."
+          : "Vous n'avez pas la permission de creer un lieu.",
+      });
+      return;
+    }
+
     if (!projet) {
       Toast.show({
         type: "error",
@@ -437,6 +456,18 @@ export const CreateProjetLocationScreen = () => {
       files,
     });
   };
+
+  if (!canEditProjetLocation) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.infoText}>
+          {isEditing
+            ? "Vous n'avez pas la permission de modifier un lieu."
+            : "Vous n'avez pas la permission de creer un lieu."}
+        </Text>
+      </View>
+    );
+  }
 
   if (!permission) {
     return (
