@@ -1,10 +1,10 @@
 import { useSession } from "@/stores/auth.store";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNetInfo } from "@react-native-community/netinfo";
+import { Image } from "expo-image";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -63,7 +63,7 @@ export default function LoginScreen() {
           <Image
             source={require("../assets/images/logo.png")}
             style={styles.logo}
-            resizeMode="contain"
+            contentFit="contain"
           />
 
           {/* Email */}

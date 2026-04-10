@@ -2,10 +2,10 @@ import { ProjetLocation } from "@/api/projet-location.api";
 import { apiUrl } from "@/constants/query";
 import { PRIMARY } from "@/constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import {
   FlatList,
-  Image,
   LayoutAnimation,
   Linking,
   Modal,
@@ -417,7 +417,7 @@ export const ProjetLocationCard = ({
               <Image
                 source={{ uri: previewImage }}
                 style={{ width: "100%", height: "100%" }}
-                resizeMode="contain"
+                contentFit="contain"
               />
             ) : null}
           </View>

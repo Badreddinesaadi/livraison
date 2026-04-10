@@ -2,11 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -49,7 +49,7 @@ export default function HomeScreen() {
           <Image
             source={require("../assets/images/logo.png")}
             style={styles.logo}
-            resizeMode="contain"
+            contentFit="contain"
           />
 
           <View>

@@ -1,11 +1,11 @@
 import { useSession } from "@/stores/auth.store";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Button,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -47,7 +47,7 @@ export default function DriverScreen() {
           <Image
             source={require("../assets/images/logo.png")}
             style={styles.logo}
-            resizeMode="contain"
+            contentFit="contain"
           />
 
           <View>
