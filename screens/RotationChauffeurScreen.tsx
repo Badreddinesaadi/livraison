@@ -1,4 +1,5 @@
-import { ListRotations } from "@/api/rotation-chauffeur";
+import { ListRotations } from "@/api/rotation-chauffeur.api";
+import { ListChauffeurs } from "@/api/users.api";
 import { ListVehicles } from "@/api/vehicle.api";
 import Loader from "@/components/Loader";
 import { RotationChauffeurCard } from "@/components/RotationChauffeurCard";
@@ -53,10 +54,22 @@ export const RotationChauffeurScreen = () => {
   const [selectedVehiculeId, setSelectedVehiculeId] = useState<
     number | undefined
   >(undefined);
+  const [selectedChauffeurId, setSelectedChauffeurId] = useState<
+    number | undefined
+  >(undefined);
+  const [selectedDisponibilite, setSelectedDisponibilite] = useState<
+    boolean | undefined
+  >(undefined);
   const [dateDu, setDateDu] = useState<Date | null>(null);
   const [dateAu, setDateAu] = useState<Date | null>(null);
   const [showDateDuPicker, setShowDateDuPicker] = useState(false);
   const [showDateAuPicker, setShowDateAuPicker] = useState(false);
+
+  const { data: chauffeursList } = useQuery({
+    queryKey: ["chauffeurs", "full-list", "rotation"],
+    queryFn: ListChauffeurs,
+    enabled: canListRotations,
+  });
 
   const { data: vehiclesList } = useQuery({
     queryKey: ["vehicles", "full-list"],
@@ -72,8 +85,19 @@ export const RotationChauffeurScreen = () => {
   }, [dateDu, dateAu]);
 
   const filtersCount = useMemo(() => {
-    return (selectedVehiculeId ? 1 : 0) + (dateDu || dateAu ? 1 : 0);
-  }, [selectedVehiculeId, dateDu, dateAu]);
+    return (
+      (selectedVehiculeId ? 1 : 0) +
+      (selectedChauffeurId ? 1 : 0) +
+      (typeof selectedDisponibilite === "boolean" ? 1 : 0) +
+      (dateDu || dateAu ? 1 : 0)
+    );
+  }, [
+    selectedVehiculeId,
+    selectedChauffeurId,
+    selectedDisponibilite,
+    dateDu,
+    dateAu,
+  ]);
 
   const selectedVehiculeLabel = useMemo(() => {
     const selectedVehicule = vehiclesList?.find(
@@ -90,6 +114,26 @@ export const RotationChauffeurScreen = () => {
         .join(" - ") || "Tous"
     );
   }, [vehiclesList, selectedVehiculeId]);
+
+  const selectedChauffeurLabel = useMemo(() => {
+    const selectedChauffeur = chauffeursList?.find(
+      (chauffeur) => chauffeur.id === selectedChauffeurId,
+    );
+
+    if (!selectedChauffeur) {
+      return "Tous";
+    }
+
+    return selectedChauffeur.name || "Tous";
+  }, [chauffeursList, selectedChauffeurId]);
+
+  const selectedDisponibiliteLabel = useMemo(() => {
+    if (typeof selectedDisponibilite !== "boolean") {
+      return "Tous";
+    }
+
+    return selectedDisponibilite ? "Disponible" : "Reserve";
+  }, [selectedDisponibilite]);
 
   const selectedIntervalLabel = useMemo(() => {
     if (!dateDu && !dateAu) {
@@ -124,6 +168,51 @@ export const RotationChauffeurScreen = () => {
       },
     });
   }, [openSelectorOptionsSheet, vehiclesList, selectedVehiculeId]);
+
+  const handleOpenChauffeurSelector = useCallback(() => {
+    openSelectorOptionsSheet({
+      title: "Filtrer par chauffeur",
+      options: [
+        { id: 0, label: "Tous" },
+        ...(chauffeursList ?? []).map((chauffeur) => ({
+          id: chauffeur.id,
+          label: chauffeur.name,
+          subLabel: chauffeur.telephone || undefined,
+        })),
+      ],
+      selectedId: selectedChauffeurId ?? 0,
+      enableSearch: true,
+      searchPlaceholder: "Rechercher un chauffeur",
+      onSelect: (id) => {
+        setSelectedChauffeurId(id === 0 ? undefined : id);
+      },
+    });
+  }, [openSelectorOptionsSheet, chauffeursList, selectedChauffeurId]);
+
+  const handleOpenDisponibiliteSelector = useCallback(() => {
+    openSelectorOptionsSheet({
+      title: "Filtrer par disponibilite",
+      options: [
+        { id: 0, label: "Tous" },
+        { id: 1, label: "Disponible" },
+        { id: 2, label: "Reserve" },
+      ],
+      selectedId:
+        typeof selectedDisponibilite === "boolean"
+          ? selectedDisponibilite
+            ? 1
+            : 2
+          : 0,
+      onSelect: (id) => {
+        if (id === 0) {
+          setSelectedDisponibilite(undefined);
+          return;
+        }
+
+        setSelectedDisponibilite(id === 1);
+      },
+    });
+  }, [openSelectorOptionsSheet, selectedDisponibilite]);
 
   const handleOpenIntervalSelector = useCallback(() => {
     openSelectorOptionsSheet({
@@ -164,14 +253,19 @@ export const RotationChauffeurScreen = () => {
   const handleOpenFiltersSheet = useCallback(() => {
     const items: VoyageFilterItem[] = [
       {
+        key: "rotation-chauffeur",
+        label: "Chauffeur",
+        valueLabel: selectedChauffeurLabel,
+      },
+      {
         key: "rotation-vehicule",
         label: "Vehicule",
         valueLabel: selectedVehiculeLabel,
       },
       {
-        key: "rotation-interval",
-        label: "Intervalle",
-        valueLabel: selectedIntervalLabel,
+        key: "rotation-disponibilite",
+        label: "Disponibilite",
+        valueLabel: selectedDisponibiliteLabel,
       },
     ];
 
@@ -179,8 +273,18 @@ export const RotationChauffeurScreen = () => {
       title: "Filtrer les rotations",
       items,
       onPressItem: (key) => {
+        if (key === "rotation-chauffeur") {
+          handleOpenChauffeurSelector();
+          return;
+        }
+
         if (key === "rotation-vehicule") {
           handleOpenVehiculeSelector();
+          return;
+        }
+
+        if (key === "rotation-disponibilite") {
+          handleOpenDisponibiliteSelector();
           return;
         }
 
@@ -189,17 +293,23 @@ export const RotationChauffeurScreen = () => {
         }
       },
       onReset: () => {
+        setSelectedChauffeurId(undefined);
         setSelectedVehiculeId(undefined);
+        setSelectedDisponibilite(undefined);
         setDateDu(null);
         setDateAu(null);
         closeBottomSheet();
       },
     });
   }, [
+    selectedChauffeurLabel,
     selectedVehiculeLabel,
+    selectedDisponibiliteLabel,
     selectedIntervalLabel,
     openVoyageFiltersSheet,
+    handleOpenChauffeurSelector,
     handleOpenVehiculeSelector,
+    handleOpenDisponibiliteSelector,
     handleOpenIntervalSelector,
     closeBottomSheet,
   ]);
@@ -211,7 +321,9 @@ export const RotationChauffeurScreen = () => {
         "chauffeur",
         "list",
         {
+          chauffeur_id: selectedChauffeurId,
           vehicule_id: selectedVehiculeId,
+          disponibilite: selectedDisponibilite,
           date_du: intervalRange.date_du,
           date_au: intervalRange.date_au,
         },
@@ -219,7 +331,9 @@ export const RotationChauffeurScreen = () => {
       queryFn: ({ pageParam }) =>
         ListRotations({
           page: pageParam,
+          chauffeur_id: selectedChauffeurId,
           vehicule_id: selectedVehiculeId,
+          disponibilite: selectedDisponibilite,
           date_du: intervalRange.date_du,
           date_au: intervalRange.date_au,
         }),

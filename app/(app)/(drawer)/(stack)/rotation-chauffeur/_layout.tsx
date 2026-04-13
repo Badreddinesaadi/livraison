@@ -35,7 +35,7 @@ export default function StackLayout() {
 
   const snapPoints = useMemo(() => {
     if (sheetType === "voyage-filters") {
-      return ["45%"];
+      return ["55%"];
     }
 
     return ["60%"];

@@ -48,7 +48,9 @@ export type VoyageFilterKey =
   | "ville"
   | "client"
   | "rotation-vehicule"
-  | "rotation-interval";
+  | "rotation-interval"
+  | "rotation-chauffeur"
+  | "rotation-disponibilite";
 
 export type VoyageFilterItem = {
   key: VoyageFilterKey;
