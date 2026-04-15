@@ -27,7 +27,9 @@ export const ReturnsScreen = () => {
   const canCreateReturn = hasRetourPermission(user, "CREATE");
   const canUpdateReturn = hasRetourPermission(user, "UPDATE");
   const canDeleteReturn = hasRetourPermission(user, "DELETE");
-  const canManageReturns = canUpdateReturn || canDeleteReturn;
+  const canAcheverBLReturn = hasRetourPermission(user, "ACHEVER_BL");
+  const canManageReturns =
+    canUpdateReturn || canDeleteReturn || canAcheverBLReturn;
   const { data: chauffersList } = useQuery({
     queryKey: ["chauffeurs", "full-list"],
     queryFn: ListChauffeurs,
@@ -123,7 +125,7 @@ export const ReturnsScreen = () => {
         Toast.show({
           type: "error",
           text1: "Permission refusée",
-          text2: "Vous n'avez pas la permission de modifier ce retour.",
+          text2: "Vous n'avez pas la permission de gérer ce retour.",
         });
         return;
       }
@@ -140,7 +142,7 @@ export const ReturnsScreen = () => {
 
       const options: { id: number; label: string; type?: "highlight" }[] = [];
       const canValidate =
-        canUpdateReturn &&
+        canAcheverBLReturn &&
         item.statut !== "terminer" &&
         item.statut !== "refuser";
 
@@ -170,6 +172,14 @@ export const ReturnsScreen = () => {
         options,
         onSelect: (id) => {
           if (id === 2 && !isValidatingReturn) {
+            if (!canAcheverBLReturn) {
+              Toast.show({
+                type: "error",
+                text1: "Permission refusée",
+                text2: "Vous n'avez pas la permission d'achever ce retour.",
+              });
+              return;
+            }
             openReturnValidateConfirm(parsedId, (targetId, payload) => {
               validateReturnMutate({
                 id: String(targetId),
@@ -190,7 +200,7 @@ export const ReturnsScreen = () => {
     },
     [
       canManageReturns,
-      canUpdateReturn,
+      canAcheverBLReturn,
       canDeleteReturn,
       openSelectorOptionsSheet,
       isValidatingReturn,

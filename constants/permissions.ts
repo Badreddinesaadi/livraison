@@ -1,6 +1,12 @@
 import { User } from "@/types/auth.types";
 
-export type PermissionAction = "CREATE" | "UPDATE" | "LIST" | "DELETE";
+export type PermissionAction =
+  | "CREATE"
+  | "UPDATE"
+  | "LIST"
+  | "DELETE"
+  | "CLOSE_BL"
+  | "ACHEVER_BL";
 export type PermissionModule = keyof User["permission"];
 
 const VOYAGE_ACTIONS: PermissionAction[] = [
@@ -8,6 +14,8 @@ const VOYAGE_ACTIONS: PermissionAction[] = [
   "UPDATE",
   "LIST",
   "DELETE",
+  "CLOSE_BL",
+  "ACHEVER_BL",
 ];
 
 const RETOUR_ACTIONS: PermissionAction[] = [
@@ -15,6 +23,7 @@ const RETOUR_ACTIONS: PermissionAction[] = [
   "UPDATE",
   "LIST",
   "DELETE",
+  "ACHEVER_BL",
 ];
 
 const PROJET_ACTIONS: PermissionAction[] = [

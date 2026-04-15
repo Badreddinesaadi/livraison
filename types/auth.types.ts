@@ -29,6 +29,9 @@ type Permissions = {
     | "UPDATE"
     | "LIST"
     | "DELETE"
+    | "TAKE_PICTURE_BL"
+    | "CLOSE_BL"
+    | "ACHEVER_BL"
   )[];
 };
 export type AuthLoginResponse = {

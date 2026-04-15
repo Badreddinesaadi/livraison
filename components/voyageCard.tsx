@@ -8,6 +8,8 @@ export const VoyageCard = ({
   item,
   canUpdateVoyage,
   canDeleteVoyage,
+  canCloseBLVoyage,
+  canAcheveBLVoyage,
   onDelete,
   onMore,
   onOpenCloseBL,
@@ -16,6 +18,8 @@ export const VoyageCard = ({
   item: VoyageListItem;
   canUpdateVoyage: boolean;
   canDeleteVoyage: boolean;
+  canCloseBLVoyage: boolean;
+  canAcheveBLVoyage: boolean;
   onDelete: () => void;
   onMore: () => void;
   onOpenCloseBL: () => void;
@@ -282,8 +286,7 @@ export const VoyageCard = ({
               </Text>
             </Pressable>
             {item.statut !== "terminer" &&
-              canUpdateVoyage &&
-              !canDeleteVoyage &&
+              canCloseBLVoyage &&
               blsEncoursCount > 0 && (
                 <Pressable
                   onPress={onOpenCloseBL}
@@ -314,7 +317,7 @@ export const VoyageCard = ({
                   </Text>
                 </Pressable>
               )}
-            {canManageVoyage && item.statut !== "terminer" && (
+            {canAcheveBLVoyage && item.statut !== "terminer" && (
               <Pressable
                 onPress={onAcheveVoyage}
                 style={{

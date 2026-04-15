@@ -45,7 +45,7 @@ export default function StackLayout() {
 
   const snapPoints = useMemo(() => {
     if (sheetType === "voyage-action-confirm") {
-      return [voyageActionType === "achever" ? "45%" : "23%"];
+      return [voyageActionType === "achever" ? "56%" : "23%"];
     } else if (sheetType === "voyage-more-actions") {
       return ["30%"];
     } else if (sheetType === "voyage-filters") {

@@ -105,7 +105,6 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
           </View>
 
           <View style={styles.userInfo}>
-            <Text style={styles.subtitle}>Connecté en tant que</Text>
             <Text style={styles.userName} numberOfLines={1}>
               {user?.name || "Utilisateur"}
             </Text>
@@ -195,7 +194,7 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#ffffff",
   },
   scrollContent: {
     flexGrow: 1,

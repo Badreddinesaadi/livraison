@@ -39,6 +39,8 @@ export const VoyagesScreen = () => {
   const canCreateVoyages = hasVoyagePermission(user, "CREATE");
   const canUpdateVoyages = hasVoyagePermission(user, "UPDATE");
   const canDeleteVoyages = hasVoyagePermission(user, "DELETE");
+  const canCloseBLVoyages = hasVoyagePermission(user, "CLOSE_BL");
+  const canAcheverBLVoyages = hasVoyagePermission(user, "ACHEVER_BL");
   const canManageVoyages =
     canCreateVoyages || canUpdateVoyages || canDeleteVoyages;
   const { data: chauffersList } = useQuery({
@@ -125,13 +127,13 @@ export const VoyagesScreen = () => {
     }
 
     if (confirmedVoyageAction.action === "achever") {
-      if (!canUpdateVoyages) {
+      if (!canAcheverBLVoyages) {
         finishVoyageActionIfPending();
         clearConfirmedVoyageAction();
         Toast.show({
           type: "error",
           text1: "Permission refusée",
-          text2: "Vous n'avez pas la permission de modifier les voyages.",
+          text2: "Vous n'avez pas la permission d'achever les voyages.",
         });
         return;
       }
@@ -175,7 +177,7 @@ export const VoyagesScreen = () => {
     deleteMutate,
     clearConfirmedVoyageAction,
     finishVoyageActionIfPending,
-    canUpdateVoyages,
+    canAcheverBLVoyages,
     canDeleteVoyages,
   ]);
 
@@ -272,11 +274,11 @@ export const VoyagesScreen = () => {
 
   const handleOpenCloseBLSheet = useCallback(
     (item: VoyageListItem) => {
-      if (!canUpdateVoyages) {
+      if (!canCloseBLVoyages) {
         Toast.show({
           type: "error",
           text1: "Permission refusée",
-          text2: "Vous n'avez pas la permission de modifier les voyages.",
+          text2: "Vous n'avez pas la permission de clôturer les BL.",
         });
         return;
       }
@@ -288,16 +290,16 @@ export const VoyagesScreen = () => {
       );
       openCloseBLSheet();
     },
-    [canUpdateVoyages, setCloseBLContext, openCloseBLSheet],
+    [canCloseBLVoyages, setCloseBLContext, openCloseBLSheet],
   );
 
   const handleAchevingVoyage = useCallback(
     (item: VoyageListItem) => {
-      if (!canUpdateVoyages) {
+      if (!canAcheverBLVoyages) {
         Toast.show({
           type: "error",
           text1: "Permission refusée",
-          text2: "Vous n'avez pas la permission de modifier les voyages.",
+          text2: "Vous n'avez pas la permission d'achever les voyages.",
         });
         return;
       }
@@ -312,7 +314,7 @@ export const VoyagesScreen = () => {
         item.date_depart,
       );
     },
-    [canUpdateVoyages, openAcheveConfirmSheet],
+    [canAcheverBLVoyages, openAcheveConfirmSheet],
   );
 
   const [searchText, setSearchText] = useState("");
@@ -787,6 +789,8 @@ export const VoyagesScreen = () => {
               item={item}
               canUpdateVoyage={canUpdateVoyages}
               canDeleteVoyage={canDeleteVoyages}
+              canCloseBLVoyage={canCloseBLVoyages}
+              canAcheveBLVoyage={canAcheverBLVoyages}
               onDelete={() => handleDelete(item.id)}
               onMore={() => handleOpenMoreSheet(item)}
               onOpenCloseBL={() => handleOpenCloseBLSheet(item)}
