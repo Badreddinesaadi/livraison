@@ -1,152 +1,101 @@
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
-import { useSession } from "@/stores/auth.store";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { DrawerActions } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { useNavigation, useRouter } from "expo-router";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const [menuVisible, setMenuVisible] = useState(false);
+  const navigation = useNavigation();
   const router = useRouter();
-  const { signOut, user } = useSession();
-  const toggleMenu = () => setMenuVisible(!menuVisible);
-  const closeMenu = () => setMenuVisible(false);
-
-  const handleLogout = () => {
-    closeMenu(); // ferme le menu
-    Alert.alert(
-      "Déconnexion",
-      "Voulez-vous vraiment vous déconnecter ?",
-      [
-        {
-          text: "Annuler",
-          style: "cancel",
-        },
-        {
-          text: "Oui",
-          onPress: signOut,
-        },
-      ],
-      { cancelable: true },
-    );
-  };
+  const toggleMenu = () => navigation.dispatch(DrawerActions.openDrawer());
 
   return (
-    <TouchableWithoutFeedback onPress={closeMenu}>
-      <SafeAreaView style={styles.container}>
-        {/* HEADER */}
-        <View style={styles.header}>
-          <Image
-            source={require("../assets/images/logo.png")}
-            style={styles.logo}
-            contentFit="contain"
-          />
+    <SafeAreaView style={styles.container}>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <Image
+          source={require("../assets/images/logo.png")}
+          style={styles.logo}
+          contentFit="contain"
+        />
 
-          <View>
-            <TouchableOpacity onPress={toggleMenu}>
-              <MaterialIcons name="account-circle" size={32} color="#ED5623" />
-            </TouchableOpacity>
-
-            {menuVisible && (
-              <View style={styles.menu}>
-                <TouchableOpacity style={styles.menuItem}>
-                  <MaterialIcons name="person" size={20} color="white" />
-                  <Text style={styles.menuText} numberOfLines={1}>
-                    {user?.name}
-                  </Text>
-                </TouchableOpacity>
-
-                <View style={styles.divider} />
-
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={handleLogout}
-                >
-                  <MaterialIcons name="logout" size={20} color="white" />
-                  <Text style={styles.menuText}>Déconnexion</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+        <View>
+          <TouchableOpacity onPress={toggleMenu}>
+            <MaterialIcons name="account-circle" size={32} color="#ED5623" />
+          </TouchableOpacity>
         </View>
+      </View>
 
-        {/* CONTENT */}
-        <View style={styles.content}>
-          <Button
-            preset="filled"
-            text="Voyages"
-            LeftAccessory={() => (
-              <View>
-                <MaterialCommunityIcons
-                  name="truck-fast"
-                  size={24}
-                  color={Colors.light.background}
-                />
-              </View>
-            )}
-            onPress={() => {
-              router.navigate("/voyages");
-            }}
-          />
-          <Button
-            preset="filled"
-            text="Retours chauffeur"
-            LeftAccessory={() => (
-              <View>
-                <MaterialCommunityIcons
-                  name="backup-restore"
-                  size={24}
-                  color={Colors.light.background}
-                />
-              </View>
-            )}
-            onPress={() => {
-              router.navigate("/returns");
-            }}
-          />
-          <Button
-            preset="filled"
-            text="Rotation chauffeur"
-            LeftAccessory={() => (
-              <View>
-                <MaterialCommunityIcons
-                  name="cached"
-                  size={24}
-                  color={Colors.light.background}
-                />
-              </View>
-            )}
-            onPress={() => {
-              router.navigate("/rotation-chauffeur");
-            }}
-          />
-          <Button
-            preset="filled"
-            text="Lieux de projets"
-            LeftAccessory={() => (
-              <View>
-                <MaterialCommunityIcons
-                  name="map-marker-radius"
-                  size={24}
-                  color={Colors.light.background}
-                />
-              </View>
-            )}
-            onPress={() => {
-              router.navigate("/projet-locations");
-            }}
-          />
-          {/* <Button
+      {/* CONTENT */}
+      <View style={styles.content}>
+        <Button
+          preset="filled"
+          text="Voyages"
+          LeftAccessory={() => (
+            <View>
+              <MaterialCommunityIcons
+                name="truck-fast"
+                size={24}
+                color={Colors.light.background}
+              />
+            </View>
+          )}
+          onPress={() => {
+            router.navigate("/voyages");
+          }}
+        />
+        <Button
+          preset="filled"
+          text="Retours chauffeur"
+          LeftAccessory={() => (
+            <View>
+              <MaterialCommunityIcons
+                name="backup-restore"
+                size={24}
+                color={Colors.light.background}
+              />
+            </View>
+          )}
+          onPress={() => {
+            router.navigate("/returns");
+          }}
+        />
+        <Button
+          preset="filled"
+          text="Rotation chauffeur"
+          LeftAccessory={() => (
+            <View>
+              <MaterialCommunityIcons
+                name="cached"
+                size={24}
+                color={Colors.light.background}
+              />
+            </View>
+          )}
+          onPress={() => {
+            router.navigate("/rotation-chauffeur");
+          }}
+        />
+        <Button
+          preset="filled"
+          text="Lieux de projets"
+          LeftAccessory={() => (
+            <View>
+              <MaterialCommunityIcons
+                name="map-marker-radius"
+                size={24}
+                color={Colors.light.background}
+              />
+            </View>
+          )}
+          onPress={() => {
+            router.navigate("/projet-locations");
+          }}
+        />
+        {/* <Button
             preset="filled"
             text="Demarrez un nouvelle voyage"
             LeftAccessory={() => (
@@ -162,9 +111,8 @@ export default function HomeScreen() {
               router.navigate("/voyages/create/chauffeur");
             }}
           /> */}
-        </View>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+      </View>
+    </SafeAreaView>
   );
 }
 

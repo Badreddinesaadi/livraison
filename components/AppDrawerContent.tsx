@@ -1,8 +1,8 @@
 import {
-  canAccessProjetModule,
-  canAccessRetourModule,
-  canAccessRotationModule,
-  canAccessVoyageModule,
+  hasProjetPermission,
+  hasRetourPermission,
+  hasRotationPermission,
+  hasVoyagePermission,
 } from "@/constants/permissions";
 import { Colors } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
@@ -61,10 +61,10 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const { user, signOut } = useSession();
-  const canShowVoyageModule = canAccessVoyageModule(user);
-  const canShowRetourModule = canAccessRetourModule(user);
-  const canShowProjetModule = canAccessProjetModule(user);
-  const canShowRotationModule = canAccessRotationModule(user);
+  const canShowVoyageModule = hasVoyagePermission(user, "LIST");
+  const canShowRetourModule = hasRetourPermission(user, "LIST");
+  const canShowProjetModule = hasProjetPermission(user, "LIST");
+  const canShowRotationModule = hasRotationPermission(user, "LIST");
 
   const handleNavigate = (route: DrawerRoute) => {
     router.navigate(route);
