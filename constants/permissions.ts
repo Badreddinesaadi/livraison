@@ -40,6 +40,13 @@ const ROTATION_ACTIONS: PermissionAction[] = [
   "DELETE",
 ];
 
+const RAPPORT_QUALITE_ACTIONS: PermissionAction[] = [
+  "CREATE",
+  "UPDATE",
+  "LIST",
+  "DELETE",
+];
+
 export const hasModulePermission = (
   user: User | null | undefined,
   module: PermissionModule,
@@ -98,4 +105,21 @@ export const hasRotationPermission = (
 
 export const canAccessRotationModule = (user: User | null | undefined) => {
   return hasAnyModulePermission(user, "rotation", ROTATION_ACTIONS);
+};
+
+export const hasRapportQualitePermission = (
+  user: User | null | undefined,
+  action: PermissionAction,
+) => {
+  return hasModulePermission(user, "rapport qualite", action);
+};
+
+export const canAccessRapportQualiteModule = (
+  user: User | null | undefined,
+) => {
+  return hasAnyModulePermission(
+    user,
+    "rapport qualite",
+    RAPPORT_QUALITE_ACTIONS,
+  );
 };

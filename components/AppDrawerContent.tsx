@@ -1,5 +1,6 @@
 import {
   hasProjetPermission,
+  hasRapportQualitePermission,
   hasRetourPermission,
   hasRotationPermission,
   hasVoyagePermission,
@@ -20,6 +21,7 @@ type DrawerIconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 type DrawerRoute =
   | "/voyages"
   | "/returns"
+  | "/quality-reports"
   | "/rotation-chauffeur"
   | "/projet-locations";
 
@@ -32,6 +34,11 @@ type DrawerMenuItem = {
 const DRAWER_ITEMS: DrawerMenuItem[] = [
   { label: "Voyages", route: "/voyages", icon: "truck-fast" },
   { label: "Retours", route: "/returns", icon: "backup-restore" },
+  {
+    label: "Rapports qualite",
+    route: "/quality-reports",
+    icon: "file-document-multiple-outline",
+  },
   {
     label: "Rotation chauffeur",
     route: "/rotation-chauffeur",
@@ -63,6 +70,7 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
   const { user, signOut } = useSession();
   const canShowVoyageModule = hasVoyagePermission(user, "LIST");
   const canShowRetourModule = hasRetourPermission(user, "LIST");
+  const canShowQualityReportModule = hasRapportQualitePermission(user, "LIST");
   const canShowProjetModule = hasProjetPermission(user, "LIST");
   const canShowRotationModule = hasRotationPermission(user, "LIST");
 
@@ -122,6 +130,10 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
 
             if (item.route === "/returns") {
               return canShowRetourModule;
+            }
+
+            if (item.route === "/quality-reports") {
+              return canShowQualityReportModule;
             }
 
             if (item.route === "/projet-locations") {

@@ -19,6 +19,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   Text,
   View,
 } from "react-native";
@@ -437,6 +438,122 @@ export const ReturnDetailsScreen = () => {
     [returnId],
   );
 
+  const downloadFileToCache = useCallback(
+    async (fileUrl: string, sourceName?: string | null, fileId?: string) => {
+      const fallbackName = `retour-${returnId ?? "fichier"}-${Date.now()}`;
+      const baseName = getFileName(sourceName, fallbackName);
+      const safeName = sanitizeFileName(baseName);
+
+      try {
+        if (fileId) {
+          setDownloadingFileId(fileId);
+        }
+
+        const tempDownloadsDir = new Directory(Paths.cache, "downloads-share");
+        if (!tempDownloadsDir.exists) {
+          tempDownloadsDir.create({ idempotent: true, intermediates: true });
+        }
+
+        const tempFileName = `${Date.now()}-${safeName}`;
+        const tempDestination = new File(tempDownloadsDir, tempFileName);
+        return await File.downloadFileAsync(fileUrl, tempDestination, {
+          idempotent: true,
+        });
+      } catch (error) {
+        console.error("Error downloading file for sharing:", error);
+        Toast.show({
+          type: "error",
+          text1: "Partage impossible",
+          text2: "Impossible de préparer ce fichier pour le partage.",
+        });
+        return null;
+      } finally {
+        setDownloadingFileId(null);
+      }
+    },
+    [returnId],
+  );
+
+  const handlePreviewFile = useCallback(
+    async (fileUrl: string, fileName: string) => {
+      const mimeType = getMimeTypeFromFileName(fileName);
+
+      try {
+        if (Platform.OS === "android") {
+          try {
+            await IntentLauncher.startActivityAsync(
+              "android.intent.action.VIEW",
+              {
+                data: fileUrl,
+                flags: 1,
+                type: mimeType,
+              },
+            );
+          } catch {
+            await IntentLauncher.startActivityAsync(
+              "android.intent.action.VIEW",
+              {
+                data: fileUrl,
+                flags: 1,
+              },
+            );
+          }
+
+          return;
+        }
+
+        const canOpen = await Linking.canOpenURL(fileUrl);
+        if (!canOpen) {
+          Toast.show({
+            type: "error",
+            text1: "Ouverture impossible",
+            text2: "Impossible d'ouvrir ce fichier.",
+          });
+          return;
+        }
+
+        await Linking.openURL(fileUrl);
+      } catch (error) {
+        console.error("Error previewing file:", error);
+        Toast.show({
+          type: "error",
+          text1: "Aperçu impossible",
+          text2: "Impossible d'ouvrir ce fichier.",
+        });
+      }
+    },
+    [],
+  );
+
+  const handleShareFile = useCallback(
+    async (fileUrl: string, sourceName?: string | null, fileId?: string) => {
+      const downloadedFile = await downloadFileToCache(
+        fileUrl,
+        sourceName,
+        fileId,
+      );
+      if (!downloadedFile) {
+        return;
+      }
+
+      try {
+        await Share.share({
+          title: downloadedFile.name,
+          message: downloadedFile.name,
+          url: downloadedFile.uri,
+        });
+      } catch (error) {
+        console.error("Error sharing file:", error);
+        Toast.show({
+          type: "error",
+          text1: "Partage impossible",
+          text2: "Impossible de partager ce fichier.",
+        });
+      }
+    },
+    [downloadFileToCache],
+  );
+
   return (
     <SafeAreaView
       style={{
@@ -704,35 +821,40 @@ export const ReturnDetailsScreen = () => {
                           flexDirection: "row",
                           marginTop: 10,
                           columnGap: 10,
+                          flexWrap: "wrap",
                         }}
                       >
-                        {fileIsImage ? (
-                          <Pressable
-                            onPress={() =>
+                        <Pressable
+                          onPress={async () => {
+                            if (fileIsImage) {
                               setPreviewImage({
                                 uri: fileUrl,
                                 dateUpload: file.date_upload ?? null,
-                              })
+                              });
+                              return;
                             }
+
+                            await handlePreviewFile(fileUrl, fileName);
+                          }}
+                          style={{
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            borderColor: "#ddd",
+                            backgroundColor: "#fff",
+                          }}
+                        >
+                          <Text
                             style={{
-                              paddingHorizontal: 12,
-                              paddingVertical: 8,
-                              borderRadius: 8,
-                              borderWidth: 1,
-                              borderColor: "#ddd",
+                              fontSize: 12,
+                              color: "#555",
+                              fontWeight: "700",
                             }}
                           >
-                            <Text
-                              style={{
-                                fontSize: 12,
-                                color: "#555",
-                                fontWeight: "700",
-                              }}
-                            >
-                              Aperçu
-                            </Text>
-                          </Pressable>
-                        ) : null}
+                            Aperçu
+                          </Text>
+                        </Pressable>
 
                         <Pressable
                           onPress={() =>
@@ -761,6 +883,30 @@ export const ReturnDetailsScreen = () => {
                             {isDownloading
                               ? "Téléchargement..."
                               : "Télécharger"}
+                          </Text>
+                        </Pressable>
+
+                        <Pressable
+                          onPress={() =>
+                            handleShareFile(fileUrl, file.nom_fichier, file.id)
+                          }
+                          disabled={isDownloading}
+                          style={{
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            borderRadius: 8,
+                            backgroundColor: "#334155",
+                            opacity: isDownloading ? 0.7 : 1,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              color: "#fff",
+                              fontWeight: "700",
+                            }}
+                          >
+                            Partager
                           </Text>
                         </Pressable>
                       </View>

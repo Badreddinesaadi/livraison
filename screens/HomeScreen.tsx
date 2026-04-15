@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { hasRapportQualitePermission } from "@/constants/permissions";
 import { Colors } from "@/constants/theme";
+import { useSession } from "@/stores/auth.store";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { DrawerActions } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useNavigation, useRouter } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -10,7 +11,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomeScreen() {
   const navigation = useNavigation();
   const router = useRouter();
-  const toggleMenu = () => navigation.dispatch(DrawerActions.openDrawer());
+  const { user } = useSession();
+  const canListQualityReports = hasRapportQualitePermission(user, "LIST");
+  const toggleMenu = () =>
+    navigation.dispatch({ type: "OPEN_DRAWER" } as never);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -63,6 +67,24 @@ export default function HomeScreen() {
             router.navigate("/returns");
           }}
         />
+        {canListQualityReports && (
+          <Button
+            preset="filled"
+            text="Rapports qualite"
+            LeftAccessory={() => (
+              <View>
+                <MaterialCommunityIcons
+                  name="file-document-multiple-outline"
+                  size={24}
+                  color={Colors.light.background}
+                />
+              </View>
+            )}
+            onPress={() => {
+              router.navigate("/quality-reports" as any);
+            }}
+          />
+        )}
         <Button
           preset="filled"
           text="Rotation chauffeur"
