@@ -36,11 +36,17 @@ export type CreateQualityReportRequest = {
   files: UploadQualityReportFile[];
 };
 
-export const listQualityReports = async ({ page }: { page: number }) => {
+export const listQualityReports = async ({
+  page,
+  search,
+}: {
+  page: number;
+  search?: string;
+}) => {
   const result = await client.request<QualityReport[]>({
     pathname: "/sdkboard/api/homescreen/rapport_qualite.php",
     method: "GET",
-    searchParams: { page },
+    searchParams: { page, search },
     isDebug: false,
     withPagination: true,
   });

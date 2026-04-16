@@ -43,7 +43,7 @@ export const QualityReportsScreen = () => {
     }
 
     debounceRef.current = setTimeout(() => {
-      setDebouncedSearch(searchText.trim().toLowerCase());
+      setDebouncedSearch(searchText.trim());
     }, 300);
 
     return () => {
@@ -76,10 +76,11 @@ export const QualityReportsScreen = () => {
 
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     useInfiniteQuery({
-      queryKey: ["quality-reports", "list"],
+      queryKey: ["quality-reports", "list", debouncedSearch],
       queryFn: ({ pageParam }) =>
         listQualityReports({
           page: pageParam,
+          search: debouncedSearch || undefined,
         }),
       enabled: canListQualityReports,
       initialPageParam: 1,
@@ -94,27 +95,8 @@ export const QualityReportsScreen = () => {
     });
 
   const listData = useMemo(() => {
-    const allItems = data?.pages.flatMap((page) => page.data ?? []) ?? [];
-
-    if (!debouncedSearch) {
-      return allItems;
-    }
-
-    return allItems.filter((item) => {
-      const searchIn = [
-        String(item.id),
-        item.dum,
-        item.dossier,
-        item.commentaire,
-        item.date,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return searchIn.includes(debouncedSearch);
-    });
-  }, [data, debouncedSearch]);
+    return data?.pages.flatMap((page) => page.data ?? []) ?? [];
+  }, [data]);
 
   const handleDelete = (reportId: number) => {
     if (!canDeleteQualityReport) {
