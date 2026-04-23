@@ -211,7 +211,10 @@ export const QualityReportDetailsScreen = () => {
     dateUpload: string | null;
   } | null>(null);
   const [processingFileId, setProcessingFileId] = useState<number | null>(null);
-  const canListQualityReports = hasRapportQualitePermission(user, "LIST");
+  const canListQualityReports: boolean = hasRapportQualitePermission(
+    user,
+    "LIST",
+  );
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["quality-reports", "details", qualityReportId],
