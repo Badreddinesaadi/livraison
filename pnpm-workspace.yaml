@@ -1,0 +1,6 @@
+overrides:
+  "hermes-compiler": "250829098.0.4"
+onlyBuiltDependencies:
+  - "unrs-resolver"
+allowBuilds:
+  unrs-resolver: true

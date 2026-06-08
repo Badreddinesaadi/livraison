@@ -123,3 +123,27 @@ export const canAccessRapportQualiteModule = (
     RAPPORT_QUALITE_ACTIONS,
   );
 };
+
+const DEMANDE_TRANSFERT_ACTIONS: PermissionAction[] = [
+  "CREATE",
+  "UPDATE",
+  "LIST",
+  "DELETE",
+];
+
+export const hasDemandeTransfertPermission = (
+  user: User | null | undefined,
+  action: PermissionAction,
+) => {
+  return hasModulePermission(user, "demande de transfert", action);
+};
+
+export const canAccessDemandeTransfertModule = (
+  user: User | null | undefined,
+) => {
+  return hasAnyModulePermission(
+    user,
+    "demande de transfert",
+    DEMANDE_TRANSFERT_ACTIONS,
+  );
+};

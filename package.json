@@ -21,28 +21,28 @@
     "@react-navigation/drawer": "^7.9.4",
     "@tanstack/react-query": "^5.90.21",
     "date-fns": "^4.1.0",
-    "expo": "^55.0.17",
-    "expo-build-properties": "~55.0.13",
-    "expo-camera": "~55.0.16",
-    "expo-constants": "~55.0.15",
+    "expo": "^55.0.26",
+    "expo-build-properties": "~55.0.14",
+    "expo-camera": "~55.0.19",
+    "expo-constants": "~55.0.16",
     "expo-document-picker": "~55.0.13",
-    "expo-file-system": "~55.0.17",
-    "expo-font": "~55.0.6",
+    "expo-file-system": "~55.0.22",
+    "expo-font": "~55.0.8",
     "expo-haptics": "~55.0.14",
-    "expo-image": "~55.0.9",
-    "expo-image-picker": "~55.0.19",
+    "expo-image": "~55.0.11",
+    "expo-image-picker": "~55.0.20",
     "expo-intent-launcher": "~55.0.12",
-    "expo-linking": "~55.0.14",
-    "expo-location": "~55.1.8",
-    "expo-media-library": "~55.0.15",
-    "expo-network": "~55.0.13",
-    "expo-router": "~55.0.13",
-    "expo-secure-store": "~55.0.13",
-    "expo-splash-screen": "~55.0.19",
-    "expo-status-bar": "~55.0.5",
-    "expo-symbols": "~55.0.7",
-    "expo-system-ui": "~55.0.16",
-    "expo-web-browser": "~55.0.14",
+    "expo-linking": "~55.0.15",
+    "expo-location": "~55.1.10",
+    "expo-media-library": "~55.0.17",
+    "expo-network": "~55.0.14",
+    "expo-router": "~55.0.16",
+    "expo-secure-store": "~55.0.14",
+    "expo-splash-screen": "~55.0.21",
+    "expo-status-bar": "~55.0.6",
+    "expo-symbols": "~55.0.9",
+    "expo-system-ui": "~55.0.18",
+    "expo-web-browser": "~55.0.16",
     "lottie-react-native": "~7.3.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -59,17 +59,9 @@
   "devDependencies": {
     "@types/react": "~19.2.10",
     "eslint": "^9.25.0",
-    "eslint-config-expo": "~55.0.0",
+    "eslint-config-expo": "~55.0.1",
     "typescript": "~5.9.2"
   },
   "private": true,
-  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc",
-  "pnpm": {
-    "overrides": {
-      "hermes-compiler": "250829098.0.4"
-    },
-    "onlyBuiltDependencies": [
-      "unrs-resolver"
-    ]
-  }
+  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485"
 }

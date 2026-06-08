@@ -24,7 +24,13 @@ export type User = {
   permission: Permissions;
 };
 type Permissions = {
-  [key in "voyage" | "retour" | "rotation" | "projet" | "rapport qualite"]: (
+  [key in
+    | "voyage"
+    | "retour"
+    | "rotation"
+    | "projet"
+    | "rapport qualite"
+    | "demande de transfert"]: (
     | "CREATE"
     | "UPDATE"
     | "LIST"
