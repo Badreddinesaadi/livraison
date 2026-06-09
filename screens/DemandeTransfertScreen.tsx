@@ -1,7 +1,4 @@
-import {
-  DemandeTransfert,
-  listDemandeTransfert,
-} from "@/api/demande-transfert.api";
+import { listDemandeTransfert } from "@/api/demande-transfert.api";
 import { DemandeTransfertCard } from "@/components/DemandeTransfertCard";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
@@ -37,9 +34,12 @@ export const DemandeTransfertScreen = () => {
 
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     useInfiniteQuery({
-      queryKey: ["demande-transferts", "list"],
+      queryKey: ["demande-transferts", "list", debouncedSearch],
       queryFn: ({ pageParam }) =>
-        listDemandeTransfert({ page: pageParam }),
+        listDemandeTransfert({
+          page: pageParam,
+          searchquery: debouncedSearch || undefined,
+        }),
       enabled: canList,
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
@@ -52,31 +52,10 @@ export const DemandeTransfertScreen = () => {
       },
     });
 
-  const listData = useMemo(() => {
-    const allItems =
-      data?.pages.flatMap((page) => page.data ?? []) ?? [];
-
-    if (!debouncedSearch) return allItems;
-
-    return allItems.filter((item) => {
-      const searchIn = [
-        item.reference,
-        item.transporteur,
-        item.matricule,
-        item.dum,
-        item.observation,
-        item.createur,
-        item.statut,
-        item.depot_source,
-        item.depot_destination,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return searchIn.includes(debouncedSearch);
-    });
-  }, [data, debouncedSearch]);
+  const listData = useMemo(
+    () => data?.pages.flatMap((page) => page.data ?? []) ?? [],
+    [data],
+  );
 
   if (!canList) {
     return (
@@ -182,7 +161,18 @@ export const DemandeTransfertScreen = () => {
         <FlatList
           data={listData}
           keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => <DemandeTransfertCard item={item} />}
+          renderItem={({ item }) => (
+            <DemandeTransfertCard
+              item={item}
+              onViewDetails={() => {
+                router.navigate({
+                  pathname:
+                    "/(app)/(drawer)/(stack)/demande-transferts/details/[demandeTransfertId]",
+                  params: { demandeTransfertId: String(item.id) },
+                });
+              }}
+            />
+          )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 }}
           onEndReachedThreshold={0.3}

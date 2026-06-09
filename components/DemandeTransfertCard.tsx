@@ -6,6 +6,7 @@ import { LayoutAnimation, Pressable, Text, View } from "react-native";
 
 type DemandeTransfertCardProps = {
   item: DemandeTransfert;
+  onViewDetails: () => void;
 };
 
 const STATUT_STYLE: Record<
@@ -63,7 +64,7 @@ const formatDateTime = (value?: string | null) => {
   });
 };
 
-export const DemandeTransfertCard = ({ item }: DemandeTransfertCardProps) => {
+export const DemandeTransfertCard = ({ item, onViewDetails }: DemandeTransfertCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const statutStyle = STATUT_STYLE[item.statut] ?? {
     bg: "#9ca3af18",
@@ -211,6 +212,36 @@ export const DemandeTransfertCard = ({ item }: DemandeTransfertCardProps) => {
             label="Créé par"
             value={item.createur || "-"}
           />
+
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              marginTop: 10,
+              paddingTop: 10,
+              borderTopWidth: 1,
+              borderTopColor: "#f2f2f2",
+            }}
+          >
+            <Pressable
+              onPress={onViewDetails}
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 10,
+                borderRadius: 8,
+                backgroundColor: PRIMARY + "18",
+                gap: 6,
+              }}
+            >
+              <FontAwesome5 name="eye" size={14} color={PRIMARY} />
+              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
+                Détails
+              </Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </Pressable>

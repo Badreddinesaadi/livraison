@@ -1,3 +1,6 @@
+import AddProductBottomSheetContent from "@/components/AddProductBottomSheetContent";
+import DeleteProductConfirmBottomSheetContent from "@/components/DeleteProductConfirmBottomSheetContent";
+import ManageLotsBottomSheetContent from "@/components/ManageLotsBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
@@ -24,15 +27,35 @@ export default function StackLayout() {
   const selectorSheetConfig = useDemandeTransfertSheetStore(
     (s) => s.selectorSheetConfig,
   );
+  const addProductConfig = useDemandeTransfertSheetStore(
+    (s) => s.addProductConfig,
+  );
+  const deleteProductConfig = useDemandeTransfertSheetStore(
+    (s) => s.deleteProductConfig,
+  );
+  const manageLotsConfig = useDemandeTransfertSheetStore(
+    (s) => s.manageLotsConfig,
+  );
+  const isDeleteProductPending = useDemandeTransfertSheetStore(
+    (s) => s.isDeleteProductPending,
+  );
   const chooseSelectorOption = useDemandeTransfertSheetStore(
     (s) => s.chooseSelectorOption,
+  );
+  const confirmDeleteProduct = useDemandeTransfertSheetStore(
+    (s) => s.confirmDeleteProduct,
   );
   const closeSheet = useDemandeTransfertSheetStore((s) => s.closeSheet);
   const isSheetOpen = useDemandeTransfertSheetStore((s) => s.isSheetOpen);
 
-  const snapPoints = useMemo(() => ["60%"], []);
+  const snapPoints = useMemo(() => {
+    if (sheetType === "add-product") return ["90%"];
+    if (sheetType === "manage-lots") return ["80%"];
+    if (sheetType === "delete-product-confirm") return ["30%"];
+    return ["60%"];
+  }, [sheetType]);
 
-  const isManagedSheetOpen = isSheetOpen && sheetType === "selector-options";
+  const isManagedSheetOpen = isSheetOpen && sheetType !== null;
   const { top, bottom } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const rotation = useRef(new Animated.Value(0));
@@ -183,6 +206,28 @@ export default function StackLayout() {
             searchPlaceholder={selectorSheetConfig.searchPlaceholder}
             onSelect={chooseSelectorOption}
           />
+        ) : sheetType === "add-product" && addProductConfig ? (
+          <AddProductBottomSheetContent
+            idDT={addProductConfig.idDT}
+            onClose={closeSheet}
+          />
+        ) : sheetType === "delete-product-confirm" && deleteProductConfig ? (
+          <DeleteProductConfirmBottomSheetContent
+            productDetailId={deleteProductConfig.productDetailId}
+            productName={deleteProductConfig.productName}
+            isLoading={isDeleteProductPending}
+            onCancel={closeSheet}
+            onConfirm={confirmDeleteProduct}
+          />
+        ) : sheetType === "manage-lots" && manageLotsConfig ? (
+          <ManageLotsBottomSheetContent
+            idDT={manageLotsConfig.idDT}
+            idProduit={manageLotsConfig.idProduit}
+            productDetailId={manageLotsConfig.productDetailId}
+            productName={manageLotsConfig.productName}
+            currentLots={manageLotsConfig.currentLots}
+            onClose={closeSheet}
+          />
         ) : (
           <View style={{ padding: 16 }}>
             <Text style={{ color: "#888" }}>Aucune option disponible</Text>
@@ -196,4 +241,5 @@ export default function StackLayout() {
 const headerTitles: Record<string, string> = {
   index: "Demande de transfert",
   "create/index": "Nouvelle demande",
+  "details/[demandeTransfertId]": "Détails de la demande",
 };

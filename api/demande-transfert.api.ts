@@ -39,11 +39,20 @@ export type CreateDemandeTransfertRequest = {
   observation?: string;
 };
 
-export const listDemandeTransfert = async ({ page }: { page: number }) => {
+export const listDemandeTransfert = async ({
+  page,
+  searchquery,
+}: {
+  page: number;
+  searchquery?: string;
+}) => {
   const result = await client.request<DemandeTransfert[]>({
     pathname: "/sdkboard/api/homescreen/demande_transfert.php",
     method: "GET",
-    searchParams: { page },
+    searchParams: {
+      page,
+      ...(searchquery ? { searchquery } : {}),
+    },
     isDebug: true,
     withPagination: true,
   });
@@ -60,6 +69,116 @@ export const createDemandeTransfert = async (
   return client.request({
     pathname: "/sdkboard/api/homescreen/demande_transfert.php",
     method: "POST",
+    body: request,
+    isDebug: true,
+  });
+};
+
+export type DemandeTransfertLot = {
+  idItem: string;
+  idProduit: string;
+  Lot: string;
+  preparer: string;
+  qte: string;
+  qte_uv: string;
+  idModif: string;
+  old_lot: string;
+  depotName?: string;
+  depotId?: number;
+  long?: string;
+  date_entree?: string;
+  nbre_pce?: string;
+};
+
+export type DemandeTransfertProduct = {
+  id: string;
+  idDT: string;
+  idSource: string;
+  idProduit: string;
+  nbrFDX: string;
+  Qte: string;
+  Unite: string;
+  preparer: string;
+  produit: string;
+  unite_v: string;
+  lots: DemandeTransfertLot[];
+};
+
+export type DemandeTransfertDetails = {
+  idDT: number;
+  count: number;
+  details: DemandeTransfertProduct[];
+};
+
+export const getDemandeTransfertDetails = async ({ id }: { id: string }) => {
+  const result = await client.request<DemandeTransfertDetails>({
+    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    method: "GET",
+    searchParams: { idDT: id, details: 1 },
+    isDebug: true,
+  });
+
+  return result;
+};
+
+export type AddProductToDTRequest = {
+  type: "detail";
+  idDT: number;
+  idProduit: number;
+  qte: number;
+  nbrFDX: number;
+  unite: string;
+};
+
+export type DeleteProductFromDTRequest = {
+  type: "detail";
+  id: string | number;
+};
+
+export type LotInsertItem = {
+  idItem: string;
+  idProduit: number;
+  Lot: string;
+  qte: number;
+};
+
+export type LotDeleteItem = {
+  idItem: string;
+  idProduit: string;
+  Lot: string;
+};
+
+export type UpdateLotsRequest = {
+  type: "update_lot";
+  lots_update: never[];
+  lots_insert: LotInsertItem[];
+  lots_delete: LotDeleteItem[];
+};
+
+export const addProductToDT = async (request: AddProductToDTRequest) => {
+  return client.request({
+    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    method: "POST",
+    body: request,
+    isDebug: true,
+  });
+};
+
+export const deleteProductFromDT = async (
+  request: DeleteProductFromDTRequest,
+) => {
+  return client.request({
+    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    method: "DELETE",
+    body: request,
+    isDebug: true,
+  });
+};
+
+export const updateProductLots = async (request: UpdateLotsRequest) => {
+  return client.request({
+    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    method: "PUT",
     body: request,
     isDebug: true,
   });
