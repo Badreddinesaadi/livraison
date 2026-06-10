@@ -11,6 +11,8 @@ type SheetType =
   | "delete-product-confirm"
   | "manage-lots"
   | "preparer-confirm"
+  | "statut-selector"
+  | "delete-dt-confirm"
   | null;
 
 type SelectorOption = {
@@ -57,6 +59,18 @@ type PreparerConfig = {
   ) => Promise<void>;
 };
 
+type StatutSelectorConfig = {
+  idDT: number;
+  currentStatut: string;
+  onSelect: (statut: string) => void;
+};
+
+type DeleteDTConfig = {
+  idDT: number;
+  reference: string;
+  handler: () => Promise<void>;
+};
+
 type DemandeTransfertSheetState = {
   sheetType: SheetType;
   selectorSheetConfig: SelectorSheetConfig | null;
@@ -64,8 +78,11 @@ type DemandeTransfertSheetState = {
   deleteProductConfig: DeleteProductConfig | null;
   manageLotsConfig: ManageLotsConfig | null;
   preparerConfig: PreparerConfig | null;
+  statutSelectorConfig: StatutSelectorConfig | null;
+  deleteDTConfig: DeleteDTConfig | null;
   isDeleteProductPending: boolean;
   isPreparerPending: boolean;
+  isDeleteDTPending: boolean;
   isSheetOpen: boolean;
   openSelectorOptions: (config: SelectorSheetConfig) => void;
   chooseSelectorOption: (id: number) => void;
@@ -77,6 +94,10 @@ type DemandeTransfertSheetState = {
   openPreparerConfirmSheet: (config: PreparerConfig) => void;
   confirmPreparer: () => void;
   finishPreparer: () => void;
+  openStatutSelectorSheet: (config: StatutSelectorConfig) => void;
+  openDeleteDTConfirmSheet: (config: DeleteDTConfig) => void;
+  confirmDeleteDT: () => void;
+  finishDeleteDT: () => void;
   closeSheet: () => void;
 };
 
@@ -88,8 +109,11 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
     deleteProductConfig: null,
     manageLotsConfig: null,
     preparerConfig: null,
+    statutSelectorConfig: null,
+    deleteDTConfig: null,
     isDeleteProductPending: false,
     isPreparerPending: false,
+    isDeleteDTPending: false,
     isSheetOpen: false,
     openSelectorOptions: (config: SelectorSheetConfig) =>
       set({
@@ -99,8 +123,11 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         deleteProductConfig: null,
         manageLotsConfig: null,
         preparerConfig: null,
+        statutSelectorConfig: null,
+        deleteDTConfig: null,
         isDeleteProductPending: false,
         isPreparerPending: false,
+        isDeleteDTPending: false,
         isSheetOpen: true,
       }),
     chooseSelectorOption: (id: number) =>
@@ -123,8 +150,11 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         deleteProductConfig: null,
         manageLotsConfig: null,
         preparerConfig: null,
+        statutSelectorConfig: null,
+        deleteDTConfig: null,
         isDeleteProductPending: false,
         isPreparerPending: false,
+        isDeleteDTPending: false,
         isSheetOpen: true,
       }),
     openDeleteProductConfirmSheet: (config: DeleteProductConfig) =>
@@ -135,8 +165,11 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         addProductConfig: null,
         manageLotsConfig: null,
         preparerConfig: null,
+        statutSelectorConfig: null,
+        deleteDTConfig: null,
         isDeleteProductPending: false,
         isPreparerPending: false,
+        isDeleteDTPending: false,
         isSheetOpen: true,
       }),
     confirmDeleteProduct: () =>
@@ -170,8 +203,11 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         addProductConfig: null,
         deleteProductConfig: null,
         preparerConfig: null,
+        statutSelectorConfig: null,
+        deleteDTConfig: null,
         isDeleteProductPending: false,
         isPreparerPending: false,
+        isDeleteDTPending: false,
         isSheetOpen: true,
       }),
     openPreparerConfirmSheet: (config: PreparerConfig) =>
@@ -182,8 +218,11 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         addProductConfig: null,
         deleteProductConfig: null,
         manageLotsConfig: null,
+        statutSelectorConfig: null,
+        deleteDTConfig: null,
         isDeleteProductPending: false,
         isPreparerPending: false,
+        isDeleteDTPending: false,
         isSheetOpen: true,
       }),
     confirmPreparer: () =>
@@ -203,6 +242,54 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
       set({
         isPreparerPending: false,
         preparerConfig: null,
+      }),
+    openStatutSelectorSheet: (config: StatutSelectorConfig) =>
+      set({
+        sheetType: "statut-selector",
+        statutSelectorConfig: config,
+        selectorSheetConfig: null,
+        addProductConfig: null,
+        deleteProductConfig: null,
+        manageLotsConfig: null,
+        preparerConfig: null,
+        deleteDTConfig: null,
+        isDeleteProductPending: false,
+        isPreparerPending: false,
+        isDeleteDTPending: false,
+        isSheetOpen: true,
+      }),
+    openDeleteDTConfirmSheet: (config: DeleteDTConfig) =>
+      set({
+        sheetType: "delete-dt-confirm",
+        deleteDTConfig: config,
+        selectorSheetConfig: null,
+        addProductConfig: null,
+        deleteProductConfig: null,
+        manageLotsConfig: null,
+        preparerConfig: null,
+        statutSelectorConfig: null,
+        isDeleteProductPending: false,
+        isPreparerPending: false,
+        isDeleteDTPending: false,
+        isSheetOpen: true,
+      }),
+    confirmDeleteDT: () =>
+      set((state) => {
+        if (state.isDeleteDTPending || !state.deleteDTConfig) {
+          return state;
+        }
+
+        state.deleteDTConfig.handler();
+
+        return {
+          isDeleteDTPending: true,
+          isSheetOpen: false,
+        };
+      }),
+    finishDeleteDT: () =>
+      set({
+        isDeleteDTPending: false,
+        deleteDTConfig: null,
       }),
     closeSheet: () => set({ isSheetOpen: false }),
   }),

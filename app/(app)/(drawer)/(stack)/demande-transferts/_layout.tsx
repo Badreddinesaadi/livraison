@@ -1,8 +1,10 @@
 import AddProductBottomSheetContent from "@/components/AddProductBottomSheetContent";
+import DeleteDTConfirmBottomSheetContent from "@/components/DeleteDTConfirmBottomSheetContent";
 import DeleteProductConfirmBottomSheetContent from "@/components/DeleteProductConfirmBottomSheetContent";
 import ManageLotsBottomSheetContent from "@/components/ManageLotsBottomSheetContent";
 import PreparerConfirmBottomSheetContent from "@/components/PreparerConfirmBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
+import StatutSelectorBottomSheetContent from "@/components/StatutSelectorBottomSheetContent";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { useDemandeTransfertSheetStore } from "@/stores/demande-transfert.store";
@@ -40,11 +42,20 @@ export default function StackLayout() {
   const preparerConfig = useDemandeTransfertSheetStore(
     (s) => s.preparerConfig,
   );
+  const statutSelectorConfig = useDemandeTransfertSheetStore(
+    (s) => s.statutSelectorConfig,
+  );
+  const deleteDTConfig = useDemandeTransfertSheetStore(
+    (s) => s.deleteDTConfig,
+  );
   const isDeleteProductPending = useDemandeTransfertSheetStore(
     (s) => s.isDeleteProductPending,
   );
   const isPreparerPending = useDemandeTransfertSheetStore(
     (s) => s.isPreparerPending,
+  );
+  const isDeleteDTPending = useDemandeTransfertSheetStore(
+    (s) => s.isDeleteDTPending,
   );
   const chooseSelectorOption = useDemandeTransfertSheetStore(
     (s) => s.chooseSelectorOption,
@@ -55,6 +66,9 @@ export default function StackLayout() {
   const confirmPreparer = useDemandeTransfertSheetStore(
     (s) => s.confirmPreparer,
   );
+  const confirmDeleteDT = useDemandeTransfertSheetStore(
+    (s) => s.confirmDeleteDT,
+  );
   const closeSheet = useDemandeTransfertSheetStore((s) => s.closeSheet);
   const isSheetOpen = useDemandeTransfertSheetStore((s) => s.isSheetOpen);
 
@@ -63,6 +77,8 @@ export default function StackLayout() {
     if (sheetType === "manage-lots") return ["80%"];
     if (sheetType === "delete-product-confirm") return ["30%"];
     if (sheetType === "preparer-confirm") return ["35%"];
+    if (sheetType === "statut-selector") return ["55%"];
+    if (sheetType === "delete-dt-confirm") return ["30%"];
     return ["60%"];
   }, [sheetType]);
 
@@ -247,6 +263,18 @@ export default function StackLayout() {
             onCancel={closeSheet}
             onConfirm={confirmPreparer}
           />
+        ) : sheetType === "statut-selector" && statutSelectorConfig ? (
+          <StatutSelectorBottomSheetContent
+            currentStatut={statutSelectorConfig.currentStatut}
+            onSelect={statutSelectorConfig.onSelect}
+          />
+        ) : sheetType === "delete-dt-confirm" && deleteDTConfig ? (
+          <DeleteDTConfirmBottomSheetContent
+            reference={deleteDTConfig.reference}
+            isLoading={isDeleteDTPending}
+            onCancel={closeSheet}
+            onConfirm={confirmDeleteDT}
+          />
         ) : (
           <View style={{ padding: 16 }}>
             <Text style={{ color: "#888" }}>Aucune option disponible</Text>
@@ -261,4 +289,5 @@ const headerTitles: Record<string, string> = {
   index: "Demande de transfert",
   "create/index": "Nouvelle demande",
   "details/[demandeTransfertId]": "Détails de la demande",
+  "edit/[demandeTransfertId]": "Modifier la demande",
 };

@@ -1,7 +1,9 @@
 import {
   DemandeTransfertProduct,
   DemandeTransfertLot,
+  changeDTStatut,
   deleteProductFromDT,
+  deleteDemandeTransfert,
   getDemandeTransfertDetails,
   listDemandeTransfert,
   preparerDemandeTransfert,
@@ -12,8 +14,8 @@ import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { useDemandeTransfertSheetStore } from "@/stores/demande-transfert.store";
 import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalSearchParams } from "expo-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   LayoutAnimation,
@@ -23,6 +25,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 const STATUT_STYLE: Record<string, { bg: string; text: string }> = (() => {
   const map: Record<string, { bg: string; text: string }> = {};
@@ -439,6 +442,7 @@ const ProductCard = ({
 export const DemandeTransfertDetailsScreen = () => {
   const { user } = useSession();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const canView = hasDemandeTransfertPermission(user, "LIST");
   const canCreate = hasDemandeTransfertPermission(user, "CREATE");
   const canUpdate = hasDemandeTransfertPermission(user, "UPDATE");
@@ -461,6 +465,16 @@ export const DemandeTransfertDetailsScreen = () => {
   const finishPreparer = useDemandeTransfertSheetStore(
     (s) => s.finishPreparer,
   );
+  const openStatutSelectorSheet = useDemandeTransfertSheetStore(
+    (s) => s.openStatutSelectorSheet,
+  );
+  const openDeleteDTConfirmSheet = useDemandeTransfertSheetStore(
+    (s) => s.openDeleteDTConfirmSheet,
+  );
+  const finishDeleteDT = useDemandeTransfertSheetStore(
+    (s) => s.finishDeleteDT,
+  );
+  const closeSheet = useDemandeTransfertSheetStore((s) => s.closeSheet);
   const { demandeTransfertId } = useLocalSearchParams<{
     demandeTransfertId: string;
   }>();
@@ -572,6 +586,70 @@ export const DemandeTransfertDetailsScreen = () => {
     });
   };
 
+  const handleChangeStatut = () => {
+    if (!transfertItem || !canUpdate) return;
+    openStatutSelectorSheet({
+      idDT: Number(demandeTransfertId),
+      currentStatut: transfertItem.statut,
+      onSelect: async (statut) => {
+        closeSheet();
+        try {
+          await changeDTStatut({
+            id: Number(demandeTransfertId),
+            statut,
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["demande-transferts", "details"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["demande-transferts", "list"],
+          });
+        } catch (error: any) {
+          Toast.show({
+            type: "error",
+            text1: "Échec",
+            text2:
+              error.message || "Impossible de changer le statut.",
+          });
+        }
+      },
+    });
+  };
+
+  const handleDeleteDT = () => {
+    if (!transfertItem || !canDelete) return;
+    openDeleteDTConfirmSheet({
+      idDT: Number(demandeTransfertId),
+      reference: transfertItem.reference,
+      handler: async () => {
+        try {
+          await deleteDemandeTransfert({
+            id: Number(demandeTransfertId),
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["demande-transferts"],
+          });
+          router.back();
+        } catch (error: any) {
+          Toast.show({
+            type: "error",
+            text1: "Échec",
+            text2:
+              error.message || "Impossible de supprimer la demande.",
+          });
+        }
+        finishDeleteDT();
+      },
+    });
+  };
+
+  const handleEditDT = () => {
+    if (!transfertItem || !canUpdate) return;
+    router.push(
+      `/(app)/(drawer)/(stack)/demande-transferts/edit/${demandeTransfertId}` as any,
+    );
+  };
+
   if (!canView) {
     return (
       <SafeAreaView
@@ -636,24 +714,47 @@ export const DemandeTransfertDetailsScreen = () => {
               >
                 {transfertItem.reference}
               </Text>
-              <View
-                style={{
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderRadius: 999,
-                  backgroundColor: statutStyle.bg,
-                }}
-              >
-                <Text
+              {canUpdate ? (
+                <Pressable onPress={handleChangeStatut}>
+                  <View
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 999,
+                      backgroundColor: statutStyle.bg,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "700",
+                        color: statutStyle.text,
+                      }}
+                    >
+                      {transfertItem.statut}
+                    </Text>
+                  </View>
+                </Pressable>
+              ) : (
+                <View
                   style={{
-                    fontSize: 12,
-                    fontWeight: "700",
-                    color: statutStyle.text,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 999,
+                    backgroundColor: statutStyle.bg,
                   }}
                 >
-                  {transfertItem.statut}
-                </Text>
-              </View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "700",
+                      color: statutStyle.text,
+                    }}
+                  >
+                    {transfertItem.statut}
+                  </Text>
+                </View>
+              )}
             </View>
 
             <DetailRow
@@ -706,6 +807,53 @@ export const DemandeTransfertDetailsScreen = () => {
               label="Créé par"
               value={transfertItem.createur || "-"}
             />
+          </View>
+        )}
+
+        {(canUpdate || canDelete) && transfertItem && (
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              marginBottom: 14,
+            }}
+          >
+            {canUpdate && (
+              <Pressable
+                onPress={handleEditDT}
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 12,
+                  borderRadius: 10,
+                  backgroundColor: PRIMARY + "18",
+                  gap: 6,
+                }}
+              >
+                <FontAwesome5 name="edit" size={14} color={PRIMARY} />
+                <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 14 }}>
+                  Modifier
+                </Text>
+              </Pressable>
+            )}
+            {canDelete && (
+              <Pressable
+                onPress={handleDeleteDT}
+                style={{
+                  width: 48,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 12,
+                  borderRadius: 10,
+                  backgroundColor: "#ef444412",
+                }}
+              >
+                <FontAwesome5 name="trash" size={16} color="#ef4444" />
+              </Pressable>
+            )}
           </View>
         )}
 

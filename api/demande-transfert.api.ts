@@ -206,3 +206,49 @@ export const preparerDemandeTransfert = async (
     isDebug: true,
   });
 };
+
+export type ChangeDTStatutRequest = {
+  id: number;
+  statut: string;
+};
+
+export const changeDTStatut = async (request: ChangeDTStatutRequest) => {
+  return client.request({
+    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    method: "PUT",
+    body: request,
+    isDebug: true,
+  });
+};
+
+export type DeleteDTRequest = {
+  id: number;
+};
+
+export const deleteDemandeTransfert = async (request: DeleteDTRequest) => {
+  return client.request({
+    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    method: "DELETE",
+    body: request,
+    isDebug: true,
+  });
+};
+
+export type UpdateDemandeTransfertRequest = {
+  id: number;
+  statut: string;
+  transporteur: string;
+  observation: string;
+  matricule: string;
+};
+
+export const updateDemandeTransfert = async (
+  request: UpdateDemandeTransfertRequest,
+) => {
+  return client.request({
+    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    method: "PUT",
+    body: request,
+    isDebug: true,
+  });
+};
