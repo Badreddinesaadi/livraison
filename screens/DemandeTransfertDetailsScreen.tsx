@@ -1,8 +1,10 @@
 import {
   DemandeTransfertProduct,
+  DemandeTransfertLot,
   deleteProductFromDT,
   getDemandeTransfertDetails,
   listDemandeTransfert,
+  preparerDemandeTransfert,
 } from "@/api/demande-transfert.api";
 import Loader from "@/components/Loader";
 import { hasDemandeTransfertPermission } from "@/constants/permissions";
@@ -89,9 +91,15 @@ const DetailRow = ({
   </View>
 );
 
-const PreparerBadge = ({ preparer }: { preparer: string }) => {
+const PreparerBadge = ({
+  preparer,
+  onPress,
+}: {
+  preparer: string;
+  onPress?: () => void;
+}) => {
   const isOui = preparer.toLowerCase() === "oui";
-  return (
+  const badge = (
     <View
       style={{
         paddingHorizontal: 8,
@@ -112,20 +120,20 @@ const PreparerBadge = ({ preparer }: { preparer: string }) => {
       </Text>
     </View>
   );
+
+  if (!isOui && onPress) {
+    return <Pressable onPress={onPress}>{badge}</Pressable>;
+  }
+
+  return badge;
 };
 
 const LotItem = ({
   lot,
+  onPreparerLot,
 }: {
-  lot: {
-    Lot: string;
-    preparer: string;
-    qte: string;
-    nbre_pce?: string;
-    long?: string;
-    date_entree?: string;
-    depotName?: string;
-  };
+  lot: DemandeTransfertLot;
+  onPreparerLot?: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const toggle = () => {
@@ -166,7 +174,7 @@ const LotItem = ({
         >
           {lot.Lot}
         </Text>
-        <PreparerBadge preparer={lot.preparer} />
+        <PreparerBadge preparer={lot.preparer} onPress={onPreparerLot} />
         <FontAwesome5
           name={expanded ? "chevron-up" : "chevron-down"}
           size={10}
@@ -235,12 +243,16 @@ const ProductCard = ({
   canUpdate,
   onDeleteProduct,
   onManageLots,
+  onPreparerProduct,
+  onPreparerLot,
 }: {
   product: DemandeTransfertProduct;
   canDelete: boolean;
   canUpdate: boolean;
   onDeleteProduct?: () => void;
   onManageLots?: () => void;
+  onPreparerProduct?: () => void;
+  onPreparerLot?: (lot: DemandeTransfertLot) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const toggle = () => {
@@ -249,6 +261,7 @@ const ProductCard = ({
   };
 
   const lotsCount = product.lots?.length ?? 0;
+  const isProductPrepared = (product.preparer ?? "").toLowerCase() === "oui";
 
   return (
     <View
@@ -293,7 +306,7 @@ const ProductCard = ({
             {product.nbrFDX} FDX · {product.Qte} {product.unite_v}
           </Text>
         </View>
-        <PreparerBadge preparer={product.preparer} />
+        <PreparerBadge preparer={product.preparer} onPress={onPreparerProduct} />
         <FontAwesome5
           name={expanded ? "chevron-up" : "chevron-down"}
           size={12}
@@ -327,7 +340,11 @@ const ProductCard = ({
             </Text>
           </View>
           {product.lots.map((lot, idx) => (
-            <LotItem key={`${lot.idItem}-${lot.Lot}-${idx}`} lot={lot} />
+            <LotItem
+              key={`${lot.idItem}-${lot.Lot}-${idx}`}
+              lot={lot}
+              onPreparerLot={onPreparerLot ? () => onPreparerLot(lot) : undefined}
+            />
           ))}
         </View>
       )}
@@ -364,7 +381,7 @@ const ProductCard = ({
         </View>
       )}
 
-      {(canDelete || canUpdate) && (
+      {(canDelete || canUpdate) && !isProductPrepared && (
         <View
           style={{
             flexDirection: "row",
@@ -438,6 +455,12 @@ export const DemandeTransfertDetailsScreen = () => {
   const openManageLotsSheet = useDemandeTransfertSheetStore(
     (s) => s.openManageLotsSheet,
   );
+  const openPreparerConfirmSheet = useDemandeTransfertSheetStore(
+    (s) => s.openPreparerConfirmSheet,
+  );
+  const finishPreparer = useDemandeTransfertSheetStore(
+    (s) => s.finishPreparer,
+  );
   const { demandeTransfertId } = useLocalSearchParams<{
     demandeTransfertId: string;
   }>();
@@ -501,6 +524,51 @@ export const DemandeTransfertDetailsScreen = () => {
       productDetailId: product.id,
       productName: product.produit,
       currentLots: product.lots ?? [],
+    });
+  };
+
+  const handlePreparerProduct = (product: DemandeTransfertProduct) => {
+    openPreparerConfirmSheet({
+      type: "preparer_produit",
+      label: product.produit,
+      request: { type: "preparer_produit", id: product.id },
+      handler: async (request) => {
+        try {
+          await preparerDemandeTransfert(request);
+          queryClient.invalidateQueries({
+            queryKey: ["demande-transferts", "details"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["demande-transferts", "list"],
+          });
+        } catch {}
+        finishPreparer();
+      },
+    });
+  };
+
+  const handlePreparerLot = (lot: DemandeTransfertLot) => {
+    openPreparerConfirmSheet({
+      type: "preparer_lot",
+      label: lot.Lot,
+      request: {
+        type: "preparer_lot",
+        idItem: lot.idItem,
+        idProduit: lot.idProduit,
+        Lot: lot.Lot,
+      },
+      handler: async (request) => {
+        try {
+          await preparerDemandeTransfert(request);
+          queryClient.invalidateQueries({
+            queryKey: ["demande-transferts", "details"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["demande-transferts", "list"],
+          });
+        } catch {}
+        finishPreparer();
+      },
     });
   };
 
@@ -683,6 +751,8 @@ export const DemandeTransfertDetailsScreen = () => {
               canUpdate={canUpdate}
               onDeleteProduct={() => handleDeleteProduct(product)}
               onManageLots={() => handleManageLots(product)}
+              onPreparerProduct={() => handlePreparerProduct(product)}
+              onPreparerLot={(lot) => handlePreparerLot(lot)}
             />
           ))
         ) : (

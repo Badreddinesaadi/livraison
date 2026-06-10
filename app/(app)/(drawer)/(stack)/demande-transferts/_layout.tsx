@@ -1,6 +1,7 @@
 import AddProductBottomSheetContent from "@/components/AddProductBottomSheetContent";
 import DeleteProductConfirmBottomSheetContent from "@/components/DeleteProductConfirmBottomSheetContent";
 import ManageLotsBottomSheetContent from "@/components/ManageLotsBottomSheetContent";
+import PreparerConfirmBottomSheetContent from "@/components/PreparerConfirmBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
@@ -36,14 +37,23 @@ export default function StackLayout() {
   const manageLotsConfig = useDemandeTransfertSheetStore(
     (s) => s.manageLotsConfig,
   );
+  const preparerConfig = useDemandeTransfertSheetStore(
+    (s) => s.preparerConfig,
+  );
   const isDeleteProductPending = useDemandeTransfertSheetStore(
     (s) => s.isDeleteProductPending,
+  );
+  const isPreparerPending = useDemandeTransfertSheetStore(
+    (s) => s.isPreparerPending,
   );
   const chooseSelectorOption = useDemandeTransfertSheetStore(
     (s) => s.chooseSelectorOption,
   );
   const confirmDeleteProduct = useDemandeTransfertSheetStore(
     (s) => s.confirmDeleteProduct,
+  );
+  const confirmPreparer = useDemandeTransfertSheetStore(
+    (s) => s.confirmPreparer,
   );
   const closeSheet = useDemandeTransfertSheetStore((s) => s.closeSheet);
   const isSheetOpen = useDemandeTransfertSheetStore((s) => s.isSheetOpen);
@@ -52,6 +62,7 @@ export default function StackLayout() {
     if (sheetType === "add-product") return ["90%"];
     if (sheetType === "manage-lots") return ["80%"];
     if (sheetType === "delete-product-confirm") return ["30%"];
+    if (sheetType === "preparer-confirm") return ["35%"];
     return ["60%"];
   }, [sheetType]);
 
@@ -227,6 +238,14 @@ export default function StackLayout() {
             productName={manageLotsConfig.productName}
             currentLots={manageLotsConfig.currentLots}
             onClose={closeSheet}
+          />
+        ) : sheetType === "preparer-confirm" && preparerConfig ? (
+          <PreparerConfirmBottomSheetContent
+            label={preparerConfig.label}
+            type={preparerConfig.type}
+            isLoading={isPreparerPending}
+            onCancel={closeSheet}
+            onConfirm={confirmPreparer}
           />
         ) : (
           <View style={{ padding: 16 }}>

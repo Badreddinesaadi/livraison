@@ -3,7 +3,7 @@ import {
   updateProductLots,
 } from "@/api/demande-transfert.api";
 import { getProductLots, ProduitLot } from "@/api/produit.api";
-import { PRIMARY } from "@/constants/theme";
+import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -50,7 +50,18 @@ export default function ManageLotsBottomSheetContent({
     [currentLots],
   );
 
+  const preparedLotSet = useMemo(
+    () =>
+      new Set(
+        currentLots
+          .filter((l) => (l.preparer ?? "").toLowerCase() === "oui")
+          .map((l) => l.Lot),
+      ),
+    [currentLots],
+  );
+
   const toggleLot = (lotNum: string) => {
+    if (preparedLotSet.has(lotNum)) return;
     setSelectedLotNumbers((prev) => {
       const next = new Set(prev);
       if (next.has(lotNum)) {
@@ -115,7 +126,10 @@ export default function ManageLotsBottomSheetContent({
     });
 
     currentLots.forEach((lot) => {
-      if (!selectedLotNumbers.has(lot.Lot)) {
+      if (
+        !selectedLotNumbers.has(lot.Lot) &&
+        (lot.preparer ?? "").toLowerCase() !== "oui"
+      ) {
         lotsDelete.push({
           idItem: lot.idItem,
           idProduit: lot.idProduit,
@@ -156,10 +170,10 @@ export default function ManageLotsBottomSheetContent({
   const renderItem = ({ item }: { item: ProduitLot }) => {
     const isSelected = selectedLotNumbers.has(item.num_lot);
     const isCurrent = currentLotSet.has(item.num_lot);
+    const isPrepared = preparedLotSet.has(item.num_lot);
 
-    return (
-      <Pressable
-        onPress={() => toggleLot(item.num_lot)}
+    const content = (
+      <View
         style={{
           flexDirection: "row",
           alignItems: "flex-start",
@@ -167,9 +181,18 @@ export default function ManageLotsBottomSheetContent({
           paddingHorizontal: 12,
           borderRadius: 10,
           borderWidth: 1,
-          borderColor: isSelected ? PRIMARY : "#eee",
-          backgroundColor: isSelected ? PRIMARY + "08" : "#fff",
+          borderColor: isPrepared
+            ? "#d1d5db"
+            : isSelected
+              ? PRIMARY
+              : "#eee",
+          backgroundColor: isPrepared
+            ? "#f3f4f6"
+            : isSelected
+              ? PRIMARY + "08"
+              : "#fff",
           marginBottom: 8,
+          opacity: isPrepared ? 0.55 : 1,
         }}
       >
         <View
@@ -178,15 +201,23 @@ export default function ManageLotsBottomSheetContent({
             height: 22,
             borderRadius: 4,
             borderWidth: 2,
-            borderColor: isSelected ? PRIMARY : "#ccc",
-            backgroundColor: isSelected ? PRIMARY : "transparent",
+            borderColor: isPrepared
+              ? "#d1d5db"
+              : isSelected
+                ? PRIMARY
+                : "#ccc",
+            backgroundColor: isPrepared
+              ? "#d1d5db"
+              : isSelected
+                ? PRIMARY
+                : "transparent",
             alignItems: "center",
             justifyContent: "center",
             marginRight: 10,
             marginTop: 2,
           }}
         >
-          {isSelected && (
+          {(isSelected || isPrepared) && (
             <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
               ✓
             </Text>
@@ -201,7 +232,23 @@ export default function ManageLotsBottomSheetContent({
             >
               {item.num_lot}
             </Text>
-            {isCurrent && (
+            {isPrepared && (
+              <View
+                style={{
+                  paddingHorizontal: 5,
+                  paddingVertical: 1,
+                  borderRadius: 4,
+                  backgroundColor: SUCCESS + "18",
+                }}
+              >
+                <Text
+                  style={{ fontSize: 10, fontWeight: "600", color: SUCCESS }}
+                >
+                  Préparé
+                </Text>
+              </View>
+            )}
+            {isCurrent && !isPrepared && (
               <View
                 style={{
                   paddingHorizontal: 5,
@@ -252,7 +299,15 @@ export default function ManageLotsBottomSheetContent({
             </Text>
           </View>
         </View>
-      </Pressable>
+      </View>
+    );
+
+    if (isPrepared) {
+      return content;
+    }
+
+    return (
+      <Pressable onPress={() => toggleLot(item.num_lot)}>{content}</Pressable>
     );
   };
 

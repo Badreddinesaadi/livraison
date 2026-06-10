@@ -183,3 +183,26 @@ export const updateProductLots = async (request: UpdateLotsRequest) => {
     isDebug: true,
   });
 };
+
+export type PreparerProduitRequest = {
+  type: "preparer_produit";
+  id: string;
+};
+
+export type PreparerLotRequest = {
+  type: "preparer_lot";
+  idItem: string;
+  idProduit: string;
+  Lot: string;
+};
+
+export const preparerDemandeTransfert = async (
+  request: PreparerProduitRequest | PreparerLotRequest,
+) => {
+  return client.request({
+    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    method: "POST",
+    body: request,
+    isDebug: true,
+  });
+};

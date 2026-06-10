@@ -1,4 +1,8 @@
-import { DemandeTransfertLot } from "@/api/demande-transfert.api";
+import {
+  DemandeTransfertLot,
+  PreparerProduitRequest,
+  PreparerLotRequest,
+} from "@/api/demande-transfert.api";
 import { create } from "zustand";
 
 type SheetType =
@@ -6,6 +10,7 @@ type SheetType =
   | "add-product"
   | "delete-product-confirm"
   | "manage-lots"
+  | "preparer-confirm"
   | null;
 
 type SelectorOption = {
@@ -43,13 +48,24 @@ type ManageLotsConfig = {
   currentLots: DemandeTransfertLot[];
 };
 
+type PreparerConfig = {
+  type: "preparer_produit" | "preparer_lot";
+  label: string;
+  request: PreparerProduitRequest | PreparerLotRequest;
+  handler: (
+    request: PreparerProduitRequest | PreparerLotRequest,
+  ) => Promise<void>;
+};
+
 type DemandeTransfertSheetState = {
   sheetType: SheetType;
   selectorSheetConfig: SelectorSheetConfig | null;
   addProductConfig: AddProductConfig | null;
   deleteProductConfig: DeleteProductConfig | null;
   manageLotsConfig: ManageLotsConfig | null;
+  preparerConfig: PreparerConfig | null;
   isDeleteProductPending: boolean;
+  isPreparerPending: boolean;
   isSheetOpen: boolean;
   openSelectorOptions: (config: SelectorSheetConfig) => void;
   chooseSelectorOption: (id: number) => void;
@@ -58,6 +74,9 @@ type DemandeTransfertSheetState = {
   confirmDeleteProduct: () => void;
   finishDeleteProduct: () => void;
   openManageLotsSheet: (config: ManageLotsConfig) => void;
+  openPreparerConfirmSheet: (config: PreparerConfig) => void;
+  confirmPreparer: () => void;
+  finishPreparer: () => void;
   closeSheet: () => void;
 };
 
@@ -68,7 +87,9 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
     addProductConfig: null,
     deleteProductConfig: null,
     manageLotsConfig: null,
+    preparerConfig: null,
     isDeleteProductPending: false,
+    isPreparerPending: false,
     isSheetOpen: false,
     openSelectorOptions: (config: SelectorSheetConfig) =>
       set({
@@ -77,7 +98,9 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         addProductConfig: null,
         deleteProductConfig: null,
         manageLotsConfig: null,
+        preparerConfig: null,
         isDeleteProductPending: false,
+        isPreparerPending: false,
         isSheetOpen: true,
       }),
     chooseSelectorOption: (id: number) =>
@@ -99,7 +122,9 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         selectorSheetConfig: null,
         deleteProductConfig: null,
         manageLotsConfig: null,
+        preparerConfig: null,
         isDeleteProductPending: false,
+        isPreparerPending: false,
         isSheetOpen: true,
       }),
     openDeleteProductConfirmSheet: (config: DeleteProductConfig) =>
@@ -109,7 +134,9 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         selectorSheetConfig: null,
         addProductConfig: null,
         manageLotsConfig: null,
+        preparerConfig: null,
         isDeleteProductPending: false,
+        isPreparerPending: false,
         isSheetOpen: true,
       }),
     confirmDeleteProduct: () =>
@@ -142,8 +169,40 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         selectorSheetConfig: null,
         addProductConfig: null,
         deleteProductConfig: null,
+        preparerConfig: null,
         isDeleteProductPending: false,
+        isPreparerPending: false,
         isSheetOpen: true,
+      }),
+    openPreparerConfirmSheet: (config: PreparerConfig) =>
+      set({
+        sheetType: "preparer-confirm",
+        preparerConfig: config,
+        selectorSheetConfig: null,
+        addProductConfig: null,
+        deleteProductConfig: null,
+        manageLotsConfig: null,
+        isDeleteProductPending: false,
+        isPreparerPending: false,
+        isSheetOpen: true,
+      }),
+    confirmPreparer: () =>
+      set((state) => {
+        if (state.isPreparerPending || !state.preparerConfig) {
+          return state;
+        }
+
+        state.preparerConfig.handler(state.preparerConfig.request);
+
+        return {
+          isPreparerPending: true,
+          isSheetOpen: false,
+        };
+      }),
+    finishPreparer: () =>
+      set({
+        isPreparerPending: false,
+        preparerConfig: null,
       }),
     closeSheet: () => set({ isSheetOpen: false }),
   }),
