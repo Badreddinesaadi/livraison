@@ -7,6 +7,8 @@
     \usepackage{enumitem}
     \usepackage{microtype}
     \usepackage{graphicx}
+    \usepackage{svg}
+    \usepackage{float}
 
     \geometry{margin=2.5cm}
     \setlength{\parindent}{0pt}
@@ -17,6 +19,13 @@
     \renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
 
     \begin{document}
+
+    \renewcommand{\contentsname}{Table des matières}
+    \renewcommand{\listfigurename}{Liste des figures}
+    \tableofcontents
+    \newpage
+    \listoffigures
+    \newpage
 
     \begin{titlepage}
     \centering
@@ -107,7 +116,17 @@
     \subsection{Contexte}
     SDKWOOD distribue des matériaux en bois et des produits associés vers des chantiers, des clients et des partenaires. Chaque jour, des chauffeurs chargent des commandes au dépôt, réalisent des livraisons, et reviennent avec des informations de terrain (retours, anomalies, pièces manquantes, refus, dommages, etc.).
 
-    Dans ce type d'activité, la qualité du suivi est un point clé. Il faut savoir, rapidement et de façon fiable, ce qui a été chargé, ce qui a été livré, ce qui a été refusé, et ce qui doit être traité ensuite au bureau.
+    L'activité logistique de SDKWOOD couvre six processus centraux :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Voyages} : création et suivi des tournées de livraison (chauffeur, véhicule, dépôt de départ, ville de destination, bons de livraison associés).
+    \item \textbf{Retours chauffeur} : enregistrement des informations de fin de tournée (bon cacheté, règlement, retour marchandise, réclamation, photos).
+    \item \textbf{Rapports qualité} : signalement et suivi des anomalies liées à une déclaration douanière (DUM) ou à un dossier, avec preuves photographiques.
+    \item \textbf{Rotation chauffeur} : consultation de la disponibilité et des trajets des chauffeurs et véhicules (kilométrage, dates, villes de destination).
+    \item \textbf{Demandes de transfert} : demande formelle de transfert de stock entre dépôts, avec gestion des produits, des lots, des statuts de préparation et de validation.
+    \item \textbf{Lieux de projets} : géolocalisation des chantiers et dépôts clients, avec coordonnées GPS, contacts et photos.
+    \end{itemize}
+
+    Ces processus sont interdépendants : un voyage génère un retour chauffeur, qui peut déclencher un rapport qualité ; une demande de transfert mobilise des produits et des lots entre dépôts ; les lieux de projets guident les tournées. Dans ce type d'activité, la qualité du suivi est un point clé. Il faut savoir, rapidement et de façon fiable, ce qui a été chargé, ce qui a été livré, ce qui a été refusé, et ce qui doit être traité ensuite au bureau.
 
     \subsection{Situation actuelle : suivi manuel}
     Aujourd'hui, une grande partie de ces opérations est faite avec du papier (carnets, fiches, formulaires, bons de livraison). Les informations sont notées à la main pendant le chargement, la livraison, et le retour.
@@ -138,7 +157,11 @@
     \subsection{Besoin : supprimer la double saisie et fiabiliser le suivi}
     Le besoin principal est de capter l'information une seule fois, au bon moment, au plus proche de l'action. En pratique, cela veut dire :
     \begin{itemize}[leftmargin=1.2em]
-    \item enregistrer les voyages, les bons de livraison et les retours sans passer par un papier intermédiaire ;
+    \item enregistrer les \textbf{voyages}, les bons de livraison et les \textbf{retours chauffeur} sans passer par un papier intermédiaire ;
+    \item permettre la création et le suivi des \textbf{demandes de transfert} entre dépôts, avec gestion des produits, des lots et des statuts de validation ;
+    \item signaler les anomalies qualité via les \textbf{rapports qualité} avec des preuves photographiques ;
+    \item consulter les \textbf{rotations chauffeur} pour connaître la disponibilité et les trajets en temps réel ;
+    \item géolocaliser les \textbf{lieux de projets} (chantiers et dépôts) avec coordonnées et contacts ;
     \item structurer les informations (statuts, commentaires, pièces justificatives) pour qu'elles soient comparables et exploitables ;
     \item rendre l'information disponible rapidement pour les équipes au dépôt et au bureau.
     \end{itemize}
@@ -217,42 +240,32 @@
     \item \textbf{Coûts et dépendance} : l'abonnement, les options et les contraintes contractuelles restent des facteurs à considérer, comme pour une solution SaaS.
     \end{itemize}
 
-    \subsection{Méthodologie de gestion de projet : Scrum}
-    Dans un contexte marqué par l'évolution rapide des exigences et la nécessité de garantir la qualité à chaque livraison, notre équipe a adopté la méthodologie Scrum, un cadre agile reconnu pour sa capacité à piloter efficacement les projets logiciels complexes.
-
-    Scrum structure le travail en \textit{Sprints}, généralement de 1 à 3 semaines dans notre projet, durant lesquels l'équipe conçoit, développe, teste et livre un incrément fonctionnel du produit. Cette approche itérative permet une adaptation continue des priorités, une intégration rapide des retours et une amélioration progressive de la qualité.
-
-    \begin{figure}[h]
-    \centering
-    \IfFileExists{assets/scrum.jpg}{
-    \includegraphics[width=0.78\textwidth]{assets/scrum.jpg}
-    }{
-    \textit{Figure Scrum : fichier assets/scrum.jpg non trouvé.}
-    }
-    \caption{Cycle de vie de la méthodologie Scrum}
-    \label{fig:scrum-cycle}
-    \end{figure}
-
-    \subsubsection{Rôles au sein de l'équipe}
-    Trois rôles clés structurent cette démarche collaborative :
-    \begin{itemize}[leftmargin=1.2em]
-    \item \textbf{Le Product Owner} incarne la vision du produit. Il définit et priorise les besoins métier à travers le Product Backlog, veillant à ce que l'équipe se concentre sur les fonctionnalités à plus forte valeur ajoutée.
-    \item \textbf{L'équipe de développement}, composée de développeurs et de testeurs, s'auto-organise pour transformer les exigences fonctionnelles en solutions opérationnelles.
-    \item \textbf{Le Scrum Master} veille à la bonne application du cadre Scrum, facilite les échanges au sein de l'équipe, supprime les obstacles et soutient la dynamique d'amélioration continue.
-    \end{itemize}
-
-    \subsubsection{Rituels agiles et interactions}
-    Chaque journée débute par un \textit{Daily Scrum}, une réunion courte permettant à chaque membre de l'équipe de partager ses avancements, ses éventuels blocages ainsi que ses objectifs journaliers. Ce rituel favorise la planification des validations, l'identification des fonctionnalités prêtes à être testées, et renforce la collaboration entre les différents intervenants, notamment entre les développeurs et l'analyste test.
-
-    À la fin de chaque Sprint, une \textit{Sprint Review} permet de présenter les livrables aux parties prenantes et de recueillir leurs retours. Une \textit{Sprint Retrospective} est ensuite organisée afin d'analyser le déroulement du Sprint, d'identifier les axes d'amélioration et de renforcer la collaboration.
-
-    \subsubsection{Suivi et traçabilité}
-    Le suivi des tâches, des tests, des anomalies et des priorités est réalisé à l'aide d'un tableau Trello, permettant une gestion visuelle du Product Backlog, des user stories, des cas de test et des tickets QA. Cette organisation favorise la transparence, la réactivité et une coordination fluide entre tous les acteurs du projet.
-
     \subsection{Synthèse de la problématique}
     La problématique est celle d'une activité logistique qui dépend de preuves et d'informations terrain, mais dont le suivi est encore largement manuel. Le papier crée des délais, des erreurs, et une faible visibilité.
 
     Cette situation met en évidence un besoin de fiabiliser la capture d'information sur le terrain, de réduire la double saisie, et de rendre les statuts plus visibles pour accélérer la décision et le traitement au bureau.
+
+    \subsection{Objectifs de l'application}
+
+    L'application vise à digitaliser l'ensemble des processus terrain et administratifs liés à la distribution du bois. Les objectifs, regroupés par modèle, sont les suivants :
+
+    \subsubsection{Voyages}
+    Remplacer la création manuelle des fiches de tournée par une saisie structurée : affectation d'un chauffeur et d'un véhicule, choix du dépôt de départ et de la ville de destination, association de bons de livraison, et clôture du voyage avec relevé kilométrique de retour. L'objectif est de rendre le cycle voyage lisible de bout en bout, de la préparation à la livraison.
+
+    \subsubsection{Retours chauffeur}
+    Éliminer la fiche papier de fin de tournée. Le chauffeur déclare directement sur mobile : bon cacheté, règlement collecté, retour de marchandise, type de réclamation, et preuves photographiques. L'ADV valide ou refuse depuis le bureau, sans ressaisie.
+
+    \subsubsection{Rapports qualité}
+    Permettre le signalement immédiat d'anomalies liées à une déclaration douanière (DUM) ou à un dossier, avec photos et commentaires. L'objectif est de remplacer le signalement oral ou papier par un enregistrement daté, traçable et illustré.
+
+    \subsubsection{Rotation chauffeur}
+    Offrir une vue consolidée des trajets et de la disponibilité des chauffeurs et véhicules : kilométrage, dates de départ et de retour, ville de destination. L'objectif est d'améliorer la planification des tournées et la réactivité opérationnelle.
+
+    \subsubsection{Demandes de transfert}
+    Digitaliser la demande de transfert de stock entre dépôts : création de la demande, ajout de produits et lots, changement de statut (brouillon, en cours, envoyé, reçu), préparation par produit ou par lot, et modification des informations de transport. L'objectif est de supprimer le circuit papier de transfert interne et de rendre le processus traçable et validable.
+
+    \subsubsection{Lieux de projets}
+    Recenser et géolocaliser les chantiers et dépôts clients avec coordonnées GPS, contacts, commentaires et photos. L'objectif est de remplacer les adresses approximatives par des points précis, consultables et partageables entre équipes.
 
     \newpage
 
@@ -286,5 +299,259 @@
     \end{itemize}
 
     Au-delà du suivi quotidien, la donnée digitale permet aussi d'améliorer le pilotage : identifier les points qui reviennent souvent (retours fréquents, types d'anomalies), suivre les volumes, et ajuster les processus.
+
+    \newpage
+
+    \begin{titlepage}
+    \centering
+    \vspace*{\fill}
+    {\Huge \textbf{CHAPITRE 2}}\\[0.8em]
+    {\LARGE \textbf{MÉTHODOLOGIE DE GESTION\\[0.4em]DU PROJET}}
+    \vspace*{\fill}
+    \end{titlepage}
+
+    \renewcommand{\thesection}{2.\arabic{section}}
+    \setcounter{section}{0}
+
+    \section{Méthodologie de gestion de projet : Scrum}
+    Dans un contexte marqué par l'évolution rapide des exigences et la nécessité de garantir la qualité à chaque livraison, notre équipe a adopté la méthodologie Scrum, un cadre agile reconnu pour sa capacité à piloter efficacement les projets logiciels complexes.
+
+    Scrum structure le travail en \textit{Sprints}, généralement de 1 à 3 semaines dans notre projet, durant lesquels l'équipe conçoit, développe, teste et livre un incrément fonctionnel du produit. Cette approche itérative permet une adaptation continue des priorités, une intégration rapide des retours et une amélioration progressive de la qualité.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/scrum.jpg}{
+    \includegraphics[width=0.78\textwidth]{assets/scrum.jpg}
+    }{
+    \textit{Figure Scrum : fichier assets/scrum.jpg non trouvé.}
+    }
+    \caption{Cycle de vie de la méthodologie Scrum}
+    \label{fig:scrum-cycle}
+    \end{figure}
+
+    \subsection{Rôles au sein de l'équipe}
+    Trois rôles clés structurent cette démarche collaborative :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Le Product Owner} incarne la vision du produit. Il définit et priorise les besoins métier à travers le Product Backlog, veillant à ce que l'équipe se concentre sur les fonctionnalités à plus forte valeur ajoutée.
+    \item \textbf{L'équipe de développement}, composée de développeurs et de testeurs, s'auto-organise pour transformer les exigences fonctionnelles en solutions opérationnelles.
+    \item \textbf{Le Scrum Master} veille à la bonne application du cadre Scrum, facilite les échanges au sein de l'équipe, supprime les obstacles et soutient la dynamique d'amélioration continue.
+    \end{itemize}
+
+    \subsection{Rituels agiles et interactions}
+    Chaque journée débute par un \textit{Daily Scrum}, une réunion courte permettant à chaque membre de l'équipe de partager ses avancements, ses éventuels blocages ainsi que ses objectifs journaliers. Ce rituel favorise la planification des validations, l'identification des fonctionnalités prêtes à être testées, et renforce la collaboration entre les différents intervenants, notamment entre les développeurs et l'analyste test.
+
+    À la fin de chaque Sprint, une \textit{Sprint Review} permet de présenter les livrables aux parties prenantes et de recueillir leurs retours. Une \textit{Sprint Retrospective} est ensuite organisée afin d'analyser le déroulement du Sprint, d'identifier les axes d'amélioration et de renforcer la collaboration.
+
+    \subsection{Suivi et traçabilité}
+    Le suivi des tâches, des tests, des anomalies et des priorités est réalisé à l'aide d'un tableau Trello, permettant une gestion visuelle du Product Backlog, des user stories, des cas de test et des tickets QA. Cette organisation favorise la transparence, la réactivité et une coordination fluide entre tous les acteurs du projet.
+
+    \subsection{Déroulement du projet}
+    Pour garantir une avancée méthodique et progressive de notre projet, nous avons adopté une approche itérative basée sur des sprints. Chaque sprint représente une période définie, de trois semaines, pendant laquelle une série d'activités spécifiques est menée à bien. Voici un aperçu de notre planification par sprint :
+
+    \begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{|c|p{13cm}|}
+    \hline
+    \textbf{Sprint} & \textbf{Actions réalisées} \\
+    \hline
+    Sprint 1 &
+    \begin{itemize}[leftmargin=1.2em]
+    \item Découverte de l'environnement de travail et obtention des accès nécessaires aux systèmes et outils.
+    \item Formation sur le métier et les outils internes.
+    \item Collaboration initiale avec l'équipe de projet.
+    \item Autoformation sur le code existant et les technologies à utiliser.
+    \item Initialisation du boilerplate de l'application.
+    \item Mise en place du design system pour le frontend et de l'architecture/code pattern pour le backend et le frontend.
+    \end{itemize}
+    \\
+    \hline
+    Sprint 2 &
+    \begin{itemize}[leftmargin=1.2em]
+    \item Implémentation de l'authentification et de l'autorisation.
+    \item Implémentation du premier module « Voyages ».
+    \end{itemize}
+    \\
+    \hline
+    Sprint 3 &
+    \begin{itemize}[leftmargin=1.2em]
+    \item Implémentation du deuxième module « Retours chauffeur ».
+    \item Implémentation du troisième module « Rapports qualité ».
+    \end{itemize}
+    \\
+    \hline
+    Sprint 4 &
+    \begin{itemize}[leftmargin=1.2em]
+    \item Implémentation du quatrième module « Rotation chauffeur ».
+    \item Implémentation du module « Lieux de projets ».
+    \end{itemize}
+    \\
+    \hline
+    Sprint 5 &
+    \begin{itemize}[leftmargin=1.2em]
+    \item Implémentation du cinquième module « Demande de transfert ».
+    \item Tests et validation de l'ensemble des fonctionnalités développées.
+    \item Génération de l'APK de production.
+    \item Rédaction du rapport et préparation de la présentation (PPT).
+    \end{itemize}
+    \\
+    \hline
+    \end{tabular}
+    \caption{Planification par sprint}
+    \label{tab:sprint-planning}
+    \end{table}
+
+    \clearpage
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/gantt.png}{
+    \includegraphics[width=\textwidth]{assets/gantt.png}
+    }{
+    \centering\textit{Diagramme de Gantt : fichier assets/gantt.svg non trouvé.}
+    }
+    \caption{Diagramme de Gantt de la planification du projet}
+    \label{fig:gantt}
+    \end{figure}
+
+    \subsection{Conclusion du chapitre}
+    Le chapitre 2 a présenté la méthodologie de gestion adoptée pour ce projet : le cadre Scrum, structuré en cinq sprints de trois semaines. Chaque sprint répond à un objectif précis, de la mise en place des fondations techniques jusqu'à la livraison finale de l'application. Les rôles (Product Owner, équipe de développement, Scrum Master), les rituels (Daily Scrum, Sprint Review, Sprint Retrospective) et l'outil de suivi Trello garantissent une coordination efficace, une visibilité continue et une capacité d'adaptation aux besoins métier tout au long du cycle de développement.
+
+    \newpage
+    \thispagestyle{empty}
+    \vspace*{\fill}
+    \begin{center}
+    {\Huge \textbf{CHAPITRE 3}}\\[0.8em]
+    {\LARGE \textbf{ANALYSE DES BESOINS\\[0.4em]ET CONCEPTION}}
+    \end{center}
+    \vspace*{\fill}
+
+    \newpage
+
+    \renewcommand{\thesection}{3.\arabic{section}}
+    \setcounter{section}{0}
+
+    \section{Introduction}
+    Le chapitre précédent a défini le cadre méthodologique du projet. Le présent chapitre aborde l'analyse des besoins et la conception de la solution.
+
+    L'application vise six processus métier distincts, chacun porté par un module fonctionnel : la gestion des voyages, les retours chauffeur, les rapports qualité, la rotation chauffeur, les demandes de transfert inter-dépôts et les lieux de projets. L'analyse ci-dessous identifie les besoins fonctionnels et non fonctionnels qui découlent de ces processus et des contraintes opérationnelles identifiées au chapitre 1.
+
+    \section{Analyse des besoins}
+
+    \subsection{Besoins fonctionnels}
+    Les besoins fonctionnels sont regroupés par module. Chaque module correspond à un processus métier identifié dans l'étude du contexte.
+
+    \subsubsection{Module Voyages}
+    Le module Voyages permet la création et le suivi des tournées de livraison. Les besoins identifiés sont les suivants :
+    \begin{itemize}[leftmargin=1.2em]
+    \item Créer un voyage en renseignant le chauffeur, le véhicule, le dépôt de départ, la ville de destination et le kilométrage de départ.
+    \item Associer un ou plusieurs bons de livraison (BL) à un voyage.
+    \item Consulter la liste des voyages avec filtrage par chauffeur, véhicule, dépôt, ville ou client.
+    \item Modifier les informations d'un voyage (chauffeur, véhicule, dépôt, ville).
+    \item Clôturer un voyage en enregistrant le kilométrage de retour et la date de retour.
+    \item Supprimer un voyage.
+    \item Visualiser le détail d'un voyage avec la liste de ses BL et leurs statuts.
+    \end{itemize}
+
+    \subsubsection{Module Retours chauffeur}
+    Le module Retours chauffeur permet l'enregistrement des informations de fin de tournée par le chauffeur, puis leur validation par l'ADV. Les besoins identifiés sont les suivants :
+    \begin{itemize}[leftmargin=1.2em]
+    \item Créer un retour en renseignant : bon cacheté (oui/non), règlement collecté (oui/non), retour marchandise (oui/non), type de réclamation, commentaires, et photos preuves.
+    \item Consulter la liste des retours avec filtrage par chauffeur et client.
+    \item Visualiser le détail d'un retour avec les images associées.
+    \item Valider ou refuser un retour (changement de statut par l'ADV).
+    \item Supprimer un retour.
+    \end{itemize}
+
+    \subsubsection{Module Rapports qualité}
+    Le module Rapports qualité permet le signalement d'anomalies liées à une déclaration douanière (DUM) ou à un dossier. Les besoins identifiés sont les suivants :
+    \begin{itemize}[leftmargin=1.2em]
+    \item Créer un rapport qualité en renseignant le numéro DUM ou le dossier, un commentaire, et des photos justificatives.
+    \item Consulter la liste des rapports avec recherche par mot-clé.
+    \item Visualiser le détail d'un rapport avec les images associées.
+    \item Supprimer un rapport qualité.
+    \end{itemize}
+
+    \subsubsection{Module Rotation chauffeur}
+    Le module Rotation chauffeur offre une vue consolidée des trajets et de la disponibilité des chauffeurs et véhicules. Les besoins identifiés sont les suivants :
+    \begin{itemize}[leftmargin=1.2em]
+    \item Consulter la liste des rotations avec filtrage par période (date début, date fin), chauffeur, véhicule et disponibilité.
+    \item Visualiser pour chaque rotation : le chauffeur, le véhicule, les kilomètres parcourus, les dates de départ et de retour, et la ville de destination.
+    \end{itemize}
+    Ce module est en lecture seule. Il ne comporte pas d'opérations de création, modification ou suppression.
+
+    \subsubsection{Module Demande de transfert}
+    Le module Demande de transfert permet la gestion des transferts de stock entre dépôts. Les besoins identifiés sont les suivants :
+    \begin{itemize}[leftmargin=1.2em]
+    \item Créer une demande de transfert en renseignant le dépôt source, le dépôt destination, le DUM, le transporteur, le matricule et l'observation.
+    \item Consulter la liste des demandes avec recherche par mot-clé.
+    \item Visualiser le détail d'une demande : informations générales, statut, produits et lots associés.
+    \item Modifier les informations de transport (transporteur, matricule, observation).
+    \item Changer le statut d'une demande (Brouillon, Encours, Envoyé, Reçu).
+    \item Ajouter un produit à une demande (quantité, nombre de FDX, unité).
+    \item Supprimer un produit d'une demande.
+    \item Gérer les lots d'un produit : ajouter de nouveaux lots, mettre à jour des lots existants, supprimer des lots. Les lots déjà préparés ne peuvent ni être désélectionnés ni supprimés.
+    \item Marquer un produit ou un lot comme préparé.
+    \item Supprimer une demande de transfert.
+    \end{itemize}
+
+    \subsubsection{Module Lieux de projets}
+    Le module Lieux de projets permet le recensement et la géolocalisation des chantiers et dépôts clients. Les besoins identifiés sont les suivants :
+    \begin{itemize}[leftmargin=1.2em]
+    \item Créer un lieu en renseignant le type (chantier ou dépôt), les coordonnées GPS, le nom du contact, le téléphone, un commentaire et des photos.
+    \item Consulter la liste des lieux avec filtrage par créateur.
+    \item Visualiser le détail d'un lieu avec ses images.
+    \item Modifier un lieu.
+    \item Supprimer un lieu.
+    \end{itemize}
+
+    \subsubsection{Besoins transversaux}
+    Au-delà des modules, des besoins fonctionnels transversaux s'appliquent à l'ensemble de l'application :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Authentification} : connexion sécurisée par identifiant et mot de passe avec émission d'un jeton d'authentification.
+    \item \textbf{Autorisations} : contrôle d'accès par module et par action (créer, modifier, lister, supprimer). Chaque module dispose de ses propres permissions, et chaque rôle utilisateur détermine les écrans accessibles.
+    \item \textbf{Navigation} : menu latéral (drawer) donnant accès aux modules autorisés, avec navigation par onglets pour les fonctions principales de chaque module.
+    \item \textbf{Recherche} : recherche côté serveur avec paramètre de requête pour les listes (voyages, retours, rapports qualité, demandes de transfert).
+    \item \textbf{Pagination} : chargement progressif des listes par pages, avec déclenchement automatique au défilement.
+    \item \textbf{Sélecteurs} : sélection de dépôts, chauffeurs, véhicules, villes, clients et produits via des feuilles de sélection (bottom sheets) avec recherche intégrée.
+    \end{itemize}
+
+    \subsection{Besoins non fonctionnels}
+    Les besoins non fonctionnels concernent les qualités attendues de la solution en termes de performance, sécurité, ergonomie et maintenabilité.
+
+    \vspace{0.8em}\textbf{Performance}\vspace{0.2em}
+    \begin{itemize}[leftmargin=1.2em,topsep=0pt]
+    \item Les listes sont chargées progressivement, par blocs, pour garantir une navigation fluide quel que soit le volume de données.
+    \item La recherche textuelle dans les listes est traitée côté serveur afin de ne pas ralentir l'application.
+    \item Les données fréquemment consultées (dépôts, produits, clients, véhicules, villes, chauffeurs) sont conservées temporairement sur l'appareil pour éviter des chargements répétés.
+    \end{itemize}
+
+    \vspace{0.8em}\textbf{Sécurité}\vspace{0.2em}
+    \begin{itemize}[leftmargin=1.2em]
+    \item L'authentification repose sur un identifiant sécurisé stocké sur l'appareil et vérifié à chaque action.
+    \item L'accès à chaque module est conditionné par les permissions de l'utilisateur. Les fonctions non autorisées (création, modification, suppression, consultation) sont masquées dans l'interface.
+    \item Les opérations sensibles (suppression d'un produit, suppression d'une demande, changement de statut) nécessitent une confirmation explicite avant exécution.
+    \end{itemize}
+
+    \vspace{0.8em}\textbf{Ergonomie et utilisabilité}\vspace{0.2em}
+    \begin{itemize}[leftmargin=1.2em,topsep=0pt]
+    \item L'application est conçue pour un usage mobile prioritaire. Les écrans, boutons et champs de saisie sont dimensionnés pour le tactile.
+    \item Les retours visuels sont systématiques : indicateur de chargement, notifications de succès ou d'erreur après chaque action, et badges de statut colorés (vert pour validé, orange pour en cours, rouge pour refusé).
+    \item Les formulaires vérifient les champs obligatoires avant soumission et signalent les erreurs de manière explicite.
+    \end{itemize}
+
+    \vspace{0.8em}\textbf{Maintenabilité et évolutivité}\vspace{0.2em}
+    \begin{itemize}[leftmargin=1.2em,topsep=0pt]
+    \item L'architecture est modulaire : chaque module (voyages, retours, rapports qualité, rotation, demande de transfert, lieux de projets) est indépendant. L'ajout d'un nouveau module n'impacte pas les modules existants.
+    \item Les données de chaque module sont organisées de manière autonome, ce qui facilite la modification d'un écran sans affecter le reste de l'application.
+    \item La navigation entre écrans suit une structure de fichiers claire et prévisible, permettant d'ajouter de nouvelles pages sans configuration complexe.
+    \item La communication avec le serveur est centralisée dans une couche unique, simplifiant les évolutions futures.
+    \end{itemize}
+
+    \vspace{0.8em}\textbf{Disponibilité et résilience}\vspace{0.2em}
+    \begin{itemize}[leftmargin=1.2em,topsep=0pt]
+    \item L'application nécessite une connexion internet pour fonctionner. En cas de perte de connexion, l'utilisateur est informé par un message clair.
+    \item L'envoi de photos (retours, rapports qualité, lieux de projets) est accompagné d'un indicateur visuel de progression afin que l'utilisateur sache que le transfert est en cours.
+    \end{itemize}
 
     \end{document}

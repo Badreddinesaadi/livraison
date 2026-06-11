@@ -101,6 +101,13 @@ export default function ManageLotsBottomSheetContent({
   const handleSave = () => {
     const idItem = currentLots[0]?.idItem || productDetailId;
 
+    const lotsUpdate: {
+      idItem: string;
+      idProduit: number;
+      old_lot: string;
+      new_lot: string;
+      qte: number;
+    }[] = [];
     const lotsInsert: {
       idItem: string;
       idProduit: number;
@@ -112,6 +119,32 @@ export default function ManageLotsBottomSheetContent({
       idProduit: string;
       Lot: string;
     }[] = [];
+
+    currentLots.forEach((lot) => {
+      const isSelected = selectedLotNumbers.has(lot.Lot);
+      const isPrepared = (lot.preparer ?? "").toLowerCase() === "oui";
+
+      if (isPrepared) return;
+
+      if (isSelected) {
+        const availableLot = availableLots?.find(
+          (al) => al.num_lot === lot.Lot,
+        );
+        lotsUpdate.push({
+          idItem: lot.idItem,
+          idProduit: Number(lot.idProduit),
+          old_lot: lot.Lot,
+          new_lot: lot.Lot,
+          qte: availableLot ? Number(availableLot.solde) || Number(lot.qte) || 1 : Number(lot.qte) || 1,
+        });
+      } else {
+        lotsDelete.push({
+          idItem: lot.idItem,
+          idProduit: lot.idProduit,
+          Lot: lot.Lot,
+        });
+      }
+    });
 
     selectedLotNumbers.forEach((lotNum) => {
       if (!currentLotSet.has(lotNum)) {
@@ -125,20 +158,7 @@ export default function ManageLotsBottomSheetContent({
       }
     });
 
-    currentLots.forEach((lot) => {
-      if (
-        !selectedLotNumbers.has(lot.Lot) &&
-        (lot.preparer ?? "").toLowerCase() !== "oui"
-      ) {
-        lotsDelete.push({
-          idItem: lot.idItem,
-          idProduit: lot.idProduit,
-          Lot: lot.Lot,
-        });
-      }
-    });
-
-    if (lotsInsert.length === 0 && lotsDelete.length === 0) {
+    if (lotsUpdate.length === 0 && lotsInsert.length === 0 && lotsDelete.length === 0) {
       Toast.show({
         type: "info",
         text1: "Aucun changement",
@@ -150,7 +170,7 @@ export default function ManageLotsBottomSheetContent({
 
     mutate({
       type: "update_lot",
-      lots_update: [],
+      lots_update: lotsUpdate,
       lots_insert: lotsInsert,
       lots_delete: lotsDelete,
     });

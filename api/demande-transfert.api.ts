@@ -142,6 +142,14 @@ export type LotInsertItem = {
   qte: number;
 };
 
+export type LotUpdateItem = {
+  idItem: string;
+  idProduit: number;
+  old_lot: string;
+  new_lot: string;
+  qte: number;
+};
+
 export type LotDeleteItem = {
   idItem: string;
   idProduit: string;
@@ -150,7 +158,7 @@ export type LotDeleteItem = {
 
 export type UpdateLotsRequest = {
   type: "update_lot";
-  lots_update: never[];
+  lots_update: LotUpdateItem[];
   lots_insert: LotInsertItem[];
   lots_delete: LotDeleteItem[];
 };

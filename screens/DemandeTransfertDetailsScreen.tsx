@@ -1,9 +1,9 @@
 import {
-  DemandeTransfertProduct,
   DemandeTransfertLot,
+  DemandeTransfertProduct,
   changeDTStatut,
-  deleteProductFromDT,
   deleteDemandeTransfert,
+  deleteProductFromDT,
   getDemandeTransfertDetails,
   listDemandeTransfert,
   preparerDemandeTransfert,
@@ -11,10 +11,10 @@ import {
 import Loader from "@/components/Loader";
 import { hasDemandeTransfertPermission } from "@/constants/permissions";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
-import { useDemandeTransfertSheetStore } from "@/stores/demande-transfert.store";
 import { useSession } from "@/stores/auth.store";
+import { useDemandeTransfertSheetStore } from "@/stores/demande-transfert.store";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -188,6 +188,11 @@ const LotItem = ({
       {expanded && (
         <View style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
           <LotDetailRow icon="barcode" label="Code lot" value={lot.Lot} />
+          <LotDetailRow
+            icon="history"
+            label="lot ancien"
+            value={lot.old_lot.length > 0 ? lot.old_lot : "--"}
+          />
           <LotDetailRow icon="cube" label="Qte" value={lot.qte} />
           {lot.nbre_pce && (
             <LotDetailRow icon="boxes" label="Nbre PCE" value={lot.nbre_pce} />
@@ -203,7 +208,11 @@ const LotItem = ({
             />
           )}
           {lot.depotName && (
-            <LotDetailRow icon="warehouse" label="Dépôt" value={lot.depotName} />
+            <LotDetailRow
+              icon="warehouse"
+              label="Dépôt"
+              value={lot.depotName}
+            />
           )}
         </View>
       )}
@@ -309,7 +318,10 @@ const ProductCard = ({
             {product.nbrFDX} FDX · {product.Qte} {product.unite_v}
           </Text>
         </View>
-        <PreparerBadge preparer={product.preparer} onPress={onPreparerProduct} />
+        <PreparerBadge
+          preparer={product.preparer}
+          onPress={onPreparerProduct}
+        />
         <FontAwesome5
           name={expanded ? "chevron-up" : "chevron-down"}
           size={12}
@@ -336,9 +348,7 @@ const ProductCard = ({
             }}
           >
             <FontAwesome5 name="th-list" size={13} color={PRIMARY} />
-            <Text
-              style={{ fontSize: 14, fontWeight: "700", color: "#1a1a2e" }}
-            >
+            <Text style={{ fontSize: 14, fontWeight: "700", color: "#1a1a2e" }}>
               Lots ({lotsCount})
             </Text>
           </View>
@@ -346,7 +356,9 @@ const ProductCard = ({
             <LotItem
               key={`${lot.idItem}-${lot.Lot}-${idx}`}
               lot={lot}
-              onPreparerLot={onPreparerLot ? () => onPreparerLot(lot) : undefined}
+              onPreparerLot={
+                onPreparerLot ? () => onPreparerLot(lot) : undefined
+              }
             />
           ))}
         </View>
@@ -410,9 +422,7 @@ const ProductCard = ({
               }}
             >
               <FontAwesome5 name="exchange-alt" size={14} color={PRIMARY} />
-              <Text
-                style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}
-              >
+              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
                 Lots
               </Text>
             </Pressable>
@@ -462,18 +472,14 @@ export const DemandeTransfertDetailsScreen = () => {
   const openPreparerConfirmSheet = useDemandeTransfertSheetStore(
     (s) => s.openPreparerConfirmSheet,
   );
-  const finishPreparer = useDemandeTransfertSheetStore(
-    (s) => s.finishPreparer,
-  );
+  const finishPreparer = useDemandeTransfertSheetStore((s) => s.finishPreparer);
   const openStatutSelectorSheet = useDemandeTransfertSheetStore(
     (s) => s.openStatutSelectorSheet,
   );
   const openDeleteDTConfirmSheet = useDemandeTransfertSheetStore(
     (s) => s.openDeleteDTConfirmSheet,
   );
-  const finishDeleteDT = useDemandeTransfertSheetStore(
-    (s) => s.finishDeleteDT,
-  );
+  const finishDeleteDT = useDemandeTransfertSheetStore((s) => s.finishDeleteDT);
   const closeSheet = useDemandeTransfertSheetStore((s) => s.closeSheet);
   const { demandeTransfertId } = useLocalSearchParams<{
     demandeTransfertId: string;
@@ -503,7 +509,10 @@ export const DemandeTransfertDetailsScreen = () => {
 
   const products = detailsData?.details ?? [];
   const statutStyle = transfertItem
-    ? STATUT_STYLE[transfertItem.statut] ?? { bg: "#9ca3af22", text: "#9ca3af" }
+    ? (STATUT_STYLE[transfertItem.statut] ?? {
+        bg: "#9ca3af22",
+        text: "#9ca3af",
+      })
     : { bg: "#9ca3af22", text: "#9ca3af" };
 
   const handleAddProduct = () => {
@@ -608,8 +617,7 @@ export const DemandeTransfertDetailsScreen = () => {
           Toast.show({
             type: "error",
             text1: "Échec",
-            text2:
-              error.message || "Impossible de changer le statut.",
+            text2: error.message || "Impossible de changer le statut.",
           });
         }
       },
@@ -634,8 +642,7 @@ export const DemandeTransfertDetailsScreen = () => {
           Toast.show({
             type: "error",
             text1: "Échec",
-            text2:
-              error.message || "Impossible de supprimer la demande.",
+            text2: error.message || "Impossible de supprimer la demande.",
           });
         }
         finishDeleteDT();
@@ -833,7 +840,9 @@ export const DemandeTransfertDetailsScreen = () => {
                 }}
               >
                 <FontAwesome5 name="edit" size={14} color={PRIMARY} />
-                <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 14 }}>
+                <Text
+                  style={{ color: PRIMARY, fontWeight: "600", fontSize: 14 }}
+                >
                   Modifier
                 </Text>
               </Pressable>
@@ -866,7 +875,14 @@ export const DemandeTransfertDetailsScreen = () => {
           }}
         >
           <FontAwesome5 name="boxes" size={16} color={PRIMARY} />
-          <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a2e", flex: 1 }}>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "700",
+              color: "#1a1a2e",
+              flex: 1,
+            }}
+          >
             Produits ({products.length})
           </Text>
           {canCreate && (

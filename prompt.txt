@@ -1,0 +1,37 @@
+add in the 2nd chapitre the 'Déroulement du projet' section
+with this description :'Pour garantir une avancée méthodique et progressive de notre projet, nous avons adopté
+une approche itérative basée sur des sprints. Chaque sprint représente une période définie,
+de trois semaines, pendant laquelle une série d’activités spécifiques est menée à bien. Voici
+un aperçu de notre planification par sprint'
+
+as well a table that has this columns : sprints  ,  Actions Réalisées 
+
+
+the first sprint should have this :
+- Découverte de l’environnement de travail et obtention des ac-
+cès nécessaires aux systèmes et outils.
+
+- Formation sur le métier et les outils internes.
+- Collaboration initiale avec l’équipe de projet.
+- Autoformation sur le code existant et les technologies à utiliser.
+- initialisation de le 'boilerplate' du l'application 
+- setting a design system  for the app frontend  as well code architecture/pattern for both the backend and frontend
+
+2nd spring:
+- implementation de l'authentication et authorization en backend et frontend
+- implementation du le premiere module 'Voyages' en backend et frontend 
+
+3rd spring:
+- implementation du le deuxieme module 'retours chauffeur' en backend et frontend
+- implementation du le troisieme module 'rapports qualite' en backend et frontend
+
+
+4th sprint:
+- implementation du le quatrieme module 'rotation chauffeur' en backend et frontend
+- implementation du le quatrieme module 'lieux de projets' en backend et frontend
+
+5th sprint:
+- implementation du le cinquieme module 'demande de transfert' en backend et frontend
+- tests et validation de l'ensemble des fonctionnalités développées
+- builder 'apk' pour le production   
+- redaction du rapport et preparation du PPT
