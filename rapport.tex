@@ -486,7 +486,11 @@
     Ce module est en lecture seule. Il ne comporte pas d'opérations de création, modification ou suppression.
 
     \subsubsection{Module Demande de transfert}
-    Le module Demande de transfert permet la gestion des transferts de stock entre dépôts. Les besoins identifiés sont les suivants :
+    Le module Demande de transfert permet la gestion des transferts de stock entre dépôts.
+
+    Dans ce module, un \textbf{produit} correspond à une essence de bois (par exemple, le bois rouge) et se décompose en plusieurs \textbf{lots}. Un lot représente une variante spécifique du même produit, caractérisée par ses dimensions. À titre d'exemple, un produit « bois rouge » peut comporter le lot « 19$\times$100 vi stora » et le lot « 15$\times$90 ». Chaque lot possède sa propre quantité et peut être préparé indépendamment des autres lots du même produit.
+
+    Les besoins identifiés sont les suivants :
     \begin{itemize}[leftmargin=1.2em]
     \item Créer une demande de transfert en renseignant le dépôt source, le dépôt destination, le DUM, le transporteur, le matricule et l'observation.
     \item Consulter la liste des demandes avec recherche par mot-clé.
@@ -573,7 +577,9 @@
     \section{Introduction}
     Ce chapitre de conception se concentre sur la traduction de notre vision en un système concret et fonctionnel. Sans réitérer les besoins déjà abordés, nous nous plongerons directement dans l'architecture du système. Notre objectif est de dévoiler comment chaque composant architectural et choix de conception contribue à un système intégré, mettant en évidence les stratégies adoptées pour une performance optimale et une sécurité renforcée. Ce cadre nous permettra de naviguer à travers les complexités techniques, offrant une compréhension claire de la structure sous-jacente qui anime notre projet.
 
-    Afin de ne pas alourdir ce document, seules deux à trois actions représentatives sont détaillées pour chaque module.
+    L'application intègre un rôle \textbf{admin global}, attribué au Directeur Général (DG) et au Directeur Général Adjoint (DGA). Ce rôle dispose de l'ensemble des permissions sur tous les modules, sans restriction aucune. Il ne figure pas dans la liste des rôles métier car il transcende les périmètres fonctionnels individuels et constitue un accès total à l'application.
+
+Afin de ne pas alourdir ce document, seules deux à trois actions représentatives sont détaillées pour chaque module.
 
     \section{Modélisation des Processus via UML}
 
@@ -607,5 +613,167 @@
     \includegraphics[width=0.85\textwidth]{assets/voyages-cloturer-bl.png}
     \caption{Cas d'utilisation — Clôturer un BL}
     \end{figure}
+
+    \subsection{Module Retours}
+    Le module Retours fait intervenir deux acteurs : le chauffeur, qui crée, modifie et supprime les retours, et l'agent de caisse, chargé de valider ou refuser les retours. La consultation de la liste est accessible aux deux profils.
+
+    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/retours-use-case.png}
+    \caption{Diagramme de cas d'utilisation — Module Retours}
+    \end{figure}
+
+    Les deux actions détaillées ci-dessous illustrent le cycle de vie d'un retour, de sa création par le chauffeur à sa validation par l'agent de caisse.
+
+    \subsubsection{Créer un retour}
+    Le processus de création d'un retour est initié par le chauffeur. Ce dernier renseigne les informations du retour — client, dépôt, motif du retour — et joint des documents justificatifs tels que des photos des marchandises retournées. Ces pièces jointes sont obligatoires et font partie intégrante du processus de création. Une fois les informations saisies et les fichiers joints, la création est validée et le retour est enregistré avec le statut \og{}En attente de validation\fg{}.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/creer-retour.png}
+    \caption{Cas d'utilisation — Créer un retour}
+    \end{figure}
+
+    \subsubsection{Valider un retour}
+    La validation d'un retour est effectuée par l'agent de caisse. Après avoir consulté les détails du retour et examiné les pièces jointes fournies par le chauffeur, l'agent de caisse décide d'accepter ou de refuser le retour. En cas d'acceptation, le statut du retour passe à \og{}Validé\fg{} ; en cas de refus, il passe à \og{}Refusé\fg{}. Cette étape constitue le point de contrôle final du processus de retour.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/valider-retour.png}
+    \caption{Cas d'utilisation — Valider un retour}
+    \end{figure}
+
+    \subsection{Module Rapports qualité}
+    Le module Rapports qualité fait intervenir deux acteurs : le service import, chargé de créer les rapports qualité, et le contrôle de gestion, qui consulte les rapports. La consultation et le listage sont accessibles aux deux profils.
+
+    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/rapports-qualite-use-case.png}
+    \caption{Diagramme de cas d'utilisation — Module Rapports qualité}
+    \end{figure}
+
+    Les deux actions détaillées ci-dessous illustrent le flux du module, depuis la création d'un rapport par le service import jusqu'à sa consultation par le contrôle de gestion.
+
+    \subsubsection{Créer un rapport qualité}
+    Le processus de création d'un rapport qualité est initié par le service import. L'utilisateur renseigne les informations du rapport — référence, observations, conformité — et y joint des photos des marchandises ou des documents scannés. Ces pièces jointes permettent de documenter visuellement l'état des produits et constituent un élément essentiel du rapport. Une fois les informations saisies, la création est validée et le rapport est enregistré.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/creer-rapport-qualite.png}
+    \caption{Cas d'utilisation — Créer un rapport qualité}
+    \end{figure}
+
+    \subsubsection{Lister les rapports qualité}
+    La consultation de la liste des rapports qualité est accessible au service import et au contrôle de gestion. L'utilisateur peut parcourir l'ensemble des rapports enregistrés et utiliser la recherche textuelle pour retrouver un rapport spécifique. Cette fonction permet au contrôle de gestion de suivre l'état qualitatif des marchandises réceptionnées sans intervenir dans le processus de création.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/lister-rapports-qualite.png}
+    \caption{Cas d'utilisation — Lister les rapports qualité}
+    \end{figure}
+
+    \subsection{Module Rotation chauffeur}
+    Le module Rotation chauffeur fait intervenir un acteur unique : le responsable de flotte. Ce dernier consulte la liste des rotations pour connaître la disponibilité des chauffeurs et des véhicules.
+
+    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/rotation-chauffeur-use-case.png}
+    \caption{Diagramme de cas d'utilisation — Module Rotation chauffeur}
+    \end{figure}
+
+    Une seule action est détaillée pour ce module, la consultation des rotations étant sa fonction principale.
+
+    \subsubsection{Lister les rotations}
+    La consultation de la liste des rotations est accessible au responsable de flotte. L'utilisateur peut parcourir l'ensemble des rotations enregistrées et filtrer les résultats par chauffeur, véhicule, disponibilité ou intervalle de dates. Ces filtres permettent d'identifier rapidement quels chauffeurs et véhicules sont disponibles pour une période donnée.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/lister-rotations.png}
+    \caption{Cas d'utilisation — Lister les rotations}
+    \end{figure}
+
+    \subsection{Module Lieux de projets}
+    Le module Lieux de projets fait intervenir plusieurs profils. La création d'un lieu est ouverte à tous les utilisateurs. La consultation et le listage sont réservés au directeur général, au directeur commercial et au directeur adjoint. La modification et la suppression sont réservées au créateur du lieu et au responsable de flotte.
+
+    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/lieux-projets-use-case.png}
+    \caption{Diagramme de cas d'utilisation — Module Lieux de projets}
+    \end{figure}
+
+    Les deux actions détaillées ci-dessous illustrent le flux du module, de la création d'un lieu par un utilisateur à sa consultation par les directeurs.
+
+    \subsubsection{Créer un lieu de projet}
+    Le processus de création d'un lieu de projet est accessible à tous les utilisateurs. Ces derniers renseignent le nom, le type (chantier ou dépôt), l'adresse, le contact et capturent automatiquement les coordonnées GPS. Des photos du lieu peuvent être jointes afin de documenter visuellement le projet. Une fois les informations saisies, la création est validée et le lieu est enregistré.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/creer-lieu-projet.png}
+    \caption{Cas d'utilisation — Créer un lieu de projet}
+    \end{figure}
+
+    \subsubsection{Lister les lieux de projets}
+    La consultation de la liste des lieux de projets est accessible au directeur général, au directeur commercial et au directeur adjoint. L'utilisateur peut parcourir l'ensemble des lieux enregistrés, filtrer par type (chantier ou dépôt) et utiliser la recherche textuelle pour retrouver un lieu spécifique.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/lister-lieux-projets.png}
+    \caption{Cas d'utilisation — Lister les lieux de projets}
+    \end{figure}
+
+    \subsection{Module Demande de transfert}
+    Le module Demande de transfert fait intervenir trois acteurs : l'ADV (agent des ventes) et le responsable de stock, qui créent les demandes, ajoutent et suppriment les produits et gèrent leurs lots, et le magasinier, chargé de la préparation des produits et des lots. La consultation de la liste est accessible aux créateurs de demandes et aux magasiniers.
+
+    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/demande-transfert-use-case.png}
+    \caption{Diagramme de cas d'utilisation — Module Demande de transfert}
+    \end{figure}
+
+    Les trois actions détaillées ci-dessous illustrent le flux du module, de la création d'une demande jusqu'à la préparation des produits par le magasinier.
+
+    \subsubsection{Créer une demande de transfert}
+    Le processus de création d'une demande de transfert est initié par l'ADV ou le responsable de stock. L'utilisateur sélectionne un dépôt source et un dépôt de destination, puis ajoute les produits concernés depuis le catalogue. Pour chaque produit, il renseigne la quantité souhaitée puis sélectionne les lots à transférer. Une fois tous les produits ajoutés, la création est validée et la demande est enregistrée avec le statut \og{}Brouillon\fg{}.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/creer-demande-transfert.png}
+    \caption{Cas d'utilisation — Créer une demande de transfert}
+    \end{figure}
+
+    \subsubsection{Gérer les lots d'un produit}
+    La gestion des lots d'un produit est effectuée par l'ADV ou le responsable de stock après l'ajout d'un produit à la demande. L'utilisateur accède à la liste des lots disponibles pour le produit sélectionné et choisit les lots à inclure dans le transfert. Il peut ajouter de nouveaux lots ou retirer des lots déjà sélectionnés, à l'exception des lots déjà préparés qui ne peuvent plus être modifiés.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/gerer-lots-demande-transfert.png}
+    \caption{Cas d'utilisation — Gérer les lots d'un produit}
+    \end{figure}
+
+    \subsubsection{Préparer un produit ou un lot}
+    La préparation des produits et des lots est la tâche exclusive du magasinier. Ce dernier consulte la liste des demandes de transfert et, pour chaque demande, prépare physiquement les produits demandés. Il peut marquer un produit entier comme préparé ou préparer des lots individuellement. Une fois un produit ou un lot marqué comme préparé, il ne peut plus être modifié ou retiré de la demande.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/preparer-produit-lot-demande-transfert.png}
+    \caption{Cas d'utilisation — Préparer un produit ou un lot}
+    \end{figure}
+
+    \subsection{Conclusion du chapitre}
+    Ce chapitre de conception a traduit les besoins fonctionnels identifiés au chapitre précédent en une modélisation UML concrète et structurée. Chaque module métier — voyages, retours chauffeur, rapports qualité, rotation chauffeur, lieux de projets et demandes de transfert — a été décrit à travers ses cas d'utilisation, en identifiant les acteurs impliqués et leurs interactions avec le système.
+
+    La modélisation a mis en évidence la répartition des responsabilités entre les différents rôles métier : agent de livraison et chauffeur pour les voyages, chauffeur et agent de caisse pour les retours, service import et contrôle de gestion pour les rapports qualité, responsable de flotte pour la rotation, ADV/responsable de stock et magasinier pour les demandes de transfert, et l'ensemble des profils pour les lieux de projets. Le rôle admin global, attribué au Directeur Général et au Directeur Général Adjoint, garantit un accès transversal à toutes les fonctionnalités de l'application.
+
+    Les actions détaillées pour chaque module illustrent les flux essentiels : de la création à la validation, de la préparation à la livraison. Cette modélisation constitue le socle à partir duquel l'architecture technique et l'implémentation ont été réalisées.
 
     \end{document}
