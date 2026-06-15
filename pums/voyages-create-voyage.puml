@@ -1,0 +1,26 @@
+@startuml voyages-create-voyage
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor #FEF3E2
+skinparam usecaseBorderColor #ED5623
+skinparam usecaseFontSize 13
+skinparam actorFontSize 13
+skinparam packageBorderColor #ED5623
+skinparam packageFontSize 14
+
+actor "Agent de livraison" as Agent
+
+rectangle "Module Voyages" #FEF9F4 {
+  usecase "Créer un voyage" as UC1
+
+  usecase "Sélectionner des BLs" as UC2
+  usecase "Prendre des photos\ndes BLs" as UC3
+}
+
+Agent --> UC1
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+
+@enduml

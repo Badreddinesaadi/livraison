@@ -1,3 +1,43 @@
 - add in the besoin fonctionnel => home page with dahsboard buttons
 - need a list of the roles of the application to be able to explain them in the besoin fonctionnel
 - in the besoin fonctionnel => explain the terms like BL,user roles,
+- add a deletion button for the DT only if the DT is not validated
+- make sure to include that if a product in a DT is prepared it cannot be removed/modified
+
+
+
+
+
+
+roles (note admin and DG, DGA are not included in the list of roles because they have access to everything) : 
+    - voyage =
+    creation/modifier/suppression => Agent de livraison
+    cloture de bl=> chauffeur
+    achever du voyage => Agent de livraison
+    consulter/lister => chauffeur (qui a créé le voyage) / agent de livraison
+
+
+    - retour =
+        creation/modifier/suppression => chauffeur
+        consulter/lister => chauffeur (qui a créé le retour) / agent de caisse
+        refuser/valide => agent de caisse
+
+    - rapport qualite =
+        creation => service import 
+        consulter/lister =>  service import , control de gestion
+
+
+    - rotation chauffeur =
+        list => responsable de flotte
+
+    - lieux projets =
+    creation des lieux => tous le monde 
+    modifier/suppression => qui a créé le lieu / responsable de flotte
+    consulter/lister => le directeur generale le directeur commerciale, le directeur adjointe
+
+
+    - demande-transfert =
+    creation/suppression des DT = les ADVs (agent des ventes), responsable de stock
+    ajout/suppression des produits et gestion de leurs lots = les ADVs, responsable de stock
+    preparation des produits = les magasiniers
+    consulter/lister les DT = qui a crée / les  magasiniers

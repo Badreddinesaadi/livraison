@@ -9,10 +9,9 @@ skinparam actorFontSize 13
 skinparam packageBorderColor #ED5623
 skinparam packageFontSize 14
 
-actor "Administrateur" as Admin
-actor "Chef de parc" as Parc
-actor "Responsable stock" as RStock
-actor "Réceptionnaire" as Reception
+actor "ADV\n(Agent des ventes)" as ADV
+actor "Responsable de stock" as RStock
+actor "Magasinier" as Magasinier
 
 rectangle "Module Demande de transfert" #FEF9F4 {
   usecase "Lister les demandes\nde transfert" as UC1
@@ -36,32 +35,28 @@ rectangle "Module Demande de transfert" #FEF9F4 {
   usecase "Confirmer la préparation\n(produit / lot)" as UC17
 }
 
-Admin --> UC1
-Admin --> UC2
-Admin --> UC3
-Admin --> UC4
-Admin --> UC5
-Admin --> UC6
-Admin --> UC7
-Admin --> UC8
-Admin --> UC9
-Admin --> UC10
-Admin --> UC11
+ADV --> UC3
+ADV --> UC4
+ADV --> UC5
+ADV --> UC6
+ADV --> UC7
+ADV --> UC8
+ADV --> UC9
 
-Parc --> UC1
-Parc --> UC2
-Parc --> UC3
-Parc --> UC5
-Parc --> UC10
-Parc --> UC11
-
-RStock --> UC1
-RStock --> UC2
+RStock --> UC3
+RStock --> UC5
+RStock --> UC6
 RStock --> UC7
+RStock --> UC8
 RStock --> UC9
 
-Reception --> UC1
-Reception --> UC2
+ADV --> UC1
+ADV --> UC2
+
+Magasinier --> UC1
+Magasinier --> UC2
+Magasinier --> UC10
+Magasinier --> UC11
 
 UC1 ..> UC12 : <<extend>>
 UC3 ..> UC13 : <<include>>

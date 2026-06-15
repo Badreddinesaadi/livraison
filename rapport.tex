@@ -566,4 +566,46 @@
 
     Ces spécifications constituent le cahier des charges à partir duquel les choix techniques et l'architecture décrits au chapitre suivant ont été établis.
 
+    \newpage
+    \renewcommand{\thesection}{4.\arabic{section}}
+    \setcounter{section}{0}
+
+    \section{Introduction}
+    Ce chapitre de conception se concentre sur la traduction de notre vision en un système concret et fonctionnel. Sans réitérer les besoins déjà abordés, nous nous plongerons directement dans l'architecture du système. Notre objectif est de dévoiler comment chaque composant architectural et choix de conception contribue à un système intégré, mettant en évidence les stratégies adoptées pour une performance optimale et une sécurité renforcée. Ce cadre nous permettra de naviguer à travers les complexités techniques, offrant une compréhension claire de la structure sous-jacente qui anime notre projet.
+
+    Afin de ne pas alourdir ce document, seules deux à trois actions représentatives sont détaillées pour chaque module.
+
+    \section{Modélisation des Processus via UML}
+
+    \subsection{Module Voyages}
+    Le module Voyages fait intervenir deux acteurs principaux : l'agent de livraison, responsable de la création, modification, suppression et achèvement des voyages ainsi que de leur consultation, et le chauffeur, qui peut consulter les voyages qui lui sont assignés et clôturer les bons de livraison (BL).
+
+    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/voyages-use-case.png}
+    \caption{Diagramme de cas d'utilisation — Module Voyages}
+    \end{figure}
+
+    Les deux actions détaillées ci-dessous illustrent le flux essentiel du module, depuis l'enregistrement d'un départ jusqu'à la preuve de livraison.
+
+    \subsubsection{Créer un voyage}
+    Le processus de création d'un voyage est initié par l'agent de livraison. L'utilisateur saisit les informations du voyage — dépôt de départ, chauffeur, véhicule et destination — puis sélectionne les BLs qui seront transportés. Chaque BL sélectionné est photographié afin de conserver une trace visuelle de l'état des documents au moment du chargement. Ces deux étapes — sélection des BLs et prise de photos — sont obligatoires et font partie intégrante du processus de création. Une fois les informations renseignées et les BLs associés au voyage, la création est validée et le voyage est enregistré.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/voyages-create-voyage.png}
+    \caption{Cas d'utilisation — Créer un voyage}
+    \end{figure}
+
+    \subsubsection{Clôturer un BL}
+    La clôture d'un BL est accessible au chauffeur. Cette action intervient lorsque le chauffeur arrive à destination et livre les marchandises. Avant de clôturer le BL, l'utilisateur consulte les images du BL pour vérifier les informations et s'assurer de la conformité de la livraison. La clôture est ensuite confirmée, ce qui marque le BL comme livré.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/voyages-cloturer-bl.png}
+    \caption{Cas d'utilisation — Clôturer un BL}
+    \end{figure}
+
     \end{document}

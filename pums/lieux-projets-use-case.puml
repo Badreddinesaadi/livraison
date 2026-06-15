@@ -9,10 +9,11 @@ skinparam actorFontSize 13
 skinparam packageBorderColor #ED5623
 skinparam packageFontSize 14
 
-actor "Administrateur" as Admin
-actor "Chef de parc" as Parc
-actor "Responsable stock" as RStock
-actor "Commercial" as Commercial
+actor "Utilisateur\n(tout rôle)" as User
+actor "Responsable de flotte" as RFlotte
+actor "Directeur général" as DG
+actor "Directeur commercial" as DCom
+actor "Directeur adjoint" as DAdj
 
 rectangle "Module Lieux de projets" #FEF9F4 {
   usecase "Lister les lieux de projets" as UC1
@@ -32,22 +33,19 @@ rectangle "Module Lieux de projets" #FEF9F4 {
   usecase "Recapturer la position GPS\n(modification)" as UC14
 }
 
-Admin --> UC1
-Admin --> UC2
-Admin --> UC3
-Admin --> UC4
-Admin --> UC5
+DG --> UC1
+DG --> UC2
+DCom --> UC1
+DCom --> UC2
+DAdj --> UC1
+DAdj --> UC2
 
-Parc --> UC1
-Parc --> UC2
-Parc --> UC3
-Parc --> UC4
+User --> UC3
+User --> UC4
+User --> UC5
 
-RStock --> UC1
-RStock --> UC2
-
-Commercial --> UC1
-Commercial --> UC2
+RFlotte --> UC4
+RFlotte --> UC5
 
 UC1 ..> UC6 : <<extend>>
 UC1 ..> UC7 : <<extend>>

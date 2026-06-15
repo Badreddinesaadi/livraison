@@ -1,0 +1,24 @@
+@startuml voyages-cloturer-bl
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor #FEF3E2
+skinparam usecaseBorderColor #ED5623
+skinparam usecaseFontSize 13
+skinparam actorFontSize 13
+skinparam packageBorderColor #ED5623
+skinparam packageFontSize 14
+
+actor "Chauffeur" as Chauffeur
+
+rectangle "Module Voyages" #FEF9F4 {
+  usecase "Clôturer un BL" as UC1
+
+  usecase "Consulter les images\nd'un BL" as UC2
+}
+
+Chauffeur --> UC1
+
+UC1 ..> UC2 : <<include>>
+
+@enduml

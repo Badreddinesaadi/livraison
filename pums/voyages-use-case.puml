@@ -9,10 +9,8 @@ skinparam actorFontSize 13
 skinparam packageBorderColor #ED5623
 skinparam packageFontSize 14
 
-actor "Administrateur" as Admin
-actor "Chef de parc" as Parc
+actor "Agent de livraison" as Agent
 actor "Chauffeur" as Chauffeur
-actor "Commercial" as Commercial
 
 rectangle "Module Voyages" #FEF9F4 {
   usecase "Lister les voyages" as UC1
@@ -30,27 +28,16 @@ rectangle "Module Voyages" #FEF9F4 {
   usecase "Consulter les images\nd'un BL" as UC12
 }
 
-Admin --> UC1
-Admin --> UC2
-Admin --> UC3
-Admin --> UC4
-Admin --> UC5
-Admin --> UC6
-Admin --> UC7
-
-Parc --> UC1
-Parc --> UC2
-Parc --> UC3
-Parc --> UC4
-Parc --> UC5
-Parc --> UC6
-Parc --> UC7
+Agent --> UC1
+Agent --> UC2
+Agent --> UC3
+Agent --> UC4
+Agent --> UC5
+Agent --> UC7
 
 Chauffeur --> UC1
 Chauffeur --> UC2
-
-Commercial --> UC1
-Commercial --> UC2
+Chauffeur --> UC6
 
 UC1 ..> UC8 : <<extend>>
 UC1 ..> UC9 : <<extend>>
@@ -58,6 +45,6 @@ UC3 ..> UC10 : <<include>>
 UC3 ..> UC11 : <<include>>
 UC4 ..> UC10 : <<include>>
 UC4 ..> UC11 : <<include>>
-UC2 ..> UC12 : <<include>>
+UC6 ..> UC12 : <<include>>
 
 @enduml

@@ -9,48 +9,36 @@ skinparam actorFontSize 13
 skinparam packageBorderColor #ED5623
 skinparam packageFontSize 14
 
-actor "Administrateur" as Admin
-actor "Chef de parc" as Parc
-actor "Responsable qualité" as RQ
-actor "Commercial" as Commercial
+actor "Service import" as SImport
+actor "Contrôle de gestion" as CGestion
 
 rectangle "Module Rapports qualité" #FEF9F4 {
   usecase "Lister les rapports qualité" as UC1
   usecase "Consulter les détails\nd'un rapport" as UC2
   usecase "Créer un rapport qualité" as UC3
-  usecase "Supprimer un rapport qualité" as UC4
 
-  usecase "Rechercher un rapport" as UC5
-  usecase "Prendre des photos" as UC6
-  usecase "Sélectionner des fichiers\n(depuis l'appareil)" as UC7
-  usecase "Prévisualiser une image\n(en plein écran)" as UC8
-  usecase "Télécharger un fichier" as UC9
-  usecase "Partager un fichier" as UC10
-  usecase "Apercevoir un fichier\n(aperçu externe)" as UC11
+  usecase "Rechercher un rapport" as UC4
+  usecase "Prendre des photos" as UC5
+  usecase "Sélectionner des fichiers\n(depuis l'appareil)" as UC6
+  usecase "Prévisualiser une image\n(en plein écran)" as UC7
+  usecase "Télécharger un fichier" as UC8
+  usecase "Partager un fichier" as UC9
+  usecase "Apercevoir un fichier\n(aperçu externe)" as UC10
 }
 
-Admin --> UC1
-Admin --> UC2
-Admin --> UC3
-Admin --> UC4
+SImport --> UC1
+SImport --> UC2
+SImport --> UC3
 
-Parc --> UC1
-Parc --> UC2
+CGestion --> UC1
+CGestion --> UC2
 
-RQ --> UC1
-RQ --> UC2
-RQ --> UC3
-RQ --> UC4
-
-Commercial --> UC1
-Commercial --> UC2
-
-UC1 ..> UC5 : <<extend>>
+UC1 ..> UC4 : <<extend>>
+UC3 ..> UC5 : <<include>>
 UC3 ..> UC6 : <<include>>
-UC3 ..> UC7 : <<include>>
+UC2 ..> UC7 : <<include>>
 UC2 ..> UC8 : <<include>>
 UC2 ..> UC9 : <<include>>
-UC2 ..> UC10 : <<include>>
-UC2 ..> UC11 : <<extend>>
+UC2 ..> UC10 : <<extend>>
 
 @enduml

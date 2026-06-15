@@ -9,11 +9,7 @@ skinparam actorFontSize 13
 skinparam packageBorderColor #ED5623
 skinparam packageFontSize 14
 
-actor "Administrateur" as Admin
-actor "Chef de parc" as Parc
-actor "Chauffeur" as Chauffeur
-actor "Commercial" as Commercial
-actor "Responsable stock" as RStock
+actor "Responsable de flotte" as RFlotte
 
 rectangle "Module Rotation chauffeur" #FEF9F4 {
   usecase "Consulter la liste\ndes rotations" as UC1
@@ -25,11 +21,7 @@ rectangle "Module Rotation chauffeur" #FEF9F4 {
   usecase "Réinitialiser les filtres" as UC6
 }
 
-Admin --> UC1
-Parc --> UC1
-Chauffeur --> UC1
-Commercial --> UC1
-RStock --> UC1
+RFlotte --> UC1
 
 UC1 ..> UC2 : <<extend>>
 UC1 ..> UC3 : <<extend>>
