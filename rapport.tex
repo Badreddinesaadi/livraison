@@ -442,15 +442,20 @@
     Les besoins fonctionnels sont regroupés par module. Chaque module correspond à un processus métier identifié dans l'étude du contexte.
 
     \subsubsection{Module Voyages}
-    Le module Voyages permet la création et le suivi des tournées de livraison. Les besoins identifiés sont les suivants :
+    Le module Voyages permet la création et le suivi des tournées de livraison.
+
+    Un \textbf{bon de livraison (BL)} est un document commercial qui accompagne chaque livraison. Il récapitule les essences de bois livrées, leurs quantités, les prix unitaires, la date de livraison, le client destinataire et le dépôt de provenance. Le BL sert de preuve de livraison et constitue le support de la facturation.
+
+    Les besoins identifiés sont les suivants :
     \begin{itemize}[leftmargin=1.2em]
     \item Créer un voyage en renseignant le chauffeur, le véhicule, le dépôt de départ, la ville de destination et le kilométrage de départ.
-    \item Associer un ou plusieurs bons de livraison (BL) à un voyage.
+    \item Associer un ou plusieurs BL à un voyage lors de sa création ou de sa modification.
     \item Consulter la liste des voyages avec filtrage par chauffeur, véhicule, dépôt, ville ou client.
-    \item Modifier les informations d'un voyage (chauffeur, véhicule, dépôt, ville).
+    \item Modifier les informations d'un voyage (chauffeur, véhicule, dépôt, ville) ainsi que la liste des BL associés.
     \item Clôturer un voyage en enregistrant le kilométrage de retour et la date de retour.
     \item Supprimer un voyage.
-    \item Visualiser le détail d'un voyage avec la liste de ses BL et leurs statuts.
+    \item Visualiser le détail d'un voyage avec la liste de ses BL et leurs statuts (en cours / livré).
+    \item Clôturer un BL : le chauffeur prend une photo en direct depuis l'appareil photo du terminal mobile comme preuve de livraison. Les coordonnées GPS du lieu de livraison sont automatiquement capturées par le terminal et jointes à la preuve. Le BL passe alors du statut « En cours » à « Livré ».
     \end{itemize}
 
     \subsubsection{Module Retours chauffeur}
@@ -553,5 +558,12 @@
     \item L'application nécessite une connexion internet pour fonctionner. En cas de perte de connexion, l'utilisateur est informé par un message clair.
     \item L'envoi de photos (retours, rapports qualité, lieux de projets) est accompagné d'un indicateur visuel de progression afin que l'utilisateur sache que le transfert est en cours.
     \end{itemize}
+
+    \subsection{Conclusion du chapitre}
+    Ce chapitre a posé les fondations de la solution en identifiant l'ensemble des fonctionnalités attendues, organisées par module métier (voyages, retours, rapports qualité, rotation chauffeur, demandes de transfert et lieux de projets), ainsi que les qualités transverses que l'application doit respecter en matière de performance, sécurité, ergonomie, maintenabilité et disponibilité.
+
+    L'analyse fonctionnelle a permis de détailler les opérations de chaque module — création, consultation, modification, suppression, validation, filtrage et recherche — en couvrant les cas d'usage réels identifiés sur le terrain. Les besoins non fonctionnels ont quant à eux défini le cadre de qualité attendu pour garantir une adoption durable par les équipes.
+
+    Ces spécifications constituent le cahier des charges à partir duquel les choix techniques et l'architecture décrits au chapitre suivant ont été établis.
 
     \end{document}

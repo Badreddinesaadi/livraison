@@ -1,2 +1,3 @@
 - add in the besoin fonctionnel => home page with dahsboard buttons
+- need a list of the roles of the application to be able to explain them in the besoin fonctionnel
 - in the besoin fonctionnel => explain the terms like BL,user roles,
