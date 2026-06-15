@@ -1,0 +1,42 @@
+@startuml achever-voyage-sequence
+title Achever un voyage — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(voyage.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Achever le voyage"
+
+App -> App : Vérifie s'il reste des BLs\nnon livrés dans ce voyage
+
+alt Il reste des BLs en cours
+    App -> User : Avertissement :\n"X BL(s) non livré(s)\ndans ce voyage"
+end
+
+App -> User : Demande de saisir :\n• le kilométrage au retour\n• la date de retour
+
+User -> App : Saisit les informations\net confirme l'action
+
+== Envoi au serveur ==
+App -> Server : Envoie les informations :\nID du voyage, statut "Terminé",\nkilométrage retour, date retour\navec le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Enregistrement ==
+Server -> DB : Débute une transaction
+
+alt L'utilisateur est un chauffeur
+    Server -> DB : Passe le voyage en "Terminé"\navec le kilométrage et la date retour\n(uniquement si le voyage\nappartient au chauffeur)
+else Autre rôle
+    Server -> DB : Passe le voyage en "Terminé"\navec le kilométrage et la date retour
+end
+
+Server -> DB : Valide la transaction
+
+Server --> App : Succès
+App --> User : "Voyage achevé avec succès"
+
+@enduml

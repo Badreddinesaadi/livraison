@@ -1,0 +1,44 @@
+@startuml supprimer-demande-transfert-sequence
+title Supprimer une demande de transfert — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur l'icône de suppression\nd'une demande
+App -> App : Demande confirmation :\n"La demande #X sera supprimée\ndéfinitivement.\nVoulez-vous continuer ?"
+
+== Confirmation ==
+User -> App : Confirme la suppression
+
+App -> Server : Envoie l'ID de la demande\nà supprimer\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Suppression en cascade ==
+Server -> DB : Débute une transaction
+
+Server -> DB : Supprime tous les lots\nassociés aux produits\nde cette demande
+note right of DB
+  Étapes de suppression :
+  1. Lots de transfert
+  2. Détails (produits)
+  3. Demande elle-même
+end note
+
+Server -> DB : Supprime tous les produits\n(lignes de détail)\nde la demande
+
+Server -> DB : Supprime la demande\nde transfert elle-même
+
+Server -> DB : Valide la transaction
+
+Server --> App : Succès : demande supprimée
+App --> User : "Demande supprimée avec succès"
+
+== Navigation ==
+App -> App : Retourne à l'écran\nde la liste des demandes
+
+@enduml

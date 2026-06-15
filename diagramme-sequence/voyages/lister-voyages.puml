@@ -1,0 +1,71 @@
+@startuml lister-voyages-sequence
+title Lister les voyages — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(voyage.php)" as Server
+database "Base de données" as DB
+
+== Accès à la liste ==
+User -> App : Ouvre l'écran "Voyages"
+App -> Server : Demande la liste des voyages\navec le token d'authentification
+
+== Authentification et rôle ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+alt L'utilisateur est un chauffeur
+    Server -> Server : Limite automatiquement\nla recherche aux voyages\ndu chauffeur connecté
+    note right of Server
+      Un chauffeur ne voit
+      que ses propres voyages
+    end note
+end
+
+== Comptage total ==
+Server -> DB : Compte le nombre total\nde voyages correspondant\naux filtres éventuels
+DB --> Server : Nombre total de résultats
+
+== Application des filtres ==
+opt L'utilisateur a saisi des filtres
+    Server -> Server : Applique les filtres demandés :
+    note right of Server
+      Filtres possibles :
+      • Un voyage précis (par ID)
+      • Par chauffeur
+      • Par véhicule
+      • Par dépôt
+      • Par ville
+      • Par client
+      • Recherche par mot-clé
+    end note
+end
+
+opt Recherche par mot-clé
+    Server -> Server : Recherche le mot-clé dans :
+    note right of Server
+      • Nom du chauffeur
+      • Immatriculation du véhicule
+      • Marque du véhicule
+      • Nom du client
+      • Code du BL
+      • Nom du dépôt
+    end note
+end
+
+== Récupération des données ==
+Server -> DB : Récupère la page demandée\n(classée par date de départ,\ndu plus récent au plus ancien)
+DB --> Server : Liste des voyages\n+ nom du chauffeur\n+ nom du dépôt\n+ nom du véhicule\n+ ville de destination
+
+== Enrichissement de chaque voyage ==
+loop Pour chaque voyage de la liste
+    Server -> DB : Récupère la liste des BLs\nassociés à ce voyage\n(avec le nom du client)
+
+    loop Pour chaque BL
+        Server -> DB : Récupère les photos\néventuelles du BL
+    end
+end
+
+Server --> App : Liste paginée complète
+App --> User : Affiche la liste des voyages\navec le nombre de résultats
+
+@enduml

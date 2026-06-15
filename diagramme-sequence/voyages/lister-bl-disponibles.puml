@@ -1,0 +1,45 @@
+@startuml lister-bl-disponibles-sequence
+title Lister les BLs disponibles pour un voyage — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(bl_voyage_list.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Ouvre l'écran de sélection\ndes BLs pour créer ou\nmodifier un voyage
+
+App -> Server : Demande la liste des BLs\ndisponibles\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie que le token\nest valide
+
+== Règles de sélection ==
+note right of Server
+  Un BL est "disponible" si :
+  • Il n'est pas déjà assigné
+    à un autre voyage
+  • C'est bien un document
+    de type BL
+  • Il contient des produits
+    à livrer
+end note
+
+== Comptage ==
+Server -> DB : Compte le nombre total\nde BLs disponibles
+DB --> Server : Nombre de BLs disponibles
+
+== Récupération ==
+Server -> DB : Récupère la page demandée\ndes BLs disponibles\n(triés par date, du plus\nancien au plus récent)
+DB --> Server : Liste des BLs disponibles\navec :\n• Code du BL\n• Nom du client\n• Date du document
+
+note right of DB
+  Les BLs déjà assignés
+  à un autre voyage sont
+  automatiquement exclus
+end note
+
+Server --> App : Liste paginée des BLs disponibles
+App --> User : Affiche la liste des BLs\nque l'utilisateur peut\nsélectionner pour le voyage
+
+@enduml

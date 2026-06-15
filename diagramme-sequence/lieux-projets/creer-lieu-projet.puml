@@ -1,0 +1,71 @@
+@startuml creer-lieu-projet-sequence
+title Créer un lieu de projet — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(projet.php)" as Server
+database "Base de données" as DB
+
+== Saisie du formulaire ==
+User -> App : Remplit les informations :\n• Type de projet (Chantier / Dépôt)\n• Contact (nom et téléphone, optionnels)\n• Commentaire (optionnel)
+
+== Capture de la position ==
+App -> App : Capture automatiquement\nles coordonnées GPS\nde la position actuelle
+
+note right of App
+  La position GPS est obligatoire\npour la création d'un lieu.\nSi la capture échoue,\nla création est impossible.
+end note
+
+== Prise de photo (optionnelle) ==
+opt L'utilisateur ajoute des fichiers
+    User -> App : Prend des photos ou\nsélectionne des fichiers\ndepuis l'appareil
+end
+
+== Soumission ==
+User -> App : Valide l'envoi du lieu
+App -> Server : Envoie le formulaire complet\navec la position GPS,\nles fichiers joints (optionnels)\net le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur connecté
+
+Server -> Server : Vérifie que le type\nde projet est renseigné\net que la localisation est fournie
+
+alt Champ obligatoire manquant
+    Server --> App : Erreur : champ obligatoire manquant
+    App --> User : Affiche l'erreur
+else Tout est valide
+
+    == Enregistrement du lieu ==
+    Server -> DB : Débute une transaction
+
+    Server -> DB : Crée un nouveau lieu de projet
+
+    note right of DB
+      Informations enregistrées :
+      - Type (Chantier / Dépôt)
+      - Coordonnées GPS
+      - Commentaire
+      - Nom du contact
+      - Téléphone du contact
+      - Créateur (utilisateur connecté)
+    end note
+
+    DB --> Server : Identifiant du lieu créé
+
+    == Sauvegarde des fichiers ==
+    opt Des fichiers ont été envoyés
+        Server -> Server : Crée un dossier\ndédié pour ce lieu
+
+        loop Pour chaque fichier envoyé
+            Server -> Server : Enregistre le fichier\navec un nom unique
+            Server -> DB : Enregistre les informations\ndu fichier (nom, chemin)
+        end
+    end
+
+    Server -> DB : Valide la transaction
+
+    Server --> App : Succès : lieu créé
+    App --> User : "Lieu créé avec succès"
+end
+
+@enduml

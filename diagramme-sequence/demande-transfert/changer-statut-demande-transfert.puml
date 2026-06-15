@@ -1,0 +1,64 @@
+@startuml changer-statut-demande-transfert-sequence
+title Changer le statut d'une demande de transfert — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur le badge de statut\nd'une demande
+App -> App : Affiche la liste des statuts possibles :\n• Brouillon\n• En cours\n• Envoyé\n• Reçue
+User -> App : Sélectionne le nouveau statut
+
+== Envoi ==
+App -> Server : Envoie la demande :\nID de la demande + nouveau statut\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur et son rôle
+
+Server -> DB : Récupère le statut actuel\nde la demande et l'ID du créateur
+DB --> Server : Statut actuel et créateur
+
+== Règles de transition ==
+note right of Server
+  Règles de transition :
+  
+  Si statut actuel = "Brouillon"
+  ET créateur = utilisateur connecté
+  → Nouveau statut = "Envoyé"
+  + Enregistre la signature
+    et la date d'envoi
+  
+  Si statut actuel = "En cours"
+  ET rôle = admin
+  → Nouveau statut = "Envoyé"
+  + Enregistre la date d'envoi
+  
+  Si statut actuel = "Envoyé"
+  ET rôle = admin
+  → Nouveau statut = "Reçue"
+  + Enregistre la date de réception
+end note
+
+alt Aucune transition possible
+    Server --> App : "Aucune action"
+    App --> User : "Impossible de changer\nle statut de cette demande"
+else Transition autorisée
+
+    == Mise à jour du statut ==
+    Server -> DB : Met à jour le statut\nde la demande
+
+    note right of DB
+      Selon la transition :
+      - Passage à "Envoyé" :\n        enregistre l'ID et la date
+        de signature et d'envoi
+      - Passage à "Reçue" :\n        enregistre l'ID et la date
+        de réception
+    end note
+
+    Server --> App : Succès avec message\ndu statut atteint
+    App --> User : "Statut changé avec succès"
+end
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml consulter-rapport-qualite-sequence
+title Consulter les détails d'un rapport qualité — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(rapport_qualite.php)" as Server
+database "Base de données" as DB
+
+== Navigation ==
+User -> App : Appuie sur "Détails"\nd'un rapport
+App -> Server : Demande les informations\ndu rapport (par son ID)\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Récupération ==
+Server -> DB : Recherche le rapport\npar son identifiant
+DB --> Server : Informations du rapport
+
+alt Rapport introuvable
+    Server --> App : Aucun résultat
+    App --> User : "Impossible de charger\nles détails du rapport"
+else Rapport trouvé
+
+    note right of DB
+      Données renvoyées :
+      - Référence DUM
+      - Référence dossier
+      - Commentaire
+      - Date de création
+      - Créateur
+      - Date de dernière modification
+    end note
+
+    == Fichiers joints ==
+    Server -> DB : Récupère tous les fichiers\net images joints au rapport
+    DB --> Server : Liste des fichiers\navec nom, chemin, date
+
+    Server --> App : Détails complets du rapport
+    App --> User : Affiche la fiche détaillée :\n• Informations du rapport\n• Pièces jointes\n  (aperçu image plein écran,\n   téléchargement, partage,\n   ouverture externe)
+end
+
+@enduml

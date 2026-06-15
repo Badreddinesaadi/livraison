@@ -1,0 +1,49 @@
+@startuml lister-lieux-projets-sequence
+title Lister les lieux de projets — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(projet.php)" as Server
+database "Base de données" as DB
+
+== Accès à la liste ==
+User -> App : Ouvre l'écran "Lieux de projets"
+App -> Server : Demande la liste des lieux\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Filtres ==
+opt L'utilisateur a appliqué des filtres
+    Server -> Server : Applique les filtres :\n• Par identifiant précis\n• Par créateur
+end
+
+== Comptage ==
+Server -> DB : Compte le nombre total\nde lieux correspondant\naux filtres éventuels
+DB --> Server : Nombre total
+
+== Récupération ==
+Server -> DB : Récupère la page demandée\ndes lieux de projets\n(du plus récent au plus ancien)
+DB --> Server : Liste des lieux\n+ nom du créateur
+
+== Enrichissement ==
+loop Pour chaque lieu
+    Server -> DB : Récupère les images\net fichiers joints au lieu
+    DB --> Server : Liste des fichiers
+
+    note right of DB
+      Données renvoyées :
+      - Type (Chantier / Dépôt)
+      - Localisation GPS
+      - Commentaire
+      - Nom du contact
+      - Téléphone du contact
+      - Nom du créateur
+      - Images
+    end note
+end
+
+Server --> App : Liste paginée complète
+App --> User : Affiche la liste des lieux\navec le nombre de résultats
+
+@enduml

@@ -1,0 +1,45 @@
+@startuml consulter-demande-transfert-sequence
+title Consulter les détails d'une demande de transfert — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(details_demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Navigation ==
+User -> App : Appuie sur "Détails"\nd'une demande
+App -> Server : Demande les détails\nde la demande (par son ID)\navec le paramètre details=1\net le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Récupération de la demande ==
+Server -> DB : Recherche la demande\nde transfert par son identifiant
+DB --> Server : Informations de la demande
+
+note right of DB
+  Données renvoyées :
+  - Tous les produits (détails)
+  - Pour chaque produit :
+    • Nom du produit
+    • Nombre de FDX
+    • Quantité
+    • Unité (pcs / fdx)
+    • Statut de préparation (Oui/Non)
+  - Pour chaque lot du produit :
+    • Numéro de lot
+    • Quantité
+    • Dépôt d'origine
+    • Statut de préparation (Oui/Non)
+end note
+
+== Récupération des lots ==
+loop Pour chaque produit
+    Server -> DB : Récupère les lots\nassociés à ce produit\navec les informations\ndepôt associé
+    DB --> Server : Liste des lots
+end
+
+Server --> App : Détails complets de la demande
+App --> User : Affiche la fiche détaillée :\n• Informations de la demande\n(référence, dépôts, transporteur,\nstatut, créateur...)\n• Liste des produits\n• Lots de chaque produit\n• Badges de préparation
+
+@enduml

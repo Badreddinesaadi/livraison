@@ -1,0 +1,59 @@
+@startuml preparer-produit-lot-demande-transfert-sequence
+title Préparer un produit ou un lot — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(validation_transfert.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Non préparé"\nsur un produit ou un lot
+
+App -> App : Demande confirmation :\n"Voulez-vous marquer cet\nélément comme préparé ?"
+
+== Confirmation ==
+User -> App : Confirme la préparation
+
+opt Préparation d'un lot
+    App -> Server : Envoie les informations :\naction = "preparerLot"\nID du lot, numéro du lot\net le token d'authentification
+else Préparation d'un produit
+    App -> Server : Envoie les informations :\naction = "preparerItem"\nID du produit (détail)\nID de la demande\net le token d'authentification
+end
+
+== Vérification des permissions ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+Server -> DB : Vérifie que l'utilisateur\na la permission de mise à jour\n(can_update)
+
+alt Permission insuffisante
+    Server --> App : Erreur : "Accès refusé"
+else
+
+    == Marquage comme préparé ==
+
+    alt Préparation d'un lot
+        Server -> DB : Marque le lot comme "Préparé"\net enregistre l'utilisateur\nqui a fait la modification
+    else Préparation d'un produit
+        Server -> DB : Marque le produit comme "Préparé"
+
+        Server -> DB : Vérifie si tous les produits\nde la demande sont préparés
+
+        opt Tous les produits sont préparés
+            Server -> DB : Passe automatiquement\nle statut de la demande à "Envoyé"\net enregistre la date d'envoi
+
+            note right of DB
+              Transition automatique :
+              Si tous les produits d'une
+              demande sont préparés,
+              la demande passe de
+              "Brouillon" ou "En cours"
+              à "Envoyé"
+            end note
+        end
+    end
+
+    Server --> App : Succès : élément préparé
+    App --> User : "Élément marqué comme préparé"
+end
+
+@enduml

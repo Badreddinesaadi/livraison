@@ -1,0 +1,55 @@
+@startuml creer-voyage-sequence
+title Créer un voyage — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(voyage.php)" as Server
+database "Base de données" as DB
+
+== Saisie du formulaire ==
+User -> App : Remplit les informations :\n• chauffeur\n• véhicule\n• dépôt de départ\n• kilométrage départ\n• ville de destination\n• liste des BLs à livrer
+App -> Server : Envoie le formulaire complet\navec le token d'authentification
+
+== Vérifications préalables ==
+Server -> Server : Vérifie que le token\nest valide et identifie\nl'utilisateur connecté
+
+Server -> Server : Vérifie que tous les champs\nobligatoires sont bien remplis :\n- date de départ\n- chauffeur\n- véhicule\n- kilométrage départ\n- dépôt de départ\n- ville de destination
+
+alt Champ obligatoire manquant
+    Server --> App : Erreur : "Le champ X est requis"
+    App --> User : Affiche le message d'erreur
+else Tous les champs sont valides
+
+    == Enregistrement du voyage ==
+    Server -> DB : Débute une transaction\n(pour garantir que tout\ns'enregistre ou rien)
+
+    Server -> DB : Crée un nouveau voyage\navec le statut "En cours"\net la date de création
+
+    note right of DB
+      Informations enregistrées :
+      - Date de départ
+      - Chauffeur assigné
+      - Véhicule utilisé
+      - Kilométrage au départ
+      - Dépôt de départ
+      - Ville de destination
+      - Créateur (utilisateur connecté)
+      - Statut initial : "En cours"
+    end note
+
+    DB --> Server : Identifiant du voyage créé
+
+    == Association des BLs ==
+    alt L'utilisateur a sélectionné des BLs
+        loop Pour chaque BL sélectionné
+            Server -> DB : Associe le BL au voyage\navec le statut "En cours"
+        end
+    end
+
+    Server -> DB : Valide la transaction\n(tout est enregistré)
+
+    Server --> App : Succès : voyage créé
+    App --> User : "Voyage créé avec succès"
+end
+
+@enduml

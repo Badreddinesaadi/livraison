@@ -1,0 +1,62 @@
+@startgantt
+!theme mono
+title Planification du projet — Diagramme de Gantt
+
+Project starts 2025-03-01
+printscale weekly
+
+' === Sprint 1 (semaines 1-3) ===
+[Sprint 1] lasts 3 weeks and is colored in lightblue
+[Environnement et accès] lasts 3 weeks and is 40% completed
+[Formation métier] lasts 2 weeks and is 40% completed
+[Collaboration initiale] lasts 2 weeks and is 40% completed
+[Autoformation technique] lasts 3 weeks and is 40% completed
+[Initialisation boilerplate] lasts 2 weeks and is 40% completed
+[Design system et architecture] lasts 3 weeks and is 40% completed
+
+' === Sprint 2 (semaines 4-6) ===
+[Sprint 2] lasts 3 weeks and is colored in lightgreen
+[Sprint 2] starts at [Sprint 1]'s end
+[Authentification et autorisation] lasts 3 weeks and is 0% completed
+[Authentification et autorisation] starts at [Sprint 1]'s end
+[Module Voyages] lasts 3 weeks and is 0% completed
+[Module Voyages] starts at [Sprint 1]'s end
+
+' === Sprint 3 (semaines 7-9) ===
+[Sprint 3] lasts 3 weeks and is colored in lightyellow
+[Sprint 3] starts at [Sprint 2]'s end
+[Module Retours chauffeur] lasts 3 weeks and is 0% completed
+[Module Retours chauffeur] starts at [Sprint 2]'s end
+[Module Rapports qualité] lasts 3 weeks and is 0% completed
+[Module Rapports qualité] starts at [Sprint 2]'s end
+
+' === Sprint 4 (semaines 10-12) ===
+[Sprint 4] lasts 3 weeks and is colored in #FFDAB9
+[Sprint 4] starts at [Sprint 3]'s end
+[Module Rotation chauffeur] lasts 2 weeks and is 0% completed
+[Module Rotation chauffeur] starts at [Sprint 3]'s end
+[Module Lieux de projets] lasts 2 weeks and is 0% completed
+[Module Lieux de projets] starts at [Sprint 3]'s end
+
+' === Sprint 5 (semaines 13-15) ===
+[Sprint 5] lasts 3 weeks and is colored in #DDA0DD
+[Sprint 5] starts at [Sprint 4]'s end
+[Module Demande de transfert] lasts 2 weeks and is 0% completed
+[Module Demande de transfert] starts at [Sprint 4]'s end
+[Tests et validation] lasts 1 week and is 0% completed
+[Tests et validation] starts at [Module Demande de transfert]'s end
+[Génération APK] lasts 3 days and is 0% completed
+[Génération APK] starts at [Tests et validation]'s end
+[Rédaction rapport + PPT] lasts 2 weeks and is 0% completed
+[Rédaction rapport + PPT] starts at [Module Demande de transfert]'s end
+
+' === Légende ====
+legend right
+  |<#87CEEB>  Sprint 1 : Fondations   |
+  |<#90EE90>  Sprint 2 : Authentification + Voyages   |
+  |<#FFFFE0>  Sprint 3 : Retours + Rapports qualité   |
+  |<#FFDAB9>  Sprint 4 : Rotation chauffeur + Lieux de projets   |
+  |<#DDA0DD>  Sprint 5 : Demande de transfert + Finalisation   |
+endlegend
+
+@endgantt

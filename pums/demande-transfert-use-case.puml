@@ -1,0 +1,77 @@
+@startuml demande-transfert-use-case
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor #FEF3E2
+skinparam usecaseBorderColor #ED5623
+skinparam usecaseFontSize 13
+skinparam actorFontSize 13
+skinparam packageBorderColor #ED5623
+skinparam packageFontSize 14
+
+actor "Administrateur" as Admin
+actor "Chef de parc" as Parc
+actor "Responsable stock" as RStock
+actor "Réceptionnaire" as Reception
+
+rectangle "Module Demande de transfert" #FEF9F4 {
+  usecase "Lister les demandes\nde transfert" as UC1
+  usecase "Consulter les détails\nd'une demande" as UC2
+  usecase "Créer une demande\nde transfert" as UC3
+  usecase "Modifier les infos\nd'une demande" as UC4
+  usecase "Changer le statut\nd'une demande" as UC5
+  usecase "Supprimer une demande\nde transfert" as UC6
+
+  usecase "Ajouter un produit" as UC7
+  usecase "Supprimer un produit" as UC8
+  usecase "Gérer les lots\nd'un produit" as UC9
+  usecase "Préparer un produit" as UC10
+  usecase "Préparer un lot" as UC11
+
+  usecase "Rechercher une demande" as UC12
+  usecase "Sélectionner un dépôt\n(source / destination)" as UC13
+  usecase "Sélectionner un produit\n(catalogue)" as UC14
+  usecase "Confirmer la suppression\nd'une demande" as UC15
+  usecase "Confirmer la suppression\nd'un produit" as UC16
+  usecase "Confirmer la préparation\n(produit / lot)" as UC17
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+
+Parc --> UC1
+Parc --> UC2
+Parc --> UC3
+Parc --> UC5
+Parc --> UC10
+Parc --> UC11
+
+RStock --> UC1
+RStock --> UC2
+RStock --> UC7
+RStock --> UC9
+
+Reception --> UC1
+Reception --> UC2
+
+UC1 ..> UC12 : <<extend>>
+UC3 ..> UC13 : <<include>>
+UC3 ..> UC14 : <<include>>
+UC2 ..> UC7 : <<extend>>
+UC2 ..> UC9 : <<extend>>
+UC5 ..> UC17 : <<include>>
+UC6 ..> UC15 : <<include>>
+UC8 ..> UC16 : <<include>>
+UC10 ..> UC17 : <<include>>
+UC11 ..> UC17 : <<include>>
+
+@enduml

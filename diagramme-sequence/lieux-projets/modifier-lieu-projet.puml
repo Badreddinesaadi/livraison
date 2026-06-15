@@ -1,0 +1,46 @@
+@startuml modifier-lieu-projet-sequence
+title Modifier un lieu de projet — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(projet.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Modifier"\npour un lieu existant
+
+== Chargement des données existantes ==
+App -> Server : Demande les informations\ndu lieu (par son ID)
+Server -> DB : Recherche le lieu par ID
+DB --> Server : Informations du lieu
+Server --> App : Données du lieu
+App -> User : Affiche le formulaire\npré-rempli avec les\ndonnées actuelles
+
+== Modification ==
+User -> App : Modifie un ou plusieurs champs :\n• Type de projet\n• Coordonnées GPS\n(option : recapture de la position)\n• Contact\n• Commentaire
+
+note right of App
+  Les images existantes sont\naffichées mais ne peuvent pas\nêtre modifiées ou ajoutées\nlors de la mise à jour.
+  Les coordonnées GPS peuvent\nêtre recapturées automatiquement\nou saisies manuellement.
+end note
+
+== Envoi ==
+App -> Server : Envoie les champs modifiés\navec l'ID du lieu\net le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+Server -> Server : Vérifie que l'ID\ndu lieu est fourni
+
+alt Aucun champ à modifier
+    Server --> App : Erreur : "Aucun champ à modifier"
+else
+
+    == Mise à jour ==
+    Server -> DB : Met à jour les champs\nmodifiés du lieu
+
+    Server --> App : Succès : lieu modifié
+    App --> User : "Lieu mis à jour\navec succès"
+end
+
+@enduml

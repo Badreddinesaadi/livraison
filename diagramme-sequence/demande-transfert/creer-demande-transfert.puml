@@ -1,0 +1,56 @@
+@startuml creer-demande-transfert-sequence
+title Créer une demande de transfert — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Saisie du formulaire ==
+User -> App : Remplit les informations :\n• Dépôt source (obligatoire)\n• Dépôt destination (obligatoire)\n• DUM\n• Transporteur\n• Matricule\n• Observation
+
+== Soumission ==
+User -> App : Valide l'envoi
+App -> Server : Envoie le formulaire\navec le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur connecté
+
+Server -> Server : Vérifie que les dépôts\nsource et destination sont fournis
+
+alt Dépôts manquants
+    Server --> App : Erreur : "Dépôt source\net destination requis"
+    App --> User : Affiche l'erreur
+else Tout est valide
+
+    == Génération de la référence ==
+    Server -> DB : Calcule la référence suivante :\nformat "DT" + numéro séquentiel\nou "DT" + année + compteur
+    note right of DB
+      Exemple : DT2500001
+      Le numéro est auto-incrémenté
+      basé sur les demandes existantes
+    end note
+
+    == Enregistrement de la demande ==
+    Server -> DB : Débute une transaction
+
+    Server -> DB : Crée une nouvelle demande\nde transfert
+
+    note right of DB
+      Informations enregistrées :
+      - Référence (auto-générée)
+      - Dépôt source et destination
+      - DUM, transporteur, matricule
+      - Observation
+      - Créateur (utilisateur connecté)
+      - Date de création
+      - Statut initial : "Brouillon"
+    end note
+
+    Server -> DB : Valide la transaction
+
+    Server --> App : Succès : demande créée\navec l'ID et la référence
+    App --> User : "Demande créée avec succès"
+end
+
+@enduml

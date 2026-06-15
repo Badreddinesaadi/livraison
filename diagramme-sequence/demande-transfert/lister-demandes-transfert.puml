@@ -1,0 +1,59 @@
+@startuml lister-demandes-transfert-sequence
+title Lister les demandes de transfert — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Accès à la liste ==
+User -> App : Ouvre l'écran "Demande de transfert"
+App -> Server : Demande la liste des demandes\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Recherche et filtres ==
+opt L'utilisateur a saisi une recherche
+    Server -> Server : Recherche le mot-clé dans :
+    note right of Server
+      • Référence
+      • Observation
+      • DUM
+      • Matricule
+      • Transporteur
+      • Statut
+      • Nom du dépôt source/destination
+      • Nom du créateur
+    end note
+end
+
+opt L'utilisateur a appliqué des filtres
+    Server -> Server : Applique les filtres :\n• Par référence\n• Par date\n• Par statut\n• Par demandeur\n• Par dépôt source/destination\n• Par DUM, matricule, transporteur
+end
+
+== Comptage ==
+Server -> DB : Compte le nombre total\nde demandes correspondant\naux filtres éventuels
+DB --> Server : Nombre total
+
+== Récupération ==
+Server -> DB : Récupère la page demandée\ndes demandes de transfert\n(du plus récent au plus ancien)
+DB --> Server : Liste des demandes\n+ nom du dépôt source\n+ nom du dépôt destination\n+ nom du créateur
+
+note right of DB
+  Données renvoyées :
+  - Référence
+  - Date de création
+  - Dépôt source et destination
+  - DUM
+  - Transporteur
+  - Matricule
+  - Observation
+  - Statut (Brouillon / En cours / Envoyé / Reçue)
+  - Nom du créateur
+end note
+
+Server --> App : Liste paginée complète
+App --> User : Affiche la liste des demandes\navec le nombre de résultats
+
+@enduml

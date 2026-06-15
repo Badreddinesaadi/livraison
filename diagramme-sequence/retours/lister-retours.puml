@@ -1,0 +1,45 @@
+@startuml lister-retours-sequence
+title Lister les retours — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(retour_chauffeur.php)" as Server
+database "Base de données" as DB
+
+== Accès à la liste ==
+User -> App : Ouvre l'écran "Retours"
+App -> Server : Demande la liste des retours\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Filtres ==
+opt L'utilisateur a appliqué des filtres
+    Server -> Server : Applique les filtres :\n• Par chauffeur\n• Par client\n• Par identifiant précis
+end
+
+== Comptage ==
+Server -> DB : Compte le nombre total\nde retours correspondant\naux filtres éventuels
+DB --> Server : Nombre total
+
+== Récupération des données ==
+Server -> DB : Récupère la page demandée\ndes retours
+
+note right of DB
+  Résultats triés ainsi :
+  1. Les retours "Envoyé"\n     (en attente de traitement)
+  2. Les autres retours\n     (du plus récent au plus ancien)
+end note
+
+DB --> Server : Liste des retours\n+ nom du chauffeur\n+ nom du client
+
+== Enrichissement de chaque retour ==
+loop Pour chaque retour
+    Server -> DB : Récupère les images\net fichiers joints\nau retour
+    DB --> Server : Liste des images\navec nom, chemin, date
+end
+
+Server --> App : Liste paginée complète
+App --> User : Affiche la liste des retours\navec le nombre de résultats
+
+@enduml

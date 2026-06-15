@@ -1,0 +1,54 @@
+@startuml cloturer-bl-sequence
+title Clôturer un BL (livrer) — Diagramme de séquence
+
+actor "Chauffeur" as Chauffeur
+participant "Application mobile" as App
+participant "Serveur\n(voyage_chauffeur.php)" as Server
+database "Base de données" as DB
+
+== Prise de photo ==
+Chauffeur -> App : Prend une photo du BL livré
+App -> App : Capture automatiquement\nles coordonnées GPS\nde la position actuelle
+
+== Envoi ==
+Chauffeur -> App : Valide la livraison du BL
+App -> Server : Envoie les informations :\n• ID du BL\n• ID du voyage\n• Statut : "Livré"\n• Photo prise\n• Coordonnées GPS\navec le token d'authentification
+
+== Vérification d'autorisation ==
+Server -> Server : Vérifie le token et\nidentifie le chauffeur connecté
+
+Server -> DB : Vérifie que le BL\nappartient bien à un voyage\ndu chauffeur connecté
+
+alt BL non trouvé ou non autorisé
+    Server --> App : Erreur : "BL non trouvé\ndans ce voyage ou\nnon autorisé"
+    App --> Chauffeur : Affiche l'erreur
+else BL trouvé et autorisé
+
+    == Sauvegarde de la photo ==
+    Server -> Server : Crée un dossier\ndédié pour ce voyage\n(s'il n'existe pas déjà)
+
+    Server -> Server : Enregistre la photo\navec un nom unique\npour éviter les conflits
+
+    Server -> DB : Enregistre la photo\ndans le dossier du BL
+    note right of DB
+      Informations stockées :
+      - Nom du fichier
+      - Chemin d'accès
+      - Date de création
+    end note
+
+    == Enregistrement de la position ==
+    Server -> DB : Enregistre les coordonnées\nGPS de la livraison
+    note right of DB
+      Permet de savoir
+      où le BL a été livré
+    end note
+
+    == Mise à jour du BL ==
+    Server -> DB : Passe le statut du BL\nà "Livré"
+
+    Server --> App : Succès : BL livré
+    App --> Chauffeur : "BL livré avec succès"
+end
+
+@enduml

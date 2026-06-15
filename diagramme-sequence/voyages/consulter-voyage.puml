@@ -1,0 +1,55 @@
+@startuml consulter-voyage-sequence
+title Consulter les détails d'un voyage — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(voyage.php)" as Server
+database "Base de données" as DB
+
+== Navigation ==
+User -> App : Appuie sur "Détails"\nd'un voyage
+App -> Server : Demande les informations\ndu voyage (par son ID)\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Fiche du voyage ==
+Server -> DB : Recherche le voyage\npar son identifiant
+DB --> Server : Informations du voyage
+
+alt Voyage introuvable
+    Server --> App : Aucun résultat
+    App --> User : "Impossible de charger\nles détails du voyage"
+else Voyage trouvé
+
+    alt L'utilisateur est un chauffeur
+        Server -> Server : Vérifie que le voyage\nappartient bien au chauffeur
+    end
+
+    note right of DB
+      Données renvoyées :
+      - Date de départ
+      - Nom du chauffeur
+      - Nom du dépôt
+      - Marque et immatriculation du véhicule
+      - Ville de destination
+      - Kilométrage départ / retour
+      - Date de retour
+      - Statut (En cours / Terminé)
+    end note
+
+    == BLs du voyage ==
+    Server -> DB : Récupère tous les BLs\nassociés à ce voyage\n(avec le nom du client)
+    DB --> Server : Liste des BLs\n(code, client, statut)
+
+    == Photos des BLs ==
+    loop Pour chaque BL
+        Server -> DB : Récupère les photos\nprises lors de la livraison
+        DB --> Server : Liste des images\n(nom, chemin, date)
+    end
+
+    Server --> App : Détails complets du voyage
+    App --> User : Affiche la fiche détaillée :\n• Informations du voyage\n• Liste des BLs avec leur statut\n• Photos des BLs livrés
+end
+
+@enduml

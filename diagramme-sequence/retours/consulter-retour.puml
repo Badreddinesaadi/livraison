@@ -1,0 +1,46 @@
+@startuml consulter-retour-sequence
+title Consulter les détails d'un retour — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(retour_chauffeur.php)" as Server
+database "Base de données" as DB
+
+== Navigation ==
+User -> App : Appuie sur "Détails"\nd'un retour
+App -> Server : Demande les informations\ndu retour (par son ID)\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Récupération ==
+Server -> DB : Recherche le retour\npar son identifiant
+DB --> Server : Informations du retour
+
+alt Retour introuvable
+    Server --> App : Aucun résultat
+    App --> User : "Impossible de charger\nles détails du retour"
+else Retour trouvé
+
+    note right of DB
+      Données renvoyées :
+      - BL cacheté (Oui/Non)
+      - Règlement (Oui/Non)
+      - Retour MSE (Oui/Non)
+      - Motif de réclamation
+      - Commentaire (si validé/refusé)
+      - Nom du client
+      - Nom du chauffeur
+      - Statut (Envoyé / Terminé / Refusé)
+      - Date de création
+    end note
+
+    == Fichiers joints ==
+    Server -> DB : Récupère tous les fichiers\net images joints au retour
+    DB --> Server : Liste des fichiers\navec nom, chemin, date
+
+    Server --> App : Détails complets du retour
+    App --> User : Affiche la fiche détaillée :\n• Informations du retour\n• Statut avec badge coloré\n• Fichiers joints\n  (aperçu, téléchargement, partage)
+end
+
+@enduml

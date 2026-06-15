@@ -1,0 +1,64 @@
+@startuml gerer-lots-demande-transfert-sequence
+title Gérer les lots d'un produit — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(details_demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Lots"\nd'un produit de la demande
+App -> Server : Récupère les lots\ndu produit sélectionné
+Server -> DB : Recherche les lots existants\npour ce produit dans la demande\n+ lots disponibles du catalogue
+DB --> Server : Liste des lots existants\n+ lots disponibles
+Server --> App : Lots du produit
+App --> User : Affiche la liste des lots\navec leur statut de préparation
+
+== Modification des lots ==
+opt L'utilisateur ajoute un nouveau lot
+    User -> App : Sélectionne un lot disponible\nparmi le catalogue
+    App -> App : Ajoute le lot à la liste\ndes lots sélectionnés
+end
+
+opt L'utilisateur supprime un lot existant
+    User -> App : Décoche un lot\n(non préparé uniquement)
+
+    note right of App
+      Les lots déjà préparés\nne peuvent pas être\nsupprimés ou désélectionnés
+    end note
+end
+
+opt L'utilisateur modifie la quantité d'un lot
+    User -> App : Modifie la quantité\nd'un lot existant
+end
+
+== Envoi des modifications ==
+User -> App : Valide les modifications
+App -> Server : Envoie les modifications :\ntype = "update_lot"\n+ lots_update : lots modifiés\n+ lots_insert : nouveaux lots\n+ lots_delete : lots supprimés\net le token d'authentification
+
+== Traitement des modifications ==
+Server -> DB : Débute une transaction
+
+loop Pour chaque lot à modifier (lots_update)
+    Server -> DB : Met à jour le lot :\nnouveau numéro, nouvelle quantité
+end
+
+loop Pour chaque lot à ajouter (lots_insert)
+    Server -> DB : Crée un nouveau lot\navec le numéro et la quantité
+end
+
+loop Pour chaque lot à supprimer (lots_delete)
+    Server -> DB : Supprime le lot\ncorrespondant
+end
+
+Server -> DB : Valide la transaction
+
+alt Aucun changement détecté
+    Server --> App : Information : "Aucun changement"
+    App --> User : "Aucun changement détecté"
+else Modifications appliquées
+    Server --> App : Succès : lots mis à jour
+    App --> User : "Lots mis à jour avec succès"
+end
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml valider-retour-sequence
+title Valider (accepter) un retour — Diagramme de séquence
+
+actor "Validateur" as Validateur
+participant "Application mobile" as App
+participant "Serveur\n(retour_chauffeur.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+Validateur -> App : Appuie sur "Traiter le retour"\npour un retour en statut "Envoyé"
+
+App -> App : Affiche le formulaire de validation\navec les deux options
+
+== Saisie du commentaire ==
+Validateur -> App : Saisit un commentaire\n(optionnel)
+
+== Choix de l'action ==
+Validateur -> App : Appuie sur "Accepter"
+
+== Confirmation ==
+App -> App : Demande confirmation :\n"Vous allez accepter le retour #X"
+Validateur -> App : Confirme l'action
+
+== Envoi ==
+App -> Server : Envoie les informations :\nID du retour, statut "terminer",\ncommentaire\navec le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+Server -> DB : Vérifie que l'utilisateur\na le droit de valider les retours\n(champ ValidationRetourChauffeur)
+
+alt Pas le droit de valider
+    Server --> App : Erreur : "Accès refusé"
+    App --> Validateur : "Vous n'avez pas\nla permission de traiter\nce retour"
+else
+
+    == Mise à jour ==
+    Server -> DB : Débute une transaction
+
+    Server -> DB : Met à jour le retour :\n- Statut → "Terminé"\n- Commentaire saisi
+
+    Server -> DB : Valide la transaction
+
+    Server --> App : Succès : retour mis à jour
+    App --> Validateur : "Retour accepté avec succès"
+end
+
+@enduml

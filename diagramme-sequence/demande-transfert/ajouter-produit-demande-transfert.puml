@@ -1,0 +1,64 @@
+@startuml ajouter-produit-demande-transfert-sequence
+title Ajouter un produit à une demande de transfert — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(details_demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Ajouter un produit"\nsur la page de détails\nd'une demande
+
+== Étape 1 : Recherche du produit ==
+User -> App : Saisit le nom ou la référence\ndu produit recherché
+App -> Server : Demande la liste des produits\ncorrespondant à la recherche
+Server -> DB : Recherche les produits\ndont le nom, la référence\nou la catégorie correspond
+DB --> Server : Liste des produits
+Server --> App : Liste des produits disponibles
+App --> User : Affiche les résultats de recherche
+
+== Sélection du produit ==
+User -> App : Sélectionne un produit
+
+== Étape 2 : Saisie des informations ==
+User -> App : Saisit les informations :\n• Nombre de FDX\n• Quantité\n• Unité (pcs / fdx)
+
+opt L'utilisateur souhaite ajouter des lots
+    loop Pour chaque lot souhaité
+        User -> App : Sélectionne un lot\nparmi les lots disponibles\ndu produit
+        App -> App : Ajoute le lot à la liste
+    end
+end
+
+== Envoi ==
+User -> App : Valide l'ajout du produit
+App -> Server : Envoie les informations :\ntype = "detail_lots"\nID de la demande, ID du produit,\nnombre de FDX, quantité, unité\n+ liste des lots (optionnels)\net le token d'authentification
+
+== Enregistrement ==
+Server -> DB : Débute une transaction
+
+Server -> DB : Crée une nouvelle ligne\nde détail dans la demande
+
+note right of DB
+  Informations enregistrées :
+  - ID de la demande de transfert
+  - ID du produit
+  - Nombre de FDX
+  - Quantité
+  - Unité (pcs / fdx)
+end note
+
+DB --> Server : Identifiant du détail créé
+
+opt Des lots ont été fournis
+    loop Pour chaque lot
+        Server -> DB : Crée un nouveau lot\nassocié au détail\navec la quantité
+    end
+end
+
+Server -> DB : Valide la transaction
+
+Server --> App : Succès : produit ajouté\navec l'identifiant du détail
+App --> User : "Produit ajouté avec succès"
+
+@enduml

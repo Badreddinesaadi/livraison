@@ -1,0 +1,49 @@
+@startuml supprimer-voyage-sequence
+title Supprimer un voyage — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(voyage.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Supprimer"\npour un voyage
+App -> App : Demande confirmation :\n"Voulez-vous vraiment\nsupprimer ce voyage ?"
+
+== Confirmation ==
+User -> App : Confirme la suppression
+
+App -> Server : Envoie l'ID du voyage\nà supprimer\navec le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Contrôle d'accès pour le chauffeur ==
+alt L'utilisateur est un chauffeur
+    Server -> DB : Vérifie que le voyage\nappartient bien au chauffeur
+
+    alt Le voyage n'appartient pas au chauffeur
+        Server --> App : Erreur : "Accès refusé"
+        App --> User : "Vous n'êtes pas autorisé\nà supprimer ce voyage"
+    end
+end
+
+== Suppression en cascade ==
+Server -> DB : Débute une transaction
+
+Server -> DB : Supprime tous les BLs\nassociés à ce voyage
+note right of DB
+  On supprime d'abord
+  les liens avec les BLs
+  avant de supprimer
+  le voyage lui-même
+end note
+
+Server -> DB : Supprime le voyage
+
+Server -> DB : Valide la transaction
+
+Server --> App : Succès : voyage supprimé
+App --> User : "Voyage supprimé avec succès"
+
+@enduml

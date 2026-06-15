@@ -1,0 +1,39 @@
+@startuml supprimer-lieu-projet-sequence
+title Supprimer un lieu de projet — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(projet.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Supprimer"\npour un lieu
+App -> App : Demande confirmation :\n"Le lieu #X sera supprimé\ndéfinitivement.\nVoulez-vous continuer ?"
+
+== Confirmation ==
+User -> App : Confirme la suppression
+
+App -> Server : Envoie l'ID du lieu\nà supprimer\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Suppression en cascade ==
+Server -> DB : Débute une transaction
+
+Server -> DB : Supprime toutes les images\net fichiers joints au lieu
+note right of DB
+  On supprime d'abord
+  les fichiers associés
+  avant de supprimer
+  le lieu lui-même
+end note
+
+Server -> DB : Supprime le lieu
+
+Server -> DB : Valide la transaction
+
+Server --> App : Succès : lieu supprimé
+App --> User : "Lieu supprimé avec succès"
+
+@enduml

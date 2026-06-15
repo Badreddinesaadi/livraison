@@ -1,0 +1,41 @@
+@startuml supprimer-produit-demande-transfert-sequence
+title Supprimer un produit d'une demande de transfert — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(details_demande_transfert.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur l'icône de suppression\nd'un produit de la demande
+
+note right of App
+  Seuls les produits non préparés\npeuvent être supprimés.\nLes produits déjà marqués\n"Préparé" n'affichent pas\nle bouton de suppression.
+end note
+
+App -> App : Demande confirmation :\n"Voulez-vous vraiment\nsupprimer ce produit ?"
+
+== Confirmation ==
+User -> App : Confirme la suppression
+
+App -> Server : Envoie la demande :\ntype = "detail", ID du produit\net le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Suppression en cascade ==
+Server -> DB : Débute une transaction
+
+Server -> DB : Supprime tous les lots\nassociés à ce produit dans la demande
+note right of DB
+  On supprime d'abord les lots\nliés au produit avant\nde supprimer le produit\nlui-même
+end note
+
+Server -> DB : Supprime le produit\n(ligne de détail)\nde la demande
+
+Server -> DB : Valide la transaction
+
+Server --> App : Succès : produit supprimé
+App --> User : "Produit supprimé avec succès"
+
+@enduml

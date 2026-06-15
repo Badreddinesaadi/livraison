@@ -1,0 +1,67 @@
+@startuml creer-rapport-qualite-sequence
+title Créer un rapport qualité — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(rapport_qualite.php)" as Server
+database "Base de données" as DB
+
+== Saisie du formulaire ==
+User -> App : Remplit les informations :\n• Référence DUM\n• Référence dossier\n• Commentaire
+
+note right of App
+  Au moins l'un des deux champs\nDUM ou Dossier doit être\nrenseigné
+end note
+
+== Prise de photo / fichiers ==
+User -> App : Prend des photos ou\nsélectionne des fichiers\ndepuis l'appareil
+App -> App : Vérifie que au moins\nun fichier est joint
+
+== Soumission ==
+User -> App : Valide l'envoi du rapport
+App -> Server : Envoie le formulaire complet\navec les fichiers joints\net le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur connecté
+
+Server -> Server : Vérifie que les champs\nobligatoires sont remplis :\n- DUM\n- Dossier\n- Commentaire
+
+alt Champ obligatoire manquant
+    Server --> App : Erreur : "Le champ X\nest obligatoire"
+    App --> User : Affiche l'erreur
+else Fichiers manquants
+    Server --> App : Erreur : "Aucune image fournie"
+    App --> User : "Veuillez ajouter\nau moins un fichier"
+else Tout est valide
+
+    == Enregistrement du rapport ==
+    Server -> DB : Débute une transaction
+
+    Server -> DB : Crée un nouveau rapport qualité
+
+    note right of DB
+      Informations enregistrées :
+      - Référence DUM
+      - Référence dossier
+      - Commentaire
+      - Créateur (utilisateur connecté)
+      - Date de création
+    end note
+
+    DB --> Server : Identifiant du rapport créé
+
+    == Sauvegarde des fichiers ==
+    Server -> Server : Crée un dossier\ndédié pour ce rapport
+
+    loop Pour chaque fichier envoyé
+        Server -> Server : Enregistre le fichier\navec un nom unique
+        Server -> DB : Enregistre les informations\ndu fichier (nom, chemin)
+    end
+
+    Server -> DB : Valide la transaction
+
+    Server --> App : Succès : rapport créé
+    App --> User : "Rapport qualité envoyé\navec succès"
+end
+
+@enduml

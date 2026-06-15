@@ -1,0 +1,67 @@
+@startuml modifier-voyage-sequence
+title Modifier un voyage — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(voyage.php)" as Server
+database "Base de données" as DB
+
+== Saisie des modifications ==
+User -> App : Modifie un ou plusieurs\nchamps du voyage :\n• véhicule\n• dépôt\n• kilométrage\n• date\n• ville\n• liste des BLs
+App -> Server : Envoie les champs modifiés\navec l'ID du voyage\net le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+Server -> Server : Vérifie que l'ID\ndu voyage est fourni
+
+alt ID manquant
+    Server --> App : Erreur : "ID voyage requis"
+else ID présent
+
+    == Champs autorisés ==
+    note right of Server
+      Seuls ces champs peuvent
+      être modifiés :
+      • Statut
+      • Véhicule
+      • Dépôt de départ
+      • Date de départ
+      • Kilométrage départ
+      • Kilométrage retour
+      • Date de retour
+      • Ville de destination
+    end note
+
+    Server -> Server : Identifie quels champs\nont été modifiés
+
+    alt Aucune modification détectée
+        Server --> App : Aucune action nécessaire
+    else
+
+        == Mise à jour ==
+        Server -> DB : Débute une transaction
+
+        alt L'utilisateur est un chauffeur
+            Server -> DB : Met à jour le voyage\n(uniquement s'il appartient\nau chauffeur connecté)
+        else Autre rôle
+            Server -> DB : Met à jour le voyage
+        end
+
+        == Mise à jour des BLs ==
+        alt L'utilisateur a modifié la liste des BLs
+            Server -> DB : Supprime tous les anciens\nBLs du voyage
+
+            loop Pour chaque BL de la nouvelle liste
+                Server -> DB : Associe le BL au voyage\n(statut : "En cours")
+            end
+        end
+
+        Server -> DB : Valide la transaction
+
+        Server --> App : Succès : voyage modifié
+        App --> User : "Voyage modifié avec succès"
+    end
+end
+
+@enduml

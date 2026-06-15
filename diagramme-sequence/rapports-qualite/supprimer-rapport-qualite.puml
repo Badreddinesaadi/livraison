@@ -1,0 +1,39 @@
+@startuml supprimer-rapport-qualite-sequence
+title Supprimer un rapport qualité — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(rapport_qualite.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur l'icône de suppression\nd'un rapport
+App -> App : Demande confirmation :\n"Le rapport #X sera supprimé\ndéfinitivement.\nVoulez-vous continuer ?"
+
+== Confirmation ==
+User -> App : Confirme la suppression
+
+App -> Server : Envoie l'ID du rapport\nà supprimer\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+== Suppression en cascade ==
+Server -> DB : Débute une transaction
+
+Server -> DB : Supprime toutes les images\net fichiers joints au rapport
+note right of DB
+  On supprime d'abord
+  les fichiers associés
+  avant de supprimer
+  le rapport lui-même
+end note
+
+Server -> DB : Supprime le rapport
+
+Server -> DB : Valide la transaction
+
+Server --> App : Succès : rapport supprimé
+App --> User : "Rapport qualité supprimé\navec succès"
+
+@enduml

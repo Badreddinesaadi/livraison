@@ -1,1 +1,2 @@
 - add in the besoin fonctionnel => home page with dahsboard buttons
+- in the besoin fonctionnel => explain the terms like BL,user roles,

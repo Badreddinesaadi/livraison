@@ -1,0 +1,67 @@
+@startuml creer-retour-sequence
+title Créer un retour — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(retour_chauffeur.php)" as Server
+database "Base de données" as DB
+
+== Saisie du formulaire ==
+User -> App : Remplit les informations :\n• Client\n• BL cacheté (Oui/Non)\n• Règlement (Oui/Non)\n• Retour MSE (Oui/Non)
+
+opt Retour MSE = "Oui"
+    App -> User : Demande de choisir\nun motif de réclamation
+    User -> App : Sélectionne un motif :\n- Retard de livraison\n- Prix incorrect\n- Quantité incorrecte\n- Mauvaise qualité
+end
+
+== Prise de photo / fichiers ==
+User -> App : Prend des photos ou\nsélectionne des fichiers\ndepuis l'appareil
+App -> App : Capture automatiquement\nles coordonnées GPS
+
+== Soumission ==
+User -> App : Valide l'envoi du retour
+App -> Server : Envoie le formulaire complet\navec les fichiers joints\net le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur connecté
+
+Server -> Server : Vérifie que les champs\nobligatoires sont remplis :\n- BL cacheté\n- Règlement\n- Retour MSE\n- Client
+
+alt Champ obligatoire manquant
+    Server --> App : Erreur : "Le champ X\nest obligatoire"
+    App --> User : Affiche l'erreur
+else Tous les champs valides
+
+    == Enregistrement du retour ==
+    Server -> DB : Débute une transaction
+
+    Server -> DB : Crée un nouveau retour\navec le statut "Envoyé"
+
+    note right of DB
+      Informations enregistrées :
+      - BL cacheté (Oui/Non)
+      - Règlement (Oui/Non)
+      - Retour MSE (Oui/Non)
+      - Motif de réclamation (optionnel)
+      - Client concerné
+      - Chauffeur (utilisateur connecté)
+      - Statut initial : "Envoyé"
+    end note
+
+    DB --> Server : Identifiant du retour créé
+
+    == Sauvegarde des fichiers ==
+    Server -> Server : Crée un dossier\ndédié pour ce retour
+
+    loop Pour chaque fichier envoyé
+        Server -> Server : Enregistre le fichier\navec un nom unique
+        Server -> DB : Enregistre les informations\ndu fichier (nom, chemin)
+    end
+
+    Server -> DB : Valide la transaction
+
+    Server --> App : Succès : retour créé
+    App --> User : "Retour envoyé avec succès"
+end
+
+@enduml

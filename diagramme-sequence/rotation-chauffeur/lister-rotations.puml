@@ -1,0 +1,55 @@
+@startuml lister-rotations-sequence
+title Consulter la liste des rotations — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(rotation_chauffeur.php)" as Server
+database "Base de données" as DB
+
+== Accès à la liste ==
+User -> App : Ouvre l'écran "Rotation chauffeur"
+App -> Server : Demande la liste des rotations\navec le token d'authentification
+
+== Vérification ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+note right of Server
+  Ce module est en lecture seule :
+  aucune action de création,
+  modification ou suppression
+  n'est possible
+end note
+
+== Filtres ==
+opt L'utilisateur a appliqué des filtres
+    Server -> Server : Applique les filtres :\n• Par chauffeur\n• Par véhicule\n• Par disponibilité (Disponible/Réservé)\n• Par intervalle de dates
+    note right of Server
+      La disponibilité est calculée ainsi :
+      - Disponible : dernier voyage\n        terminé ou aucun voyage
+      - Réservé : dernier voyage\n        en cours
+    end note
+end
+
+== Comptage ==
+Server -> DB : Compte le nombre total\nde véhicules correspondant\naux filtres éventuels
+DB --> Server : Nombre total
+
+== Récupération ==
+Server -> DB : Récupère la liste des véhicules\navec les informations\ndu dernier voyage effectué
+
+note right of DB
+  Pour chaque véhicule :
+  - Nom et immatriculation
+  - Nom du chauffeur du dernier voyage
+  - Ville de destination
+  - Date de départ / date de retour
+  - Disponibilité (calculée)
+  - Kilométrage total parcouru
+end note
+
+DB --> Server : Liste des rotations
+
+Server --> App : Liste paginée complète
+App --> User : Affiche la liste des rotations\navec le nombre de résultats
+
+@enduml

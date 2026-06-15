@@ -1,0 +1,47 @@
+@startuml supprimer-retour-sequence
+title Supprimer un retour — Diagramme de séquence
+
+actor "Utilisateur" as User
+participant "Application mobile" as App
+participant "Serveur\n(retour_chauffeur.php)" as Server
+database "Base de données" as DB
+
+== Déclenchement ==
+User -> App : Appuie sur "Supprimer"\npour un retour
+App -> App : Demande confirmation :\n"Le retour #X sera supprimé\ndéfinitivement.\nVoulez-vous continuer ?"
+
+== Confirmation ==
+User -> App : Confirme la suppression
+
+App -> Server : Envoie l'ID du retour\nà supprimer\navec le token d'authentification
+
+== Vérifications ==
+Server -> Server : Vérifie le token et\nidentifie l'utilisateur
+
+Server -> DB : Vérifie que l'identifiant\ndu retour existe
+
+alt Retour introuvable
+    Server --> App : Erreur : "ID retour non trouvé"
+    App --> User : Affiche l'erreur
+else Retour trouvé
+
+    == Suppression en cascade ==
+    Server -> DB : Débute une transaction
+
+    Server -> DB : Supprime toutes les images\net fichiers joints au retour
+    note right of DB
+      On supprime d'abord
+      les fichiers associés
+      avant de supprimer
+      le retour lui-même
+    end note
+
+    Server -> DB : Supprime le retour
+
+    Server -> DB : Valide la transaction
+
+    Server --> App : Succès : retour supprimé
+    App --> User : "Retour supprimé avec succès"
+end
+
+@enduml

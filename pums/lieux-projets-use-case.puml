@@ -1,0 +1,62 @@
+@startuml lieux-projets-use-case
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor #FEF3E2
+skinparam usecaseBorderColor #ED5623
+skinparam usecaseFontSize 13
+skinparam actorFontSize 13
+skinparam packageBorderColor #ED5623
+skinparam packageFontSize 14
+
+actor "Administrateur" as Admin
+actor "Chef de parc" as Parc
+actor "Responsable stock" as RStock
+actor "Commercial" as Commercial
+
+rectangle "Module Lieux de projets" #FEF9F4 {
+  usecase "Lister les lieux de projets" as UC1
+  usecase "Consulter les détails\nd'un lieu" as UC2
+  usecase "Créer un lieu de projet" as UC3
+  usecase "Modifier un lieu de projet" as UC4
+  usecase "Supprimer un lieu de projet" as UC5
+
+  usecase "Rechercher un lieu" as UC6
+  usecase "Filtrer par type\n(Chantier / Dépôt)" as UC7
+  usecase "Capturer la position GPS" as UC8
+  usecase "Prendre des photos" as UC9
+  usecase "Sélectionner des fichiers\n(depuis l'appareil)" as UC10
+  usecase "Ouvrir dans Google Maps" as UC11
+  usecase "Appeler le contact" as UC12
+  usecase "Prévisualiser une image\n(en plein écran)" as UC13
+  usecase "Recapturer la position GPS\n(modification)" as UC14
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+
+Parc --> UC1
+Parc --> UC2
+Parc --> UC3
+Parc --> UC4
+
+RStock --> UC1
+RStock --> UC2
+
+Commercial --> UC1
+Commercial --> UC2
+
+UC1 ..> UC6 : <<extend>>
+UC1 ..> UC7 : <<extend>>
+UC3 ..> UC8 : <<include>>
+UC3 ..> UC9 : <<extend>>
+UC3 ..> UC10 : <<extend>>
+UC4 ..> UC14 : <<extend>>
+UC2 ..> UC11 : <<extend>>
+UC2 ..> UC12 : <<extend>>
+UC2 ..> UC13 : <<extend>>
+
+@enduml
