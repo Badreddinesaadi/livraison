@@ -4,6 +4,10 @@
 - add a deletion button for the DT only if the DT is not validated
 - make sure to include that if a product in a DT is prepared it cannot be removed/modified
 - explain the terms in TD , lot , produit,preparation  
+- make sure to add a page for 'Liste des abréviations'
+
+
+
 
 
 

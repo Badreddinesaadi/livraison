@@ -8,8 +8,10 @@
     \usepackage{microtype}
     \usepackage{graphicx}
     \usepackage{svg}
-    \usepackage{float}
-
+\usepackage{float}
+    \usepackage{fancyhdr}
+    \usepackage[tableposition=above]{caption}
+    
     \geometry{margin=2.5cm}
     \setlength{\parindent}{0pt}
     \setlength{\parskip}{0.6em}
@@ -17,23 +19,30 @@
     \renewcommand{\thesection}{1.\arabic{section}}
     \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
     \renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
-
+    
+    \pagestyle{fancy}
+    \fancyhf{}
+    \fancyfoot[C]{\small\thepage}
+    \renewcommand{\headrulewidth}{0.4pt}
+    
     \begin{document}
 
     \renewcommand{\contentsname}{Table des matières}
     \renewcommand{\listfigurename}{Liste des figures}
+    \setcounter{tocdepth}{2}
     \tableofcontents
-    \newpage
+\newpage
     \listoffigures
     \newpage
 
-    \begin{titlepage}
-    \centering
+    \thispagestyle{empty}
     \vspace*{\fill}
+    \begin{center}
     {\Huge \textbf{CHAPITRE 1}}\\[0.8em]
     {\LARGE \linespread{0.9}\selectfont \textbf{CADRE ET CONTEXTE GÉNÉRAL}\\[0.4em]\textbf{DU PROJET}}
+    \end{center}
     \vspace*{\fill}
-    \end{titlepage}
+    \newpage
 
     \section{Présentation de l'entreprise SDK WOOD}
 
@@ -300,19 +309,6 @@
 
     Au-delà du suivi quotidien, la donnée digitale permet aussi d'améliorer le pilotage : identifier les points qui reviennent souvent (retours fréquents, types d'anomalies), suivre les volumes, et ajuster les processus.
 
-    \newpage
-
-    \begin{titlepage}
-    \centering
-    \vspace*{\fill}
-    {\Huge \textbf{CHAPITRE 2}}\\[0.8em]
-    {\LARGE \textbf{MÉTHODOLOGIE DE GESTION\\[0.4em]DU PROJET}}
-    \vspace*{\fill}
-    \end{titlepage}
-
-    \renewcommand{\thesection}{2.\arabic{section}}
-    \setcounter{section}{0}
-
     \section{Méthodologie de gestion de projet : Scrum}
     Dans un contexte marqué par l'évolution rapide des exigences et la nécessité de garantir la qualité à chaque livraison, notre équipe a adopté la méthodologie Scrum, un cadre agile reconnu pour sa capacité à piloter efficacement les projets logiciels complexes.
 
@@ -346,11 +342,13 @@
     Le suivi des tâches, des tests, des anomalies et des priorités est réalisé à l'aide d'un tableau Trello, permettant une gestion visuelle du Product Backlog, des user stories, des cas de test et des tickets QA. Cette organisation favorise la transparence, la réactivité et une coordination fluide entre tous les acteurs du projet.
 
     \subsection{Déroulement du projet}
-    Pour garantir une avancée méthodique et progressive de notre projet, nous avons adopté une approche itérative basée sur des sprints. Chaque sprint représente une période définie, de trois semaines, pendant laquelle une série d'activités spécifiques est menée à bien. Voici un aperçu de notre planification par sprint :
+    Pour garantir une avancée méthodique et progressive de notre projet, nous avons adopté une approche itérative basée sur des sprints. Chaque sprint représente une période définie, de trois semaines, pendant laquelle une série d'activités spécifiques est menée à bien. Le Tableau~\ref{tab:sprint-planning} présente la planification par sprint.
 
     \begin{table}[h]
     \centering
     \renewcommand{\arraystretch}{1.4}
+    \caption{Planification par sprint}
+    \label{tab:sprint-planning}
     \begin{tabular}{|c|p{13cm}|}
     \hline
     \textbf{Sprint} & \textbf{Actions réalisées} \\
@@ -397,8 +395,6 @@
     \\
     \hline
     \end{tabular}
-    \caption{Planification par sprint}
-    \label{tab:sprint-planning}
     \end{table}
 
     \clearpage
@@ -414,31 +410,36 @@
     \label{fig:gantt}
     \end{figure}
 
-    \subsection{Conclusion du chapitre}
-    Le chapitre 2 a présenté la méthodologie de gestion adoptée pour ce projet : le cadre Scrum, structuré en cinq sprints de trois semaines. Chaque sprint répond à un objectif précis, de la mise en place des fondations techniques jusqu'à la livraison finale de l'application. Les rôles (Product Owner, équipe de développement, Scrum Master), les rituels (Daily Scrum, Sprint Review, Sprint Retrospective) et l'outil de suivi Trello garantissent une coordination efficace, une visibilité continue et une capacité d'adaptation aux besoins métier tout au long du cycle de développement.
+\subsection{Conclusion du chapitre}
+Ce chapitre a présenté le cadre général du projet et la méthodologie de gestion adoptée : après avoir décrit l'entreprise SDK WOOD, sa problématique et la solution proposée, la méthodologie Scrum a été exposée, structurée en cinq sprints de trois semaines. Chaque sprint répond à un objectif précis, de la mise en place des fondations techniques jusqu'à la livraison finale de l'application. Les rôles (Product Owner, équipe de développement, Scrum Master), les rituels (Daily Scrum, Sprint Review, Sprint Retrospective) et l'outil de suivi Trello garantissent une coordination efficace, une visibilité continue et une capacité d'adaptation aux besoins métier tout au long du cycle de développement.
 
     \newpage
     \thispagestyle{empty}
     \vspace*{\fill}
     \begin{center}
-    {\Huge \textbf{CHAPITRE 3}}\\[0.8em]
-    {\LARGE \textbf{ANALYSE DES BESOINS\\[0.4em]ET CONCEPTION}}
+    {\Huge \textbf{CHAPITRE 2}}\\[0.8em]
+    {\LARGE \textbf{ANALYSE DES BESOINS,\\[0.4em]CONCEPTION ET ARCHITECTURE}}
     \end{center}
     \vspace*{\fill}
 
     \newpage
 
-    \renewcommand{\thesection}{3.\arabic{section}}
+    \renewcommand{\thesection}{2.\arabic{section}}
     \setcounter{section}{0}
 
-    \section{Introduction}
-    Le chapitre précédent a défini le cadre méthodologique du projet. Le présent chapitre aborde l'analyse des besoins et la conception de la solution.
+\section{Introduction}
+Le chapitre précédent a défini le cadre général du projet et la méthodologie de gestion adoptée. Le présent chapitre aborde l'analyse des besoins, la conception et l'architecture de la solution.
 
-    L'application vise six processus métier distincts, chacun porté par un module fonctionnel : la gestion des voyages, les retours chauffeur, les rapports qualité, la rotation chauffeur, les demandes de transfert inter-dépôts et les lieux de projets. L'analyse ci-dessous identifie les besoins fonctionnels et non fonctionnels qui découlent de ces processus et des contraintes opérationnelles identifiées au chapitre 1.
+L'application vise six processus métier distincts, chacun porté par un module fonctionnel : la gestion des voyages, les retours chauffeur, les rapports qualité, la rotation chauffeur, les demandes de transfert inter-dépôts et les lieux de projets. L'analyse présentée dans la section~\ref{sec:besoins-fonctionnels} identifie les besoins fonctionnels et non fonctionnels qui découlent de ces processus et des contraintes opérationnelles identifiées au chapitre 1.
+
+L'application intègre un rôle \textbf{admin global}, attribué au Directeur Général (DG) et au Directeur Général Adjoint (DGA). Ce rôle dispose de l'ensemble des permissions sur tous les modules, sans restriction aucune. Il ne figure pas dans la liste des rôles métier car il transcende les périmètres fonctionnels individuels et constitue un accès total à l'application.
+
+Afin de ne pas alourdir ce document, seules deux à trois actions représentatives sont détaillées pour chaque module.
 
     \section{Analyse des besoins}
 
     \subsection{Besoins fonctionnels}
+    \label{sec:besoins-fonctionnels}
     Les besoins fonctionnels sont regroupés par module. Chaque module correspond à un processus métier identifié dans l'étude du contexte.
 
     \subsubsection{Module Voyages}
@@ -561,40 +562,23 @@
     \begin{itemize}[leftmargin=1.2em,topsep=0pt]
     \item L'application nécessite une connexion internet pour fonctionner. En cas de perte de connexion, l'utilisateur est informé par un message clair.
     \item L'envoi de photos (retours, rapports qualité, lieux de projets) est accompagné d'un indicateur visuel de progression afin que l'utilisateur sache que le transfert est en cours.
-    \end{itemize}
-
-    \subsection{Conclusion du chapitre}
-    Ce chapitre a posé les fondations de la solution en identifiant l'ensemble des fonctionnalités attendues, organisées par module métier (voyages, retours, rapports qualité, rotation chauffeur, demandes de transfert et lieux de projets), ainsi que les qualités transverses que l'application doit respecter en matière de performance, sécurité, ergonomie, maintenabilité et disponibilité.
-
-    L'analyse fonctionnelle a permis de détailler les opérations de chaque module — création, consultation, modification, suppression, validation, filtrage et recherche — en couvrant les cas d'usage réels identifiés sur le terrain. Les besoins non fonctionnels ont quant à eux défini le cadre de qualité attendu pour garantir une adoption durable par les équipes.
-
-    Ces spécifications constituent le cahier des charges à partir duquel les choix techniques et l'architecture décrits au chapitre suivant ont été établis.
-
-    \newpage
-    \renewcommand{\thesection}{4.\arabic{section}}
-    \setcounter{section}{0}
-
-    \section{Introduction}
-    Ce chapitre de conception se concentre sur la traduction de notre vision en un système concret et fonctionnel. Sans réitérer les besoins déjà abordés, nous nous plongerons directement dans l'architecture du système. Notre objectif est de dévoiler comment chaque composant architectural et choix de conception contribue à un système intégré, mettant en évidence les stratégies adoptées pour une performance optimale et une sécurité renforcée. Ce cadre nous permettra de naviguer à travers les complexités techniques, offrant une compréhension claire de la structure sous-jacente qui anime notre projet.
-
-    L'application intègre un rôle \textbf{admin global}, attribué au Directeur Général (DG) et au Directeur Général Adjoint (DGA). Ce rôle dispose de l'ensemble des permissions sur tous les modules, sans restriction aucune. Il ne figure pas dans la liste des rôles métier car il transcende les périmètres fonctionnels individuels et constitue un accès total à l'application.
-
-Afin de ne pas alourdir ce document, seules deux à trois actions représentatives sont détaillées pour chaque module.
+\end{itemize}
 
     \section{Modélisation des Processus via UML}
 
     \subsection{Module Voyages}
     Le module Voyages fait intervenir deux acteurs principaux : l'agent de livraison, responsable de la création, modification, suppression et achèvement des voyages ainsi que de leur consultation, et le chauffeur, qui peut consulter les voyages qui lui sont assignés et clôturer les bons de livraison (BL).
 
-    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+    Le diagramme de la Figure~\ref{fig:voyages-use-case} présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
 
     \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/voyages-use-case.png}
     \caption{Diagramme de cas d'utilisation — Module Voyages}
+    \label{fig:voyages-use-case}
     \end{figure}
 
-    Les deux actions détaillées ci-dessous illustrent le flux essentiel du module, depuis l'enregistrement d'un départ jusqu'à la preuve de livraison.
+    Les deux actions détaillées dans la suite illustrent le flux essentiel du module, depuis l'enregistrement d'un départ jusqu'à la preuve de livraison.
 
     \subsubsection{Créer un voyage}
     Le processus de création d'un voyage est initié par l'agent de livraison. L'utilisateur saisit les informations du voyage — dépôt de départ, chauffeur, véhicule et destination — puis sélectionne les BLs qui seront transportés. Chaque BL sélectionné est photographié afin de conserver une trace visuelle de l'état des documents au moment du chargement. Ces deux étapes — sélection des BLs et prise de photos — sont obligatoires et font partie intégrante du processus de création. Une fois les informations renseignées et les BLs associés au voyage, la création est validée et le voyage est enregistré.
@@ -603,6 +587,7 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/voyages-create-voyage.png}
     \caption{Cas d'utilisation — Créer un voyage}
+    \label{fig:voyages-create-voyage}
     \end{figure}
 
     \subsubsection{Clôturer un BL}
@@ -612,20 +597,22 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/voyages-cloturer-bl.png}
     \caption{Cas d'utilisation — Clôturer un BL}
+    \label{fig:voyages-cloturer-bl}
     \end{figure}
 
     \subsection{Module Retours}
     Le module Retours fait intervenir deux acteurs : le chauffeur, qui crée, modifie et supprime les retours, et l'agent de caisse, chargé de valider ou refuser les retours. La consultation de la liste est accessible aux deux profils.
 
-    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+    Le diagramme de la Figure~\ref{fig:retours-use-case} présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
 
     \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/retours-use-case.png}
     \caption{Diagramme de cas d'utilisation — Module Retours}
+    \label{fig:retours-use-case}
     \end{figure}
 
-    Les deux actions détaillées ci-dessous illustrent le cycle de vie d'un retour, de sa création par le chauffeur à sa validation par l'agent de caisse.
+    Les deux actions détaillées dans la suite illustrent le cycle de vie d'un retour, de sa création par le chauffeur à sa validation par l'agent de caisse.
 
     \subsubsection{Créer un retour}
     Le processus de création d'un retour est initié par le chauffeur. Ce dernier renseigne les informations du retour — client, dépôt, motif du retour — et joint des documents justificatifs tels que des photos des marchandises retournées. Ces pièces jointes sont obligatoires et font partie intégrante du processus de création. Une fois les informations saisies et les fichiers joints, la création est validée et le retour est enregistré avec le statut \og{}En attente de validation\fg{}.
@@ -634,29 +621,32 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/creer-retour.png}
     \caption{Cas d'utilisation — Créer un retour}
+    \label{fig:creer-retour}
     \end{figure}
 
     \subsubsection{Valider un retour}
-    La validation d'un retour est effectuée par l'agent de caisse. Après avoir consulté les détails du retour et examiné les pièces jointes fournies par le chauffeur, l'agent de caisse décide d'accepter ou de refuser le retour. En cas d'acceptation, le statut du retour passe à \og{}Validé\fg{} ; en cas de refus, il passe à \og{}Refusé\fg{}. Cette étape constitue le point de contrôle final du processus de retour.
+    La validation d'un retour est effectuée par l'agent de caisse. Après avoir consulté les détails du retour et examiné les pièces jointes fournies par le chauffeur, l'agent de caisse décide d'accepter ou de refuser le retour. En cas d'acceptation, le statut du retour passe à \og{}Terminé\fg{} ; en cas de refus, il passe à \og{}Refusé\fg{}. Cette étape constitue le point de contrôle final du processus de retour.
 
     \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/valider-retour.png}
     \caption{Cas d'utilisation — Valider un retour}
+    \label{fig:valider-retour}
     \end{figure}
 
     \subsection{Module Rapports qualité}
     Le module Rapports qualité fait intervenir deux acteurs : le service import, chargé de créer les rapports qualité, et le contrôle de gestion, qui consulte les rapports. La consultation et le listage sont accessibles aux deux profils.
 
-    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+    Le diagramme de la Figure~\ref{fig:rapports-qualite-use-case} présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
 
     \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/rapports-qualite-use-case.png}
     \caption{Diagramme de cas d'utilisation — Module Rapports qualité}
+    \label{fig:rapports-qualite-use-case}
     \end{figure}
 
-    Les deux actions détaillées ci-dessous illustrent le flux du module, depuis la création d'un rapport par le service import jusqu'à sa consultation par le contrôle de gestion.
+    Les deux actions détaillées dans la suite illustrent le flux du module, depuis la création d'un rapport par le service import jusqu'à sa consultation par le contrôle de gestion.
 
     \subsubsection{Créer un rapport qualité}
     Le processus de création d'un rapport qualité est initié par le service import. L'utilisateur renseigne les informations du rapport — référence, observations, conformité — et y joint des photos des marchandises ou des documents scannés. Ces pièces jointes permettent de documenter visuellement l'état des produits et constituent un élément essentiel du rapport. Une fois les informations saisies, la création est validée et le rapport est enregistré.
@@ -665,6 +655,7 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/creer-rapport-qualite.png}
     \caption{Cas d'utilisation — Créer un rapport qualité}
+    \label{fig:creer-rapport-qualite}
     \end{figure}
 
     \subsubsection{Lister les rapports qualité}
@@ -674,17 +665,19 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/lister-rapports-qualite.png}
     \caption{Cas d'utilisation — Lister les rapports qualité}
+    \label{fig:lister-rapports-qualite}
     \end{figure}
 
     \subsection{Module Rotation chauffeur}
     Le module Rotation chauffeur fait intervenir un acteur unique : le responsable de flotte. Ce dernier consulte la liste des rotations pour connaître la disponibilité des chauffeurs et des véhicules.
 
-    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module.
+    Le diagramme de la Figure~\ref{fig:rotation-chauffeur-use-case} présente l'ensemble des cas d'utilisation du module.
 
     \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/rotation-chauffeur-use-case.png}
     \caption{Diagramme de cas d'utilisation — Module Rotation chauffeur}
+    \label{fig:rotation-chauffeur-use-case}
     \end{figure}
 
     Une seule action est détaillée pour ce module, la consultation des rotations étant sa fonction principale.
@@ -696,20 +689,22 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/lister-rotations.png}
     \caption{Cas d'utilisation — Lister les rotations}
+    \label{fig:lister-rotations}
     \end{figure}
 
     \subsection{Module Lieux de projets}
     Le module Lieux de projets fait intervenir plusieurs profils. La création d'un lieu est ouverte à tous les utilisateurs. La consultation et le listage sont réservés au directeur général, au directeur commercial et au directeur adjoint. La modification et la suppression sont réservées au créateur du lieu et au responsable de flotte.
 
-    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+    Le diagramme de la Figure~\ref{fig:lieux-projets-use-case} présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
 
     \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/lieux-projets-use-case.png}
     \caption{Diagramme de cas d'utilisation — Module Lieux de projets}
+    \label{fig:lieux-projets-use-case}
     \end{figure}
 
-    Les deux actions détaillées ci-dessous illustrent le flux du module, de la création d'un lieu par un utilisateur à sa consultation par les directeurs.
+    Les deux actions détaillées dans la suite illustrent le flux du module, de la création d'un lieu par un utilisateur à sa consultation par les directeurs.
 
     \subsubsection{Créer un lieu de projet}
     Le processus de création d'un lieu de projet est accessible à tous les utilisateurs. Ces derniers renseignent le nom, le type (chantier ou dépôt), l'adresse, le contact et capturent automatiquement les coordonnées GPS. Des photos du lieu peuvent être jointes afin de documenter visuellement le projet. Une fois les informations saisies, la création est validée et le lieu est enregistré.
@@ -718,6 +713,7 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/creer-lieu-projet.png}
     \caption{Cas d'utilisation — Créer un lieu de projet}
+    \label{fig:creer-lieu-projet}
     \end{figure}
 
     \subsubsection{Lister les lieux de projets}
@@ -727,20 +723,22 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/lister-lieux-projets.png}
     \caption{Cas d'utilisation — Lister les lieux de projets}
+    \label{fig:lister-lieux-projets}
     \end{figure}
 
     \subsection{Module Demande de transfert}
     Le module Demande de transfert fait intervenir trois acteurs : l'ADV (agent des ventes) et le responsable de stock, qui créent les demandes, ajoutent et suppriment les produits et gèrent leurs lots, et le magasinier, chargé de la préparation des produits et des lots. La consultation de la liste est accessible aux créateurs de demandes et aux magasiniers.
 
-    Le diagramme ci-dessous présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
+    Le diagramme de la Figure~\ref{fig:demande-transfert-use-case} présente l'ensemble des cas d'utilisation du module ainsi que les interactions entre ces acteurs.
 
     \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/demande-transfert-use-case.png}
     \caption{Diagramme de cas d'utilisation — Module Demande de transfert}
+    \label{fig:demande-transfert-use-case}
     \end{figure}
 
-    Les trois actions détaillées ci-dessous illustrent le flux du module, de la création d'une demande jusqu'à la préparation des produits par le magasinier.
+    Les trois actions détaillées dans la suite illustrent le flux du module, de la création d'une demande jusqu'à la préparation des produits par le magasinier.
 
     \subsubsection{Créer une demande de transfert}
     Le processus de création d'une demande de transfert est initié par l'ADV ou le responsable de stock. L'utilisateur sélectionne un dépôt source et un dépôt de destination, puis ajoute les produits concernés depuis le catalogue. Pour chaque produit, il renseigne la quantité souhaitée puis sélectionne les lots à transférer. Une fois tous les produits ajoutés, la création est validée et la demande est enregistrée avec le statut \og{}Brouillon\fg{}.
@@ -749,6 +747,7 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/creer-demande-transfert.png}
     \caption{Cas d'utilisation — Créer une demande de transfert}
+    \label{fig:creer-demande-transfert}
     \end{figure}
 
     \subsubsection{Gérer les lots d'un produit}
@@ -758,6 +757,7 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/gerer-lots-demande-transfert.png}
     \caption{Cas d'utilisation — Gérer les lots d'un produit}
+    \label{fig:gerer-lots-demande-transfert}
     \end{figure}
 
     \subsubsection{Préparer un produit ou un lot}
@@ -767,13 +767,310 @@ Afin de ne pas alourdir ce document, seules deux à trois actions représentativ
     \centering
     \includegraphics[width=0.85\textwidth]{assets/preparer-produit-lot-demande-transfert.png}
     \caption{Cas d'utilisation — Préparer un produit ou un lot}
+    \label{fig:preparer-produit-lot-demande-transfert}
     \end{figure}
 
-    \subsection{Conclusion du chapitre}
-    Ce chapitre de conception a traduit les besoins fonctionnels identifiés au chapitre précédent en une modélisation UML concrète et structurée. Chaque module métier — voyages, retours chauffeur, rapports qualité, rotation chauffeur, lieux de projets et demandes de transfert — a été décrit à travers ses cas d'utilisation, en identifiant les acteurs impliqués et leurs interactions avec le système.
+\subsection{Conclusion du chapitre}
+Ce chapitre a présenté l'analyse des besoins et la modélisation de la solution. L'analyse fonctionnelle a permis d'identifier les besoins de chaque module métier — voyages, retours chauffeur, rapports qualité, rotation chauffeur, lieux de projets et demandes de transfert — ainsi que les besoins non fonctionnels en matière de performance, sécurité, ergonomie, maintenabilité et disponibilité. La modélisation UML a ensuite traduit ces besoins en cas d'utilisation concrets, en identifiant les acteurs impliqués et leurs interactions avec le système.
 
-    La modélisation a mis en évidence la répartition des responsabilités entre les différents rôles métier : agent de livraison et chauffeur pour les voyages, chauffeur et agent de caisse pour les retours, service import et contrôle de gestion pour les rapports qualité, responsable de flotte pour la rotation, ADV/responsable de stock et magasinier pour les demandes de transfert, et l'ensemble des profils pour les lieux de projets. Le rôle admin global, attribué au Directeur Général et au Directeur Général Adjoint, garantit un accès transversal à toutes les fonctionnalités de l'application.
+La répartition des responsabilités entre les différents rôles métier a été mise en évidence : agent de livraison et chauffeur pour les voyages, chauffeur et agent de caisse pour les retours, service import et contrôle de gestion pour les rapports qualité, responsable de flotte pour la rotation, ADV/responsable de stock et magasinier pour les demandes de transfert, et l'ensemble des profils pour les lieux de projets. Le rôle admin global, attribué au Directeur Général et au Directeur Général Adjoint, garantit un accès transversal à toutes les fonctionnalités de l'application.
 
-    Les actions détaillées pour chaque module illustrent les flux essentiels : de la création à la validation, de la préparation à la livraison. Cette modélisation constitue le socle à partir duquel l'architecture technique et l'implémentation ont été réalisées.
+Les actions détaillées pour chaque module illustrent les flux essentiels : de la création à la validation, de la préparation à la livraison. Ces spécifications et cette modélisation constituent le socle à partir duquel l'architecture technique et l'implémentation ont été réalisées.
+
+    \newpage
+    \thispagestyle{empty}
+    \vspace*{\fill}
+    \begin{center}
+    {\Huge \textbf{CHAPITRE 3}}\\[0.8em]
+    {\LARGE \textbf{MISE EN ŒUVRE DE LA\\[0.4em]SOLUTION}}
+    \end{center}
+    \vspace*{\fill}
+
+    \newpage
+    \renewcommand{\thesection}{3.\arabic{section}}
+    \setcounter{section}{0}
+
+    \section{Introduction}
+    Ce troisième chapitre présente les différentes technologies et outils adoptés pour le développement de la solution proposée. En outre, il représente la modélisation du processus final et détaille les différentes étapes de la réalisation de ce projet, en se servant de captures illustratives.
+
+    \section{Outils utilisés}
+
+    \subsection{Environnements de développement}
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/vscode-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/vscode-logo.png}
+    }{
+    \textit{Logo VS Code : fichier assets/vscode-logo.png non trouvé.}
+    }
+    \caption{Visual Studio Code}
+    \label{fig:vscode-logo}
+    \end{figure}
+
+    \textbf{Visual Studio Code (VS Code)} : éditeur de code libre et multiplateforme développé par Microsoft. Léger, extensible et doté d'un écosystème riche d'extensions, il a été utilisé pour l'édition du code frontend et backend, le débogage et la gestion de terminal intégré. \textit{Justification :} VS Code a été choisi pour sa légèreté, son support natif de TypeScript et PHP, et ses extensions intégrées pour Git, React Native et le débogage mobile.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/git-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/git-logo.png}
+    }{
+    \textit{Logo Git : fichier assets/git-logo.png non trouvé.}
+    }
+    \caption{Git}
+    \label{fig:git-logo}
+    \end{figure}
+
+    \textbf{Git} : système de gestion de versions distribué qui permet de suivre chaque modification du code source, de créer des branches de développement et de fusionner les contributions. Il garantit la traçabilité des évolutions et facilite le travail collaboratif. \textit{Justification :} Git est le standard industriel pour le contrôle de version ; il permet de revenir à tout état antérieur du code, de travailler en parallèle sur plusieurs fonctionnalités et de conserver un historique complet des modifications.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/github-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/github-logo.png}
+    }{
+    \textit{Logo GitHub : fichier assets/github-logo.png non trouvé.}
+    }
+    \caption{GitHub}
+    \label{fig:github-logo}
+    \end{figure}
+
+    \textbf{GitHub} : plateforme d'hébergement de dépôts Git qui offre un espace centralisé pour le stockage du code, la revue de contributions via les pull requests et le suivi des tickets. Elle sécurise le code distant et permet un accès partagé à l'équipe. \textit{Justification :} GitHub fournit un dépôt distant fiable, accessible de n'importe où, et facilite le suivi des problèmes et la collaboration entre développeurs via les pull requests.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/postman-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/postman-logo.png}
+    }{
+    \textit{Logo Postman : fichier assets/postman-logo.png non trouvé.}
+    }
+    \caption{Postman}
+    \label{fig:postman-logo}
+    \end{figure}
+
+    \textbf{Postman} : outil de test et de documentation d'API REST. Il permet de construire, envoyer et inspecter des requêtes HTTP vers les endpoints du backend, de vérifier les réponses et d'organiser les tests en collections réutilisables. \textit{Justification :} Postman a été indispensable pour valider chaque endpoint de l'API PHP au fur et à mesure du développement, vérifier les réponses et les codes d'erreur, et documenter les requêtes pour le frontend.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/phpmyadmin-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/phpmyadmin-logo.png}
+    }{
+    \textit{Logo phpMyAdmin : fichier assets/phpmyadmin-logo.png non trouvé.}
+    }
+    \caption{phpMyAdmin}
+    \label{fig:phpmyadmin-logo}
+    \end{figure}
+
+    \textbf{phpMyAdmin} : interface web d'administration de bases de données MySQL. Elle permet de gérer les bases, les tables, les utilisateurs et les permissions, d'exécuter des requêtes SQL et d'importer ou exporter des données, le tout sans recourir à la ligne de commande. \textit{Justification :} phpMyAdmin offre un accès visuel rapide à la base de données pour créer les tables, vérifier les données et déboguer les requêtes, sans installer d'outil supplémentaire sur le serveur.
+
+    \subsection{Base de données}
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/mysql-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/mysql-logo.png}
+    }{
+    \textit{Logo MySQL : fichier assets/mysql-logo.png non trouvé.}
+    }
+    \caption{MySQL}
+    \label{fig:mysql-logo}
+    \end{figure}
+
+    \textbf{MySQL} : système de gestion de bases de données relationnelles (SGBD) open source, fondé sur le langage SQL (Structured Query Language). SQL permet de définir la structure des données (création de tables, contraintes d'intégrité, clés étrangères), de les manipuler (insertion, mise à jour, suppression) et de les interroger de manière déclarative.
+
+    Le choix de MySQL repose sur plusieurs critères : sa maturité et sa fiabilité éprouvées dans les environnements de production, ses performances élevées en lecture et en écriture pour des volumes de données conséquents, sa conformité aux standards SQL qui garantit la portabilité des requêtes, et son intégration native avec PHP via l'extension MySQLi. L'ensemble des données métier — voyages, retours, rapports qualité, demandes de transfert, lieux de projets, utilisateurs et permissions — est stocké dans une base MySQL hébergée sur le serveur de l'entreprise. \textit{Justification :} MySQL a été choisi pour sa compatibilité directe avec PHP, sa robustesse en production et sa disponibilité sur l'infrastructure existante de SDK WOOD.
+
+    \subsection{Langage de programmation backend}
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/php-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/php-logo.png}
+    }{
+    \textit{Logo PHP : fichier assets/php-logo.png non trouvé.}
+    }
+    \caption{PHP}
+    \label{fig:php-logo}
+    \end{figure}
+
+    \textbf{PHP} : langage de script côté serveur conçu pour le développement web. Dans ce projet, PHP a été utilisé en tant que langage pur, sans recours à un framework. L'objectif de ce choix est double : d'une part, conserver une totale maîtrise de la logique métier et de la structure du code, sans les abstractions et les conventions imposées par un framework ; d'autre part, s'adapter à l'environnement de travail existant au sein de SDK WOOD, où PHP est la technologie backend en place. Ce choix permet ainsi à l'équipe interne de modifier, étendre et maintenir le code source du backend sans courbe d'apprentissage liée à un framework supplémentaire.
+
+    Parmi les avantages de PHP sans framework : une exécution directe sur le serveur web Apache, une configuration minimale, un cycle requête-réponse simple et un déploiement immédiat par simple transfert de fichiers. Chaque endpoint de l'API correspond à un fichier PHP dédié, ce qui favorise la lisibilité, la traçabilité et la maintenabilité. \textit{Justification :} PHP a été adopté pour s'insérer naturellement dans l'environnement technique existant de SDK WOOD, permettant à l'équipe interne de reprendre et faire évoluer le code sans dépendance à un framework.
+
+    \subsection{Langage de programmation frontend}
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/typescript-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/typescript-logo.png}
+    }{
+    \textit{Logo TypeScript : fichier assets/typescript-logo.png non trouvé.}
+    }
+    \caption{TypeScript}
+    \label{fig:typescript-logo}
+    \end{figure}
+
+    \textbf{TypeScript} : sur-ensemble de JavaScript développé par Microsoft, ajoutant un typage statique optionnel au langage. Par rapport à JavaScript, TypeScript détecte les erreurs de type à la compilation plutôt qu'à l'exécution, améliore l'autocomplétion et la navigation dans l'éditeur de code, et facilite la refactorisation grâce à une meilleure analyse statique. Le typage explicite des props, des états et des réponses API réduit les erreurs de régression et documente le contrat entre le frontend et le backend, ce qui est particulièrement précieux dans un projet mobile où les champs et les formats de données sont nombreux. \textit{Justification :} TypeScript a été choisi pour réduire les erreurs à l'exécution grâce au typage statique, améliorer la productivité via l'autocomplétion, et faciliter la maintenance du code dans un projet comptant de nombreux types de données échangés avec l'API.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/react-native-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/react-native-logo.png}
+    }{
+    \textit{Logo React Native : fichier assets/react-native-logo.png non trouvé.}
+    }
+    \caption{React Native}
+    \label{fig:react-native-logo}
+    \end{figure}
+
+    \textbf{React Native} : framework développé par Meta permettant de construire des applications mobiles natives pour iOS et Android à partir d'une base de code unique en JavaScript/TypeScript. Contrairement à une approche hybride basée sur un navigateur embarqué, React Native génère de véritables composants natifs : les éléments d'interface déclarés en React sont traduits en vues UIKit sur iOS et en vues Android sur Android, via un pont (Bridge) qui assure la communication entre le thread JavaScript et le thread natif. Ce mécanisme permet de bénéficier des performances et du rendu natifs tout en conservant un cycle de développement rapide — rechargement instantané, métrologie en temps réel et partage de logique métier entre les deux plateformes.
+
+    Par rapport au développement natif en Java (Android) ou Objective-C/Swift (iOS), React Native offre un gain de productivité substantiel : une seule base de code pour deux plateformes, un écosystème de bibliothèques riche via npm, et une communauté active. Le choix de React Native pour ce projet se justifie par la nécessité de livrer une application mobile robuste et performante dans un délai contraint, tout en ciblant simultanément les environnements Android et iOS. \textit{Justification :} React Native a été retenu pour sa capacité à produire une application native pour iOS et Android à partir d'un code unique, réduisant les coûts de développement et les délais tout en offrant des performances proches du natif.
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/expo-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/expo-logo.png}
+    }{
+    \textit{Logo Expo : fichier assets/expo-logo.png non trouvé.}
+    }
+    \caption{Expo}
+    \label{fig:expo-logo}
+    \end{figure}
+
+    \textbf{Expo} : plateforme de développement et de déploiement construite au-dessus de React Native. Elle fournit un ensemble d'outils et de services — SDK, serveur de développement, builds cloud et application de prévisualisation — qui simplifient le cycle de développement mobile. Expo élimine la nécessité de configurer nativement Android Studio et Xcode : un simple \texttt{expo start} lance un serveur de développement avec rechargement en temps réel, l'application Expo Go permet de tester directement sur un appareil physique sans compilation, et les builds gérés (EAS Build) produisent les APK et IPA prêts pour la distribution. \textit{Justification :} Expo a été adopté pour accélérer le développement en supprimant la configuration native, permettre des itérations rapides via le rechargement instantané sur appareil, et simplifier la génération de l'APK de production sans environnement Android Studio.
+
+    \section{Bibliothèques et packages TypeScript}
+
+    Le frontend de l'application repose sur un ensemble de bibliothèques TypeScript sélectionnées pour couvrir la navigation, la gestion d'état, les appels réseau, les interactions utilisateur et l'accès aux fonctionnalités natives. Le Tableau~\ref{tab:packages-ts} présente les packages principaux et leur usage dans le projet.
+
+    \begin{table}[h]
+    \centering
+    \caption{Packages TypeScript principaux du frontend}
+    \label{tab:packages-ts}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|p{4.5cm}|p{10cm}|}
+    \hline
+    \textbf{Package} & \textbf{Usage dans le projet} \\
+    \hline
+    expo-router & Navigation basée sur les fichiers (file-based routing) avec gestion des onglets, du drawer et des écrans de détail. \\
+    \hline
+    @react-navigation/drawer & Menu latéral (drawer) donnant accès aux modules autorisés selon le rôle utilisateur. \\
+    \hline
+    @react-navigation/bottom-tabs & Barre de navigation inférieure pour les fonctions principales de chaque module. \\
+    \hline
+    @tanstack/react-query & Gestion des appels API avec mise en cache, invalidation automatique et états de chargement/erreur. \\
+    \hline
+    zustand & Gestion de l'état global de l'application (authentification, sélection de dépôt, filtres). \\
+    \hline
+    expo-camera & Accès à l'appareil photo pour les prises de vue (BL, retours, lieux de projets). \\
+    \hline
+    expo-image-picker & Sélection d'images depuis la galerie du téléphone. \\
+    \hline
+    expo-location & Récupération des coordonnées GPS pour la géolocalisation des lieux de projets. \\
+    \hline
+    expo-secure-store & Stockage sécurisé du jeton d'authentification sur l'appareil. \\
+    \hline
+    @gorhom/bottom-sheet & Feuilles de sélection modales (dépôts, chauffeurs, véhicules, produits) avec recherche intégrée. \\
+    \hline
+    @react-native-community/netinfo & Détection de la connexion réseau pour informer l'utilisateur en cas de perte de connexion. \\
+    \hline
+    @react-native-community/datetimepicker & Sélecteur de date pour le filtrage des listes (rotations, voyages). \\
+    \hline
+    date-fns & Formatage et manipulation des dates dans l'interface (affichage, filtrage, calculs). \\
+    \hline
+    react-native-toast-message & Notifications de succès, erreur et information après chaque action utilisateur. \\
+    \hline
+    lottie-react-native & Animations Lottie pour les écrans de chargement et les retours visuels. \\
+    \hline
+    expo-file-system & Gestion des fichiers locaux (photos compressées, exports). \\
+    \hline
+    expo-haptics & Retours haptiques (vibrations) lors des interactions tactiles sensibles. \\
+    \hline
+    \end{tabular}
+    \end{table}
+
+    \section{Documentation d'API et serveur web}
+
+    \subsection{API REST}
+
+    L'architecture de communication entre le frontend mobile et le backend suit le modèle REST (Representational State Transfer). Une API REST expose des endpoints accessibles via le protocole HTTP, chacun correspondant à une ressource métier (voyages, retours, rapports qualité, demandes de transfert, lieux de projets, etc.). Les opérations CRUD (Créer, Lire, Mettre à jour, Supprimer) sont mappées aux méthodes HTTP : \texttt{POST} pour la création, \texttt{GET} pour la lecture, \texttt{PUT} pour la mise à jour et \texttt{DELETE} pour la suppression. Chaque requête est authentifiée via un jeton transmis dans l'en-tête \texttt{auth\_token}, et les réponses sont retournées au format JSON.
+
+    Ce modèle offre plusieurs avantages : une séparation nette entre le client et le serveur, une évolutivité indépendante du frontend et du backend, et la possibilité de consommer l'API depuis tout client HTTP. Dans ce projet, chaque module métier dispose de son propre ensemble d'endpoints PHP dédiés, ce qui assure la cohérence, la traçabilité et la maintenabilité de l'API.
+
+    \subsection{Serveur web Apache}
+
+    \begin{figure}[h]
+    \centering
+    \IfFileExists{assets/apache-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/apache-logo.png}
+    }{
+    \textit{Logo Apache : fichier assets/apache-logo.png non trouvé.}
+    }
+    \caption{Serveur web Apache}
+    \label{fig:apache-logo}
+    \end{figure}
+
+    Le backend PHP est hébergé sur un serveur web Apache, qui assure la réception des requêtes HTTP entrantes, leur routage vers les fichiers PHP correspondants et la transmission des réponses au client mobile. Apache est configuré pour servir les endpoints de l'API REST dans le répertoire \texttt{/sdkboard/api/}, avec le module de réécriture d'URL activé pour prendre en charge les méthodes HTTP étendues (PUT, DELETE) nécessaires aux opérations CRUD.
+
+    Le choix d'Apache repose sur sa maturité, sa stabilité en production et son intégration native avec PHP via le module \texttt{mod\_php}. Sa configuration simplifiée permet un déploiement direct des fichiers PHP sans couche intermédiaire, en cohérence avec l'approche sans framework adoptée pour le backend.
+
+    \section{Modèle d'Architecture Logicielle}
+
+    \subsection{Architecture du backend : Transaction Script}
+
+    L'architecture du backend adopte le pattern \textbf{Transaction Script}, tel que défini par Martin Fowler. Dans ce pattern, chaque opération métier est encapsulée dans une procédure dédiée — ici, un fichier PHP — qui prend en charge l'intégralité du traitement : réception de la requête HTTP, détermination de l'action à effectuer, exécution des requêtes SQL directement via \texttt{mysqli}, et renvoi de la réponse au format JSON. Il n'y a pas de couche ORM, de repository ou de modèle de domaine : le script accède directement à la base de données et applique la logique métier de manière procédurale.
+
+    Ce pattern présente plusieurs avantages dans le contexte de ce projet :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Simplicité} : chaque endpoint correspond à un fichier unique, ce qui rend le code facile à localiser, lire et modifier.
+    \item \textbf{Traçabilité} : le chemin entre la requête HTTP et la réponse est linéaire et explicite, sans abstraction intermédiaire.
+    \item \textbf{Maintenabilité pour l'équipe interne} : l'absence de framework et d'ORM permet à tout développeur PHP de comprendre et modifier un endpoint sans connaissance d'une architecture spécifique.
+    \item \textbf{Déploiement immédiat} : un simple transfert de fichier sur le serveur suffit pour mettre à jour un endpoint, sans compilation ni cache à invalider.
+    \end{itemize}
+
+    La Figure~\ref{fig:backend-tree} présente l'arborescence des fichiers du backend, où chaque fichier PHP correspond à un domaine métier distinct.
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/backend-tree.png}{
+    \includegraphics[width=0.75\textwidth]{assets/backend-tree.png}
+    }{
+    \textit{Arborescence du backend : fichier assets/backend-tree.png non trouvé.}
+    }
+    \caption{Arborescence des fichiers du backend}
+    \label{fig:backend-tree}
+    \end{figure}
+
+    Chaque fichier du backend suit un schéma cohérent : il identifie la méthode HTTP (GET, POST, PUT, DELETE), extrait les paramètres de la requête, exécute les requêtes SQL nécessaires via \texttt{mysqli}, et retourne une réponse JSON structurée avec un champ \texttt{status} (booléen), un champ \texttt{message} et un champ \texttt{data}. Les opérations sensibles utilise une transaction MySQL (\texttt{begin\_transaction}, \texttt{commit}, \texttt{rollback}) pour garantir l'intégrité des données.
+
+    \subsection{Architecture du frontend : séparation par couches et par domaine}
+
+    Le frontend adopte une \textbf{architecture en couches} avec une séparation claire des responsabilités, complétée par un alignement sur les domaines métier au sein de chaque couche. Cette organisation permet de développer, tester et maintenir chaque module de manière autonome tout en conservant une structure cohérente à l'échelle de l'application.
+
+    Les couches sont les suivantes :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{app/} (navigation) : routage basé sur les fichiers via Expo Router. Chaque route est un composant minimal qui délègue l'affichage à un écran dédié.
+    \item \textbf{screens/} (présentation) : composants de page complets, contenant la logique d'affichage, les appels API via React Query et la gestion des interactions utilisateur.
+    \item \textbf{components/} (composants réutilisables) : cartes de liste, feuilles de sélection (bottom sheets), boutons et indicateurs partagés entre les écrans.
+    \item \textbf{api/} (accès aux données) : un fichier par domaine métier (voyage, retour, rapport qualité, etc.), exportant des fonctions typées qui appellent le client HTTP centralisé.
+    \item \textbf{stores/} (état client) : états Zustand pour les formulaires multi-étapes, les bottom sheets et les sélections temporaires.
+    \item \textbf{constants/} (infrastructure) : client HTTP centralisé, configuration React Query, thème et fonctions de permissions.
+    \item \textbf{types/} (types partagés) : définitions TypeScript pour les entités communes (utilisateur, BL, dépôt, etc.).
+    \end{itemize}
+
+    Au sein de chaque couche, les fichiers sont nommés par domaine métier — par exemple \texttt{voyage.api.ts}, \texttt{VoyagesScreen.tsx}, \texttt{voyage.store.ts} — ce qui facilite la navigation et la maintenance. La gestion d'état suit une stratégie duale : React Query pour l'état serveur (données issues de l'API, avec cache et invalidation automatique) et Zustand pour l'état client (sélections, formulaires, modales).
+
+    La Figure~\ref{fig:frontend-tree} présente l'arborescence des dossiers du frontend, illustrant la séparation par couches et par domaine.
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/frontend-tree.png}{
+    \includegraphics[width=0.75\textwidth]{assets/frontend-tree.png}
+    }{
+    \textit{Arborescence du frontend : fichier assets/frontend-tree.png non trouvé.}
+    }
+    \caption{Arborescence des dossiers du frontend}
+    \label{fig:frontend-tree}
+    \end{figure}
 
     \end{document}

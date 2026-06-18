@@ -120,6 +120,9 @@ export default function ManageLotsBottomSheetContent({
       Lot: string;
     }[] = [];
 
+    const toDelete: { idItem: string; idProduit: string; Lot: string }[] = [];
+    const toInsert: { Lot: string; qte: number }[] = [];
+
     currentLots.forEach((lot) => {
       const isSelected = selectedLotNumbers.has(lot.Lot);
       const isPrepared = (lot.preparer ?? "").toLowerCase() === "oui";
@@ -138,7 +141,7 @@ export default function ManageLotsBottomSheetContent({
           qte: availableLot ? Number(availableLot.solde) || Number(lot.qte) || 1 : Number(lot.qte) || 1,
         });
       } else {
-        lotsDelete.push({
+        toDelete.push({
           idItem: lot.idItem,
           idProduit: lot.idProduit,
           Lot: lot.Lot,
@@ -149,14 +152,34 @@ export default function ManageLotsBottomSheetContent({
     selectedLotNumbers.forEach((lotNum) => {
       if (!currentLotSet.has(lotNum)) {
         const availableLot = availableLots?.find((al) => al.num_lot === lotNum);
-        lotsInsert.push({
-          idProduit: Number(idProduit),
+        toInsert.push({
           Lot: lotNum,
           qte: availableLot ? Number(availableLot.solde) || 1 : 1,
-          idItem,
         });
       }
     });
+
+    const pairCount = Math.min(toDelete.length, toInsert.length);
+    for (let i = 0; i < pairCount; i++) {
+      lotsUpdate.push({
+        idItem: toDelete[i].idItem,
+        idProduit: Number(toDelete[i].idProduit),
+        old_lot: toDelete[i].Lot,
+        new_lot: toInsert[i].Lot,
+        qte: toInsert[i].qte,
+      });
+    }
+    for (let i = pairCount; i < toDelete.length; i++) {
+      lotsDelete.push(toDelete[i]);
+    }
+    for (let i = pairCount; i < toInsert.length; i++) {
+      lotsInsert.push({
+        idProduit: Number(idProduit),
+        Lot: toInsert[i].Lot,
+        qte: toInsert[i].qte,
+        idItem,
+      });
+    }
 
     if (lotsUpdate.length === 0 && lotsInsert.length === 0 && lotsDelete.length === 0) {
       Toast.show({
