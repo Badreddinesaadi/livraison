@@ -1073,4 +1073,248 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
     \label{fig:frontend-tree}
     \end{figure}
 
+    \section{Réalisation des sprints de l'application}
+
+    Cette section décrit la réalisation concrète de l'application, sprint par sprint. Le Sprint 1 ayant été consacré à l'initialisation du boilerplate, à la mise en place du design system et à l'autoformation sur les technologies, le démarrage effectif du développement intervient au Sprint 2, qui constitue le point d'entrée de la réalisation.
+
+    \subsection{Sprint 2 : Authentification et module Voyages}
+
+    \subsubsection{Authentification}
+
+    L'authentification repose sur un mécanisme de jetons (\textit{token-based authentication}) de type stateful : à la connexion, le backend vérifie les identifiants de l'utilisateur dans la base de données, génère un jeton unique associé à la session, et le renvoie au client. Ce jeton est stocké de manière sécurisée sur le terminal mobile via \texttt{expo-secure-store} et transmis dans l'en-tête \texttt{auth\_token} de chaque requête API ultérieure. Le backend valide systématiquement le jeton avant d'exécuter toute opération, garantissant ainsi que seuls les utilisateurs authentifiés accèdent aux endpoints protégés.
+
+    La Figure~\ref{fig:auth-flow-uml} présente le diagramme de séquence du flux d'authentification, détaillant les échanges entre le client mobile, le backend et la base de données.
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/auth-flow-uml.png}{
+    \includegraphics[width=0.8\textwidth]{assets/auth-flow-uml.png}
+    }{
+    \textit{Diagramme du flux d'authentification : fichier assets/auth-flow-uml.png non trouvé.}
+    }
+    \caption{Diagramme de séquence — Flux d'authentification}
+    \label{fig:auth-flow-uml}
+    \end{figure}
+
+    La Figure~\ref{fig:login-screen} présente l'interface de connexion affichée à l'utilisateur au lancement de l'application.
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/login-screen.png}{
+    \includegraphics[width=0.35\textwidth]{assets/login-screen.png}
+    }{
+    \textit{Écran de connexion : fichier assets/login-screen.png non trouvé.}
+    }
+    \caption{Interface de connexion}
+    \label{fig:login-screen}
+    \end{figure}
+
+    Les Figures~\ref{fig:login-fail} et~\ref{fig:login-success} illustrent respectivement l'échec et la réussite de l'authentification.
+
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/login-fail.png}{
+    \includegraphics[width=0.9\textwidth]{assets/login-fail.png}
+    }{
+    \textit{Échec de connexion : fichier assets/login-fail.png non trouvé.}
+    }
+    \caption{Échec d'authentification}
+    \label{fig:login-fail}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/login-success.png}{
+    \includegraphics[width=0.9\textwidth]{assets/login-success.png}
+    }{
+    \textit{Réussite de connexion : fichier assets/login-success.png non trouvé.}
+    }
+    \caption{Réussite d'authentification}
+    \label{fig:login-success}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Écran d'accueil}
+
+    Après une authentification réussie, l'utilisateur accède à l'écran d'accueil. Celui-ci affiche une grille de modules disponibles — Voyages, Retours chauffeur, Rapports qualité, Rotation chauffeur, Lieux de projets et Demandes de transfert — sous forme de cartes cliquables. Chaque carte n'est visible que si l'utilisateur dispose de la permission correspondante. Cette logique est pilotée par les fonctions de permission définies dans \texttt{constants/permissions.ts} : avant le rendu de chaque carte, une vérification du type \texttt{canAccessVoyageModule(user)} détermine son affichage.
+
+    Dans la barre d'en-tête, une icône utilisateur est placée en haut à gauche. Lorsqu'elle est pressée, un menu latéral (drawer) se déploie depuis le bord gauche de l'écran. Ce drawer liste les modules autorisés pour l'utilisateur connecté, reprenant la même logique de permission que l'écran d'accueil, et propose en bas du menu un bouton de déconnexion. La déconnexion supprime le jeton d'authentification du stockage sécurisé et redirige l'utilisateur vers l'écran de connexion.
+
+    La Figure~\ref{fig:home-screen} présente l'écran d'accueil avec les modules disponibles pour un utilisateur donné, et la Figure~\ref{fig:drawer-menu} illustre le drawer déployé.
+
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/home-screen.png}{
+    \includegraphics[width=0.9\textwidth]{assets/home-screen.png}
+    }{
+    \textit{Écran d'accueil : fichier assets/home-screen.png non trouvé.}
+    }
+    \caption{Écran d'accueil avec les modules}
+    \label{fig:home-screen}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/drawer-menu.png}{
+    \includegraphics[width=0.9\textwidth]{assets/drawer-menu.png}
+    }{
+    \textit{Drawer : fichier assets/drawer-menu.png non trouvé.}
+    }
+    \caption{Drawer latéral avec les modules et la déconnexion}
+    \label{fig:drawer-menu}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Module Voyages}
+
+    Le module Voyages propose une liste à défilement infini (\textit{infinite scroll}), chargée progressivement par pages via React Query (\texttt{useInfiniteQuery}). Chaque voyage est présenté sous forme d'une carte affichant l'identifiant du voyage, le nom du chauffeur assigné, les bons de livraison (BL) associés et leur statut (En cours / Livré), ainsi qu'un badge de statut coloré. Un bouton de création est placé en haut à droite de l'écran, permettant à l'agent de livraison d'initier un nouveau voyage en trois étapes : renseigner les informations du voyage (chauffeur, véhicule, dépôt de départ, ville de destination et kilométrage de départ), puis sélectionner les BL à associer depuis une liste déroulante avec photographie de chaque BL obligatoire, et enfin visualiser un récapitulatif du voyage avant de confirmer la création.
+
+    La carte de voyage est expansible : en appuyant dessus, des informations supplémentaires apparaissent (dépôt de départ, ville de destination, kilométrage) ainsi que, selon le rôle de l'utilisateur, jusqu'à cinq boutons d'action :
+
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Modifier} : réservé à l'agent de livraison. Ouvre une feuille modale permettant de changer le chauffeur, le véhicule, le dépôt, la ville ou la liste des BL associés.
+    \item \textbf{Clôturer BL} : réservé au chauffeur. Ouvre une feuille modale listant les BL non encore clôturés du voyage. L'utilisateur sélectionne un BL, ce qui le redirige vers un écran de prise de photo en direct depuis l'appareil photo du terminal mobile. La photo capture les produits physiques livrés comme preuve ; une fois la photo prise, la clôture est confirmée et le BL passe au statut \og Livré \fg.
+    \item \textbf{Achever} : réservé à l'agent de livraison. Ouvre une feuille de confirmation avec trois champs obligatoires : le kilométrage réel du véhicule au retour, la date de retour et l'heure de retour. La validation de cette feuille marque le voyage comme achevé.
+    \item \textbf{Voir les détails} : ouvre l'écran de détail du voyage, qui affiche les informations complètes du voyage, la liste des BL avec leur statut et les clichés photographiques pris lors de la clôture de chaque BL.
+    \item \textbf{Supprimer} : réservé à l'agent de livraison. Ouvre une feuille de confirmation demandant de valider la suppression définitive du voyage.
+    \end{itemize}
+
+    La barre de recherche en haut de l'écran permet de filtrer les voyages par identifiant, par nom de chauffeur ou par client associé aux BL.
+
+    La Figure~\ref{fig:voyage-list} montre la liste des voyages avec le bouton de création en haut à droite, et les Figures~\ref{fig:voyage-expanded} et~\ref{fig:voyage-sheet} illustrent respectivement l'expansion d'une carte et la feuille d'actions.
+
+    La Figure~\ref{fig:voyage-create-step1}, la Figure~\ref{fig:voyage-create-step2} et la Figure~\ref{fig:voyage-create-step3} illustrent les trois étapes de la création d'un voyage : saisie des informations, sélection des BL, et récapitulatif avant confirmation. Les Figures~\ref{fig:voyage-cloturer-sheet} et~\ref{fig:voyage-cloturer-photo} détaillent le flux de clôture d'un BL.
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/voyage-list.png}{
+    \includegraphics[width=0.35\textwidth]{assets/voyage-list.png}
+    }{
+    \textit{Liste des voyages : fichier assets/voyage-list.png non trouvé.}
+    }
+    \caption{Liste des voyages — cartes avec BL et statuts}
+    \label{fig:voyage-list}
+    \end{figure}
+
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-card-expanded.png}{
+    \includegraphics[width=0.9\textwidth]{assets/voyage-card-expanded.png}
+    }{
+    \textit{Carte expansée : fichier assets/voyage-card-expanded.png non trouvé.}
+    }
+    \caption{Carte de voyage expansée}
+    \label{fig:voyage-expanded}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-bottom-sheet.png}{
+    \includegraphics[width=0.9\textwidth]{assets/voyage-bottom-sheet.png}
+    }{
+    \textit{Feuille d'actions : fichier assets/voyage-bottom-sheet.png non trouvé.}
+    }
+    \caption{Feuille d'actions — Modifier / Voir les détails}
+    \label{fig:voyage-sheet}
+    \end{minipage}
+    \end{figure}
+
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-create-step1.png}{
+    \includegraphics[width=\textwidth]{assets/voyage-create-step1.png}
+    }{
+    \textit{Étape 1 : fichier assets/voyage-create-step1.png non trouvé.}
+    }
+    \caption{Étape 1 — Saisie des informations}
+    \label{fig:voyage-create-step1}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-create-step2.png}{
+    \includegraphics[width=\textwidth]{assets/voyage-create-step2.png}
+    }{
+    \textit{Étape 2 : fichier assets/voyage-create-step2.png non trouvé.}
+    }
+    \caption{Étape 2 — Sélection des BL}
+    \label{fig:voyage-create-step2}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-create-step3.png}{
+    \includegraphics[width=\textwidth]{assets/voyage-create-step3.png}
+    }{
+    \textit{Étape 3 : fichier assets/voyage-create-step3.png non trouvé.}
+    }
+    \caption{Étape 3 — Récapitulatif et confirmation}
+    \label{fig:voyage-create-step3}
+    \end{minipage}
+    \end{figure}
+
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-cloturer-sheet.png}{
+    \includegraphics[width=0.9\textwidth]{assets/voyage-cloturer-sheet.png}
+    }{
+    \textit{Clôturer BL — sélection : fichier assets/voyage-cloturer-sheet.png non trouvé.}
+    }
+    \caption{Feuille de sélection des BL à clôturer}
+    \label{fig:voyage-cloturer-sheet}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-cloturer-photo.png}{
+    \includegraphics[width=0.9\textwidth]{assets/voyage-cloturer-photo.png}
+    }{
+    \textit{Clôturer BL — photo : fichier assets/voyage-cloturer-photo.png non trouvé.}
+    }
+    \caption{Prise de photo de preuve du BL}
+    \label{fig:voyage-cloturer-photo}
+    \end{minipage}
+    \end{figure}
+
+    La Figure~\ref{fig:voyage-achever} présente la feuille d'achèvement d'un voyage, la Figure~\ref{fig:voyage-details} montre l'écran de détail avec les BL et leurs images, et la Figure~\ref{fig:voyage-delete-confirm} illustre la confirmation de suppression.
+
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-achever.png}{
+    \includegraphics[width=0.9\textwidth]{assets/voyage-achever.png}
+    }{
+    \textit{Achever un voyage : fichier assets/voyage-achever.png non trouvé.}
+    }
+    \caption{Feuille d'achèvement — kilométrage, date et heure retour}
+    \label{fig:voyage-achever}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/voyage-details.png}{
+    \includegraphics[width=0.9\textwidth]{assets/voyage-details.png}
+    }{
+    \textit{Détail d'un voyage : fichier assets/voyage-details.png non trouvé.}
+    }
+    \caption{Écran de détail — BL, statuts et images}
+    \label{fig:voyage-details}
+    \end{minipage}
+    \end{figure}
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/voyage-delete-confirm.png}{
+    \includegraphics[width=0.35\textwidth]{assets/voyage-delete-confirm.png}
+    }{
+    \textit{Confirmation de suppression : fichier assets/voyage-delete-confirm.png non trouvé.}
+    }
+    \caption{Feuille de confirmation de suppression d'un voyage}
+    \label{fig:voyage-delete-confirm}
+    \end{figure}
+
     \end{document}
