@@ -943,11 +943,11 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
 
     Le frontend de l'application repose sur un ensemble de bibliothèques TypeScript sélectionnées pour couvrir la navigation, la gestion d'état, les appels réseau, les interactions utilisateur et l'accès aux fonctionnalités natives. Le Tableau~\ref{tab:packages-ts} présente les packages principaux et leur usage dans le projet.
 
-    \begin{table}[h]
+    \begin{table}[H]
     \centering
+    \renewcommand{\arraystretch}{1.3}
     \caption{Packages TypeScript principaux du frontend}
     \label{tab:packages-ts}
-    \renewcommand{\arraystretch}{1.3}
     \begin{tabular}{|p{4.5cm}|p{10cm}|}
     \hline
     \textbf{Package} & \textbf{Usage dans le projet} \\
@@ -1001,10 +1001,10 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
 
     \begin{figure}[h]
     \centering
-    \IfFileExists{assets/apache-logo.jpg}{
-    \includegraphics[width=0.2\textwidth]{assets/apache-logo.jpg}
+    \IfFileExists{assets/apache-logo.png}{
+    \includegraphics[width=0.2\textwidth]{assets/apache-logo.png}
     }{
-    \textit{Logo Apache : fichier assets/apache-logo.jpg non trouvé.}
+    \textit{Logo Apache : fichier assets/apache-logo.png non trouvé.}
     }
     \caption{Serveur web Apache}
     \label{fig:apache-logo}
@@ -1096,42 +1096,29 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
     \label{fig:auth-flow-uml}
     \end{figure}
 
-    La Figure~\ref{fig:login-screen} présente l'interface de connexion affichée à l'utilisateur au lancement de l'application.
+    La Figure~\ref{fig:login-screen} présente l'interface de connexion et la Figure~\ref{fig:login-fail} illustre l'échec d'authentification.
 
-    \begin{figure}[H]
+    \begin{figure}[ht]
     \centering
-    \IfFileExists{assets/login-screen.jpg}{
-    \includegraphics[width=0.35\textwidth]{assets/login-screen.jpg}
+    \begin{minipage}[b]{0.4\textwidth}
+    \centering
+    \IfFileExists{assets/login-screen.jpeg}{
+    \includegraphics[width=0.8\textwidth]{assets/login-screen.jpeg}
     }{
-    \textit{Écran de connexion : fichier assets/login-screen.jpg non trouvé.}
+    \textit{Écran de connexion : fichier assets/login-screen.jpeg non trouvé.}
     }
     \caption{Interface de connexion}
     \label{fig:login-screen}
-    \end{figure}
-
-    Les Figures~\ref{fig:login-fail} et~\ref{fig:login-success} illustrent respectivement l'échec et la réussite de l'authentification.
-
-    \begin{figure}[H]
-    \centering
-    \begin{minipage}[b]{0.45\textwidth}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.4\textwidth}
     \centering
     \IfFileExists{assets/login-fail.jpg}{
-    \includegraphics[width=0.9\textwidth]{assets/login-fail.jpg}
+    \includegraphics[width=0.8\textwidth]{assets/login-fail.jpg}
     }{
     \textit{Échec de connexion : fichier assets/login-fail.jpg non trouvé.}
     }
     \caption{Échec d'authentification}
     \label{fig:login-fail}
-    \end{minipage}\hfill
-    \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \IfFileExists{assets/login-success.jpg}{
-    \includegraphics[width=0.9\textwidth]{assets/login-success.jpg}
-    }{
-    \textit{Réussite de connexion : fichier assets/login-success.jpg non trouvé.}
-    }
-    \caption{Réussite d'authentification}
-    \label{fig:login-success}
     \end{minipage}
     \end{figure}
 
@@ -1143,22 +1130,22 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
 
     La Figure~\ref{fig:home-screen} présente l'écran d'accueil avec les modules disponibles pour un utilisateur donné, et la Figure~\ref{fig:drawer-menu} illustre le drawer déployé.
 
-    \begin{figure}[H]
+    \begin{figure}[ht]
     \centering
-    \begin{minipage}[b]{0.45\textwidth}
+    \begin{minipage}[b]{0.4\textwidth}
     \centering
     \IfFileExists{assets/home-screen.jpg}{
-    \includegraphics[width=0.9\textwidth]{assets/home-screen.jpg}
+    \includegraphics[width=0.8\textwidth]{assets/home-screen.jpg}
     }{
     \textit{Écran d'accueil : fichier assets/home-screen.jpg non trouvé.}
     }
     \caption{Écran d'accueil avec les modules}
     \label{fig:home-screen}
     \end{minipage}\hfill
-    \begin{minipage}[b]{0.45\textwidth}
+    \begin{minipage}[b]{0.4\textwidth}
     \centering
     \IfFileExists{assets/drawer-menu.jpg}{
-    \includegraphics[width=0.9\textwidth]{assets/drawer-menu.jpg}
+    \includegraphics[width=0.8\textwidth]{assets/drawer-menu.jpg}
     }{
     \textit{Drawer : fichier assets/drawer-menu.jpg non trouvé.}
     }
@@ -1169,9 +1156,7 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
 
     \subsubsection{Module Voyages}
 
-    Le module Voyages propose une liste à défilement infini (\textit{infinite scroll}), chargée progressivement par pages via React Query (\texttt{useInfiniteQuery}). Chaque voyage est présenté sous forme d'une carte affichant l'identifiant du voyage, le nom du chauffeur assigné, les bons de livraison (BL) associés et leur statut (En cours / Livré), ainsi qu'un badge de statut coloré. Un bouton de création est placé en haut à droite de l'écran, permettant à l'agent de livraison d'initier un nouveau voyage en trois étapes : renseigner les informations du voyage (chauffeur, véhicule, dépôt de départ, ville de destination et kilométrage de départ), puis sélectionner les BL à associer depuis une liste déroulante avec photographie de chaque BL obligatoire, et enfin visualiser un récapitulatif du voyage avant de confirmer la création.
-
-    La carte de voyage est expansible : en appuyant dessus, des informations supplémentaires apparaissent (dépôt de départ, ville de destination, kilométrage) ainsi que, selon le rôle de l'utilisateur, jusqu'à cinq boutons d'action :
+    L'écran principal affiche la liste paginée des voyages sous forme de cartes, avec l'identifiant, le chauffeur, les bons de livraison (BL) et un badge de statut coloré. Un bouton de création placé en haut à droite permet d'initier un voyage en trois étapes : informations du voyage, sélection des BL avec photo obligatoire, et récapitulatif avant confirmation. La carte est expansible et dévoile des informations supplémentaires ainsi que, selon le rôle, jusqu'à cinq actions :
 
     \begin{itemize}[leftmargin=1.2em]
     \item \textbf{Modifier} : réservé à l'agent de livraison. Ouvre une feuille modale permettant de changer le chauffeur, le véhicule, le dépôt, la ville ou la liste des BL associés.
@@ -1315,6 +1300,396 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
     }
     \caption{Feuille de confirmation de suppression d'un voyage}
     \label{fig:voyage-delete-confirm}
+    \end{figure}
+
+    \subsection{Sprint 3 : Module Retours chauffeur et Rapports qualité}
+
+    Le module Retours chauffeur permet aux chauffeurs de soumettre des retours de marchandise et aux administrateurs de les valider ou de les refuser. Chaque retour est rattaché à un client et à un chauffeur, et peut inclure des photos prises en direct depuis l'appareil photo du terminal ou des fichiers joints sélectionnés depuis le stockage. Le cycle de vie d'un retour passe par quatre statuts : \og En cours \fg{} lors de la création, \og Envoyé \fg{} après soumission, puis \og Terminé \fg{} si le retour est accepté ou \og Refusé \fg{} si l'administrateur le rejette.
+
+    L'accès au module est contrôlé par cinq permissions : \texttt{LIST} (consultation de la liste), \texttt{CREATE} (création d'un retour), \texttt{UPDATE} (gestion des retours), \texttt{DELETE} (suppression) et \texttt{ACHEVER\_BL} (validation ou refus d'un retour). Seules les personnes autorisées voient les boutons d'action correspondants.
+
+    \subsubsection{Liste des retours et filtrage}
+
+    L'écran principal affiche la liste paginée des retours sous forme de cartes. Chaque carte présente l'identifiant du retour, le nom du chauffeur, le statut coloré et le nombre de fichiers joints. En appuyant sur une carte, des détails supplémentaires apparaissent (client, motif de réclamation, retour MSE, BL cacheté, règlement) ainsi que deux boutons d'action : \og Voir les détails \fg{} et \og Plus \fg{} (traitement ou suppression).
+
+    Une barre de recherche locale permet de filtrer la liste. Un bouton de filtre ouvre une feuille modale proposant deux critères serveur : le chauffeur et le client (avec recherche intégrée). Un badge indique le nombre de filtres actifs.
+
+    La Figure~\ref{fig:retour-list} présente la liste des retours avec la barre de recherche et le bouton de création.
+
+    \begin{figure}[ht]
+    \centering
+    \IfFileExists{assets/retour-list.jpg}{
+    \includegraphics[width=0.35\textwidth]{assets/retour-list.jpg}
+    }{
+    \textit{Liste des retours : fichier assets/retour-list.jpg non trouvé.}
+    }
+    \caption{Liste des retours — cartes avec identifiant, chauffeur et statut}
+    \label{fig:retour-list}
+    \end{figure}
+
+    \subsubsection{Carte expansive, filtrage et détail}
+
+    La carte expansive dévoile les détails du retour (client, motif de réclamation, indicateurs booléens) et propose les boutons Voir les détails et Plus (traitement, suppression). L'écran de détail affiche toutes les informations du retour, le commentaire éventuel de validation dans un encadré coloré, ainsi que la liste des fichiers joints avec les actions Aperçu, Télécharger et Partager. L'écran de filtrage permet de filtrer la liste par chauffeur et par client.
+
+    La Figure~\ref{fig:retour-filter} illustre la feuille de filtrage, la Figure~\ref{fig:retour-card-expanded} présente la carte expansive, et la Figure~\ref{fig:retour-details} montre l'écran de détail.
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/retour-filter.jpg}{
+    \includegraphics[width=\textwidth]{assets/retour-filter.jpg}
+    }{
+    \textit{Filtre : fichier assets/retour-filter.jpg non trouvé.}
+    }
+    \caption{Feuille de filtrage par chauffeur et client}
+    \label{fig:retour-filter}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/retour-card-expanded.jpg}{
+    \includegraphics[width=\textwidth]{assets/retour-card-expanded.jpg}
+    }{
+    \textit{Carte expansive : fichier assets/retour-card-expanded.jpg non trouvé.}
+    }
+    \caption{Carte de retour expansée — détails et actions}
+    \label{fig:retour-card-expanded}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/retour-details.jpg}{
+    \includegraphics[width=\textwidth]{assets/retour-details.jpg}
+    }{
+    \textit{Écran de détail : fichier assets/retour-details.jpg non trouvé.}
+    }
+    \caption{Écran de détail — informations et fichiers joints}
+    \label{fig:retour-details}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Validation, création et suppression}
+
+    La validation d'un retour s'effectue en deux étapes : l'administrateur choisit entre Accepter et Refuser, saisit un commentaire facultatif, puis confirme son choix sur un écran récapitulatif avec un bouton coloré selon l'action (vert pour acceptation, rouge pour refus).
+
+    La création d'un retour comporte un formulaire (client, BL cacheté, règlement, retour MSE, réclamation) et une zone de fichiers permettant de prendre une photo via l'appareil photo du terminal ou de sélectionner des fichiers depuis le stockage, avec un aperçu en liste horizontale.
+
+    La suppression affiche une feuille de confirmation avec le message \og Le retour \#\{id\} sera supprimé définitivement. Voulez-vous continuer ? \fg{} et deux boutons : Annuler ou Supprimer.
+
+    La Figure~\ref{fig:retour-validation} présente l'écran de validation, la Figure~\ref{fig:retour-create} montre l'écran de création, et la Figure~\ref{fig:retour-delete-confirm} illustre la confirmation de suppression.
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/retour-validation.jpg}{
+    \includegraphics[width=\textwidth]{assets/retour-validation.jpg}
+    }{
+    \textit{Validation : fichier assets/retour-validation.jpg non trouvé.}
+    }
+    \caption{Validation — Choix, commentaire et confirmation}
+    \label{fig:retour-validation}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/retour-create.jpg}{
+    \includegraphics[width=\textwidth]{assets/retour-create.jpg}
+    }{
+    \textit{Création : fichier assets/retour-create.jpg non trouvé.}
+    }
+    \caption{Création d'un retour — formulaire et prise de photos}
+    \label{fig:retour-create}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/retour-delete-confirm.jpg}{
+    \includegraphics[width=\textwidth]{assets/retour-delete-confirm.jpg}
+    }{
+    \textit{Suppression : fichier assets/retour-delete-confirm.jpg non trouvé.}
+    }
+    \caption{Feuille de confirmation de suppression d'un retour}
+    \label{fig:retour-delete-confirm}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Module Rapports qualité}
+
+    Le module Rapports qualité permet de consigner des rapports sur la qualité des produits livrés. Chaque rapport est identifié par un numéro, contient les champs DUM, Dossier et Commentaire, et peut être accompagné de fichiers joints (photos ou documents). L'accès est contrôlé par quatre permissions : \texttt{LIST} (consultation), \texttt{CREATE} (création), \texttt{UPDATE} (modification) et \texttt{DELETE} (suppression).
+
+    \subsubsection{Liste des rapports et carte expansive}
+
+    L'écran principal affiche la liste paginée des rapports sous forme de cartes. Chaque carte présente l'identifiant du rapport (\texttt{RQ-\{id\}}), le dossier ou DUM, la date de création et le nombre de fichiers joints. En appuyant sur une carte, des détails supplémentaires apparaissent : les champs DUM, Dossier, Commentaire et Date, accompagnés d'une galerie de miniatures des fichiers joints et de deux boutons d'action conditionnels — \og Détails \fg{} et \og Supprimer \fg.
+
+    Une barre de recherche locale avec débounce permet de filtrer les rapports par DUM, Dossier ou Commentaire.
+
+    La Figure~\ref{fig:rapport-qualite-list} présente la liste des rapports, et les Figures~\ref{fig:rapport-qualite-card-expanded} et~\ref{fig:rapport-qualite-details} illustrent respectivement la carte expansive et l'écran de détail.
+
+    \begin{figure}[ht]
+    \centering
+    \IfFileExists{assets/rapport-qualite-list.jpg}{
+    \includegraphics[width=0.35\textwidth]{assets/rapport-qualite-list.jpg}
+    }{
+    \textit{Liste des rapports : fichier assets/rapport-qualite-list.jpg non trouvé.}
+    }
+    \caption{Liste des rapports qualité — cartes avec DUM et Dossier}
+    \label{fig:rapport-qualite-list}
+    \end{figure}
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/rapport-qualite-card-expanded.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/rapport-qualite-card-expanded.jpg}
+    }{
+    \textit{Carte expansive : fichier assets/rapport-qualite-card-expanded.jpg non trouvé.}
+    }
+    \caption{Carte de rapport expansive — détails et actions}
+    \label{fig:rapport-qualite-card-expanded}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/rapport-qualite-details.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/rapport-qualite-details.jpg}
+    }{
+    \textit{Écran de détail : fichier assets/rapport-qualite-details.jpg non trouvé.}
+    }
+    \caption{Écran de détail — informations et fichiers joints}
+    \label{fig:rapport-qualite-details}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Création et suppression}
+
+    L'écran de création comporte un formulaire (DUM, Dossier, Commentaire) et une zone de fichiers permettant de prendre une photo depuis l'appareil photo ou de sélectionner des fichiers existants, avec un aperçu en liste horizontale. La validation exige qu'au moins un des champs DUM ou Dossier soit renseigné et qu'au moins un fichier soit joint.
+
+    La suppression affiche une feuille de confirmation avec le message \og Le rapport \#\{id\} sera supprimé définitivement. Voulez-vous continuer ? \fg{} et deux boutons : Annuler ou Supprimer.
+
+    La Figure~\ref{fig:rapport-qualite-create} présente l'écran de création, et la Figure~\ref{fig:rapport-qualite-delete-confirm} illustre la confirmation de suppression.
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/rapport-qualite-create.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/rapport-qualite-create.jpg}
+    }{
+    \textit{Création : fichier assets/rapport-qualite-create.jpg non trouvé.}
+    }
+    \caption{Création d'un rapport qualité}
+    \label{fig:rapport-qualite-create}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/rapport-qualite-delete-confirm.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/rapport-qualite-delete-confirm.jpg}
+    }{
+    \textit{Suppression : fichier assets/rapport-qualite-delete-confirm.jpg non trouvé.}
+    }
+    \caption{Confirmation de suppression d'un rapport}
+    \label{fig:rapport-qualite-delete-confirm}
+    \end{minipage}
+    \end{figure}
+
+    \subsection{Sprint 4 : Module Rotation et Module Lieux}
+
+    \subsubsection{Module Rotation}
+
+    Le module Rotation est un module en lecture seule qui affiche la liste paginée des rotations de véhicules. Chaque carte présente le véhicule, le chauffeur assigné, le kilométrage parcouru, la ville d'arrivée et un badge de disponibilité (Disponible en vert ou Réservé en rouge). Un bouton de filtre ouvre une feuille modale proposant quatre critères : chauffeur, véhicule, disponibilité et intervalle de dates.
+
+    La Figure~\ref{fig:rotation-list} présente la liste des rotations, et la Figure~\ref{fig:rotation-filter} illustre la feuille de filtrage.
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/rotation-list.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/rotation-list.jpg}
+    }{
+    \textit{Liste des rotations : fichier assets/rotation-list.jpg non trouvé.}
+    }
+    \caption{Liste des rotations — véhicules et disponibilité}
+    \label{fig:rotation-list}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/rotation-filter.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/rotation-filter.jpg}
+    }{
+    \textit{Filtre : fichier assets/rotation-filter.jpg non trouvé.}
+    }
+    \caption{Feuille de filtrage — chauffeur, véhicule, disponibilité}
+    \label{fig:rotation-filter}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Module Lieux de projets}
+
+    Le module Lieux de projets gère les chantiers et dépôts avec leurs coordonnées GPS, contacts et photos. L'écran principal affiche une liste filtrable par type (Chantier ou Dépôt). Chaque carte est expansive et dévoile les détails du lieu (contact, téléphone, coordonnées GPS, commentaire), une galerie de photos et des boutons d'action : ouvrir la localisation dans Google Maps, appeler le contact, ou modifier/supprimer le lieu.
+
+    L'écran de création capture automatiquement les coordonnées GPS du terminal, propose un formulaire (type de projet, contact, téléphone, commentaire) et une zone de prise de photos ou sélection de fichiers.
+
+    La Figure~\ref{fig:lieux-list} montre la liste des lieux, la Figure~\ref{fig:lieux-card-expanded} illustre la carte expansive, et la Figure~\ref{fig:lieux-create} présente l'écran de création.
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/lieux-list.jpg}{
+    \includegraphics[width=\textwidth]{assets/lieux-list.jpg}
+    }{
+    \textit{Liste des lieux : fichier assets/lieux-list.jpg non trouvé.}
+    }
+    \caption{Liste des lieux — chantiers et dépôts}
+    \label{fig:lieux-list}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/lieux-card-expanded.jpg}{
+    \includegraphics[width=\textwidth]{assets/lieux-card-expanded.jpg}
+    }{
+    \textit{Carte expansive : fichier assets/lieux-card-expanded.jpg non trouvé.}
+    }
+    \caption{Carte expansive — détails et galerie}
+    \label{fig:lieux-card-expanded}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.32\textwidth}
+    \centering
+    \IfFileExists{assets/lieux-create.jpg}{
+    \includegraphics[width=\textwidth]{assets/lieux-create.jpg}
+    }{
+    \textit{Création : fichier assets/lieux-create.jpg non trouvé.}
+    }
+    \caption{Création d'un lieu — formulaire et GPS}
+    \label{fig:lieux-create}
+    \end{minipage}
+    \end{figure}
+
+    \subsection{Sprint 5 : Module Demande de transfert}
+
+    Le module Demande de transfert gère les demandes de transfert de produits entre dépôts. Chaque demande comporte une référence, un dépôt source, un dépôt destination, un transporteur, une matricule, un numéro DUM, un statut et une observation. Les produits et lots associés à la demande suivent un cycle de préparation : un produit ou un lot peut être marqué comme préparé une fois vérifié. L'accès est contrôlé par quatre permissions : \texttt{LIST}, \texttt{CREATE}, \texttt{UPDATE} et \texttt{DELETE}.
+
+    \subsubsection{Liste des demandes et carte expansive}
+
+    L'écran principal affiche la liste paginée des demandes de transfert sous forme de cartes. Chaque carte présente la référence, le transporteur, un badge de statut coloré (vert pour Validé/Terminé, ambre pour Brouillon/En cours, rouge pour Refusé/Annulé) et la date. En appuyant sur une carte, des détails supplémentaires apparaissent : transporteur, matricule, DUM, dépôt source, dépôt destination, observation et créateur. Un bouton \og Détails \fg{} permet de naviguer vers l'écran de détail complet.
+
+    La Figure~\ref{fig:dt-list} présente la liste des demandes, et la Figure~\ref{fig:dt-card-expanded} illustre la carte expansive avec les informations détaillées.
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/dt-list.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/dt-list.jpg}
+    }{
+    \textit{Liste des demandes : fichier assets/dt-list.jpg non trouvé.}
+    }
+    \caption{Liste des demandes de transfert}
+    \label{fig:dt-list}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \IfFileExists{assets/dt-card-expanded.jpg}{
+    \includegraphics[width=0.85\textwidth]{assets/dt-card-expanded.jpg}
+    }{
+    \textit{Carte expansive : fichier assets/dt-card-expanded.jpg non trouvé.}
+    }
+    \caption{Carte de demande expansive — détails}
+    \label{fig:dt-card-expanded}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Écran de détail}
+
+    L'écran de détail affiche trois sections principales. La première est une carte d'en-tête avec la référence de la demande, un badge de statut modifiable par un appui (ouvrant un sélecteur de statut à quatre choix : Brouillon, En cours, Envoyé, Reçue), puis les champs Dépôt source, Dépôt destination, Transporteur, Matricule, DUM, Date, Observation et Créé par. Deux boutons d'action conditionnels apparaissent sous l'en-tête : Modifier (si permission \texttt{UPDATE}) et Supprimer (si permission \texttt{DELETE}).
+
+    La deuxième section liste les produits associés à la demande. Chaque produit affiche son nom, le nombre de FDX, la quantité, l'unité et un badge de préparation (Préparé / Non préparé). Si le produit n'est pas encore préparé et que l'utilisateur dispose de la permission \texttt{UPDATE}, deux boutons d'action apparaissent : Gérer les lots (ouvrant la feuille de sélection des lots) et Supprimer le produit. Si des lots sont associés au produit, ils sont listés avec leur numéro de lot, leur propre badge de préparation, et des détails expansibles (code lot, lot ancien, quantité, nombre de pièces, longueur, date d'entrée, dépôt).
+
+    La Figure~\ref{fig:dt-details} présente l'écran de détail complet avec la carte d'en-tête, le sélecteur de statut et la liste des produits.
+
+    \begin{figure}[ht]
+    \centering
+    \IfFileExists{assets/dt-details.jpg}{
+    \includegraphics[width=0.35\textwidth]{assets/dt-details.jpg}
+    }{
+    \textit{Écran de détail : fichier assets/dt-details.jpg non trouvé.}
+    }
+    \caption{Écran de détail — en-tête, statut et produits}
+    \label{fig:dt-details}
+    \end{figure}
+
+    \subsubsection{Suppression, gestion des lots et préparation}
+
+    La suppression d'une demande de transfert affiche une feuille de confirmation : \og La demande de transfert "\{référence\}" sera supprimée définitivement. Voulez-vous continuer ? \fg{}, avec les boutons Annuler et Supprimer.
+
+    La gestion des lots (\og Gérer les lots \fg{}) permet de sélectionner ou désélectionner les lots à associer à un produit. La feuille affiche la liste de tous les lots disponibles pour le produit, chacun avec une case à cocher, son numéro de lot, des badges (Préparé en vert, Actuel en bleu) et les informations de détail (quantité, pièces, dépôt, date). Les lots déjà préparés ne sont pas modifiables. Un compteur en bas indique le nombre de lots sélectionnés et un bouton Enregistrer enregistre les modifications.
+
+    La préparation d'un produit ou d'un lot affiche une feuille de confirmation demandant de valider le passage au statut Préparé. Le bouton de confirmation est vert pour l'acceptation.
+
+    La Figure~\ref{fig:dt-delete} présente la confirmation de suppression, la Figure~\ref{fig:dt-manage-lots} illustre la feuille de gestion des lots, la Figure~\ref{fig:dt-preparer-produit} montre la confirmation de préparation d'un produit, et la Figure~\ref{fig:dt-preparer-lot} celle d'un lot.
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.38\textwidth}
+    \centering
+    \IfFileExists{assets/dt-delete.jpg}{
+    \includegraphics[width=0.75\textwidth]{assets/dt-delete.jpg}
+    }{
+    \textit{Suppression : fichier assets/dt-delete.jpg non trouvé.}
+    }
+    \caption{Confirmation de suppression}
+    \label{fig:dt-delete}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.38\textwidth}
+    \centering
+    \IfFileExists{assets/dt-manage-lots.jpg}{
+    \includegraphics[width=0.75\textwidth]{assets/dt-manage-lots.jpg}
+    }{
+    \textit{Gestion des lots : fichier assets/dt-manage-lots.jpg non trouvé.}
+    }
+    \caption{Gérer les lots — sélection et badges}
+    \label{fig:dt-manage-lots}
+    \end{minipage}
+    \end{figure}
+
+    \begin{figure}[ht]
+    \centering
+    \begin{minipage}[b]{0.38\textwidth}
+    \centering
+    \IfFileExists{assets/dt-preparer-produit.jpg}{
+    \includegraphics[width=0.75\textwidth]{assets/dt-preparer-produit.jpg}
+    }{
+    \textit{Préparation produit : fichier assets/dt-preparer-produit.jpg non trouvé.}
+    }
+    \caption{Préparer un produit}
+    \label{fig:dt-preparer-produit}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.38\textwidth}
+    \centering
+    \IfFileExists{assets/dt-preparer-lot.jpg}{
+    \includegraphics[width=0.75\textwidth]{assets/dt-preparer-lot.jpg}
+    }{
+    \textit{Préparation lot : fichier assets/dt-preparer-lot.jpg non trouvé.}
+    }
+    \caption{Préparer un lot}
+    \label{fig:dt-preparer-lot}
+    \end{minipage}
+    \end{figure}
+
+    \subsubsection{Création d'une demande de transfert}
+
+    L'écran de création comporte un formulaire avec six champs : Dépôt source et Dépôt destination (sélectionnés via une feuille modale de liste de dépôts), DUM, Transporteur, Matricule et Observation (facultatif). La validation exige que les deux dépôts soient sélectionnés et que les champs DUM, Transporteur et Matricule soient renseignés.
+
+    La Figure~\ref{fig:dt-create} présente l'écran de création avec le formulaire et les sélecteurs de dépôts.
+
+    \begin{figure}[ht]
+    \centering
+    \IfFileExists{assets/dt-create.jpg}{
+    \includegraphics[width=0.25\textwidth]{assets/dt-create.jpg}
+    }{
+    \textit{Écran de création : fichier assets/dt-create.jpg non trouvé.}
+    }
+    \caption{Création d'une demande de transfert}
+    \label{fig:dt-create}
     \end{figure}
 
     \end{document}
