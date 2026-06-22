@@ -11,10 +11,13 @@
 \usepackage{float}
     \usepackage{fancyhdr}
     \usepackage[tableposition=above]{caption}
+    \usepackage{tocloft}
     \usepackage{arabtex}
     \usepackage{utf8}
-    
+
     \geometry{margin=2.5cm}
+
+    \setlength{\cftsecnumwidth}{3.5em}
     \setlength{\parindent}{0pt}
     \setlength{\parskip}{0.6em}
     \setcounter{secnumdepth}{3}
@@ -157,7 +160,7 @@ My application, developed with React Native and TypeScript for the frontend and 
 
     \renewcommand{\contentsname}{Table des matières}
     \renewcommand{\listfigurename}{Liste des figures}
-    \setcounter{tocdepth}{2}
+    \setcounter{tocdepth}{1}
     \tableofcontents
 \newpage
     \listoffigures
@@ -171,6 +174,8 @@ My application, developed with React Native and TypeScript for the frontend and 
     \end{center}
     \vspace*{\fill}
     \newpage
+
+\addcontentsline{toc}{section}{{\bfseries Chapitre 1 : Cadre et contexte général du projet}}
 
     \section{Présentation de l'entreprise SDK WOOD}
 
@@ -555,6 +560,8 @@ Ce chapitre a présenté le cadre général du projet et la méthodologie de ges
     \renewcommand{\thesection}{2.\arabic{section}}
     \setcounter{section}{0}
 
+\addcontentsline{toc}{section}{{\bfseries Chapitre 2 : Analyse des besoins, conception et architecture}}
+
 \section{Introduction}
 Le chapitre précédent a défini le cadre général du projet et la méthodologie de gestion adoptée. Le présent chapitre aborde l'analyse des besoins, la conception et l'architecture de la solution.
 
@@ -917,6 +924,8 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
     \newpage
     \renewcommand{\thesection}{3.\arabic{section}}
     \setcounter{section}{0}
+
+\addcontentsline{toc}{section}{{\bfseries Chapitre 3 : Mise en œuvre de la solution}}
 
     \section{Introduction}
     Ce troisième chapitre présente les différentes technologies et outils adoptés pour le développement de la solution proposée. En outre, il représente la modélisation du processus final et détaille les différentes étapes de la réalisation de ce projet, en se servant de captures illustratives.
