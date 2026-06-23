@@ -11,7 +11,9 @@
 \usepackage{float}
     \usepackage{fancyhdr}
     \usepackage[tableposition=above]{caption}
+\usepackage{url}
     \usepackage{tocloft}
+    \usepackage{longtable}
     \usepackage{arabtex}
     \usepackage{utf8}
 
@@ -48,6 +50,8 @@ Je tiens \`a exprimer ma profonde gratitude et mon respect \`a mon pr\'ecieux su
 Je tiens aussi \`a exprimer ma profonde gratitude \`a mon responsable de fili\`ere, M. TIDHAF Belkasem, pour son d\'evouement et son soutien tout au long de ma trajectoire.
 
 Je tiens \'egalement \`a remercier tous mes enseignants de l'ENSAO pour leur soutien et leur accueil cordial et amical.
+
+Je tiens aussi \`a exprimer ma gratitude envers M. EL ASNAOUI Khalid, membre du jury, pour avoir consenti \`a \'evaluer ce travail. Et pour toutes les raisons, petites et grandes, je ne saurai jamais assez exprimer ma gratitude \`a mes parents pour leur d\'evouement.
 
 Pour finir, je tiens \`a exprimer ma profonde gratitude envers tous ceux qui ont particip\'e \`a la r\'ealisation de ce projet, qu'ils soient proches ou \'eloign\'es. Leur soutien, qu'il soit mat\'eriel, moral ou intellectuel, a \'et\'e d'une valeur inestimable.
 
@@ -141,7 +145,7 @@ Votre enfant.
 \end{center}
 \vspace{0.3cm}
 
-Dans le cadre de mon projet de fin d'ann\'ee \`a l'\'Ecole Nationale des Sciences Appliqu\'ees d'Oujda, fili\`ere Ing\'enierie des Technologies de l'Information et R\'eseaux de Communication, j'ai con\c cu une application mobile destin\'ee \`a la gestion des op\'erations logistiques de l'entreprise SDK WOOD. Sp\'ecialis\'ee dans le secteur du bois, SDK WOOD assure la livraison de produits via des chauffeurs et agents de livraison sur de multiples d\'ep\^ots et chantiers.
+Dans le cadre de mon projet de fin d\'études \`a l'\'Ecole Nationale des Sciences Appliqu\'ees d'Oujda, fili\`ere Ing\'enierie des Technologies de l'Information et R\'eseaux de Communication, j'ai con\c cu une application mobile destin\'ee \`a la gestion des op\'erations logistiques de l'entreprise SDK WOOD. Sp\'ecialis\'ee dans le secteur du bois, SDK WOOD assure la livraison de produits via des chauffeurs et agents de livraison sur de multiples d\'ep\^ots et chantiers.
 
 Mon application, d\'evelopp\'ee avec React Native et TypeScript pour le frontend et PHP pour le backend, offre six modules m\'etier : Voyages (gestion des tourn\'ees de livraison avec cl\^oture de bons de livraison par photographie), Retours chauffeur (soumission et validation de retours de marchandise), Rapports qualit\'e (consignation de rapports avec pi\`eces jointes), Rotation (suivi de la disponibilit\'e des v\'ehicules), Lieux de projets (g\'eolocalisation des chantiers et d\'ep\^ots) et Demande de transfert (transfert de produits entre d\'ep\^ots avec gestion des lots). L'objectif de ce projet est de fournir aux chauffeurs et agents un outil mobile fiable et efficace pour digitaliser l'ensemble du flux logistique de SDK WOOD.
 
@@ -165,6 +169,63 @@ My application, developed with React Native and TypeScript for the frontend and 
 \newpage
     \listoffigures
     \newpage
+    \renewcommand{\listtablename}{Liste des tableaux}
+    \listoftables
+    \newpage
+
+    \section*{Liste des abréviations}
+    \addcontentsline{toc}{section}{Liste des abréviations}
+    \begin{longtable}{p{2.5cm} p{12cm}}
+    \textbf{API} & Application Programming Interface (interface de programmation d'application) \\
+    \textbf{APK} & Android Package Kit (fichier d'installation Android) \\
+    \textbf{BL} & Bon de Livraison \\
+    \textbf{CRUD} & Create, Read, Update, Delete (opérations de base sur les données) \\
+    \textbf{DT} & Demande de Transfert \\
+    \textbf{DUM} & Déclaration Unique de Marchandise (document douanier) \\
+    \textbf{EAS} & Expo Application Services (service de build cloud d'Expo) \\
+    \textbf{ENSAO} & École Nationale des Sciences Appliquées d'Oujda \\
+    \textbf{FDX} & Fardeaux (nombre de colis par produit) \\
+    \textbf{GPS} & Global Positioning System (système de géolocalisation) \\
+    \textbf{HT} & Hors Taxes \\
+    \textbf{HTTP} & HyperText Transfer Protocol (protocole de communication web) \\
+    \textbf{IDE} & Integrated Development Environment (environnement de développement intégré) \\
+    \textbf{JSON} & JavaScript Object Notation (format d'échange de données) \\
+    \textbf{KDH} & Kilo Dirhams (milliers de dirhams marocains) \\
+    \textbf{MDH} & Million de Dirhams \\
+    \textbf{MSE} & Marchandise \\
+    \textbf{ORM} & Object-Relational Mapping (mapping objet-relationnel) \\
+    \textbf{PFA} & Projet de Fin d'Année \\
+    \textbf{REST} & Representational State Transfer (style architectural d'API) \\
+    \textbf{RQ} & Rapport Qualité \\
+    \textbf{SGBD} & Système de Gestion de Base de Données \\
+    \textbf{SQL} & Structured Query Language (langage de requête structuré) \\
+    \textbf{UML} & Unified Modeling Language (langage de modélisation unifié) \\
+    \textbf{URL} & Uniform Resource Locator (adresse web) \\
+    \textbf{VS Code} & Visual Studio Code (éditeur de code) \\
+    \end{longtable}
+    \newpage
+
+    \thispagestyle{empty}
+    \vspace*{\fill}
+    \begin{center}
+    {\Huge \textbf{INTRODUCTION GÉNÉRALE}}
+    \end{center}
+    \vspace*{\fill}
+    \newpage
+
+\addcontentsline{toc}{section}{{\bfseries Introduction générale}}
+
+    \section*{Introduction générale}
+
+    Dans un contexte économique où la digitalisation des processus métiers est devenue un facteur clé de compétitivité, les entreprises du secteur logistique font face à des défis croissants en matière de traçabilité, d'efficacité opérationnelle et de qualité de service. La gestion manuelle des opérations de livraison, de retours marchandise et de suivi de flotte engendre des retards d'information, des erreurs de saisie et une visibilité limitée sur l'état réel des opérations sur le terrain.
+
+    Le présent rapport décrit la conception et le développement d'une application mobile destinée à l'entreprise SDK WOOD, spécialisée dans la distribution de produits de construction et de bois. L'application vise à digitaliser l'ensemble du flux logistique des chauffeurs et agents sur le terrain, depuis la gestion des tournées de livraison avec clôture de bons de livraison par photographie, jusqu'aux demandes de transfert inter-dépôts en passant par les retours marchandise, les rapports qualité, la rotation des véhicules et la géolocalisation des lieux de projets.
+
+    Le projet a été réalisé au sein d'une équipe adoptant une méthodologie agile Scrum, structurée en cinq sprints de trois semaines. Le frontend a été développé en TypeScript avec React Native et Expo, tandis que le backend repose sur PHP et MySQL, s'intégrant naturellement dans l'infrastructure existante de l'entreprise.
+
+    Ce rapport s'articule autour de trois chapitres. Le premier chapitre présente le cadre et le contexte général du projet : l'entreprise SDK WOOD, la problématique métier, la solution proposée et la méthodologie Scrum adoptée. Le deuxième chapitre trait de l'analyse des besoins, incluant l'étude de l'existant, l'analyse fonctionnelle et la modélisation UML de la solution. Le troisième chapitre détaille la mise en œuvre technique de la solution : les outils et technologies utilisés, l'architecture logicielle, la réalisation des sprints et les tests de validation.
+
+    \newpage
 
     \thispagestyle{empty}
     \vspace*{\fill}
@@ -177,9 +238,13 @@ My application, developed with React Native and TypeScript for the frontend and 
 
 \addcontentsline{toc}{section}{{\bfseries Chapitre 1 : Cadre et contexte général du projet}}
 
-    \section{Présentation de l'entreprise SDK WOOD}
+    \section{Introduction}
+    Ce premier chapitre pose le cadre général du projet. Il présente tout d'abord l'entreprise SDK WOOD — son profil, sa mission, son positionnement sur le marché et sa trajectoire de croissance — puis expose la problématique métier qui a motivé le projet : le suivi manuel des opérations logistiques et ses limites. La solution proposée, une application mobile de digitalisation des processus, est ensuite décrite. Enfin, la méthodologie de gestion de projet Scrum adoptée pour le développement est détaillée, incluant les rôles, les rituels agiles et le déroulement des sprints.
 
-    \begin{figure}[h]
+    \section{Présentation de l'entreprise SDK WOOD}
+    \subsection{Profil, mission et positionnement}
+
+     \begin{figure}[h]
     \centering
     \IfFileExists{assets/sdk-wood-logo.jpg}{
     \includegraphics[width=0.35\textwidth]{assets/sdk-wood-logo.jpg}
@@ -189,8 +254,6 @@ My application, developed with React Native and TypeScript for the frontend and 
     \caption{Logo SDK WOOD}
     \label{fig:sdkwood-logo}
     \end{figure}
-
-    \subsection{Profil, mission et positionnement}
     La société \textbf{SDK WOOD} a été fondée en 2012 par \textbf{Lhaj El AROUI Ahmed} et \textbf{M. El AROUI Aboubakr Siddik}. Elle évolue aujourd'hui parmi les dix principaux importateurs et distributeurs de bois massif et de panneaux au Maroc.
 
     L'entreprise s'inscrit dans la continuité d'une tradition familiale active dans le négoce du bois depuis les années 1950. Cette continuité lui permet de combiner expérience du marché, réseau commercial et vision de modernisation.
@@ -256,9 +319,9 @@ My application, developed with React Native and TypeScript for the frontend and 
     \section{Problématique}
 
     \subsection{Contexte}
-    SDKWOOD distribue des matériaux en bois et des produits associés vers des chantiers, des clients et des partenaires. Chaque jour, des chauffeurs chargent des commandes au dépôt, réalisent des livraisons, et reviennent avec des informations de terrain (retours, anomalies, pièces manquantes, refus, dommages, etc.).
+    SDK WOOD distribue des matériaux en bois et des produits associés vers des chantiers, des clients et des partenaires. Chaque jour, des chauffeurs chargent des commandes au dépôt, réalisent des livraisons, et reviennent avec des informations de terrain (retours, anomalies, pièces manquantes, refus, dommages, etc.).
 
-    L'activité logistique de SDKWOOD couvre six processus centraux :
+    L'activité logistique de SDK sdWOOD couvre six processus centraux :
     \begin{itemize}[leftmargin=1.2em]
     \item \textbf{Voyages} : création et suivi des tournées de livraison (chauffeur, véhicule, dépôt de départ, ville de destination, bons de livraison associés).
     \item \textbf{Retours chauffeur} : enregistrement des informations de fin de tournée (bon cacheté, règlement, retour marchandise, réclamation, photos).
@@ -327,7 +390,7 @@ My application, developed with React Native and TypeScript for the frontend and 
     \label{fig:onfleet-logo}
     \end{figure}
 
-    \subsubsection{Ce que Onfleet apporte}
+    \subsubsection{Ce qu'Onfleet apporte}
     Onfleet est adapté lorsque l'objectif principal est d'organiser des livraisons, de suivre l'avancement d'une tournée, et d'obtenir une preuve de livraison.
 
     Principaux bénéfices :
@@ -381,6 +444,42 @@ My application, developed with React Native and TypeScript for the frontend and 
     \item \textbf{Paramétrage et intégration} : l'alignement avec des règles et statuts internes peut demander des choix et du temps.
     \item \textbf{Coûts et dépendance} : l'abonnement, les options et les contraintes contractuelles restent des facteurs à considérer, comme pour une solution SaaS.
     \end{itemize}
+
+    \subsubsection{Tableau de synthèse}
+
+    Le Tableau~\ref{tab:synthese-existant} synthétise la comparaison entre les solutions existantes et la solution développée.
+
+    \begin{table}[ht]
+    \centering
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Synthèse de l'étude de l'existant}
+    \label{tab:synthese-existant}
+    \begin{tabular}{|p{3cm}|p{4.5cm}|p{4.5cm}|p{4.5cm}|}
+    \hline
+    \textbf{Critère} & \textbf{Onfleet} & \textbf{Samsara} & \textbf{Solution développée} \\
+    \hline
+    Gestion des tournées & Oui, standard & Indirect (suivi flotte) & Oui, avec BL, statuts et photos \\
+    \hline
+    Bons de livraison (BL) & Non & Non & Oui, clôture avec photo obligatoire \\
+    \hline
+    Retours chauffeur & Non & Non & Oui, validation avec commentaire \\
+    \hline
+    Rapports qualité & Non & Non & Oui, avec fichiers joints \\
+    \hline
+    Rotation / suivi flotte & Basique & Avancé & Oui, filtrage par disponibilité \\
+    \hline
+    Transferts inter-dépôts & Non & Non & Oui, gestion des lots \\
+    \hline
+    Lieux de projets & Non & Non & Oui, géolocalisation GPS \\
+    \hline
+    Personnalisation & Limitée (paramétrage) & Limitée (paramétrage) & Totale (code source maîtrisé) \\
+    \hline
+    Intégration SI existant & Contrainte & Contrainte & Native (PHP/MySQL existants) \\
+    \hline
+    Coût & Abonnement SaaS & Abonnement SaaS & Développement initial uniquement \\
+    \hline
+    \end{tabular}
+    \end{table}
 
     \subsection{Synthèse de la problématique}
     La problématique est celle d'une activité logistique qui dépend de preuves et d'informations terrain, mais dont le suivi est encore largement manuel. Le papier crée des délais, des erreurs, et une faible visibilité.
@@ -445,7 +544,7 @@ My application, developed with React Native and TypeScript for the frontend and 
     \section{Méthodologie de gestion de projet : Scrum}
     Dans un contexte marqué par l'évolution rapide des exigences et la nécessité de garantir la qualité à chaque livraison, notre équipe a adopté la méthodologie Scrum, un cadre agile reconnu pour sa capacité à piloter efficacement les projets logiciels complexes.
 
-    Scrum structure le travail en \textit{Sprints}, généralement de 1 à 3 semaines dans notre projet, durant lesquels l'équipe conçoit, développe, teste et livre un incrément fonctionnel du produit. Cette approche itérative permet une adaptation continue des priorités, une intégration rapide des retours et une amélioration progressive de la qualité.
+    Scrum structure le travail en \textit{Sprints}, généralement de 1 à 3 semaines dans notre projet, durant lesquels l'équipe conçoit, développe et livre un incrément fonctionnel du produit. Cette approche itérative permet une adaptation continue des priorités, une intégration rapide des retours et une amélioration progressive de la qualité.
 
     \begin{figure}[h]
     \centering
@@ -462,7 +561,7 @@ My application, developed with React Native and TypeScript for the frontend and 
     Trois rôles clés structurent cette démarche collaborative :
     \begin{itemize}[leftmargin=1.2em]
     \item \textbf{Le Product Owner} incarne la vision du produit. Il définit et priorise les besoins métier à travers le Product Backlog, veillant à ce que l'équipe se concentre sur les fonctionnalités à plus forte valeur ajoutée.
-    \item \textbf{L'équipe de développement}, composée de développeurs et de testeurs, s'auto-organise pour transformer les exigences fonctionnelles en solutions opérationnelles.
+    \item \textbf{L'équipe de développement}, composée de développeurs, s'auto-organise pour transformer les exigences fonctionnelles en solutions opérationnelles.
     \item \textbf{Le Scrum Master} veille à la bonne application du cadre Scrum, facilite les échanges au sein de l'équipe, supprime les obstacles et soutient la dynamique d'amélioration continue.
     \end{itemize}
 
@@ -1076,6 +1175,19 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
 
     \textbf{Expo} : plateforme de développement et de déploiement construite au-dessus de React Native. Elle fournit un ensemble d'outils et de services — SDK, serveur de développement, builds cloud et application de prévisualisation — qui simplifient le cycle de développement mobile. Expo élimine la nécessité de configurer nativement Android Studio et Xcode : un simple \texttt{expo start} lance un serveur de développement avec rechargement en temps réel, l'application Expo Go permet de tester directement sur un appareil physique sans compilation, et les builds gérés (EAS Build) produisent les APK et IPA prêts pour la distribution. \textit{Justification :} Expo a été adopté pour accélérer le développement en supprimant la configuration native, permettre des itérations rapides via le rechargement instantané sur appareil, et simplifier la génération de l'APK de production sans environnement Android Studio.
 
+    \begin{figure}[ht]
+    \centering
+    \IfFileExists{assets/android-studio-logo.jpg}{
+    \includegraphics[width=0.2\textwidth]{assets/android-studio-logo.jpg}
+    }{
+    \textit{Logo Android Studio : fichier assets/android-studio-logo.jpg non trouvé.}
+    }
+    \caption{Android Studio}
+    \label{fig:android-studio-logo}
+    \end{figure}
+
+    \textbf{Android Studio} : environnement de développement intégré (IDE) officiel pour le développement Android, développé par Google. Bien que le framework Expo simplifie considérablement la configuration native, Android Studio reste indispensable au projet pour deux raisons : la génération du fichier APK de production via un build de développement (\textit{development build}) et le lancement d'émulateurs Android pour tester l'application sur différentes versions et tailles d'écran sans nécessiter de périphérique physique. \textit{Justification :} Android Studio a été utilisé comme outil complémentaire à Expo pour la compilation native et l'émulation, assurant la compatibilité de l'application avec l'écosystème Android.
+
     \section{Bibliothèques et packages TypeScript}
 
     Le frontend de l'application repose sur un ensemble de bibliothèques TypeScript sélectionnées pour couvrir la navigation, la gestion d'état, les appels réseau, les interactions utilisateur et l'accès aux fonctionnalités natives. Le Tableau~\ref{tab:packages-ts} présente les packages principaux et leur usage dans le projet.
@@ -1178,7 +1290,7 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
     \label{fig:backend-tree}
     \end{figure}
 
-    Chaque fichier du backend suit un schéma cohérent : il identifie la méthode HTTP (GET, POST, PUT, DELETE), extrait les paramètres de la requête, exécute les requêtes SQL nécessaires via \texttt{mysqli}, et retourne une réponse JSON structurée avec un champ \texttt{status} (booléen), un champ \texttt{message} et un champ \texttt{data}. Les opérations sensibles utilise une transaction MySQL (\texttt{begin\_transaction}, \texttt{commit}, \texttt{rollback}) pour garantir l'intégrité des données.
+    Chaque fichier du backend suit un schéma cohérent : il identifie la méthode HTTP (GET, POST, PUT, DELETE), extrait les paramètres de la requête, exécute les requêtes SQL nécessaires via \texttt{mysqli}, et retourne une réponse JSON structurée avec un champ \texttt{status} (booléen), un champ \texttt{message} et un champ \texttt{data}. Les opérations sensibles utilisent une transaction MySQL (\texttt{begin\_transaction}, \texttt{commit}, \texttt{rollback}) pour garantir l'intégrité des données.
 
     \subsection{Architecture du frontend : séparation par couches et par domaine}
 
@@ -1846,8 +1958,177 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
     \label{fig:dt-create}
     \end{figure}
 
+    \section{Tests et validation}
+
+    La stratégie de test adoptée pour ce projet repose sur une approche de tests manuels, couvrant à la fois le backend et le frontend. Cette approche, bien que plus légère qu'une suite de tests automatisés, s'est avérée adaptée au contexte du projet : une petite équipe Scrum avec des sprints de trois semaines et une application métier dont les flux sont bien définis.
+
+    \subsection{Tests backend : API REST avec Postman}
+
+    Chaque endpoint de l'API REST a été testé manuellement via Postman. L'outil a permis de vérifier le bon fonctionnement des opérations CRUD pour chaque module métier, de contrôler les codes de statut HTTP retournés (200, 201, 400, 404, 500), de valider la structure des réponses JSON et de s'assurer de la persistance correcte des données dans la base MySQL. Les scénarios de test incluent notamment : l'authentification avec jeton valide et invalide, la création d'entités avec champs obligatoires et facultatifs, la mise à jour partielle et complète, la suppression avec vérification de l'intégrité référentielle, et la pagination des listes.
+
+    La Figure~\ref{fig:postman-test} illustre un test d'API réalisé avec Postman.
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/postman-test.jpg}{
+    \includegraphics[width=0.75\textwidth]{assets/postman-test.jpg}
+    }{
+    \textit{Test Postman : fichier assets/postman-test.jpg non trouvé.}
+    }
+    \caption{Test d'un endpoint API avec Postman}
+    \label{fig:postman-test}
+    \end{figure}
+
+    \subsection{Tests frontend : Android Emulator et Expo Go}
+
+    Le frontend a été testé de deux manières complémentaires. D'une part, l'émulateur Android (via Android Studio) a permis de simuler l'application sur différentes configurations d'écran et versions d'Android, garantissant une compatibilité large. D'autre part, Expo Go a été utilisé pour tester l'application en conditions réelles : rechargement instantané du code modifié, interaction tactile réelle et test sur périphérique physique.
+
+    Les tests frontend ont couvert : le rendu de chaque écran avec données réelles, la navigation entre les écrans et le drawer, les interactions utilisateur (appuis, défilement, saisie, sélection), l'affichage des états de chargement et d'erreur, la validation des formulaires (champs requis, limites de fichiers) et la vérification du contrôle d'accès par permissions (affichage conditionnel des boutons et modules).
+
+    La Figure~\ref{fig:expo-go-test} présente l'application en cours de test avec Expo Go sur un périphérique Android.
+
+    \begin{figure}[H]
+    \centering
+    \IfFileExists{assets/expo-go-test.jpg}{
+    \includegraphics[width=0.5\textwidth]{assets/expo-go-test.jpg}
+    }{
+    \textit{Test Expo Go : fichier assets/expo-go-test.jpg non trouvé.}
+    }
+    \caption{Interface développeur Expo Go — application en test}
+    \label{fig:expo-go-test}
+    \end{figure}
+
     \section{Conclusion}
 
-    Ce chapitre a présenté la mise en œuvre concrète de la solution SDK WOOD Mobile. Après avoir exposé les outils de développement (VS Code, Git, GitHub, Postman, phpMyAdmin) et les technologies adoptées (MySQL, PHP, TypeScript, React Native, Expo), l'architecture logicielle a été détaillée : un backend en Transaction Script et un frontend organisé en couches par domaine Le versionnement du code via GitHub a assuré la traçabilité des modifications quotidiennes.
+    Ce chapitre a présenté la mise en œuvre concrète de la solution SDK WOOD Mobile. Après avoir exposé les outils de développement (VS Code, Git, GitHub, Postman, phpMyAdmin, Android Studio) et les technologies adoptées (MySQL, PHP, TypeScript, React Native, Expo), l'architecture logicielle a été détaillée : un backend en Transaction Script et un frontend organisé en couches par domaine, avec React Query et Zustand. Le versionnement du code via GitHub a assuré la traçabilité des modifications quotidiennes.
+
+    La réalisation s'est déroulée sur quatre sprints de développement :
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Sprint 2} : authentification par jeton et module Voyages.
+    \item \textbf{Sprint 3} : module Retours chauffeur et module Rapports qualité.
+    \item \textbf{Sprint 4} : module Rotation et module Lieux de projets.
+    \item \textbf{Sprint 5} : module Demande de transfert.
+    \end{itemize}
+
+    La stratégie de tests manuels, menée conjointement avec Postman pour les API et l'émulateur Android couplé à Expo Go pour le frontend, a permis de valider l'ensemble des fonctionnalités développées.
+
+    L'ensemble de ces six modules, développés selon une approche Scrum itérative, constitue une application mobile complète répondant aux besoins métiers de SDK WOOD.
+
+    \newpage
+
+    \thispagestyle{empty}
+    \vspace*{\fill}
+    \begin{center}
+    {\Huge \textbf{CONCLUSION GÉNÉRALE}}
+    \end{center}
+    \vspace*{\fill}
+    \newpage
+
+\addcontentsline{toc}{section}{{\bfseries Conclusion générale}}
+
+    \section*{Conclusion générale}
+
+    Ce projet de fin d'année a permis de concevoir et de développer une application mobile complète répondant aux besoins métiers de SDK WOOD dans le domaine de la gestion logistique. L'application digitalise six modules fonctionnels — Voyages, Retours chauffeur, Rapports qualité, Rotation, Lieux de projets et Demande de transfert — couvrant l'ensemble du flux opérationnel des chauffeurs et agents sur le terrain.
+
+    La réalisation de ce projet s'est appuyée sur une méthodologie agile Scrum, structurée en cinq sprints itératifs de trois semaines. Cette approche a permis une livraison incrémentale des fonctionnalités, une adaptation continue aux besoins métier et une validation régulière des incréments produits. Les rôles Scrum (Product Owner, équipe de développement, Scrum Master) et les rituels (Daily Scrum, Sprint Review, Sprint Retrospective) ont assuré une coordination efficace et une qualité continue.
+
+    Sur le plan technique, le projet a mobilisé un éventail de technologies modernes : React Native et Expo pour le frontend mobile multiplateforme, TypeScript pour le typage statique et la maintenabilité, PHP et MySQL pour le backend s'intégrant à l'infrastructure existante, et une architecture en Transaction Script privilégiant la simplicité et la maîtrise du code. La gestion d'état a été confiée à React Query pour le cache serveur et Zustand pour l'état client, tandis que GitHub a assuré le versionnement et la traçabilité du code.
+
+    La stratégie de tests manuels, combinant Postman pour les API REST et l'émulateur Android couplé à Expo Go pour le frontend, a permis de valider l'ensemble des fonctionnalités avec des données réelles avant la livraison.
+
+    \subsection*{Perspectives}
+
+    Bien que l'application réponde aux besoins actuels de SDK WOOD, plusieurs perspectives d'évolution peuvent être envisagées pour enrichir et étendre la solution :
+
+    \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Géolocalisation en temps réel} : intégration d'un suivi GPS en direct des véhicules de livraison, permettant une visualisation cartographique des tournées et une optimisation des itinéraires.
+
+    \item \textbf{Notifications push} : mise en place de notifications instantanées pour informer les chauffeurs des nouvelles missions, des changements d'affectation ou des validations de retours.
+
+    \item \textbf{Mode hors ligne} : implémentation d'un cache local persistant permettant aux chauffeurs de poursuivre leur travail en zones de faible connectivité, avec synchronisation automatique au retour du réseau.
+
+    \item \textbf{Tableau de bord analytique} : développement d'une interface web d'administration avec statistiques et indicateurs de performance (KPI) — taux de livraison à temps, volume de retours, temps moyen par tournée — pour le pilotage opérationnel de la direction.
+
+    \item \textbf{Signature électronique} : ajout d'une fonctionnalité de signature digitale des bons de livraison directement sur l'application, renforçant la traçabilité et la valeur probante des livraisons.
+
+    \item \textbf{Tests automatisés} : mise en place d'une suite de tests unitaires et d'intégration (Jest, React Native Testing Library) ainsi que de tests end-to-end (Detox) pour garantir la non-régression lors des futures évolutions.
+
+    \item \textbf{Déploiement iOS} : extension du déploiement vers l'App Store via EAS Build et certification Apple, afin de couvrir l'écosystème iOS en complément d'Android.
+
+    \item \textbf{Intégration avec un système ERP} : connexion de l'application à un système de gestion d'entreprise (ERP) pour synchroniser automatiquement les stocks, les commandes et les factures, évitant ainsi la double saisie.
+    \end{itemize}
+
+    Ces perspectives ouvrent des voies d'amélioration concrètes qui permettront à SDK WOOD de poursuivre la digitalisation de son activité logistique et de renforcer sa compétitivité sur le marché.
+
+    \newpage
+    \addcontentsline{toc}{section}{\bfseries Bibliographie}
+    \section*{Bibliographie}
+
+    \begin{thebibliography}{99}
+
+    \bibitem{scrum}
+    K. Schwaber et J. Sutherland, \textit{The Scrum Guide -- The Definitive Guide to Scrum: The Rules of the Game}, Scrum.org, 2020. \url{https://www.scrumguides.org/scrum-guide.html}
+
+    \bibitem{reactnative}
+    Meta Open Source, \textit{React Native -- Official Documentation}, 2024. \url{https://reactnative.dev/docs/getting-started}
+
+    \bibitem{expo}
+    Expo, \textit{Expo Documentation -- SDK, EAS Build et Expo Go}, 2024. \url{https://docs.expo.dev/}
+
+    \bibitem{typescript}
+    Microsoft, \textit{TypeScript Handbook}, 2024. \url{https://www.typescriptlang.org/docs/handbook/intro.html}
+
+    \bibitem{php}
+    The PHP Group, \textit{PHP Manual -- Server-side scripting language}, 2024. \url{https://www.php.net/manual/en/}
+
+    \bibitem{mysql}
+    Oracle Corporation, \textit{MySQL Reference Manual}, 2024. \url{https://dev.mysql.com/doc/refman/8.0/en/}
+
+    \bibitem{fowler}
+    M. Fowler, \textit{Patterns of Enterprise Application Architecture}, Addison-Wesley Professional, 2002, chap. « Transaction Script ».
+
+    \bibitem{uml}
+    OMG (Object Management Group), \textit{Unified Modeling Language (UML) Specification}, version 2.5.1, 2017. \url{https://www.omg.org/spec/UML/2.5.1/}
+
+    \bibitem{apache}
+    Apache Software Foundation, \textit{Apache HTTP Server Documentation}, 2024. \url{https://httpd.apache.org/docs/2.4/}
+
+    \bibitem{reactquery}
+    TanStack, \textit{React Query -- Data-fetching library for React}, 2024. \url{https://tanstack.com/query/latest}
+
+    \bibitem{zustand}
+    Poimandres, \textit{Zustand -- Bear necessities for state management in React}, 2024. \url{https://github.com/pmndrs/zustand}
+
+    \bibitem{androidstudio}
+    Google, \textit{Android Studio -- Official IDE for Android development}, 2024. \url{https://developer.android.com/studio}
+
+    \bibitem{postman}
+    Postman Inc., \textit{Postman Documentation -- API development and testing platform}, 2024. \url{https://learning.postman.com/}
+
+    \bibitem{git}
+    Software Freedom Conservancy, \textit{Git -- Distributed Version Control System}, 2024. \url{https://git-scm.com/doc}
+
+    \bibitem{github}
+    GitHub Inc., \textit{GitHub Documentation -- Code hosting and collaboration}, 2024. \url{https://docs.github.com/}
+
+    \bibitem{phpmyadmin}
+    phpMyAdmin Team, \textit{phpMyAdmin Documentation -- MySQL web administration}, 2024. \url{https://docs.phpmyadmin.net/}
+
+    \bibitem{rest}
+    R. T. Fielding, \textit{Architectural Styles and the Design of Network-based Software Architectures}, Ph.D. dissertation, University of California, Irvine, 2000, chap. 5 « Representational State Transfer (REST) ».
+
+    \bibitem{onfleet}
+    Onfleet Inc., \textit{Onfleet -- Last Mile Delivery Management Software}, 2024. \url{https://onfleet.com/}
+
+    \bibitem{samsara}
+    Samsara Inc., \textit{Samsara -- Connected Operations Cloud}, 2024. \url{https://www.samsara.com/}
+
+    \bibitem{vscode}
+    Microsoft, \textit{Visual Studio Code Documentation}, 2024. \url{https://code.visualstudio.com/docs}
+
+    \bibitem{expo-router}
+    Expo, \textit{Expo Router -- File-based routing for React Native}, 2024. \url{https://docs.expo.dev/router/installation/}
+
+    \end{thebibliography}
 
     \end{document}
