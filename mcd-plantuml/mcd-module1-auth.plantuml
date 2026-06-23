@@ -1,0 +1,70 @@
+@startuml MCD_Module1_Auth
+
+!theme plain
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor<<entite>> lightBlue
+  BorderColor<<entite>> darkBlue
+  BackgroundColor<<assoc>> #FFE4B5
+  BorderColor<<assoc>> #CD853F
+}
+
+title MCD — Module 1 : Authentification & Permissions
+
+class UTILISATEUR <<entite>> {
+  + id : int <<PK>>
+  --
+  nom : varchar
+  prenom : varchar
+  role : enum
+  ValidationRetourChauffeur : enum
+}
+
+class UTILISATEUR_TOKEN <<entite>> {
+  + id : int <<PK>>
+  --
+  idUser : int <<FK>>
+  token : text
+}
+
+class MENUS <<entite>> {
+  + id : int <<PK>>
+  --
+  code : varchar
+  designation : varchar
+}
+
+class PERMISSIONS <<entite>> {
+  + id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  menu_id : int <<FK>>
+  can_view : tinyint
+  can_create : tinyint
+  can_update : tinyint
+  can_delete : tinyint
+  can_take_picture_bl : tinyint
+  can_close_bl : tinyint
+  can_achever : tinyint
+}
+
+UTILISATEUR "1,n" --> "0,n" UTILISATEUR_TOKEN : possède_token >
+note on link
+  Cardinalités :
+  (1,n) — (0,n)
+  Un utilisateur peut avoir
+  de 0 à n tokens.
+end note
+
+' Association A_permissions : UTILISATEUR <-> MENUS via PERMISSIONS
+' PERMISSIONS est une association porteuse d'attributs (7 flags booléens)
+' Représentée ici comme entité associative
+UTILISATEUR "0,n" --> "0,n" PERMISSIONS : possède >
+MENUS "0,n" --> "0,n" PERMISSIONS : définit >
+
+note bottom of PERMISSIONS
+  Table associative reliant UTILISATEUR et MENUS
+  7 attributs booléens de permissions d'accès aux modules
+end note
+
+@enduml

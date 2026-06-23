@@ -14,8 +14,9 @@
 \usepackage{url}
     \usepackage{tocloft}
     \usepackage{longtable}
-    \usepackage{arabtex}
-    \usepackage{utf8}
+\usepackage{arabtex}
+\usepackage{utf8}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 
     \geometry{margin=2.5cm}
 
@@ -34,28 +35,7 @@
     
     \begin{document}
 
-\thispagestyle{empty}
-\vspace*{0.5cm}
-\begin{center}
-{\Large \textbf{Remerciements}}
-\end{center}
-\vspace{0.5cm}
 
-J'ai le plaisir de r\'eserver cette page comme signe de ma profonde gratitude \`a tous ceux qui m'ont apport\'e leur aide de pr\`es ou de loin au bon d\'eroulement de ce travail.
-
-Tout d'abord, je remercie Dieu le Tout-Puissant qui m'a donn\'e la d\'etermination et le courage n\'ecessaires pour l'accomplissement de ce travail.
-
-Je tiens \`a exprimer ma profonde gratitude et mon respect \`a mon pr\'ecieux superviseur, M. BOUKSIM Mohcine. J'appr\'ecie sa disponibilit\'e, sa bienveillance, son assistance et ses encouragements. C'est gr\^ace \`a lui que j'ai r\'eussi \`a accomplir ce travail.
-
-Je tiens aussi \`a exprimer ma profonde gratitude \`a mon responsable de fili\`ere, M. TIDHAF Belkasem, pour son d\'evouement et son soutien tout au long de ma trajectoire.
-
-Je tiens \'egalement \`a remercier tous mes enseignants de l'ENSAO pour leur soutien et leur accueil cordial et amical.
-
-Je tiens aussi \`a exprimer ma gratitude envers M. EL ASNAOUI Khalid, membre du jury, pour avoir consenti \`a \'evaluer ce travail. Et pour toutes les raisons, petites et grandes, je ne saurai jamais assez exprimer ma gratitude \`a mes parents pour leur d\'evouement.
-
-Pour finir, je tiens \`a exprimer ma profonde gratitude envers tous ceux qui ont particip\'e \`a la r\'ealisation de ce projet, qu'ils soient proches ou \'eloign\'es. Leur soutien, qu'il soit mat\'eriel, moral ou intellectuel, a \'et\'e d'une valeur inestimable.
-
-\newpage
 
 \thispagestyle{empty}
 \vspace*{0.5cm}
@@ -81,32 +61,7 @@ Pour finir, je tiens \`a exprimer ma profonde gratitude envers tous ceux qui ont
 
 \newpage
 
-\thispagestyle{empty}
-\vspace*{0.5cm}
-\begin{center}
-{\Large \textbf{D\'edicace}}
-\end{center}
-\vspace{0.5cm}
 
-\`A mes chers parents,
-
-Pour tout l'amour inconditionnel que vous m'avez t\'emoign\'e, pour votre appui continu et vos encouragements ind\'efectibles. Vous avez \'et\'e ma source de force et d'inspiration tout au long de ce parcours acad\'emique.
-
-Chers parents,
-
-Ce m\'emoire est le r\'esultat de vos efforts et de votre engagement. Vous m'avez toujours soutenu, m\^eme dans les p\'eriodes o\`u je manquais de confiance en moi-m\^eme. Vous m'avez appris la valeur du travail acharn\'e, de la pers\'ev\'erance et de l'int\'egrit\'e.
-
-Votre pr\'ecieuse aide et vos encouragements ont \'et\'e essentiels \`a mon succ\`es. Vous m'avez accompagn\'e et soutenu \`a chaque phase de mon parcours. Gr\^ace \`a votre amour et votre bienveillance, j'ai r\'eussi \`a franchir les obstacles et \`a garder le cap sur mes objectifs.
-
-Je ne pourrai jamais assez vous remercier pour toutes les nuits blanches, les mots d'encouragement et les pri\`eres silencieuses que vous avez offertes pour ma r\'eussite. Vous avez \'et\'e mes premiers guides, mes plus fervents soutiens et mes exemples \`a suivre.
-
-Ce m\'emoire vous est consacr\'e, en t\'emoignage de gratitude pour tout ce que vous avez accompli pour moi. Je souhaite que ce travail illustre les valeurs et les enseignements que vous m'avez partag\'es.
-
-Avec toute ma gratitude et mon affection,
-
-Votre enfant.
-
-\newpage
 
 \thispagestyle{empty}
 \vspace*{0.5cm}
@@ -168,11 +123,6 @@ My application, developed with React Native and TypeScript for the frontend and 
     \tableofcontents
 \newpage
     \listoffigures
-    \newpage
-    \renewcommand{\listtablename}{Liste des tableaux}
-    \listoftables
-    \newpage
-
     \section*{Liste des abréviations}
     \addcontentsline{toc}{section}{Liste des abréviations}
     \begin{longtable}{p{2.5cm} p{12cm}}
@@ -203,14 +153,7 @@ My application, developed with React Native and TypeScript for the frontend and 
     \textbf{URL} & Uniform Resource Locator (adresse web) \\
     \textbf{VS Code} & Visual Studio Code (éditeur de code) \\
     \end{longtable}
-    \newpage
-
-    \thispagestyle{empty}
-    \vspace*{\fill}
-    \begin{center}
-    {\Huge \textbf{INTRODUCTION GÉNÉRALE}}
-    \end{center}
-    \vspace*{\fill}
+   
     \newpage
 
 \addcontentsline{toc}{section}{{\bfseries Introduction générale}}
@@ -259,27 +202,6 @@ My application, developed with React Native and TypeScript for the frontend and 
     L'entreprise s'inscrit dans la continuité d'une tradition familiale active dans le négoce du bois depuis les années 1950. Cette continuité lui permet de combiner expérience du marché, réseau commercial et vision de modernisation.
 
     SDK WOOD sert principalement les \textbf{grossistes, distributeurs, transformateurs} et \textbf{promoteurs immobiliers}. Sa mission est d'assurer une disponibilité régulière des produits bois, une logistique réactive et un service fiable, de l'approvisionnement jusqu'à la livraison.
-
-    \subsection{Repères clés de l'entreprise}
-    \begin{itemize}[leftmargin=1.2em]
-    \item \textbf{Année de création} : 2012.
-    \item \textbf{Statut juridique} : Société à responsabilité limitée.
-    \item \textbf{Siège social} : 9,5 km, Boulevard Mohammed VI, Casablanca.
-    \item \textbf{Activité} : importation et distribution du bois massif et des panneaux.
-    \item \textbf{Concurrence} : importateurs de bois massif et de panneaux sur le marché national.
-    \item \textbf{Chiffre d'affaires HT 2024} : 305\,486 KDH.
-    \item \textbf{Capital social} : 20\,000 KDH.
-    \item \textbf{Résultat net 2024} : 8\,803 KDH.
-    \end{itemize}
-
-    \subsection{Trajectoire de croissance (2012--2025)}
-    \begin{itemize}[leftmargin=1.2em]
-    \item \textbf{2012--2014} : création de la société et lancement effectif de l'activité.
-    \item \textbf{2014--2016} : phase de pénétration du marché, avec une progression à deux chiffres du chiffre d'affaires.
-    \item \textbf{2017--2020} : phase de confirmation, avec un chiffre d'affaires évoluant de 60 MDH à 100 MDH.
-    \item \textbf{2021--2022} : phase de \textit{challenger}, entrée dans le top 10 des importateurs bois, chiffre d'affaires proche de 200 MDH et part de marché d'environ 5\%.
-    \item \textbf{2022--2025} : phase d'expansion des parts de marché, pénétration de nouvelles niches, chiffre d'affaires proche de 300 MDH et objectif de part de marché à 10\%.
-    \end{itemize}
 
     \subsection{Moyens, atouts et orientations stratégiques}
     \begin{figure}[h]
@@ -370,8 +292,6 @@ My application, developed with React Native and TypeScript for the frontend and 
     \item structurer les informations (statuts, commentaires, pièces justificatives) pour qu'elles soient comparables et exploitables ;
     \item rendre l'information disponible rapidement pour les équipes au dépôt et au bureau.
     \end{itemize}
-
-    \newpage
 
     \subsection{Étude de l'existant}
     Il existe des solutions du marché qui répondent au besoin de suivi des livraisons et des opérations terrain. Deux exemples connus sont \textbf{Onfleet} et \textbf{Samsara}.
@@ -508,8 +428,6 @@ My application, developed with React Native and TypeScript for the frontend and 
     \subsubsection{Lieux de projets}
     Recenser et géolocaliser les chantiers et dépôts clients avec coordonnées GPS, contacts, commentaires et photos. L'objectif est de remplacer les adresses approximatives par des points précis, consultables et partageables entre équipes.
 
-    \newpage
-
     \subsection{Solution proposée : une application mobile pour digitaliser les opérations}
     L'objectif est de remplacer l'enregistrement papier et la ressaisie par un enregistrement direct, simple et structuré, au moment où l'action se produit. L'application accompagne le chauffeur et les équipes internes sur les tâches du quotidien : préparation et suivi des voyages, gestion des bons de livraison, enregistrement des retours, et consultation des détails.
 
@@ -542,6 +460,7 @@ My application, developed with React Native and TypeScript for the frontend and 
     Au-delà du suivi quotidien, la donnée digitale permet aussi d'améliorer le pilotage : identifier les points qui reviennent souvent (retours fréquents, types d'anomalies), suivre les volumes, et ajuster les processus.
 
     \section{Méthodologie de gestion de projet : Scrum}
+    {\footnotesize
     Dans un contexte marqué par l'évolution rapide des exigences et la nécessité de garantir la qualité à chaque livraison, notre équipe a adopté la méthodologie Scrum, un cadre agile reconnu pour sa capacité à piloter efficacement les projets logiciels complexes.
 
     Scrum structure le travail en \textit{Sprints}, généralement de 1 à 3 semaines dans notre projet, durant lesquels l'équipe conçoit, développe et livre un incrément fonctionnel du produit. Cette approche itérative permet une adaptation continue des priorités, une intégration rapide des retours et une amélioration progressive de la qualité.
@@ -641,6 +560,7 @@ My application, developed with React Native and TypeScript for the frontend and 
     \caption{Diagramme de Gantt de la planification du projet}
     \label{fig:gantt}
     \end{figure}
+    }
 
 \subsection{Conclusion du chapitre}
 Ce chapitre a présenté le cadre général du projet et la méthodologie de gestion adoptée : après avoir décrit l'entreprise SDK WOOD, sa problématique et la solution proposée, la méthodologie Scrum a été exposée, structurée en cinq sprints de trois semaines. Chaque sprint répond à un objectif précis, de la mise en place des fondations techniques jusqu'à la livraison finale de l'application. Les rôles (Product Owner, équipe de développement, Scrum Master), les rituels (Daily Scrum, Sprint Review, Sprint Retrospective) et l'outil de suivi Trello garantissent une coordination efficace, une visibilité continue et une capacité d'adaptation aux besoins métier tout au long du cycle de développement.
@@ -1033,160 +953,105 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
 
     \subsection{Environnements de développement}
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/vscode-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/vscode-logo.png}
-    }{
-    \textit{Logo VS Code : fichier assets/vscode-logo.png non trouvé.}
-    }
-    \caption{Visual Studio Code}
-    \label{fig:vscode-logo}
-    \end{figure}
-
+    \IfFileExists{assets/vscode-logo.png}{\includegraphics[width=\linewidth]{assets/vscode-logo.png}}{\textit{VS Code}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{Visual Studio Code (VS Code)} : éditeur de code libre et multiplateforme développé par Microsoft. Léger, extensible et doté d'un écosystème riche d'extensions, il a été utilisé pour l'édition du code frontend et backend, le débogage et la gestion de terminal intégré. \textit{Justification :} VS Code a été choisi pour sa légèreté, son support natif de TypeScript et PHP, et ses extensions intégrées pour Git, React Native et le débogage mobile.
+    \end{minipage}\\[0.8em]
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/git-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/git-logo.png}
-    }{
-    \textit{Logo Git : fichier assets/git-logo.png non trouvé.}
-    }
-    \caption{Git}
-    \label{fig:git-logo}
-    \end{figure}
-
+    \IfFileExists{assets/git-logo.png}{\includegraphics[width=\linewidth]{assets/git-logo.png}}{\textit{Git}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{Git} : système de gestion de versions distribué qui permet de suivre chaque modification du code source, de créer des branches de développement et de fusionner les contributions. Il garantit la traçabilité des évolutions et facilite le travail collaboratif. \textit{Justification :} Git est le standard industriel pour le contrôle de version ; il permet de revenir à tout état antérieur du code, de travailler en parallèle sur plusieurs fonctionnalités et de conserver un historique complet des modifications.
+    \end{minipage}\\[0.8em]
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/github-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/github-logo.png}
-    }{
-    \textit{Logo GitHub : fichier assets/github-logo.png non trouvé.}
-    }
-    \caption{GitHub}
-    \label{fig:github-logo}
-    \end{figure}
-
+    \IfFileExists{assets/github-logo.png}{\includegraphics[width=\linewidth]{assets/github-logo.png}}{\textit{GitHub}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{GitHub} : plateforme d'hébergement de dépôts Git qui offre un espace centralisé pour le stockage du code, la revue de contributions via les pull requests et le suivi des tickets. Elle sécurise le code distant et permet un accès partagé à l'équipe. \textit{Justification :} GitHub fournit un dépôt distant fiable, accessible de n'importe où, et facilite le suivi des problèmes et la collaboration entre développeurs via les pull requests.
+    \end{minipage}\\[0.8em]
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/postman-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/postman-logo.png}
-    }{
-    \textit{Logo Postman : fichier assets/postman-logo.png non trouvé.}
-    }
-    \caption{Postman}
-    \label{fig:postman-logo}
-    \end{figure}
-
+    \IfFileExists{assets/postman-logo.png}{\includegraphics[width=\linewidth]{assets/postman-logo.png}}{\textit{Postman}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{Postman} : outil de test et de documentation d'API REST. Il permet de construire, envoyer et inspecter des requêtes HTTP vers les endpoints du backend, de vérifier les réponses et d'organiser les tests en collections réutilisables. \textit{Justification :} Postman a été indispensable pour valider chaque endpoint de l'API PHP au fur et à mesure du développement, vérifier les réponses et les codes d'erreur, et documenter les requêtes pour le frontend.
+    \end{minipage}\\[0.8em]
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/phpmyadmin-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/phpmyadmin-logo.png}
-    }{
-    \textit{Logo phpMyAdmin : fichier assets/phpmyadmin-logo.png non trouvé.}
-    }
-    \caption{phpMyAdmin}
-    \label{fig:phpmyadmin-logo}
-    \end{figure}
-
+    \IfFileExists{assets/phpmyadmin-logo.png}{\includegraphics[width=\linewidth]{assets/phpmyadmin-logo.png}}{\textit{phpMyAdmin}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{phpMyAdmin} : interface web d'administration de bases de données MySQL. Elle permet de gérer les bases, les tables, les utilisateurs et les permissions, d'exécuter des requêtes SQL et d'importer ou exporter des données, le tout sans recourir à la ligne de commande. \textit{Justification :} phpMyAdmin offre un accès visuel rapide à la base de données pour créer les tables, vérifier les données et déboguer les requêtes, sans installer d'outil supplémentaire sur le serveur.
+    \end{minipage}
 
     \subsection{Base de données}
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/mysql-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/mysql-logo.png}
-    }{
-    \textit{Logo MySQL : fichier assets/mysql-logo.png non trouvé.}
-    }
-    \caption{MySQL}
-    \label{fig:mysql-logo}
-    \end{figure}
-
+    \IfFileExists{assets/mysql-logo.png}{\includegraphics[width=\linewidth]{assets/mysql-logo.png}}{\textit{MySQL}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{MySQL} : système de gestion de bases de données relationnelles (SGBD) open source, fondé sur le langage SQL (Structured Query Language). SQL permet de définir la structure des données (création de tables, contraintes d'intégrité, clés étrangères), de les manipuler (insertion, mise à jour, suppression) et de les interroger de manière déclarative.
+    \end{minipage}
 
     Le choix de MySQL repose sur plusieurs critères : sa maturité et sa fiabilité éprouvées dans les environnements de production, ses performances élevées en lecture et en écriture pour des volumes de données conséquents, sa conformité aux standards SQL qui garantit la portabilité des requêtes, et son intégration native avec PHP via l'extension MySQLi. L'ensemble des données métier — voyages, retours, rapports qualité, demandes de transfert, lieux de projets, utilisateurs et permissions — est stocké dans une base MySQL hébergée sur le serveur de l'entreprise. \textit{Justification :} MySQL a été choisi pour sa compatibilité directe avec PHP, sa robustesse en production et sa disponibilité sur l'infrastructure existante de SDK WOOD.
 
     \subsection{Langage de programmation backend}
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/php-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/php-logo.png}
-    }{
-    \textit{Logo PHP : fichier assets/php-logo.png non trouvé.}
-    }
-    \caption{PHP}
-    \label{fig:php-logo}
-    \end{figure}
-
+    \IfFileExists{assets/php-logo.png}{\includegraphics[width=\linewidth]{assets/php-logo.png}}{\textit{PHP}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{PHP} : langage de script côté serveur conçu pour le développement web. Dans ce projet, PHP a été utilisé en tant que langage pur, sans recours à un framework. L'objectif de ce choix est double : d'une part, conserver une totale maîtrise de la logique métier et de la structure du code, sans les abstractions et les conventions imposées par un framework ; d'autre part, s'adapter à l'environnement de travail existant au sein de SDK WOOD, où PHP est la technologie backend en place. Ce choix permet ainsi à l'équipe interne de modifier, étendre et maintenir le code source du backend sans courbe d'apprentissage liée à un framework supplémentaire.
+    \end{minipage}
 
     Parmi les avantages de PHP sans framework : une exécution directe sur le serveur web Apache, une configuration minimale, un cycle requête-réponse simple et un déploiement immédiat par simple transfert de fichiers. Chaque endpoint de l'API correspond à un fichier PHP dédié, ce qui favorise la lisibilité, la traçabilité et la maintenabilité. \textit{Justification :} PHP a été adopté pour s'insérer naturellement dans l'environnement technique existant de SDK WOOD, permettant à l'équipe interne de reprendre et faire évoluer le code sans dépendance à un framework.
 
     \subsection{Langage de programmation frontend}
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/typescript-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/typescript-logo.png}
-    }{
-    \textit{Logo TypeScript : fichier assets/typescript-logo.png non trouvé.}
-    }
-    \caption{TypeScript}
-    \label{fig:typescript-logo}
-    \end{figure}
-
+    \IfFileExists{assets/typescript-logo.png}{\includegraphics[width=\linewidth]{assets/typescript-logo.png}}{\textit{TypeScript}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{TypeScript} : sur-ensemble de JavaScript développé par Microsoft, ajoutant un typage statique optionnel au langage. Par rapport à JavaScript, TypeScript détecte les erreurs de type à la compilation plutôt qu'à l'exécution, améliore l'autocomplétion et la navigation dans l'éditeur de code, et facilite la refactorisation grâce à une meilleure analyse statique. Le typage explicite des props, des états et des réponses API réduit les erreurs de régression et documente le contrat entre le frontend et le backend, ce qui est particulièrement précieux dans un projet mobile où les champs et les formats de données sont nombreux. \textit{Justification :} TypeScript a été choisi pour réduire les erreurs à l'exécution grâce au typage statique, améliorer la productivité via l'autocomplétion, et faciliter la maintenance du code dans un projet comptant de nombreux types de données échangés avec l'API.
+    \end{minipage}\\[0.8em]
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/react-native-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/react-native-logo.png}
-    }{
-    \textit{Logo React Native : fichier assets/react-native-logo.png non trouvé.}
-    }
-    \caption{React Native}
-    \label{fig:react-native-logo}
-    \end{figure}
-
+    \IfFileExists{assets/react-native-logo.png}{\includegraphics[width=\linewidth]{assets/react-native-logo.png}}{\textit{React Native}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{React Native} : framework développé par Meta permettant de construire des applications mobiles natives pour iOS et Android à partir d'une base de code unique en JavaScript/TypeScript. Contrairement à une approche hybride basée sur un navigateur embarqué, React Native génère de véritables composants natifs : les éléments d'interface déclarés en React sont traduits en vues UIKit sur iOS et en vues Android sur Android, via un pont (Bridge) qui assure la communication entre le thread JavaScript et le thread natif. Ce mécanisme permet de bénéficier des performances et du rendu natifs tout en conservant un cycle de développement rapide — rechargement instantané, métrologie en temps réel et partage de logique métier entre les deux plateformes.
+    \end{minipage}
 
     Par rapport au développement natif en Java (Android) ou Objective-C/Swift (iOS), React Native offre un gain de productivité substantiel : une seule base de code pour deux plateformes, un écosystème de bibliothèques riche via npm, et une communauté active. Le choix de React Native pour ce projet se justifie par la nécessité de livrer une application mobile robuste et performante dans un délai contraint, tout en ciblant simultanément les environnements Android et iOS. \textit{Justification :} React Native a été retenu pour sa capacité à produire une application native pour iOS et Android à partir d'un code unique, réduisant les coûts de développement et les délais tout en offrant des performances proches du natif.
 
-    \begin{figure}[h]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/expo-logo.png}{
-    \includegraphics[width=0.2\textwidth]{assets/expo-logo.png}
-    }{
-    \textit{Logo Expo : fichier assets/expo-logo.jpg non trouvé.}
-    }
-    \caption{Expo}
-    \label{fig:expo-logo}
-    \end{figure}
-
+    \IfFileExists{assets/expo-logo.png}{\includegraphics[width=\linewidth]{assets/expo-logo.png}}{\textit{Expo}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{Expo} : plateforme de développement et de déploiement construite au-dessus de React Native. Elle fournit un ensemble d'outils et de services — SDK, serveur de développement, builds cloud et application de prévisualisation — qui simplifient le cycle de développement mobile. Expo élimine la nécessité de configurer nativement Android Studio et Xcode : un simple \texttt{expo start} lance un serveur de développement avec rechargement en temps réel, l'application Expo Go permet de tester directement sur un appareil physique sans compilation, et les builds gérés (EAS Build) produisent les APK et IPA prêts pour la distribution. \textit{Justification :} Expo a été adopté pour accélérer le développement en supprimant la configuration native, permettre des itérations rapides via le rechargement instantané sur appareil, et simplifier la génération de l'APK de production sans environnement Android Studio.
+    \end{minipage}\\[0.8em]
 
-    \begin{figure}[ht]
+    \begin{minipage}[t]{0.16\textwidth}
     \centering
-    \IfFileExists{assets/android-studio-logo.jpg}{
-    \includegraphics[width=0.2\textwidth]{assets/android-studio-logo.jpg}
-    }{
-    \textit{Logo Android Studio : fichier assets/android-studio-logo.jpg non trouvé.}
-    }
-    \caption{Android Studio}
-    \label{fig:android-studio-logo}
-    \end{figure}
-
+    \IfFileExists{assets/android-studio-logo.png}{\includegraphics[width=\linewidth]{assets/android-studio-logo.png}}{\textit{Android Studio}}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.80\textwidth}
     \textbf{Android Studio} : environnement de développement intégré (IDE) officiel pour le développement Android, développé par Google. Bien que le framework Expo simplifie considérablement la configuration native, Android Studio reste indispensable au projet pour deux raisons : la génération du fichier APK de production via un build de développement (\textit{development build}) et le lancement d'émulateurs Android pour tester l'application sur différentes versions et tailles d'écran sans nécessiter de périphérique physique. \textit{Justification :} Android Studio a été utilisé comme outil complémentaire à Expo pour la compilation native et l'émulation, assurant la compatibilité de l'application avec l'écosystème Android.
+    \end{minipage}
 
     \section{Bibliothèques et packages TypeScript}
 
@@ -2000,28 +1865,10 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
 
     \section{Conclusion}
 
-    Ce chapitre a présenté la mise en œuvre concrète de la solution SDK WOOD Mobile. Après avoir exposé les outils de développement (VS Code, Git, GitHub, Postman, phpMyAdmin, Android Studio) et les technologies adoptées (MySQL, PHP, TypeScript, React Native, Expo), l'architecture logicielle a été détaillée : un backend en Transaction Script et un frontend organisé en couches par domaine, avec React Query et Zustand. Le versionnement du code via GitHub a assuré la traçabilité des modifications quotidiennes.
+    Ce chapitre a détaillé la mise en œuvre de la solution : outils (VS Code, Git, GitHub, Postman, phpMyAdmin, Android Studio), technologies (MySQL, PHP, TypeScript, React Native, Expo), architecture (backend Transaction Script, frontend en couches avec React Query et Zustand) et versionnement GitHub.
 
-    La réalisation s'est déroulée sur quatre sprints de développement :
-    \begin{itemize}[leftmargin=1.2em]
-    \item \textbf{Sprint 2} : authentification par jeton et module Voyages.
-    \item \textbf{Sprint 3} : module Retours chauffeur et module Rapports qualité.
-    \item \textbf{Sprint 4} : module Rotation et module Lieux de projets.
-    \item \textbf{Sprint 5} : module Demande de transfert.
-    \end{itemize}
+    La réalisation s'est articulée autour de quatre sprints : Sprint~2 (authentification et Voyages), Sprint~3 (Retours chauffeur et Rapports qualité), Sprint~4 (Rotation et Lieux de projets), Sprint~5 (Demande de transfert). Les tests manuels via Postman et l'émulateur Android/Expo Go ont validé l'ensemble des fonctionnalités, livrant une application mobile complète répondant aux besoins métiers de SDK WOOD.
 
-    La stratégie de tests manuels, menée conjointement avec Postman pour les API et l'émulateur Android couplé à Expo Go pour le frontend, a permis de valider l'ensemble des fonctionnalités développées.
-
-    L'ensemble de ces six modules, développés selon une approche Scrum itérative, constitue une application mobile complète répondant aux besoins métiers de SDK WOOD.
-
-    \newpage
-
-    \thispagestyle{empty}
-    \vspace*{\fill}
-    \begin{center}
-    {\Huge \textbf{CONCLUSION GÉNÉRALE}}
-    \end{center}
-    \vspace*{\fill}
     \newpage
 
 \addcontentsline{toc}{section}{{\bfseries Conclusion générale}}

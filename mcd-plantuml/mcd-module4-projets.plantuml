@@ -1,0 +1,49 @@
+@startuml MCD_Module4_Projets
+
+!theme plain
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor<<entite>> lightBlue
+  BorderColor<<entite>> darkBlue
+}
+
+title MCD — Module 4 : Lieux de Projets
+
+class UTILISATEUR <<entite>> {
+  + id : int <<PK>>
+  --
+  nom : varchar
+  prenom : varchar
+  role : enum
+}
+
+class PROJET <<entite>> {
+  + id : int <<PK>>
+  --
+  projet : enum(dépôt, chantier)
+  localisation : varchar
+  commentaire : text
+  contact_nom : varchar
+  contact_telephone : varchar
+  idCreate : int <<FK>>
+}
+
+class PROJET_IMAGE <<entite>> {
+  + id : int <<PK>>
+  --
+  nom_fichier : varchar
+  chemin_fichier : varchar
+  date_upload : datetime
+  idProjet : int <<FK>>
+}
+
+UTILISATEUR "0,n" --> "0,n" PROJET : crée_projet >
+PROJET "1,n" --> "0,n" PROJET_IMAGE : a_photos >
+
+note bottom of PROJET
+  projet : enum('dépôt', 'chantier')
+  localisation : texte libre (adresse ou GPS)
+  contact : nom + téléphone du responsable sur site
+end note
+
+@enduml

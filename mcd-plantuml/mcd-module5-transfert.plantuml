@@ -1,0 +1,126 @@
+@startuml MCD_Module5_Transfert
+
+!theme plain
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor<<entite>> lightBlue
+  BorderColor<<entite>> darkBlue
+  BackgroundColor<<vue>> #F0F0F0
+  BorderColor<<vue>> #999999
+}
+
+title MCD — Module 5 : Demande de Transfert
+
+class UTILISATEUR <<entite>> {
+  + id : int <<PK>>
+  --
+  nom : varchar
+  prenom : varchar
+  role : enum
+}
+
+class VUE_DEPOTS <<vue>> {
+  (vue SQL — non-entité)
+  + id
+  --
+  nom
+}
+
+class DEMANDETRANSFERT <<entite>> {
+  + id : int <<PK>>
+  --
+  reference : varchar
+  dum : varchar
+  transporteur : varchar
+  matricule : varchar
+  date : timestamp
+  observation : text
+  statut : enum
+  dateSingeDemandeur : datetime
+  dateEnvoie : datetime
+  dateRecu : datetime
+  idDepotSource : int <<FK>>
+  idDepotDestination : int <<FK>>
+  idCreate : int <<FK>>
+  idSigneDemamdeur : int <<FK>>
+  idEnvoie : int <<FK>>
+  idRecu : int <<FK>>
+}
+
+class DEMANDETRANSFERT_DETAILS <<entite>> {
+  + id : int <<PK>>
+  --
+  nbrFDX : int
+  Qte : double
+  Unite : char
+  preparer : enum(Non, Oui)
+  idDT : int <<FK>>
+  idProduit : int <<FK>>
+}
+
+class TRANSFER_LOTS <<entite>> {
+  + idItem : int <<PK,FK>>
+  + idProduit : int <<PK,FK>>
+  + Lot : varchar <<PK>>
+  --
+  preparer : enum(Non, Oui)
+  qte : double
+  old_lot : varchar
+  idModif : int <<FK>>
+}
+
+class VUE_PRODUITS <<vue>> {
+  (vue SQL — non-entité)
+  + produit_id
+  --
+  produit
+  unite_v
+  type_stock
+}
+
+' ==================== 4 rôles UTILISATEUR ====================
+UTILISATEUR "0,n" --> "0,n" DEMANDETRANSFERT : idCreate\n(crée) >
+UTILISATEUR "0,n" --> "0,n" DEMANDETRANSFERT : idSigneDemamdeur\n(signe) >
+UTILISATEUR "0,n" --> "0,n" DEMANDETRANSFERT : idEnvoie\n(envoie) >
+UTILISATEUR "0,n" --> "0,n" DEMANDETRANSFERT : idRecu\n(reçoit) >
+
+note right of DEMANDETRANSFERT
+  4 rôles distincts vers UTILISATEUR :
+  1. idCreate         — créateur de la demande
+  2. idSigneDemamdeur — signataire (demandeur)
+  3. idEnvoie         — expéditeur
+  4. idRecu           — récepteur (validation finale)
+
+  2 dépôts (vues SQL) :
+  - idDepotSource       — dépôt source
+  - idDepotDestination  — dépôt destination
+end note
+
+' ==================== Dépôts (vues SQL, pointillé) ====================
+DEMANDETRANSFERT "0,n" ..> "0,n" VUE_DEPOTS : idDepotSource >
+DEMANDETRANSFERT "0,n" ..> "0,n" VUE_DEPOTS : idDepotDestination >
+
+' ==================== Détails & Lots ====================
+DEMANDETRANSFERT "1,n" --> "0,n" DEMANDETRANSFERT_DETAILS : contient >
+DEMANDETRANSFERT_DETAILS "0,n" ..> "0,n" VUE_PRODUITS : idProduit >
+
+DEMANDETRANSFERT_DETAILS "1,n" --> "0,n" TRANSFER_LOTS : a_lots >
+TRANSFER_LOTS "0,n" ..> "0,n" VUE_PRODUITS : idProduit_référence >
+UTILISATEUR "0,n" --> "0,n" TRANSFER_LOTS : idModif\n(modifie_lot) >
+
+note right of TRANSFER_LOTS
+  Clé primaire composée :
+  (idItem, idProduit, Lot)
+
+  Lot = texte simple (numéro de lot)
+  Unite = texte simple (kg, m³, unité)
+  old_lot = valeur précédente lors d'une modif
+end note
+
+legend right
+  |= Couleur |= Type |
+  |<#lightBlue>| Entité application |
+  |<#F0F0F0>| Vue SQL (pointillé) |
+endlegend
+
+@enduml

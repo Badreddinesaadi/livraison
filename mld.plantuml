@@ -1,0 +1,408 @@
+@startuml MLD_SDK_WOOD
+
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #ADD8E6
+  BorderColor #00008B
+}
+
+title MLD - Modele Logique de Donnees - SDK WOOD Mobile
+
+note as Legend
+  Notation MLD (Merise relationnel) :
+  *  = Cle primaire (PK)
+  #  = Cle etrangere (FK)
+  +  = PK composee (multi-colonnes)
+  --
+  ||--o{  = un a plusieurs (optionnel)
+  ||--|{  = un a plusieurs (obligatoire)
+  ||--||  = un a un
+  }|--|{  = plusieurs a plusieurs
+  FK -> PK = reference d'integrite
+end note
+
+' ================================================================
+' MODULE 1 : Authentification & Permissions
+' ================================================================
+
+package "Module 1 : Authentification & Permissions" {
+
+  entity UTILISATEUR {
+    * id : int <<PK>>
+    --
+    nom : varchar(30)
+    prenom : varchar(40)
+    role : enum
+    ValidationRetourChauffeur : enum
+  }
+
+  entity UTILISATEUR_TOKEN {
+    * id : int <<PK>>
+    --
+    # idUser : int <<FK>>
+    token : text
+  }
+
+  entity MENUS {
+    * id : int <<PK>>
+    --
+    code : varchar
+    designation : varchar
+  }
+
+  entity PERMISSIONS {
+    + user_id : int <<PK,FK>>
+    + menu_id : int <<PK,FK>>
+    --
+    can_view : tinyint
+    can_create : tinyint
+    can_update : tinyint
+    can_delete : tinyint
+    can_take_picture_bl : tinyint
+    can_close_bl : tinyint
+    can_achever : tinyint
+  }
+
+  UTILISATEUR ||--o{ UTILISATEUR_TOKEN : "idUser -> id"
+  UTILISATEUR ||--o{ PERMISSIONS      : "user_id -> id"
+  MENUS      ||--o{ PERMISSIONS      : "menu_id -> id"
+
+  note bottom of PERMISSIONS
+    Table associative (MCD : association 0,n - 0,n
+    entre UTILISATEUR et MENUS)
+    PK composee = (user_id, menu_id)
+  end note
+}
+
+' ================================================================
+' MODULE 2 : Voyages & Bons de Livraison
+' ================================================================
+
+package "Module 2 : Voyages & BL" {
+
+  entity MARQUE_VEHICULE {
+    * id : int <<PK>>
+    --
+    designation : varchar(100)
+  }
+
+  entity VEHICULE {
+    * id : int <<PK>>
+    --
+    immatriculation : varchar(20)
+    # idMarque : int <<FK>>
+  }
+
+  entity VILLE {
+    * id : int <<PK>>
+    --
+    designation : varchar(120)
+    kmDeCasa : double
+  }
+
+  entity "VUE_DEPOTS\n(vue SQL, non-table)" as VUE_DEPOTS {
+    * id
+    --
+    nom
+  }
+
+  entity VOYAGE {
+    * id : int <<PK>>
+    --
+    date_depart : datetime
+    km_depart : int
+    km_retour : int
+    date_retour : datetime
+    date_create : datetime
+    statut : enum
+    # idChauffeur : int <<FK>>
+    # idVehicule : int <<FK>>
+    # idCreate : int <<FK>>
+    # depot_depart : int <<FK>>
+    # idVille : int <<FK>>
+  }
+
+  entity VOYAGE_BL {
+    * id : int <<PK>>
+    --
+    statut : enum
+    coordinates : varchar(200)
+    # idVoyage : int <<FK>>
+    # idBL : int <<FK>>
+  }
+
+  entity VOYAGE_BL_IMAGE {
+    * id : int <<PK>>
+    --
+    nom_fichier : varchar(255)
+    chemin_fichier : varchar(500)
+    date_upload : datetime
+    # idVoyageBL : int <<FK>>
+  }
+
+  entity "DOCUMENT\n(jbm - ERP existant)" as DOCUMENT {
+    * id : int <<PK>>
+    --
+    id_document : varchar(50)
+    id_type_document : int
+    datetime_document : datetime
+    # id_entreprise : int <<FK>>
+  }
+
+  entity "DOCUMENT_ITEMS\n(jbm - ERP existant)" as DOCUMENT_ITEMS {
+    * id_item : int <<PK>>
+    --
+    # id_document : int <<FK>>
+    # idproduit : int <<FK>>
+  }
+
+  entity "PARTENAIRES\n(jbm - ERP existant)" as PARTENAIRES {
+    * id : int <<PK>>
+    --
+    societe : varchar(200)
+  }
+
+  entity "VUE_PRODUITS\n(vue SQL, non-table)" as VUE_PRODUITS {
+    * produit_id
+    --
+    produit
+    unite_v
+    type_stock
+  }
+
+  MARQUE_VEHICULE ||--o{ VEHICULE          : "idMarque -> id"
+  VEHICULE      ||--o{ VOYAGE             : "idVehicule -> id"
+  UTILISATEUR   ||--o{ VOYAGE             : "idChauffeur -> id"
+  UTILISATEUR   ||--o{ VOYAGE             : "idCreate -> id"
+  VUE_DEPOTS    ||--o{ VOYAGE             : "depot_depart -> id"
+  VILLE         |o--o{ VOYAGE             : "idVille -> id"
+
+  VOYAGE        ||--o{ VOYAGE_BL          : "idVoyage -> id"
+  VOYAGE_BL     ||--o{ VOYAGE_BL_IMAGE    : "idVoyageBL -> id"
+  DOCUMENT      |o--o{ VOYAGE_BL         : "idBL -> id"
+
+  PARTENAIRES   ||--o{ DOCUMENT           : "id_entreprise -> id"
+  DOCUMENT      ||--o{ DOCUMENT_ITEMS     : "id_document -> id"
+  VUE_PRODUITS  ||--o{ DOCUMENT_ITEMS     : "idproduit -> produit_id"
+
+  note right of VOYAGE_BL
+    MCD : association 1,n - 0,n
+    Devenue relation avec PK propre (id)
+    + 2 FK (idVoyage, idBL)
+  end note
+
+  note right of DOCUMENT
+    Table externe jbm (ERP existant)
+    Filtre : id_type_document = 7 (BL)
+  end note
+}
+
+' ================================================================
+' MODULE 3 : Retours Chauffeur & Rapports Qualite
+' ================================================================
+
+package "Module 3 : Retours & Rapports" {
+
+  entity RETOUR_CHAUFFEUR {
+    * id : int <<PK>>
+    --
+    Bl_cachetet : enum(oui, non)
+    reglement : enum(oui, non)
+    retour_Mse : enum(oui, non)
+    reclamation : enum
+    statut : enum
+    date : datetime
+    commentaire : text
+    # client_id : int <<FK>>
+    # chauffeur_id : int <<FK>>
+  }
+
+  entity RETOUR_CHAUFFEUR_IMAGE {
+    * id : int <<PK>>
+    --
+    nom_fichier : varchar(255)
+    chemin_fichier : varchar(500)
+    date_upload : datetime
+    # idCreate : int <<FK>>
+    # idRetourChaufeur : int <<FK>>
+  }
+
+  entity RAPPORT_QUALITE {
+    * id : int <<PK>>
+    --
+    dum : varchar(100)
+    dossier : varchar(150)
+    commentaire : text
+    dateCreate : datetime
+    dateModif : datetime
+    # user_id : int <<FK>>
+    # idCreate : int <<FK>>
+    # idModif : int <<FK>>
+  }
+
+  entity RAPPORT_QUALITE_IMAGE {
+    * id : int <<PK>>
+    --
+    nom_fichier : varchar(255)
+    chemin_fichier : text
+    date_upload : datetime
+    # idCreate : int <<FK>>
+    # idRapportQualite : int <<FK>>
+  }
+
+  UTILISATEUR         ||--o{ RETOUR_CHAUFFEUR        : "chauffeur_id -> id"
+  PARTENAIRES         ||--o{ RETOUR_CHAUFFEUR        : "client_id -> id"
+  RETOUR_CHAUFFEUR    ||--o{ RETOUR_CHAUFFEUR_IMAGE  : "idRetourChaufeur -> id"
+  UTILISATEUR         ||--o{ RETOUR_CHAUFFEUR_IMAGE  : "idCreate -> id"
+
+  UTILISATEUR         ||--o{ RAPPORT_QUALITE         : "user_id -> id"
+  UTILISATEUR         ||--o{ RAPPORT_QUALITE         : "idCreate -> id"
+  UTILISATEUR         ||--o{ RAPPORT_QUALITE         : "idModif -> id"
+  RAPPORT_QUALITE     ||--o{ RAPPORT_QUALITE_IMAGE  : "idRapportQualite -> id"
+  UTILISATEUR         ||--o{ RAPPORT_QUALITE_IMAGE  : "idCreate -> id"
+
+  note bottom of RAPPORT_QUALITE
+    3 FK vers UTILISATEUR (roles distincts) :
+    - user_id  : personne concernee
+    - idCreate : createur de l'enregistrement
+    - idModif  : dernier modificateur
+  end note
+
+  note bottom of RETOUR_CHAUFFEUR
+    Bl_cachetet = booleen (BL tamponne)
+    chauffeur_id = utilisateur qui soumet
+    client_id = partenaire concerne
+  end note
+}
+
+' ================================================================
+' MODULE 4 : Lieux de Projets
+' ================================================================
+
+package "Module 4 : Projets" {
+
+  entity PROJET {
+    * id : int <<PK>>
+    --
+    projet : enum(depot, chantier)
+    localisation : varchar(255)
+    commentaire : text
+    contact_nom : varchar(100)
+    contact_telephone : varchar(20)
+    # idCreate : int <<FK>>
+  }
+
+  entity PROJET_IMAGE {
+    * id : int <<PK>>
+    --
+    nom_fichier : varchar(255)
+    chemin_fichier : varchar(255)
+    date_upload : datetime
+    # idProjet : int <<FK>>
+  }
+
+  UTILISATEUR ||--o{ PROJET       : "idCreate -> id"
+  PROJET      ||--o{ PROJET_IMAGE : "idProjet -> id"
+}
+
+' ================================================================
+' MODULE 5 : Demande de Transfert
+' ================================================================
+
+package "Module 5 : Transfert" {
+
+  entity DEMANDETRANSFERT {
+    * id : int <<PK>>
+    --
+    reference : varchar(255)
+    dum : varchar(50)
+    transporteur : varchar(50)
+    matricule : varchar(50)
+    date : timestamp
+    observation : text
+    statut : enum
+    dateSingeDemandeur : datetime
+    dateEnvoie : datetime
+    dateRecu : datetime
+    # idDepotSource : int <<FK>>
+    # idDepotDestination : int <<FK>>
+    # idCreate : int <<FK>>
+    # idSigneDemamdeur : int <<FK>>
+    # idEnvoie : int <<FK>>
+    # idRecu : int <<FK>>
+  }
+
+  entity DEMANDETRANSFERT_DETAILS {
+    * id : int <<PK>>
+    --
+    nbrFDX : int
+    Qte : double
+    Unite : char(20)
+    preparer : enum(Non, Oui)
+    # idDT : int <<FK>>
+    # idProduit : int <<FK>>
+  }
+
+  entity TRANSFER_LOTS {
+    + idItem : int <<PK,FK>>
+    + idProduit : int <<PK,FK>>
+    + Lot : varchar <<PK>>
+    --
+    preparer : enum(Non, Oui)
+    qte : double
+    old_lot : varchar(50)
+    # idModif : int <<FK>>
+  }
+
+  UTILISATEUR ||--o{ DEMANDETRANSFERT : "idCreate -> id"
+  UTILISATEUR ||--o{ DEMANDETRANSFERT : "idSigneDemamdeur -> id"
+  UTILISATEUR ||--o{ DEMANDETRANSFERT : "idEnvoie -> id"
+  UTILISATEUR ||--o{ DEMANDETRANSFERT : "idRecu -> id"
+
+  VUE_DEPOTS  ||--o{ DEMANDETRANSFERT : "idDepotSource -> id"
+  VUE_DEPOTS  ||--o{ DEMANDETRANSFERT : "idDepotDestination -> id"
+
+  DEMANDETRANSFERT         ||--o{ DEMANDETRANSFERT_DETAILS : "idDT -> id"
+  VUE_PRODUITS             ||--o{ DEMANDETRANSFERT_DETAILS : "idProduit -> produit_id"
+
+  DEMANDETRANSFERT_DETAILS ||--o{ TRANSFER_LOTS            : "idItem -> id"
+  VUE_PRODUITS             ||--o{ TRANSFER_LOTS            : "idProduit -> produit_id"
+  UTILISATEUR              ||--o{ TRANSFER_LOTS            : "idModif -> id"
+
+  note right of DEMANDETRANSFERT
+    4 FK vers UTILISATEUR (roles distincts) :
+    - idCreate         : createur
+    - idSigneDemamdeur : signataire
+    - idEnvoie         : expediteur
+    - idRecu           : recepteur
+
+    2 FK vers VUE_DEPOTS :
+    - idDepotSource      : depot source
+    - idDepotDestination : depot destination
+  end note
+
+  note right of TRANSFER_LOTS
+    PK composee : (idItem, idProduit, Lot)
+    Lot = texte (numero de lot)
+    Unite = texte (kg, m3, unite)
+    old_lot = valeur precedente lors d'une modif
+  end note
+
+  note right of DEMANDETRANSFERT_DETAILS
+    nbrFDX = nombre de fardeaux (FDX)
+    Qte = quantite
+    Unite = texte libre (non FK)
+  end note
+}
+
+legend right
+  |= Symbole |= Signification |
+  | *        | Cle primaire (PK) |
+  | #        | Cle etrangere (FK) |
+  | +        | PK composee |
+  | ||--o{   | un a plusieurs (optionnel) |
+  | |o--o{   | un optionnel a plusieurs optionnel |
+  | ||--||   | un a un |
+endlegend
+
+@enduml

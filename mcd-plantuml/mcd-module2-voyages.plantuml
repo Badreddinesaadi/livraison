@@ -1,0 +1,157 @@
+@startuml MCD_Module2_Voyages
+
+!theme plain
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor<<entite>> lightBlue
+  BorderColor<<entite>> darkBlue
+  BackgroundColor<<abc>> #FFE4B5
+  BorderColor<<abc>> #CD853F
+  BackgroundColor<<ext>> #F5DEB3
+  BorderColor<<ext>> #DEB887
+  BackgroundColor<<vue>> #F0F0F0
+  BorderColor<<vue>> #999999
+}
+
+title MCD — Module 2 : Voyages & Bons de Livraison
+
+class UTILISATEUR <<entite>> {
+  + id : int <<PK>>
+  --
+  nom : varchar
+  prenom : varchar
+  role : enum
+}
+
+class MARQUE_VEHICULE <<entite>> {
+  + id : int <<PK>>
+  --
+  designation : varchar
+}
+
+class VEHICULE <<entite>> {
+  + id : int <<PK>>
+  --
+  immatriculation : varchar
+  idMarque : int <<FK>>
+}
+
+class VILLE <<entite>> {
+  + id : int <<PK>>
+  --
+  designation : varchar
+  kmDeCasa : double
+}
+
+class VUE_DEPOTS <<vue>> {
+  (vue SQL — non-entité)
+  + id
+  --
+  nom
+}
+
+class VOYAGE <<entite>> {
+  + id : int <<PK>>
+  --
+  date_depart : datetime
+  km_depart : int
+  km_retour : int
+  date_retour : datetime
+  date_create : datetime
+  statut : enum
+  idChauffeur : int <<FK>>
+  idVehicule : int <<FK>>
+  idCreate : int <<FK>>
+  depot_depart : int <<FK>>
+  idVille : int <<FK>>
+}
+
+class VOYAGE_BL <<entite>> {
+  + id : int <<PK>>
+  --
+  statut : enum
+  coordinates : varchar
+  idVoyage : int <<FK>>
+  idBL : int <<FK>>
+}
+
+class VOYAGE_BL_IMAGE <<entite>> {
+  + id : int <<PK>>
+  --
+  nom_fichier : varchar
+  chemin_fichier : varchar
+  date_upload : datetime
+  idVoyageBL : int <<FK>>
+}
+
+class DOCUMENT <<ext>> {
+  (table jbm — ERP legacy)
+  + id : int <<PK>>
+  --
+  id_document : varchar
+  id_type_document : int
+  datetime_document : datetime
+  id_entreprise : int <<FK>>
+}
+
+note right of DOCUMENT
+  id_type_document = 7
+  correspond aux Bon de Livraison (BL)
+end note
+
+class PARTENAIRES <<ext>> {
+  (table jbm — ERP legacy)
+  + id : int <<PK>>
+  --
+  societe : varchar
+}
+
+class DOCUMENT_ITEMS <<ext>> {
+  (table jbm — ERP legacy)
+  + id_item : int <<PK>>
+  --
+  id_document : int <<FK>>
+  idproduit : int <<FK>>
+}
+
+class VUE_PRODUITS <<vue>> {
+  (vue SQL — non-entité)
+  + produit_id
+  --
+  produit
+  unite_v
+  type_stock
+}
+
+' --- Relations : Chauffeur & Créateur ---
+UTILISATEUR "0,n" --> "1,n" VOYAGE : effectue_chauffeur >
+UTILISATEUR "0,n" --> "0,n" VOYAGE : crée >
+
+' --- Relation véhicule/marque ---
+VEHICULE "n,1" --> "1,n" MARQUE_VEHICULE : de_marque >
+VOYAGE "1,1" --> "0,n" VEHICULE : utilise >
+
+' --- Relation ville ---
+VOYAGE "0,1" --> "0,n" VILLE : destination >
+
+' --- Dépôt (vue SQL, pointillé) ---
+VOYAGE "1,1" ..> "0,n" VUE_DEPOTS : depot_depart >
+
+' --- Bo.rs de livraison ---
+VOYAGE "1,n" --> "1,n" VOYAGE_BL : contient >
+VOYAGE_BL "0,n" --> "0,n" DOCUMENT : référence_BL >
+VOYAGE_BL "1,n" --> "0,n" VOYAGE_BL_IMAGE : a_photos >
+
+' --- Document/Partenaires ---
+DOCUMENT "1,1" --> "0,n" PARTENAIRES : entreprise >
+DOCUMENT "1,n" --> "0,n" DOCUMENT_ITEMS : contient >
+DOCUMENT_ITEMS "0,n" ..> "0,n" VUE_PRODUITS : idproduit >
+
+legend right
+  |= Couleur |= Type |
+  |<#lightBlue>| Entité application |
+  |<#F5DEB3>| Table jbm (ERP legacy) |
+  |<#F0F0F0>| Vue SQL (pointillé) |
+endlegend
+
+@enduml

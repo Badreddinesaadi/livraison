@@ -1,0 +1,120 @@
+@startuml MCD_Module3_Retours_Rapports
+
+!theme plain
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor<<entite>> lightBlue
+  BorderColor<<entite>> darkBlue
+  BackgroundColor<<ext>> #F5DEB3
+  BorderColor<<ext>> #DEB887
+}
+
+title MCD — Module 3 : Retours Chauffeur & Rapports Qualité
+
+class UTILISATEUR <<entite>> {
+  + id : int <<PK>>
+  --
+  nom : varchar
+  prenom : varchar
+  role : enum
+  ValidationRetourChauffeur : enum
+}
+
+class PARTENAIRES <<ext>> {
+  (table jbm — ERP legacy)
+  + id : int <<PK>>
+  --
+  societe : varchar
+}
+
+' ==================== RETOUR CHAUFFEUR ====================
+
+class RETOUR_CHAUFFEUR <<entite>> {
+  + id : int <<PK>>
+  --
+  Bl_cachetet : enum(oui, non)
+  reglement : enum(oui, non)
+  retour_Mse : enum(oui, non)
+  reclamation : enum
+  statut : enum
+  date : datetime
+  commentaire : text
+  client_id : int <<FK>>
+  chauffeur_id : int <<FK>>
+}
+
+class RETOUR_CHAUFFEUR_IMAGE <<entite>> {
+  + id : int <<PK>>
+  --
+  nom_fichier : varchar
+  chemin_fichier : varchar
+  date_upload : datetime
+  idCreate : int <<FK>>
+  idRetourChaufeur : int <<FK>>
+}
+
+' --- Relations Retour ---
+UTILISATEUR "0,n" --> "0,n" RETOUR_CHAUFFEUR : soumet_chauffeur >
+RETOUR_CHAUFFEUR "0,n" --> "1,1" PARTENAIRES : client_concerné >
+RETOUR_CHAUFFEUR "1,n" --> "0,n" RETOUR_CHAUFFEUR_IMAGE : a_photos >
+UTILISATEUR "0,n" --> "0,n" RETOUR_CHAUFFEUR_IMAGE : crée_photo >
+
+note right of RETOUR_CHAUFFEUR
+  Bl_cachetet = booléen
+  (BL tamponné par le client)
+  chauffeur_id = utilisateur qui soumet
+  client_id = partenaire concerné
+end note
+
+' ==================== RAPPORT QUALITE ====================
+
+class RAPPORT_QUALITE <<entite>> {
+  + id : int <<PK>>
+  --
+  dum : varchar
+  dossier : varchar
+  commentaire : text
+  dateCreate : datetime
+  dateModif : datetime
+  user_id : int <<FK>>
+  idCreate : int <<FK>>
+  idModif : int <<FK>>
+}
+
+class RAPPORT_QUALITE_IMAGE <<entite>> {
+  + id : int <<PK>>
+  --
+  nom_fichier : varchar
+  chemin_fichier : text
+  date_upload : datetime
+  idCreate : int <<FK>>
+  idRapportQualite : int <<FK>>
+}
+
+' --- Relations Rapport Qualité ---
+' 3 rôles distincts vers UTILISATEUR :
+'   user_id  = personne concernée par le rapport
+'   idCreate = qui a créé l'enregistrement
+'   idModif  = dernier modificateur
+
+UTILISATEUR "0,n" --> "0,n" RAPPORT_QUALITE : user_id_\nconcerne >
+UTILISATEUR "0,n" --> "0,n" RAPPORT_QUALITE : idCreate_\ncrée >
+UTILISATEUR "0,n" --> "0,n" RAPPORT_QUALITE : idModif_\nmodifie >
+RAPPORT_QUALITE "1,n" --> "0,n" RAPPORT_QUALITE_IMAGE : a_photos >
+UTILISATEUR "0,n" --> "0,n" RAPPORT_QUALITE_IMAGE : crée_photo >
+
+note right of RAPPORT_QUALITE
+  3 rôles vers UTILISATEUR :
+  - user_id  ≠ idCreate
+  - user_id  = personne concernée
+  - idCreate = créateur de l'enregistrement
+  - idModif  = dernier modificateur
+end note
+
+legend right
+  |= Couleur |= Type |
+  |<#lightBlue>| Entité application |
+  |<#F5DEB3>| Table jbm (ERP legacy) |
+endlegend
+
+@enduml

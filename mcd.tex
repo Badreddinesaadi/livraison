@@ -1,0 +1,521 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=2cm}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning,arrows.meta,calc,fit,backgrounds}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\tikzset{
+  entity/.style={
+    rectangle,draw,thick,fill=blue!10,
+    minimum width=2.8cm,minimum height=0.6cm,
+    align=center,font=\small\bfseries,
+    inner sep=2pt
+  },
+  attr/.style={
+    rectangle,draw,thin,fill=blue!3,
+    minimum width=2.8cm,align=left,font=\footnotesize,
+    inner sep=3pt,anchor=north
+  },
+  assoc/.style={
+    diamond,draw,thick,fill=orange!15,
+    minimum width=2cm,minimum height=1cm,
+    align=center,font=\footnotesize\bfseries,
+    inner sep=1pt,aspect=2
+  },
+  note/.style={
+    rectangle,draw,dashed,thin,fill=yellow!10,
+    minimum width=2cm,align=center,font=\scriptsize\itshape,
+    inner sep=3pt
+  },
+  card/.style={font=\scriptsize,fill=white,inner sep=1pt},
+  rel/.style={->,>=stealth,thick},
+  relb/.style={<-,>=stealth,thick},
+  bi_rel/.style={<->,>=stealth,thick},
+  dashed_rel/.style={->,>=stealth,thick,dashed}
+}
+
+\title{\textbf{Modèle Conceptuel de Données (MCD)\\[0.3em]
+\large Application SDK WOOD Mobile}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\section{Introduction}
+
+Ce document présente le Modèle Conceptuel de Données (MCD) de l'application SDK WOOD Mobile, construit selon la méthode Merise. Le MCD identifie les entités, leurs attributs (avec clés primaires soulignées et clés étrangères annotées), les associations et les cardinalités.
+
+Les tables \texttt{vue\_depots} et \texttt{vue\_produits} sont des vues SQL utilisées comme clés étrangères mais ne constituent pas des entités du MCD ; elles sont représentées en pointillé.
+
+Le MCD est organisé en cinq modules métier correspondant aux sprints de développement.
+
+\tableofcontents
+\newpage
+
+% ================================================================
+\section{Module 1 : Authentification \& Permissions}
+% ================================================================
+
+\subsection{Entités}
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{UTILISATEUR} (\underline{id}, nom, prenom, role, ValidationRetourChauffeur)
+\item \textbf{UTILISATEUR\_TOKEN} (\underline{id}, idUser $\rightarrow$ UTILISATEUR, token)
+\item \textbf{MENUS} (\underline{id}, code, designation)
+\item \textbf{PERMISSIONS} (\underline{id}, user\_id $\rightarrow$ UTILISATEUR, menu\_id $\rightarrow$ MENUS, can\_view, can\_create, can\_update, can\_delete, can\_take\_picture\_bl, can\_close\_bl, can\_achever)
+\end{itemize}
+
+\subsection{Associations}
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{Possède\_token} : UTILISATEUR $1,n$ — $0,n$ UTILISATEUR\_TOKEN
+\item \textbf{A\_permissions} : UTILISATEUR $0,n$ — $0,n$ MENUS (via PERMISSIONS, porte 7 attributs booléens)
+\end{itemize}
+
+\subsection{Diagramme}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=2.2cm]
+
+% --- Entities ---
+\node[entity] (user) at (0,0) {UTILISATEUR};
+\node[attr, below=0.15cm of user] (user_a) {\textbf{\underline{id}}, nom, prenom,\\role, ValidationRetourChauffeur};
+
+\node[entity] (token) at (6,0.5) {TOKEN};
+\node[attr, below=0.15cm of token] (token_a) {\textbf{\underline{id}}, idUser $\to$, token};
+
+\node[entity] (menus) at (0,-3.5) {MENUS};
+\node[attr, below=0.15cm of menus] (menus_a) {\textbf{\underline{id}}, code, designation};
+
+\node[entity] (perms) at (5.5,-3.5) {PERMISSIONS};
+\node[attr, below=0.15cm of perms] (perms_a) {\textbf{\underline{id}}, user\_id $\to$, menu\_id $\to$,\\can\_view, can\_create, can\_update,\\can\_delete, can\_take\_picture\_bl,\\can\_close\_bl, can\_achever};
+
+% --- Associations ---
+\node[assoc] (tok_assoc) at (3,0.3) {Possède};
+\node[assoc] (perm_assoc) at (2.7,-3.5) {A\_permissions};
+
+% --- Edges ---
+\draw[bi_rel] (user) -- node[card,above]{$1,n$} (tok_assoc);
+\draw[bi_rel] (tok_assoc) -- node[card,above]{$0,n$} (token);
+
+\draw[bi_rel] (user) -- node[card,right]{$0,n$} (perm_assoc);
+\draw[bi_rel] (perm_assoc) -- node[card,above]{$0,n$} (perms);
+
+\end{tikzpicture}
+\caption{MCD — Module Authentification \& Permissions}
+\label{fig:mcd-auth}
+\end{figure}
+
+\newpage
+
+% ================================================================
+\section{Module 2 : Voyages \& Bons de Livraison}
+% ================================================================
+
+\subsection{Entités}
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{MARQUE\_VEHICULE} (\underline{id}, designation)
+\item \textbf{VEHICULE} (\underline{id}, immatriculation, idMarque $\rightarrow$ MARQUE\_VEHICULE)
+\item \textbf{VILLE} (\underline{id}, designation, kmDeCasa)
+\item \textbf{VOYAGE} (\underline{id}, date\_depart, km\_depart, km\_retour, date\_retour, date\_create, statut, idChauffeur $\rightarrow$ UTILISATEUR, idVehicule $\rightarrow$ VEHICULE, idCreate $\rightarrow$ UTILISATEUR, depot\_depart $\rightarrow$ \textit{vue\_depots}, idVille $\rightarrow$ VILLE)
+\item \textbf{VOYAGE\_BL} (\underline{id}, statut, coordinates, idVoyage $\rightarrow$ VOYAGE, idBL $\rightarrow$ DOCUMENT)
+\item \textbf{VOYAGE\_BL\_IMAGE} (\underline{id}, nom\_fichier, chemin\_fichier, date\_upload, idVoyageBL $\rightarrow$ VOYAGE\_BL)
+\item \textbf{DOCUMENT} (\underline{id}, id\_document, id\_type\_document, datetime\_document, id\_entreprise $\rightarrow$ PARTENAIRES)
+\item \textbf{DOCUMENT\_ITEMS} (\underline{id\_item}, id\_document $\rightarrow$ DOCUMENT, idproduit $\rightarrow$ \textit{vue\_produits})
+\item \textbf{PARTENAIRES} (\underline{id}, societe)
+\end{itemize}
+
+\subsection{Notes}
+\begin{itemize}[leftmargin=1.5em]
+\item \texttt{vue\_depots} (vue SQL) : identifié par \texttt{id}, attribut \texttt{nom}. Référencé par \texttt{depot\_depart} et \texttt{idDepotSource/Destination}.
+\item \texttt{vue\_produits} (vue SQL) : identifié par \texttt{produit\_id}, attributs \texttt{produit}, \texttt{unite\_v}, \texttt{type\_stock}.
+\item \texttt{document.id\_type\_document = 7} correspond aux Bons de Livraison (BL).
+\end{itemize}
+
+\subsection{Diagramme}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=1.8cm]
+
+% --- Entities ---
+\node[entity] (user) at (0,2) {UTILISATEUR};
+
+\node[entity] (voyage) at (0,-1.5) {VOYAGE};
+\node[attr, below=0.1cm of voyage] (voyage_a) {\underline{id}, date\_depart, km\_depart,\\km\_retour, date\_retour, statut,\\idChauffeur $\to$, idVehicule $\to$,\\idCreate $\to$, depot\_depart $\to$, idVille $\to$};
+
+\node[entity] (vehicule) at (-4.5,-1.5) {VEHICULE};
+\node[attr, below=0.1cm of vehicule] (veh_a) {\underline{id}, immatriculation,\\idMarque $\to$};
+
+\node[entity] (marque) at (-4.5,-5) {MARQUE};
+\node[attr, below=0.1cm of marque] (marque_a) {\underline{id}, designation};
+
+\node[entity] (ville) at (5,-1.5) {VILLE};
+\node[attr, below=0.1cm of ville] (ville_a) {\underline{id}, designation, kmDeCasa};
+
+\node[entity] (vbl) at (0,-6.5) {VOYAGE\_BL};
+\node[attr, below=0.1cm of vbl] (vbl_a) {\underline{id}, statut, coordinates,\\idVoyage $\to$, idBL $\to$};
+
+\node[entity] (vblimg) at (-3.5,-6.5) {VBL\_IMAGE};
+\node[attr, below=0.1cm of vblimg] (vblimg_a) {\underline{id}, nom\_fichier,\\chemin\_fichier, date\_upload,\\idVoyageBL $\to$};
+
+\node[entity] (doc) at (4,-6.5) {DOCUMENT};
+\node[attr, below=0.1cm of doc] (doc_a) {\underline{id}, id\_document,\\id\_type\_document,\\datetime\_document,\\id\_entreprise $\to$};
+
+\node[entity] (part) at (8,-6.5) {PARTENAIRES};
+\node[attr, below=0.1cm of part] (part_a) {\underline{id}, societe};
+
+\node[note] (depot_note) at (-2.5,2.6) {[vue\_depots :\\id, nom]};
+
+% --- Associations ---
+\node[assoc] (a_chauffeur) at (1.5,0.3) {Effectue};
+\node[assoc] (a_cree) at (-1.5,0.3) {Crée};
+\node[assoc] (a_marque) at (-4.5,-3.2) {De};
+\node[assoc] (a_ville) at (3,-1.5) {Destination};
+\node[assoc] (a_depot) at (-1.2,2.2) {Départ};
+\node[assoc] (a_contient) at (1.8,-4) {Contient};
+\node[assoc] (a_photo) at (-1.8,-5.3) {A\_photos};
+\node[assoc] (a_entreprise) at (6,-6.5) {Entreprise};
+
+% --- Edges ---
+\draw[bi_rel] (user) -- node[card,right]{$0,n$} (a_chauffeur);
+\draw[bi_rel] (a_chauffeur) -- node[card,right]{$1,n$} (voyage);
+
+\draw[bi_rel] (user) -- node[card,left]{$0,n$} (a_cree);
+\draw[bi_rel] (a_cree) -- node[card,left]{$0,n$} (voyage);
+
+\draw[bi_rel] (vehicule) -- node[card,left]{$n,1$} (a_marque);
+\draw[bi_rel] (a_marque) -- node[card,left]{$1,n$} (marque);
+
+\draw[bi_rel] (voyage) -- node[card,above]{$0,1$} (a_ville);
+\draw[bi_rel] (a_ville) -- node[card,above]{$0,n$} (ville);
+
+\draw[dashed_rel] (voyage) -- node[card,above left]{$1,1$} (a_depot);
+\draw[dashed_rel] (a_depot) -- (depot_note);
+
+\draw[bi_rel] (voyage.south) -- node[card,left]{$1,n$} (a_contient.north);
+\draw[bi_rel] (a_contient.south) -- node[card,right]{$0,n$} (vbl.north);
+
+\draw[bi_rel] (vbl) -- node[card,above]{$1,n$} (a_photo);
+\draw[bi_rel] (a_photo) -- node[card,above]{$0,n$} (vblimg);
+
+\draw[bi_rel] (vbl) -- node[card,above]{$0,n$} (doc);
+\draw[bi_rel] (doc) -- node[card,above]{$1,1$} (part);
+
+\end{tikzpicture}
+\caption{MCD — Module Voyages \& Bons de Livraison}
+\label{fig:mcd-voyage}
+\end{figure}
+
+\newpage
+
+% ================================================================
+\section{Module 3 : Retours Chauffeur \& Rapports Qualité}
+% ================================================================
+
+\subsection{Entités}
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{RETOUR\_CHAUFFEUR} (\underline{id}, Bl\_cachetet, reglement, retour\_Mse, reclamation, statut, date, commentaire, client\_id $\rightarrow$ PARTENAIRES, chauffeur\_id $\rightarrow$ UTILISATEUR)
+\item \textbf{RETOUR\_CHAUFFEUR\_IMAGE} (\underline{id}, nom\_fichier, chemin\_fichier, date\_upload, idCreate $\rightarrow$ UTILISATEUR, idRetourChaufeur $\rightarrow$ RETOUR\_CHAUFFEUR)
+\item \textbf{RAPPORT\_QUALITE} (\underline{id}, dum, dossier, commentaire, dateCreate, dateModif, user\_id $\rightarrow$ UTILISATEUR, idCreate $\rightarrow$ UTILISATEUR, idModif $\rightarrow$ UTILISATEUR)
+\item \textbf{RAPPORT\_QUALITE\_IMAGE} (\underline{id}, nom\_fichier, chemin\_fichier, date\_upload, idCreate $\rightarrow$ UTILISATEUR, idRapportQualite $\rightarrow$ RAPPORT\_QUALITE)
+\item \textbf{PARTENAIRES} (\underline{id}, societe)
+\item \textbf{UTILISATEUR} (\underline{id}, nom, prenom, role, ValidationRetourChauffeur)
+\end{itemize}
+
+\subsection{Diagramme}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=2cm]
+
+% --- Entities ---
+\node[entity] (user) at (0,1) {UTILISATEUR};
+
+\node[entity] (rc) at (-4,-2.5) {RETOUR\_CHAUFFEUR};
+\node[attr, below=0.1cm of rc] (rc_a) {\underline{id}, Bl\_cachetet, reglement,\\retour\_Mse, reclamation, statut,\\date, commentaire,\\client\_id $\to$, chauffeur\_id $\to$};
+
+\node[entity] (rc_img) at (-7.5,-2.5) {RC\_IMAGE};
+\node[attr, below=0.1cm of rc_img] (rc_img_a) {\underline{id}, nom\_fichier,\\chemin\_fichier, date\_upload,\\idCreate $\to$, idRetourChaufeur $\to$};
+
+\node[entity] (rq) at (4,-2.5) {RAPPORT\_QUALITE};
+\node[attr, below=0.1cm of rq] (rq_a) {\underline{id}, dum, dossier,\\commentaire, dateCreate, dateModif,\\user\_id $\to$, idCreate $\to$, idModif $\to$};
+
+\node[entity] (rq_img) at (8,-2.5) {RQ\_IMAGE};
+\node[attr, below=0.1cm of rq_img] (rq_img_a) {\underline{id}, nom\_fichier,\\chemin\_fichier, date\_upload,\\idCreate $\to$, idRapportQualite $\to$};
+
+\node[entity] (part) at (-4,-6.5) {PARTENAIRES};
+\node[attr, below=0.1cm of part] (part_a) {\underline{id}, societe};
+
+% --- Associations ---
+\node[assoc] (a_soumet) at (-2.5,-0.8) {Soumet};
+\node[assoc] (a_photo_rc) at (-5.8,-2.5) {A\_photos};
+\node[assoc] (a_create_prc) at (-7.5,0.1) {Photo\_de};
+\node[assoc] (a_client) at (-4,-4.5) {Client};
+\node[assoc] (a_rapport_user) at (2,-0.8) {Concerne};
+\node[assoc] (a_rapport_create) at (4,0.1) {Crée};
+\node[assoc] (a_rapport_modif) at (5.5,0.8) {Modifie};
+\node[assoc] (a_photo_rq) at (6,-2.5) {A\_photos};
+\node[assoc] (a_create_prq) at (8,0.1) {Photo\_de};
+
+% --- Edges Retour ---
+\draw[bi_rel] (user) -- node[card,above]{$0,n$} (a_soumet);
+\draw[bi_rel] (a_soumet) -- node[card,below]{$0,n$} (rc);
+
+\draw[bi_rel] (rc) -- node[card,above]{$1,n$} (a_photo_rc);
+\draw[bi_rel] (a_photo_rc) -- node[card,above]{$0,n$} (rc_img);
+
+\draw[bi_rel] (user) -- node[card,left]{$0,n$} (a_create_prc);
+\draw[bi_rel] (a_create_prc) -- node[card,left]{$0,n$} (rc_img);
+
+\draw[bi_rel] (rc) -- node[card,left]{$0,n$} (a_client);
+\draw[bi_rel] (a_client) -- node[card,left]{$1,1$} (part);
+
+% --- Edges Rapport ---
+\draw[bi_rel] (user) -- node[card,above]{$0,n$} (a_rapport_user);
+\draw[bi_rel] (a_rapport_user) -- node[card,below]{$0,n$} (rq);
+
+\draw[bi_rel] (user) -- node[card,above right]{$0,n$} (a_rapport_create);
+\draw[bi_rel] (a_rapport_create) -- node[card,right]{$0,n$} (rq);
+
+\draw[bi_rel] (user) -- node[card,right]{$0,n$} (a_rapport_modif);
+\draw[bi_rel] (a_rapport_modif) -- node[card,right]{$0,n$} (rq);
+
+\draw[bi_rel] (rq) -- node[card,above]{$1,n$} (a_photo_rq);
+\draw[bi_rel] (a_photo_rq) -- node[card,above]{$0,n$} (rq_img);
+
+\draw[bi_rel] (user) -- node[card,above]{$0,n$} (a_create_prq);
+\draw[bi_rel] (a_create_prq) -- node[card,below]{$0,n$} (rq_img);
+
+\end{tikzpicture}
+\caption{MCD — Module Retours Chauffeur \& Rapports Qualité}
+\label{fig:mcd-retour}
+\end{figure}
+
+\newpage
+
+% ================================================================
+\section{Module 4 : Lieux de Projets}
+% ================================================================
+
+\subsection{Entités}
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{PROJET} (\underline{id}, projet, localisation, commentaire, contact\_nom, contact\_telephone, idCreate $\rightarrow$ UTILISATEUR)
+\item \textbf{PROJET\_IMAGE} (\underline{id}, nom\_fichier, chemin\_fichier, date\_upload, idProjet $\rightarrow$ PROJET)
+\item \textbf{UTILISATEUR} (\underline{id}, nom, prenom, role)
+\end{itemize}
+
+\subsection{Diagramme}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=2.5cm]
+
+\node[entity] (user) at (0,0) {UTILISATEUR};
+
+\node[entity] (projet) at (0,-3) {PROJET};
+\node[attr, below=0.1cm of projet] (projet_a) {\underline{id}, projet, localisation,\\commentaire, contact\_nom,\\contact\_telephone, idCreate $\to$};
+
+\node[entity] (pimg) at (5,-3) {PROJET\_IMAGE};
+\node[attr, below=0.1cm of pimg] (pimg_a) {\underline{id}, nom\_fichier,\\chemin\_fichier, date\_upload,\\idProjet $\to$};
+
+\node[assoc] (a_create) at (0,-1.5) {Crée};
+\node[assoc] (a_photo) at (2.5,-3) {A\_photos};
+
+\draw[bi_rel] (user) -- node[card,right]{$0,n$} (a_create);
+\draw[bi_rel] (a_create) -- node[card,right]{$0,n$} (projet);
+
+\draw[bi_rel] (projet) -- node[card,above]{$1,n$} (a_photo);
+\draw[bi_rel] (a_photo) -- node[card,above]{$0,n$} (pimg);
+
+\end{tikzpicture}
+\caption{MCD — Module Lieux de Projets}
+\label{fig:mcd-projet}
+\end{figure}
+
+\newpage
+
+% ================================================================
+\section{Module 5 : Demande de Transfert}
+% ================================================================
+
+\subsection{Entités}
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{DEMANDETRANSFERT} (\underline{id}, reference, dum, transporteur, matricule, date, observation, statut, dateSingeDemandeur, dateEnvoie, dateRecu, idDepotSource $\rightarrow$ \textit{vue\_depots}, idDepotDestination $\rightarrow$ \textit{vue\_depots}, idCreate $\rightarrow$ UTILISATEUR, idSigneDemamdeur $\rightarrow$ UTILISATEUR, idEnvoie $\rightarrow$ UTILISATEUR, idRecu $\rightarrow$ UTILISATEUR)
+\item \textbf{DEMANDETRANSFERT\_DETAILS} (\underline{id}, nbrFDX, Qte, Unite, preparer, idDT $\rightarrow$ DEMANDETRANSFERT, idProduit $\rightarrow$ \textit{vue\_produits})
+\item \textbf{TRANSFER\_LOTS} (\underline{idItem}, \underline{idProduit}, \underline{Lot}, preparer, qte, old\_lot, idModif $\rightarrow$ UTILISATEUR, idItem $\rightarrow$ DEMANDETRANSFERT\_DETAILS)
+\item \textbf{UTILISATEUR} (\underline{id}, nom, prenom, role)
+\end{itemize}
+
+\subsection{Notes}
+\begin{itemize}[leftmargin=1.5em]
+\item \texttt{vue\_depots} : référencé par \texttt{idDepotSource} et \texttt{idDepotDestination} (dépôt source et destination du transfert).
+\item \texttt{vue\_produits} : référencé par \texttt{idProduit} dans \texttt{DEMANDETRANSFERT\_DETAILS} et \texttt{TRANSFER\_LOTS}.
+\item \texttt{TRANSFER\_LOTS} a une clé primaire composée : (\underline{idItem}, \underline{idProduit}, \underline{Lot}).
+\item \texttt{DEMANDETRANSFERT} a 4 rôles distincts vers \texttt{UTILISATEUR} : Crée, Signe, Envoie, Reçoit.
+\end{itemize}
+
+\subsection{Diagramme}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=2cm]
+
+% --- Entities ---
+\node[entity] (user) at (0,1.5) {UTILISATEUR};
+
+\node[entity] (dt) at (0,-2) {DEMANDE\_TRANSFERT};
+\node[attr, below=0.1cm of dt] (dt_a) {\underline{id}, reference, dum, transporteur,\\matricule, date, observation, statut,\\dateSingeDemandeur, dateEnvoie, dateRecu,\\idDepotSource $\to$, idDepotDestination $\to$,\\idCreate $\to$, idSigneDemamdeur $\to$,\\idEnvoie $\to$, idRecu $\to$};
+
+\node[entity] (dd) at (5,-2) {DT\_DETAILS};
+\node[attr, below=0.1cm of dd] (dd_a) {\underline{id}, nbrFDX, Qte, Unite,\\preparer, idDT $\to$, idProduit $\to$};
+
+\node[entity] (tl) at (5,-6) {TRANSFER\_LOTS};
+\node[attr, below=0.1cm of tl] (tl_a) {\underline{idItem}, \underline{idProduit}, \underline{Lot},\\preparer, qte, old\_lot,\\idModif $\to$};
+
+\node[note] (depot_note) at (-3.5,1.8) {[vue\_depots :\\id, nom]};
+\node[note] (prod_note) at (9,-2) {[vue\_produits :\\produit\_id, produit,\\unite\_v, type\_stock]};
+
+% --- Associations ---
+\node[assoc] (a_create) at (-1.2,0.2) {Crée};
+\node[assoc] (a_signe) at (0.5,0.8) {Signe};
+\node[assoc] (a_envoie) at (-1.5,0.9) {Envoie};
+\node[assoc] (a_recu) at (1,0.2) {Reçoit};
+\node[assoc] (a_depot_s) at (-2.5,-0.2) {Dépôt\_S};
+\node[assoc] (a_depot_d) at (2.5,-0.2) {Dépôt\_D};
+\node[assoc] (a_detail) at (2.5,-2) {Contient};
+\node[assoc] (a_lot) at (5,-4) {A\_lots};
+\node[assoc] (a_modif_lot) at (7,-4.5) {Modifie\_lot};
+
+% --- Edges ---
+\draw[bi_rel] (user) -- node[card,left]{$0,n$} (a_create);
+\draw[bi_rel] (a_create) -- node[card,left]{$0,n$} (dt);
+
+\draw[bi_rel] (user) -- node[card,right]{$0,n$} (a_signe);
+\draw[bi_rel] (a_signe) -- node[card,right]{$0,n$} (dt);
+
+\draw[bi_rel] (user) -- node[card,left]{$0,n$} (a_envoie);
+\draw[bi_rel] (a_envoie) -- node[card,below]{$0,n$} (dt);
+
+\draw[bi_rel] (user) -- node[card,right]{$0,n$} (a_recu);
+\draw[bi_rel] (a_recu) -- node[card,right]{$0,n$} (dt);
+
+\draw[dashed_rel] (dt) -- node[card,above left]{$0,n$} (a_depot_s);
+\draw[dashed_rel] (a_depot_s) -- (depot_note);
+
+\draw[dashed_rel] (dt) -- node[card,above right]{$0,n$} (a_depot_d);
+\draw[dashed_rel] (a_depot_d) -- (depot_note);
+
+\draw[bi_rel] (dt) -- node[card,above]{$1,n$} (a_detail);
+\draw[bi_rel] (a_detail) -- node[card,above]{$0,n$} (dd);
+
+\draw[dashed_rel] (dd) -- node[card,above]{$0,n$} (prod_note);
+
+\draw[bi_rel] (dd) -- node[card,left]{$1,n$} (a_lot);
+\draw[bi_rel] (a_lot) -- node[card,left]{$0,n$} (tl);
+
+\draw[bi_rel] (user) -- node[card,above right]{$0,n$} (a_modif_lot);
+\draw[bi_rel] (a_modif_lot) -- node[card,below]{$0,n$} (tl);
+
+\end{tikzpicture}
+\caption{MCD — Module Demande de Transfert}
+\label{fig:mcd-transfert}
+\end{figure}
+
+\newpage
+
+% ================================================================
+\section{Dictionnaire de données récapitulatif}
+% ================================================================
+
+\subsection{Entités et leurs attributs}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.2cm}|p{2cm}|p{8cm}|}
+\hline
+\textbf{Entité} & \textbf{Clé primaire} & \textbf{Attributs} \\
+\hline
+UTILISATEUR & \underline{id} & nom, prenom, role, ValidationRetourChauffeur \\
+\hline
+UTILISATEUR\_TOKEN & \underline{id} & idUser $\to$, token \\
+\hline
+MENUS & \underline{id} & code, designation \\
+\hline
+PERMISSIONS & \underline{id} & user\_id $\to$, menu\_id $\to$, can\_view, can\_create, can\_update, can\_delete, can\_take\_picture\_bl, can\_close\_bl, can\_achever \\
+\hline
+MARQUE\_VEHICULE & \underline{id} & designation \\
+\hline
+VEHICULE & \underline{id} & immatriculation, idMarque $\to$ \\
+\hline
+VILLE & \underline{id} & designation, kmDeCasa \\
+\hline
+VOYAGE & \underline{id} & date\_depart, km\_depart, km\_retour, date\_retour, date\_create, statut, idChauffeur $\to$, idVehicule $\to$, idCreate $\to$, depot\_depart $\to$, idVille $\to$ \\
+\hline
+VOYAGE\_BL & \underline{id} & statut, coordinates, idVoyage $\to$, idBL $\to$ \\
+\hline
+VOYAGE\_BL\_IMAGE & \underline{id} & nom\_fichier, chemin\_fichier, date\_upload, idVoyageBL $\to$ \\
+\hline
+RETOUR\_CHAUFFEUR & \underline{id} & Bl\_cachetet, reglement, retour\_Mse, reclamation, statut, date, commentaire, client\_id $\to$, chauffeur\_id $\to$ \\
+\hline
+RETOUR\_CHAUFFEUR\_IMAGE & \underline{id} & nom\_fichier, chemin\_fichier, date\_upload, idCreate $\to$, idRetourChaufeur $\to$ \\
+\hline
+RAPPORT\_QUALITE & \underline{id} & dum, dossier, commentaire, dateCreate, dateModif, user\_id $\to$, idCreate $\to$, idModif $\to$ \\
+\hline
+RAPPORT\_QUALITE\_IMAGE & \underline{id} & nom\_fichier, chemin\_fichier, date\_upload, idCreate $\to$, idRapportQualite $\to$ \\
+\hline
+PROJET & \underline{id} & projet, localisation, commentaire, contact\_nom, contact\_telephone, idCreate $\to$ \\
+\hline
+PROJET\_IMAGE & \underline{id} & nom\_fichier, chemin\_fichier, date\_upload, idProjet $\to$ \\
+\hline
+DEMANDETRANSFERT & \underline{id} & reference, dum, transporteur, matricule, date, observation, statut, dateSingeDemandeur, dateEnvoie, dateRecu, idDepotSource $\to$, idDepotDestination $\to$, idCreate $\to$, idSigneDemamdeur $\to$, idEnvoie $\to$, idRecu $\to$ \\
+\hline
+DEMANDETRANSFERT\_DETAILS & \underline{id} & nbrFDX, Qte, Unite, preparer, idDT $\to$, idProduit $\to$ \\
+\hline
+TRANSFER\_LOTS & \underline{idItem}, \underline{idProduit}, \underline{Lot} & preparer, qte, old\_lot, idModif $\to$ \\
+\hline
+DOCUMENT & \underline{id} & id\_document, id\_type\_document, datetime\_document, id\_entreprise $\to$ \\
+\hline
+DOCUMENT\_ITEMS & \underline{id\_item} & id\_document $\to$, idproduit $\to$ \\
+\hline
+PARTENAIRES & \underline{id} & societe \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Règles de gestion}
+
+\begin{enumerate}[leftmargin=1.5em]
+\item Un \textbf{utilisateur} possede de 0 à $n$ tokens d'authentification.
+\item Un \textbf{utilisateur} a de 0 à $n$ permissions, chacune associée à un \textbf{menu}.
+\item Un \textbf{voyage} est effectué par un et un seul \textbf{chauffeur} (utilisateur).
+\item Un \textbf{voyage} utilise un et un seul \textbf{véhicule}, d'une \textbf{marque}.
+\item Un \textbf{voyage} part d'un \textbf{dépôt} et peut avoir une \textbf{ville} de destination.
+\item Un \textbf{voyage} contient de 0 à $n$ \textbf{bons de livraison} (documents de type 7).
+\item Chaque \textbf{BL de voyage} peut avoir de 0 à $n$ \textbf{photos}.
+\item Une \textbf{retour chauffeur} est soumis par un \textbf{chauffeur} et concerne un \textbf{client} (partenaire).
+\item Un \textbf{retour chauffeur} a de 0 à $n$ \textbf{images}, créées par un \textbf{utilisateur}.
+\item Un \textbf{rapport qualité} est soumis, créé et modifié par des \textbf{utilisateurs} (3 rôles distincts).
+\item Un \textbf{rapport qualité} a de 0 à $n$ \textbf{images}, créées par un \textbf{utilisateur}.
+\item Un \textbf{projet} est créé par un \textbf{utilisateur} et a de 0 à $n$ \textbf{images}.
+\item Une \textbf{demande de transfert} est créée, signée, envoyée et recue par des \textbf{utilisateurs} (4 rôles distincts).
+\item Une \textbf{demande de transfert} contient de 0 à $n$ \textbf{détails} (lignes de produits).
+\item Chaque \textbf{détail} peut avoir de 0 à $n$ \textbf{lots}.
+\item Un \textbf{document} appartient à une \textbf{entreprise} (partenaire) et contient des \textbf{articles}.
+\item Les vues SQL \texttt{vue\_depots} et \texttt{vue\_produits} sont référencées par des FK mais ne constituent pas des entités du MCD.
+\end{enumerate}
+
+\end{document}
