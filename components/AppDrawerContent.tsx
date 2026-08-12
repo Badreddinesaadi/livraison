@@ -9,11 +9,12 @@ import {
 import { Colors } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+
+import { usePathname, useRouter } from "expo-router";
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
-} from "@react-navigation/drawer";
-import { usePathname, useRouter } from "expo-router";
+} from "expo-router/drawer";
 import { type ComponentProps } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
