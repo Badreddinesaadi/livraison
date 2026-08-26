@@ -85,11 +85,7 @@ export default function SelectOptionBottomSheetContent({
   const shouldShowSearch = enableSearch || options.length > 5;
 
   useEffect(() => {
-    if (!shouldShowSearch) {
-      setDebouncedSearch("");
-      return;
-    }
-
+    if (!shouldShowSearch) return;
     const timeout = setTimeout(() => {
       setDebouncedSearch(searchText.trim().toLowerCase());
     }, 300);

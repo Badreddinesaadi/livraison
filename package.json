@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start -c",
+    "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -58,6 +58,7 @@
     "@types/react": "~19.2.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~57.0.1",
+    "eslint-plugin-react-native": "^5.0.0",
     "typescript": "~6.0.3"
   },
   "private": true,

@@ -2,6 +2,7 @@ import {
   canAccessDemandeTransfertModule,
   canAccessProjetModule,
   canAccessRapportQualiteModule,
+  canAccessRapportVisiteModule,
   canAccessRetourModule,
   canAccessRotationModule,
   canAccessVoyageModule,
@@ -31,7 +32,8 @@ interface ModuleItem {
     | "/quality-reports"
     | "/rotation-chauffeur"
     | "/projet-locations"
-    | "/demande-transferts";
+    | "/demande-transferts"
+    | "/rvt";
   canAccess: (user: User) => boolean;
 }
 
@@ -79,6 +81,12 @@ export default function HomeScreen() {
       icon: "swap-horizontal",
       route: "/demande-transferts",
       canAccess: canAccessDemandeTransfertModule,
+    },
+    {
+      label: "Rapport de visite",
+      icon: "clipboard-list-outline",
+      route: "/rvt",
+      canAccess: canAccessRapportVisiteModule,
     },
   ];
 

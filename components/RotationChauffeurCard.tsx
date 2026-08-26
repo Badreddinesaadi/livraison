@@ -141,7 +141,7 @@ export const RotationChauffeurCard = ({ item }: { item: Rotation }) => {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             <FontAwesome5 name="map-marker-alt" size={12} color="#666" />
             <Text style={{ color: "#555", fontSize: 12 }}>
-              Ville d'arrivee: {villeLabel}
+              {`Ville d'arrivee: ${villeLabel}`}
             </Text>
           </View>
         ) : null}

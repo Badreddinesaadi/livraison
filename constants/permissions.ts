@@ -147,3 +147,25 @@ export const canAccessDemandeTransfertModule = (
     DEMANDE_TRANSFERT_ACTIONS,
   );
 };
+
+const RAPPORT_VISITE_ACTIONS: PermissionAction[] = [
+  "CREATE",
+  "UPDATE",
+  "LIST",
+  "DELETE",
+];
+
+export const hasRapportVisitePermission = (
+  user: User | null | undefined,
+  action: PermissionAction,
+) => {
+  return hasModulePermission(user, "rapport terrain", action);
+};
+
+export const canAccessRapportVisiteModule = (user: User | null | undefined) => {
+  return hasAnyModulePermission(
+    user,
+    "rapport terrain",
+    RAPPORT_VISITE_ACTIONS,
+  );
+};

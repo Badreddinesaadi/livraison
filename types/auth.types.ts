@@ -30,7 +30,8 @@ type Permissions = {
     | "rotation"
     | "projet"
     | "rapport qualite"
-    | "demande de transfert"]: (
+    | "demande de transfert"
+    | "rapport terrain"]: (
     | "CREATE"
     | "UPDATE"
     | "LIST"

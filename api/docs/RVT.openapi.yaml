@@ -1,0 +1,2058 @@
+openapi: 3.1.0
+info:
+  title: API SDKWOOD — Rapport de visite terrain
+  version: 1.0.0
+  license:
+    name: Propriétaire
+    identifier: LicenseRef-Proprietary
+  description: |
+    Contrat HTTP de l'application SDKWOOD de rapport de visite terrain.
+
+    Le navigateur reste responsable de l'interaction avec le formulaire, de la
+    capture GPS, de l'accès à la caméra, de la dictée vocale, des vibrations
+    et des liens de partage. L'API est la source de vérité pour les clients,
+    les données de référence, les tournées commerciales, les visites, les
+    photos, les analyses et les exports.
+
+    L'intégration ERP est une préoccupation interne du serveur et n'est pas
+    exposée par ce contrat. L'API attend un jeton pré-émis dans l'en-tête
+    `auth_token`. Ce contrat ne définit aucun point d'entrée de connexion ou
+    d'émission de jeton.
+
+    ## Enveloppe des réponses
+    Toutes les réponses réussies utilisent une enveloppe commune :
+      - `status` : booléen, `true` si l'opération a réussi, `false` sinon ;
+      - `data` : contient les données retournées (objet, tableau ou `null`) ;
+      - `pagination` : présent uniquement pour les points d'entrée qui
+        retournent une liste paginée, avec `page`, `perPage`, `total` et
+        `totalPages`.
+
+    Exemple pour une ressource unique :
+
+        {
+          "status": true,
+          "data": { ... }
+        }
+
+    Exemple pour une liste paginée :
+
+        {
+          "status": true,
+          "data": [ ... ],
+          "pagination": {
+            "page": 1,
+            "perPage": 10,
+            "total": 3,
+            "totalPages": 1
+          }
+        }
+
+    Les points d'entrée d'export (`/visits/{visitId}/export`,
+    `/rounds/{roundId}/export`, `/exports/visits`) retournent directement un
+    fichier binaire (PDF, CSV) ou un document JSON brut : ils ne suivent pas
+    cette enveloppe.
+servers:
+  - url: http://{backendHost}
+    description: Backend PHP SDKBOARD (développement local)
+    variables:
+      backendHost:
+        default: localhost:8075
+        description: Hôte et port du back-office SDKBOARD (ex. localhost:8075)
+  - url: https://{apiHost}/api/v1
+    description: Serveur d'API (production)
+    variables:
+      apiHost:
+        default: api.sdkwood.ma
+        description: Nom d'hôte public de l'API
+  - url: http://{localHost}:3001/api/v1
+    description: Développement local
+    variables:
+      localHost:
+        default: 127.0.0.1
+        description: Nom d'hôte local de l'API
+tags:
+  - name: Clients
+    description: Référentiel clients ERP
+  - name: Données de référence
+    description: Produits et options du formulaire
+  - name: Tournées
+    description: Tournées et sessions commerciales
+  - name: Visites
+    description: Persistance des rapports de visite
+  - name: Photos
+    description: Traitement et stockage serveur des photos de visite
+  - name: Analyses
+    description: Indicateurs agrégés des visites
+security:
+  - authToken: []
+paths:
+  /sdkboard/api/users/clients.php:
+    get:
+      tags: [Clients]
+      operationId: listClients
+      summary: Récupérer la liste des clients ERP
+      description: |
+        Point d'entrée du back-office SDKBOARD. Seule la méthode GET est
+        prise en charge, sans aucun paramètre. Retourne la liste complète des
+        clients (triés par raison sociale) avec l'enveloppe `status`/`data`,
+        sans pagination. Il n'existe pas de point d'entrée pour un client
+        unique.
+      responses:
+        "200":
+          description: Liste des clients ERP
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ErpClient"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+  /sdkboard/api/homescreen/rapport_terrain.php:
+    get:
+      tags: [Données de référence]
+      operationId: getReferenceData
+      summary: Récupérer le catalogue et les options du formulaire
+      description: |
+        Retourne les données actuellement regroupées dans `src/data/*`, mais
+        gérées par le serveur. Le frontal peut charger ces données une fois au
+        démarrage et utiliser les cartes d'options de détail produit pour
+        afficher les champs dépendants.
+      responses:
+        "200":
+          description: Instantané des données de référence
+          headers:
+            ETag:
+              description: Identifiant de version pour un cache conditionnel
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/ReferenceData"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+  /sdkboard/api/rounds/rounds.php:
+    post:
+      tags: [Tournées]
+      operationId: createRound
+      summary: Ouvrir une nouvelle tournée commerciale
+      description: |
+        Point d'entrée PHP unique `/sdkboard/api/rounds/rounds.php`. Le serveur
+        dérive `commercialId` depuis `auth_token` et rejette la création tant
+        qu'une tournée est déjà ouverte pour ce commercial (409
+        `ROUND_ALREADY_OPEN`). `idempotencyKey` est transmise dans l'URL ; la
+        même clé rejoue la création sans doublon.
+      parameters:
+        - name: idempotencyKey
+          in: query
+          required: true
+          description: Clé unique générée côté client (8 à 200 caractères), transmise dans l'URL
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 200
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoundCreate"
+      responses:
+        "201":
+          description: Tournée ouverte
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Round"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "409":
+          $ref: "#/components/responses/Conflit"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+    get:
+      tags: [Tournées]
+      operationId: getRounds
+      summary: Récupérer une tournée ou lister les tournées du commercial
+      description: |
+        Comportement piloté par les paramètres de requête :
+          - si `id` est fourni → retourne une seule tournée (`{status, data}`) ;
+          - sinon, retourne la liste paginée des tournées du commercial courant
+            (`{status, data, pagination}`).
+        Le filtre `status` accepte `open` (en cours) ou `closed` (terminée ou
+        annulée). Les filtres `from`/`to` portent sur la date de début.
+      parameters:
+        - name: id
+          in: query
+          description: Identifiant de la tournée (retourne une seule tournée si fourni)
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filtrer par statut de la tournée
+          schema:
+            $ref: "#/components/schemas/RoundStatus"
+        - name: from
+          in: query
+          description: Inclure les tournées démarrées à partir de cette date
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          description: Inclure les tournées démarrées avant ou à cette date
+          schema:
+            type: string
+            format: date
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: Tournée unique (si `id` fourni) ou liste paginée de tournées
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    additionalProperties: false
+                    required: [status, data]
+                    properties:
+                      status:
+                        type: boolean
+                        description: true si l'opération a réussi, false sinon.
+                        example: true
+                      data:
+                        $ref: "#/components/schemas/Round"
+                  - type: object
+                    additionalProperties: false
+                    required: [status, data, pagination]
+                    properties:
+                      status:
+                        type: boolean
+                        description: true si l'opération a réussi, false sinon.
+                        example: true
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Round"
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+
+  /sdkboard/api/rounds/rounds.php/close:
+    post:
+      tags: [Tournées]
+      operationId: closeRound
+      summary: Clôturer une tournée commerciale
+      description: |
+        Appel réel : `POST /sdkboard/api/rounds/rounds.php?action=close&id={roundId}`.
+        La clôture est refusée si la tournée n'est plus en cours (409
+        `ROUND_ALREADY_CLOSED`).
+      parameters:
+        - name: action
+          in: query
+          required: true
+          description: Action `close` (le serveur route la clôture via ce paramètre)
+          schema:
+            type: string
+            enum: [close]
+        - name: id
+          in: query
+          required: true
+          description: Identifiant de la tournée
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoundClose"
+      responses:
+        "200":
+          description: Tournée clôturée
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Round"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "409":
+          $ref: "#/components/responses/Conflit"
+
+  /sdkboard/api/rounds/visits.php:
+    post:
+      tags: [Visites]
+      operationId: createVisit
+      summary: Soumettre un rapport de visite
+      description: |
+        Point d'entrée PHP unique `/sdkboard/api/rounds/visits.php`. Sans
+        paramètre `action`, crée le rapport : `roundId` est attendu dans le
+        corps de la requête et `idempotencyKey` dans l'URL. La requête est
+        rejetée lorsque la tournée est clôturée (409 `ROUND_CLOSED`). La même
+        clé d'idempotence pour la même tournée rejoue la création sans doublon.
+      parameters:
+        - name: idempotencyKey
+          in: query
+          required: true
+          description: Clé unique générée côté client (8 à 200 caractères), transmise dans l'URL
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 200
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisitCreate"
+      responses:
+        "201":
+          description: Rapport de visite persisté
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VisitReport"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "409":
+          $ref: "#/components/responses/Conflit"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+    get:
+      tags: [Visites]
+      operationId: getVisits
+      summary: Récupérer une visite ou lister les visites d'une tournée
+      description: |
+        Comportement piloté par les paramètres de requête :
+          - si `id` est fourni → retourne une seule visite (`{status, data}`) ;
+          - sinon, `roundId` est obligatoire → retourne la liste paginée
+            (`{status, data, pagination}`).
+      parameters:
+        - name: id
+          in: query
+          description: Identifiant de la visite (retourne une seule visite si fourni)
+          schema:
+            type: string
+        - name: roundId
+          in: query
+          description: Identifiant de la tournée (obligatoire pour lister les visites)
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          description: Filtrer par identifiant de client
+          schema:
+            type: string
+        - name: city
+          in: query
+          description: Filtrer par ville
+          schema:
+            type: string
+            maxLength: 120
+        - name: result
+          in: query
+          description: Filtrer par résultat de visite
+          schema:
+            $ref: "#/components/schemas/VisitResult"
+        - name: opportunityDetected
+          in: query
+          description: Filtrer par présence d'une opportunité détectée
+          schema:
+            type: boolean
+        - name: from
+          in: query
+          description: Visites terminées à partir de cet instant
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: Visites terminées avant ou à cet instant
+          schema:
+            type: string
+            format: date-time
+        - name: sort
+          in: query
+          description: "Expression de tri. Valeurs prises en charge : `completedAt`, `-completedAt`, `createdAt` et `-createdAt`."
+          schema:
+            type: string
+            enum: [completedAt, -completedAt, createdAt, -createdAt]
+            default: -completedAt
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: Visite unique (si `id` fourni) ou liste paginée de visites
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    additionalProperties: false
+                    required: [status, data]
+                    properties:
+                      status:
+                        type: boolean
+                        description: true si l'opération a réussi, false sinon.
+                        example: true
+                      data:
+                        $ref: "#/components/schemas/VisitReport"
+                  - type: object
+                    additionalProperties: false
+                    required: [status, data, pagination]
+                    properties:
+                      status:
+                        type: boolean
+                        description: true si l'opération a réussi, false sinon.
+                        example: true
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/VisitReport"
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+    patch:
+      tags: [Visites]
+      operationId: updateVisit
+      summary: Mettre à jour un rapport de visite
+      description: |
+        Appel réel : `PATCH /sdkboard/api/rounds/visits.php?id={visitId}`.
+        Incrémente la version du rapport. Le client doit envoyer dans `If-Match`
+        la version lue précédemment afin d'éviter les mises à jour perdues
+        (409 `VERSION_MISMATCH`).
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Identifiant de la visite
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisitPatch"
+      responses:
+        "200":
+          description: Rapport de visite mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VisitReport"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "409":
+          $ref: "#/components/responses/Conflit"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+    delete:
+      tags: [Visites]
+      operationId: deleteVisit
+      summary: Supprimer un rapport de visite
+      description: |
+        Appel réel : `DELETE /sdkboard/api/rounds/visits.php?id={visitId}`.
+        Extension implémentée côté serveur mais non exposée dans l'interface
+        de l'application. Un utilisateur `commercial` ne peut supprimer que
+        ses propres visites (403 sinon).
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Identifiant de la visite
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Visite supprimée
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    type: "null"
+                    description: Aucune donnée n'est retournée pour cette opération.
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "403":
+          description: Accès refusé (visite d'un autre commercial)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+
+  /sdkboard/api/rounds/visits.php/photos:
+    post:
+      tags: [Photos]
+      operationId: uploadVisitPhoto
+      summary: Envoyer et traiter une photo de visite
+      description: |
+        Appel réel : `POST /sdkboard/api/rounds/visits.php?action=addPhoto&id={visitId}`.
+        Un seul fichier par appel, champ `file`. Maximum 5 photos par visite.
+        Extensions autorisées : jpg, jpeg, png, webp (taille maximale 8 Mo).
+      parameters:
+        - name: action
+          in: query
+          required: true
+          description: Action `addPhoto` (le serveur route l'upload via ce paramètre)
+          schema:
+            type: string
+            enum: [addPhoto]
+        - name: id
+          in: query
+          required: true
+          description: Identifiant de la visite
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PhotoUpload"
+      responses:
+        "201":
+          description: Métadonnées de la photo stockée
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VisitPhoto"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "413":
+          description: Le fichier envoyé est trop volumineux (maximum 8 Mo)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+
+  /sdkboard/api/rounds/visits.php/photos/{photoId}:
+    delete:
+      tags: [Photos]
+      operationId: deleteVisitPhoto
+      summary: Retirer une photo d'une visite
+      description: |
+        Appel réel : `DELETE /sdkboard/api/rounds/visits.php?action=deletePhoto&id={visitId}&photoId={photoId}`.
+      parameters:
+        - name: action
+          in: query
+          required: true
+          description: Action `deletePhoto` (le serveur route la suppression via ce paramètre)
+          schema:
+            type: string
+            enum: [deletePhoto]
+        - name: id
+          in: query
+          required: true
+          description: Identifiant de la visite
+          schema:
+            type: string
+        - name: photoId
+          in: path
+          required: true
+          description: Identifiant de la photo
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Photo supprimée
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    type: "null"
+                    description: Aucune donnée n'est retournée pour cette opération.
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+
+  /sdkboard/api/rounds/analytics.php:
+    get:
+      tags: [Analyses]
+      operationId: getAnalytics
+      summary: Obtenir les indicateurs du tableau de bord des visites
+      description: |
+        Point d'entrée PHP unique `/sdkboard/api/rounds/analytics.php` (GET
+        uniquement). Calcule les agrégats sur les visites filtrées. Pour un
+        utilisateur `commercial`, les visites sont limitées aux siennes.
+        Les classements (`*Ranking`) retournent le top 10 trié par occurrences
+        décroissantes ; `productRanking` et `competitorRanking` utilisent les
+        identifiants (`productId` / `competitorId`) comme libellé. Aucun
+        `roundId` n'est requis.
+      parameters:
+        - name: roundId
+          in: query
+          description: Filtrer par identifiant de tournée
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          description: Filtrer par identifiant de client
+          schema:
+            type: string
+        - name: city
+          in: query
+          description: Filtrer par ville (recherchée dans la localisation de la visite)
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: Visites terminées à partir de cet instant (422 si invalide)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: Visites terminées avant ou à cet instant (422 si invalide)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Indicateurs agrégés du tableau de bord
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/DashboardData"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+
+components:
+  securitySchemes:
+    authToken:
+      type: apiKey
+      in: header
+      name: auth_token
+      description: Jeton d'application pré-émis. L'émission du jeton est en dehors de cette API.
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Numéro de page à retourner (commence à 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PerPage:
+      name: perPage
+      in: query
+      description: Nombre d'éléments par page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: Version retournée lors de la dernière lecture, par exemple `2`
+      schema:
+        type: string
+        pattern: "^[0-9]+$"
+
+  responses:
+    RequeteInvalide:
+      description: Requête malformée
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NonAutorise:
+      description: Jeton `auth_token` manquant ou invalide
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Introuvable:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflit:
+      description: Conflit d'état ou d'idempotence
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ErreurValidation:
+      description: Validation métier en échec
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [status, code, message]
+      properties:
+        status:
+          type: boolean
+          description: Toujours `false` pour une erreur.
+          example: false
+        code:
+          type: string
+          description: Code machine de l'erreur
+          examples: [VALIDATION_ERROR]
+        message:
+          type: string
+          description: Message lisible de l'erreur
+        details:
+          type: object
+          description: Détails complémentaires de l'erreur
+          additionalProperties: true
+        requestId:
+          type: string
+          description: Identifiant de corrélation de la requête
+
+    Pagination:
+      type: object
+      additionalProperties: false
+      required: [page, perPage, total, totalPages]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Numéro de la page courante
+          example: 1
+        perPage:
+          type: integer
+          minimum: 1
+          description: Nombre d'éléments par page
+          example: 10
+        total:
+          type: integer
+          minimum: 0
+          description: Nombre total d'éléments
+          example: 3
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Nombre total de pages
+          example: 1
+
+    GPSStatus:
+      type: string
+      description: Statut de la capture GPS
+      enum: [GPS_VALIDATED, GPS_DENIED, GPS_UNAVAILABLE, GPS_TIMEOUT]
+
+    SyncStatus:
+      type: string
+      description: Statut de synchronisation serveur ou ERP. Le navigateur ne maintient aucune file d'attente hors ligne.
+      enum: [draft, pending_sync, synced, sync_error]
+
+    RoundStatus:
+      type: string
+      description: Statut d'une tournée
+      enum: [open, closed]
+
+    ActivityType:
+      type: string
+      description: Type d'activité d'un client
+      enum: [Menuiserie, Usine Meuble, Chantier BTP, Négoce]
+
+    ParkSize:
+      type: string
+      description: Taille du site
+      enum: [Petite, Moyenne, Grande]
+
+    MainCategory:
+      type: string
+      description: Famille principale de produit
+      enum: [BOIS, BOIS DUR, PANNEAUX, BTP, ACCESSOIRES]
+
+    ContactRole:
+      type: string
+      description: Rôle du contact rencontré
+      enum:
+        [
+          Gérant,
+          Acheteur,
+          Commercial,
+          Responsable production,
+          Responsable chantier,
+          Autre,
+        ]
+
+    ObservedActivity:
+      type: string
+      description: Activité observée chez le client
+      enum: [Menuisier, Revendeur, Chantier, Industriel]
+
+    ActivityLevel:
+      type: string
+      description: Niveau d'activité observé
+      enum: [Faible, Moyen, Fort]
+
+    PresenceLevel:
+      type: string
+      description: Niveau de présence
+      enum: [Faible, Moyen, Important]
+
+    SDKPosition:
+      type: string
+      description: Position SDK WOOD chez le client
+      enum: [Absent, Faible, Moyen, Important, Dominant]
+
+    OpportunityPotential:
+      type: string
+      description: Potentiel d'une opportunité
+      enum: [Petit, Moyen, Important, Très important]
+
+    OpportunityHorizon:
+      type: string
+      description: Horizon d'une opportunité
+      enum:
+        - Immédiat
+        - "< 1 mois"
+        - "1 à 3 mois"
+        - "> 3 mois"
+
+    VisitResult:
+      type: string
+      description: Résultat d'une visite
+      enum:
+        [
+          Commande,
+          Devis,
+          Échantillon,
+          Tarif,
+          Relance,
+          Prospection,
+          Réclamation,
+          RAS,
+        ]
+
+    NextAction:
+      type: string
+      description: Prochaine action à réaliser
+      enum:
+        [
+          Appeler,
+          Envoyer prix,
+          Envoyer devis,
+          Envoyer échantillon,
+          Faire offre,
+          Revisiter,
+          Aucune,
+        ]
+
+    ErpClient:
+      type: object
+      additionalProperties: false
+      required: [id, societe, ville, telephone, adresse]
+      description: Client issu du répertoire ERP (back-office SDKBOARD)
+      properties:
+        id:
+          type: integer
+          description: Identifiant du client
+          example: 1507
+        societe:
+          type: string
+          description: Raison sociale du client
+          example: " DIVERS"
+        ville:
+          type: string
+          description: Ville du client
+          example: ""
+        telephone:
+          type: string
+          description: Téléphone du client
+          example: ""
+        adresse:
+          type: string
+          description: Adresse du client
+          example: ""
+        commercial_nom:
+          type: string
+          description: Nom du commercial affecté
+        categorie_client:
+          type: string
+          description: Catégorie du client
+        activite_nom:
+          type: string
+          description: Nom de l'activité du client
+
+    Client:
+      type: object
+      additionalProperties: false
+      required: [id, name, active]
+      properties:
+        id:
+          type: string
+          description: Identifiant du client
+        code:
+          type: string
+          description: Code client
+        name:
+          type: string
+          description: Raison sociale du client
+        city:
+          type: string
+          description: Ville du client
+        commercialId:
+          type: string
+          description: Identifiant du commercial affecté
+        commercialName:
+          type: string
+          description: Nom du commercial affecté
+        category:
+          type: string
+          description: Catégorie du client
+        activity:
+          $ref: "#/components/schemas/ActivityType"
+        parkSize:
+          $ref: "#/components/schemas/ParkSize"
+        active:
+          type: boolean
+          description: Indique si le client est actif
+
+    Location:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/GPSStatus"
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          description: Latitude de la position
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          description: Longitude de la position
+        accuracy:
+          type: number
+          minimum: 0
+          description: Précision de la position en mètres
+        capturedAt:
+          type: string
+          format: date-time
+          description: Date et heure de la capture
+        address:
+          type: string
+          description: Adresse (si disponible)
+        city:
+          type: string
+          description: Ville déduite
+        region:
+          type: string
+          description: Région déduite
+
+    ActionDateOption:
+      type: object
+      additionalProperties: false
+      required: [id, label, days]
+      properties:
+        id:
+          type: string
+          description: Identifiant de l'option de délai
+        label:
+          type: string
+          description: Libellé de l'option de délai
+        days:
+          type: integer
+          minimum: 1
+          description: Nombre de jours du délai
+
+    ReferenceData:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          contactRoles,
+          activityLevels,
+          observedActivities,
+          siteSizes,
+          presenceLevels,
+          sdkPositions,
+          opportunityPotentials,
+          opportunityHorizons,
+          visitResults,
+          nextActions,
+          actionDateOptions,
+          categories,
+          categoryTags,
+          subCategories,
+          productSuggestions,
+          qualityTags,
+          allQualityOptions,
+          panelThicknesses,
+          panelDimensions,
+          panelDecors,
+          panelFinitions,
+          hardwoodEssences,
+          boisSections,
+          poutreH20Lengths,
+          madrierLengths,
+          madrierThicknesses,
+          btpCraneOptions,
+          constructionTypes,
+          constructionPhases,
+          industrialActivities,
+          equipmentByActivity,
+          brandsByCategory,
+          extraPanelBrands,
+          suppliersByCategory,
+          competitors,
+        ]
+      properties:
+        contactRoles:
+          type: array
+          description: Rôles de contact proposés
+          items:
+            $ref: "#/components/schemas/ContactRole"
+        activityLevels:
+          type: array
+          description: Niveaux d'activité proposés
+          items:
+            $ref: "#/components/schemas/ActivityLevel"
+        observedActivities:
+          type: array
+          description: Activités observées proposées
+          items:
+            $ref: "#/components/schemas/ObservedActivity"
+        siteSizes:
+          type: array
+          description: Tailles de site proposées
+          items:
+            $ref: "#/components/schemas/ParkSize"
+        presenceLevels:
+          type: array
+          description: Niveaux de présence proposés
+          items:
+            $ref: "#/components/schemas/PresenceLevel"
+        sdkPositions:
+          type: array
+          description: Positions SDK proposées
+          items:
+            $ref: "#/components/schemas/SDKPosition"
+        opportunityPotentials:
+          type: array
+          description: Potentiels d'opportunité proposés
+          items:
+            $ref: "#/components/schemas/OpportunityPotential"
+        opportunityHorizons:
+          type: array
+          description: Horizons d'opportunité proposés
+          items:
+            $ref: "#/components/schemas/OpportunityHorizon"
+        visitResults:
+          type: array
+          description: Résultats de visite proposés
+          items:
+            $ref: "#/components/schemas/VisitResult"
+        nextActions:
+          type: array
+          description: Prochaines actions proposées
+          items:
+            $ref: "#/components/schemas/NextAction"
+        actionDateOptions:
+          type: array
+          description: Délais de prochaine action proposés
+          items:
+            $ref: "#/components/schemas/ActionDateOption"
+        categories:
+          type: array
+          description: Familles principales de produit
+          items:
+            $ref: "#/components/schemas/MainCategory"
+        categoryTags:
+          type: object
+          description: Tags par famille (libellés courts)
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        subCategories:
+          type: object
+          description: Sous-catégories par famille
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        productSuggestions:
+          type: object
+          description: Suggestions de produits par famille
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        qualityTags:
+          type: array
+          description: Tags de qualité
+          items:
+            type: string
+        allQualityOptions:
+          type: array
+          description: Options de qualité complètes
+          items:
+            type: string
+        panelThicknesses:
+          type: array
+          description: Épaisseurs de panneaux
+          items:
+            type: string
+        panelDimensions:
+          type: array
+          description: Dimensions de panneaux
+          items:
+            type: string
+        panelDecors:
+          type: array
+          description: Décors de panneaux
+          items:
+            type: string
+        panelFinitions:
+          type: array
+          description: Finitions de panneaux
+          items:
+            type: string
+        hardwoodEssences:
+          type: array
+          description: Essences de bois dur
+          items:
+            type: string
+        boisSections:
+          type: array
+          description: Sections de bois
+          items:
+            type: string
+        poutreH20Lengths:
+          type: array
+          description: Longueurs de poutre H20
+          items:
+            type: string
+        madrierLengths:
+          type: array
+          description: Longueurs de madrier
+          items:
+            type: string
+        madrierThicknesses:
+          type: array
+          description: Épaisseurs de madrier
+          items:
+            type: string
+        btpCraneOptions:
+          type: array
+          description: Options de grues BTP
+          items:
+            type: string
+        constructionTypes:
+          type: array
+          description: Types de chantier proposés
+          items:
+            type: string
+        constructionPhases:
+          type: array
+          description: Phases d'avancement de chantier proposées
+          items:
+            type: string
+        industrialActivities:
+          type: array
+          description: Activités industrielles proposées
+          items:
+            type: string
+        equipmentByActivity:
+          type: object
+          description: Équipements proposés par activité observée
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        brandsByCategory:
+          type: object
+          description: Marques proposées par famille
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        extraPanelBrands:
+          type: array
+          description: Marques panneaux supplémentaires
+          items:
+            type: string
+        suppliersByCategory:
+          type: object
+          description: Fournisseurs par famille
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        competitors:
+          type: array
+          description: Liste des concurrents
+          items:
+            type: string
+
+    ProductDetails:
+      type: object
+      additionalProperties: false
+      description: Détails libres associés à un produit observé
+      properties:
+        quality:
+          type: string
+          description: Qualité ou choix
+        essence:
+          type: string
+          description: Essence du bois
+        decor:
+          type: string
+          description: Décor
+        finish:
+          type: string
+          description: Finition
+        thickness:
+          type: string
+          description: Épaisseur
+        section:
+          type: string
+          description: Section
+        quantity:
+          type: string
+          description: Quantité observée
+        price:
+          type: string
+          description: Prix observé
+        dimensions:
+          type: string
+          description: Dimension ou longueur
+
+    ObservedProductInput:
+      type: object
+      additionalProperties: false
+      required: [productId]
+      properties:
+        lineId:
+          type: string
+          description: Identifiant de ligne généré côté client
+        productId:
+          type: string
+          description: Identifiant du produit du catalogue
+        category2:
+          type: string
+          description: Second niveau de catégorie sélectionné
+        presence:
+          $ref: "#/components/schemas/PresenceLevel"
+        details:
+          $ref: "#/components/schemas/ProductDetails"
+
+    ObservedProduct:
+      type: object
+      additionalProperties: false
+      required: [lineId, productId, label, categoryId, categoryLabel]
+      properties:
+        lineId:
+          type: string
+          description: Identifiant de la ligne produit
+        productId:
+          type: string
+          description: Identifiant du produit du catalogue
+        label:
+          type: string
+          description: Libellé du produit
+        categoryId:
+          $ref: "#/components/schemas/MainCategory"
+        categoryLabel:
+          type: string
+          description: Libellé de la famille
+        subcategoryId:
+          type: string
+          description: Identifiant de la sous-famille
+        subcategoryLabel:
+          type: string
+          description: Libellé de la sous-famille
+        category2:
+          type: string
+          description: Second niveau de catégorie
+        presence:
+          $ref: "#/components/schemas/PresenceLevel"
+        details:
+          $ref: "#/components/schemas/ProductDetails"
+
+    ObservedBrandInput:
+      type: object
+      additionalProperties: false
+      required: [brandId]
+      properties:
+        brandId:
+          type: string
+          description: Identifiant de la marque
+        presence:
+          $ref: "#/components/schemas/PresenceLevel"
+
+    ObservedBrand:
+      type: object
+      additionalProperties: false
+      required: [brandId, label]
+      properties:
+        brandId:
+          type: string
+          description: Identifiant de la marque
+        label:
+          type: string
+          description: Libellé de la marque
+        categoryId:
+          $ref: "#/components/schemas/MainCategory"
+        presence:
+          $ref: "#/components/schemas/PresenceLevel"
+
+    ObservedCompetitorInput:
+      type: object
+      additionalProperties: false
+      required: [competitorId]
+      properties:
+        competitorId:
+          type: string
+          description: Identifiant du concurrent
+        presence:
+          $ref: "#/components/schemas/PresenceLevel"
+
+    ObservedCompetitor:
+      type: object
+      additionalProperties: false
+      required: [competitorId, label]
+      properties:
+        competitorId:
+          type: string
+          description: Identifiant du concurrent
+        label:
+          type: string
+          description: Libellé du concurrent
+        presence:
+          $ref: "#/components/schemas/PresenceLevel"
+
+    OpportunityInput:
+      type: object
+      additionalProperties: false
+      required: [detected]
+      properties:
+        detected:
+          description: Indique si une opportunité a été détectée
+          oneOf:
+            - type: boolean
+            - type: "null"
+        productId:
+          type: string
+          description: Identifiant du produit concerné
+        potential:
+          $ref: "#/components/schemas/OpportunityPotential"
+        horizon:
+          $ref: "#/components/schemas/OpportunityHorizon"
+        estimatedAmount:
+          type: number
+          minimum: 0
+          description: Montant estimé en DH
+        competitorId:
+          type: string
+          description: Identifiant du concurrent principal
+
+    Opportunity:
+      type: object
+      additionalProperties: false
+      required: [detected]
+      properties:
+        detected:
+          description: Indique si une opportunité a été détectée
+          oneOf:
+            - type: boolean
+            - type: "null"
+        productId:
+          type: string
+          description: Identifiant du produit concerné
+        productLabel:
+          type: string
+          description: Libellé du produit concerné
+        categoryId:
+          $ref: "#/components/schemas/MainCategory"
+        potential:
+          $ref: "#/components/schemas/OpportunityPotential"
+        horizon:
+          $ref: "#/components/schemas/OpportunityHorizon"
+        estimatedAmount:
+          type: number
+          minimum: 0
+          description: Montant estimé en DH
+        competitorId:
+          type: string
+          description: Identifiant du concurrent principal
+        competitor:
+          type: string
+          description: Libellé du concurrent principal
+
+    ConstructionSiteInput:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          description: Type de chantier
+        progressPhase:
+          type: string
+          description: Phase d'avancement
+        signPhotoId:
+          type: string
+          description: Identifiant de la photo du panneau de chantier
+
+    ConstructionSite:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          description: Type de chantier
+        progressPhase:
+          type: string
+          description: Phase d'avancement
+        signPhotoId:
+          type: string
+          description: Identifiant de la photo du panneau de chantier
+        signPhoto:
+          $ref: "#/components/schemas/VisitPhoto"
+
+    IndustrialSite:
+      type: object
+      additionalProperties: false
+      required: [activities]
+      properties:
+        activities:
+          type: array
+          uniqueItems: true
+          description: Spécialités industrielles observées
+          items:
+            type: string
+        otherActivity:
+          type: string
+          description: Autre activité précisée
+
+    ResellerSite:
+      type: object
+      additionalProperties: false
+      required: [offersCutting]
+      properties:
+        offersCutting:
+          description: Indique si le revendeur propose un service de découpe
+          oneOf:
+            - type: boolean
+            - type: "null"
+
+    OrderQuantities:
+      type: object
+      additionalProperties: false
+      required: [solo, semiCombined]
+      properties:
+        solo:
+          type: integer
+          minimum: 0
+          maximum: 999
+          description: Quantité commandée en Solo
+        semiCombined:
+          type: integer
+          minimum: 0
+          maximum: 999
+          description: Quantité commandée en Semi-combiné
+
+    VisitFields:
+      type: object
+      additionalProperties: false
+      properties:
+        clientId:
+          type: string
+          description: Identifiant du client ERP visité
+        startedAt:
+          type: string
+          format: date-time
+          description: Date et heure de début de la visite
+        completedAt:
+          type: string
+          format: date-time
+          description: Date et heure de fin facultative envoyée par le client. Le serveur peut la remplacer par son heure d'achèvement persistée.
+        location:
+          $ref: "#/components/schemas/Location"
+        contactRole:
+          $ref: "#/components/schemas/ContactRole"
+        contactOther:
+          type: string
+          maxLength: 500
+          description: Précision du contact lorsque le rôle est « Autre »
+        activityLevel:
+          $ref: "#/components/schemas/ActivityLevel"
+        observedActivities:
+          type: array
+          maxItems: 1
+          uniqueItems: true
+          description: Activité observée (au plus une)
+          items:
+            $ref: "#/components/schemas/ObservedActivity"
+        equipment:
+          type: array
+          uniqueItems: true
+          description: Équipements sélectionnés
+          items:
+            type: string
+        equipmentQuantities:
+          type: object
+          description: Quantités observées par équipement
+          additionalProperties:
+            type: integer
+            minimum: 1
+            maximum: 999
+        constructionSite:
+          $ref: "#/components/schemas/ConstructionSiteInput"
+        industrialSite:
+          $ref: "#/components/schemas/IndustrialSite"
+        resellerSite:
+          $ref: "#/components/schemas/ResellerSite"
+        siteSize:
+          $ref: "#/components/schemas/ParkSize"
+        products:
+          type: array
+          description: Produits observés
+          items:
+            $ref: "#/components/schemas/ObservedProductInput"
+        otherProduct:
+          type: string
+          maxLength: 500
+          description: Autre produit libre
+        brands:
+          type: array
+          uniqueItems: true
+          description: Marques observées
+          items:
+            $ref: "#/components/schemas/ObservedBrandInput"
+        competitors:
+          type: array
+          uniqueItems: true
+          description: Concurrents observés
+          items:
+            $ref: "#/components/schemas/ObservedCompetitorInput"
+        sdkPosition:
+          $ref: "#/components/schemas/SDKPosition"
+        opportunity:
+          $ref: "#/components/schemas/OpportunityInput"
+        results:
+          type: array
+          uniqueItems: true
+          description: Résultats de la visite
+          items:
+            $ref: "#/components/schemas/VisitResult"
+        orderQuantities:
+          $ref: "#/components/schemas/OrderQuantities"
+        nextAction:
+          $ref: "#/components/schemas/NextAction"
+        nextActionDueAt:
+          type: string
+          format: date-time
+          description: Échéance de la prochaine action
+        note:
+          type: string
+          maxLength: 10000
+          description: Note générale de la visite
+
+    VisitCreate:
+      allOf:
+        - $ref: "#/components/schemas/VisitFields"
+        - type: object
+          required:
+            [roundId, clientId, startedAt, location, opportunity, results]
+          properties:
+            roundId:
+              type: string
+              description: Identifiant de la tournée (obligatoire dans le corps de la requête)
+
+    VisitPatch:
+      description: Champs de visite modifiables. Les propriétés omises conservent leur valeur courante.
+      allOf:
+        - $ref: "#/components/schemas/VisitFields"
+
+    VisitPhoto:
+      type: object
+      additionalProperties: false
+      required: [id, name, contentType, size, capturedAt, processingStatus]
+      properties:
+        id:
+          type: string
+          description: Identifiant de la photo
+        name:
+          type: string
+          description: Nom de la photo
+        contentType:
+          type: string
+          pattern: "^image/"
+          description: Type MIME de la photo
+        size:
+          type: integer
+          minimum: 0
+          description: Taille en octets
+        capturedAt:
+          type: string
+          format: date-time
+          description: Date et heure de la capture
+        remoteUrl:
+          type: string
+          format: uri
+          description: URL distante de la photo traitée
+        thumbnailUrl:
+          type: string
+          format: uri
+          description: URL distante de la vignette
+        processingStatus:
+          type: string
+          description: Statut du traitement serveur
+          enum: [processing, ready, failed]
+        errorMessage:
+          type: string
+          description: Message d'erreur du traitement, si applicable
+
+    PhotoUpload:
+      type: object
+      additionalProperties: false
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Fichier image original (jpg, jpeg, png ou webp, maximum 8 Mo). Un seul fichier par appel.
+        capturedAt:
+          type: string
+          format: date-time
+          description: Date et heure de la capture
+
+    VisitReport:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          visitId,
+          version,
+          roundId,
+          commercialId,
+          createdAt,
+          startedAt,
+          completedAt,
+          durationSeconds,
+          syncStatus,
+          idempotencyKey,
+          client,
+          location,
+          observedActivities,
+          equipment,
+          equipmentQuantities,
+          products,
+          brands,
+          competitors,
+          opportunity,
+          results,
+          photos,
+        ]
+      properties:
+        id:
+          type: string
+          description: Identifiant du rapport
+        visitId:
+          type: string
+          description: Identifiant métier de la visite
+        version:
+          type: integer
+          minimum: 1
+          description: Version du rapport (incrémentée à chaque mise à jour)
+        roundId:
+          type: string
+          description: Identifiant de la tournée
+        commercialId:
+          type: string
+          description: Identifiant du commercial
+        createdAt:
+          type: string
+          format: date-time
+          description: Date de création du rapport
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date de dernière mise à jour
+        startedAt:
+          type: string
+          format: date-time
+          description: Date de début de la visite
+        completedAt:
+          type: string
+          format: date-time
+          description: Date d'achèvement de la visite
+        durationSeconds:
+          type: integer
+          minimum: 0
+          description: Durée de la visite en secondes
+        syncStatus:
+          $ref: "#/components/schemas/SyncStatus"
+        idempotencyKey:
+          type: string
+          description: Clé d'idempotence de la création
+        client:
+          $ref: "#/components/schemas/Client"
+        location:
+          $ref: "#/components/schemas/Location"
+        contactRole:
+          $ref: "#/components/schemas/ContactRole"
+        contactOther:
+          type: string
+          description: Précision du contact lorsque le rôle est « Autre »
+        activityLevel:
+          $ref: "#/components/schemas/ActivityLevel"
+        observedActivities:
+          type: array
+          description: Activités observées
+          items:
+            $ref: "#/components/schemas/ObservedActivity"
+        equipment:
+          type: array
+          description: Équipements observés
+          items:
+            type: string
+        equipmentQuantities:
+          type: object
+          description: Quantités observées par équipement
+          additionalProperties:
+            type: integer
+        constructionSite:
+          $ref: "#/components/schemas/ConstructionSite"
+        industrialSite:
+          $ref: "#/components/schemas/IndustrialSite"
+        resellerSite:
+          $ref: "#/components/schemas/ResellerSite"
+        siteSize:
+          $ref: "#/components/schemas/ParkSize"
+        products:
+          type: array
+          description: Produits observés
+          items:
+            $ref: "#/components/schemas/ObservedProduct"
+        otherProduct:
+          type: string
+          description: Autre produit libre
+        brands:
+          type: array
+          description: Marques observées
+          items:
+            $ref: "#/components/schemas/ObservedBrand"
+        competitors:
+          type: array
+          description: Concurrents observés
+          items:
+            $ref: "#/components/schemas/ObservedCompetitor"
+        sdkPosition:
+          $ref: "#/components/schemas/SDKPosition"
+        opportunity:
+          $ref: "#/components/schemas/Opportunity"
+        results:
+          type: array
+          description: Résultats de la visite
+          items:
+            $ref: "#/components/schemas/VisitResult"
+        orderQuantities:
+          $ref: "#/components/schemas/OrderQuantities"
+        nextAction:
+          $ref: "#/components/schemas/NextAction"
+        nextActionDueAt:
+          type: string
+          format: date-time
+          description: Échéance de la prochaine action
+        note:
+          type: string
+          description: Note générale de la visite
+        photos:
+          type: array
+          maxItems: 5
+          description: Photos associées à la visite
+          items:
+            $ref: "#/components/schemas/VisitPhoto"
+
+    RoundCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        startedAt:
+          type: string
+          format: date
+          description: Date de début facultative envoyée par le client. Le serveur enregistre la valeur faisant autorité.
+
+    RoundClose:
+      type: object
+      additionalProperties: false
+      properties:
+        closedAt:
+          type: string
+          format: date
+          description: Date de clôture facultative envoyée par le client. Le serveur enregistre la valeur faisant autorité.
+
+    Round:
+      type: object
+      additionalProperties: false
+      required: [id, commercialId, startedAt, status, visitCount, syncStatus]
+      properties:
+        id:
+          type: string
+          description: Identifiant de la tournée
+        commercialId:
+          type: string
+          description: Identifiant du commercial
+        startedAt:
+          type: string
+          format: date-time
+          description: Date de début de la tournée
+        closedAt:
+          type: string
+          format: date-time
+          description: Date de clôture de la tournée
+        status:
+          $ref: "#/components/schemas/RoundStatus"
+        visitCount:
+          type: integer
+          minimum: 0
+          description: Nombre de visites enregistrées
+        syncStatus:
+          $ref: "#/components/schemas/SyncStatus"
+
+    DashboardRanking:
+      type: object
+      additionalProperties: false
+      required: [label, value]
+      properties:
+        label:
+          type: string
+          description: Libellé du classement
+        value:
+          type: integer
+          minimum: 0
+          description: Nombre d'occurrences
+
+    DashboardData:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          totalReports,
+          uniqueClients,
+          orders,
+          opportunities,
+          pendingSync,
+          soloQuantity,
+          semiCombinedQuantity,
+          orderRate,
+          opportunityRate,
+          averageDurationSeconds,
+          activityCounts,
+          resultRanking,
+          sdkPositionRanking,
+          productRanking,
+          competitorRanking,
+          cityRanking,
+        ]
+      properties:
+        totalReports:
+          type: integer
+          minimum: 0
+          description: Nombre total de rapports
+        uniqueClients:
+          type: integer
+          minimum: 0
+          description: Nombre de clients distincts visités
+        orders:
+          type: integer
+          minimum: 0
+          description: Nombre de commandes
+        opportunities:
+          type: integer
+          minimum: 0
+          description: Nombre d'opportunités détectées
+        pendingSync:
+          type: integer
+          minimum: 0
+          description: Rapports en attente de synchronisation ERP (et non d'une file d'attente navigateur hors ligne)
+        soloQuantity:
+          type: integer
+          minimum: 0
+          description: Quantité totale commandée en Solo
+        semiCombinedQuantity:
+          type: integer
+          minimum: 0
+          description: Quantité totale commandée en Semi-combiné
+        orderRate:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Taux de commande en pourcentage
+        opportunityRate:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Taux d'opportunité en pourcentage
+        averageDurationSeconds:
+          type: integer
+          minimum: 0
+          description: Durée moyenne des visites en secondes
+        activityCounts:
+          type: object
+          description: Nombre de visites par activité observée
+          additionalProperties:
+            type: integer
+            minimum: 0
+        resultRanking:
+          type: array
+          description: Classement des résultats de visite
+          items:
+            $ref: "#/components/schemas/DashboardRanking"
+        sdkPositionRanking:
+          type: array
+          description: Classement des positions SDK
+          items:
+            $ref: "#/components/schemas/DashboardRanking"
+        productRanking:
+          type: array
+          description: Classement des produits les plus observés
+          items:
+            $ref: "#/components/schemas/DashboardRanking"
+        competitorRanking:
+          type: array
+          description: Classement des concurrents les plus présents
+          items:
+            $ref: "#/components/schemas/DashboardRanking"
+        cityRanking:
+          type: array
+          description: Classement des villes visitées
+          items:
+            $ref: "#/components/schemas/DashboardRanking"

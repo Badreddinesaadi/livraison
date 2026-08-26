@@ -39,10 +39,11 @@ export default function ManageLotsBottomSheetContent({
   );
 
   useEffect(() => {
-    if (currentLots) {
-      const initial = new Set(currentLots.map((l) => l.Lot));
-      setSelectedLotNumbers(initial);
-    }
+    if (!currentLots) return;
+    const timeout = setTimeout(() => {
+      setSelectedLotNumbers(new Set(currentLots.map((l) => l.Lot)));
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [currentLots]);
 
   const currentLotSet = useMemo(

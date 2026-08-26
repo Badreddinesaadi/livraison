@@ -2,6 +2,7 @@ import {
   hasDemandeTransfertPermission,
   hasProjetPermission,
   hasRapportQualitePermission,
+  hasRapportVisitePermission,
   hasRetourPermission,
   hasRotationPermission,
   hasVoyagePermission,
@@ -26,7 +27,8 @@ type DrawerRoute =
   | "/quality-reports"
   | "/rotation-chauffeur"
   | "/projet-locations"
-  | "/demande-transferts";
+  | "/demande-transferts"
+  | "/rvt";
 
 type DrawerMenuItem = {
   label: string;
@@ -57,6 +59,11 @@ const DRAWER_ITEMS: DrawerMenuItem[] = [
     route: "/demande-transferts",
     icon: "swap-horizontal",
   },
+  {
+    label: "Rapport de visite",
+    route: "/rvt",
+    icon: "clipboard-list-outline",
+  },
 ];
 
 function isRouteActive(pathname: string, route: DrawerRoute) {
@@ -85,6 +92,7 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     user,
     "LIST",
   );
+  const canShowRapportVisiteModule = hasRapportVisitePermission(user, "LIST");
 
   const handleNavigate = (route: DrawerRoute) => {
     router.navigate(route);
@@ -158,6 +166,10 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
 
             if (item.route === "/demande-transferts") {
               return canShowDemandeTransfertModule;
+            }
+
+            if (item.route === "/rvt") {
+              return canShowRapportVisiteModule;
             }
 
             return true;

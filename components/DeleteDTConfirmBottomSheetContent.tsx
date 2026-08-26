@@ -36,7 +36,8 @@ export default function DeleteDTConfirmBottomSheetContent({
           marginBottom: 16,
         }}
       >
-        La demande de transfert "{reference}" sera définitivement supprimée.
+        {`La demande de transfert "${reference}" sera définitivement supprimée.`}
+        {"\n"}
         Voulez-vous continuer ?
       </Text>
 
