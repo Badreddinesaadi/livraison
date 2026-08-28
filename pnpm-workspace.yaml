@@ -1,32 +1,31 @@
-overrides:
-  "hermes-compiler": "250829098.0.4"
-onlyBuiltDependencies:
-  - "unrs-resolver"
 allowBuilds:
   unrs-resolver: true
 minimumReleaseAgeExclude:
-  - '@expo/cli@57.0.19'
-  - '@expo/inline-modules@0.1.7'
-  - '@expo/local-build-cache-provider@57.0.8'
-  - '@expo/log-box@57.0.4'
-  - '@expo/metro-config@57.0.11'
-  - '@expo/prebuild-config@57.0.15'
-  - '@expo/router-server@57.0.8'
-  - babel-preset-expo@57.0.9
-  - expo-asset@57.0.15
-  - expo-constants@57.0.15
-  - expo-file-system@57.0.6
-  - expo-modules-autolinking@57.0.12
-  - expo-modules-core@57.0.14
-  - expo-modules-jsi@57.0.6
-  - expo@57.0.17
-  - '@expo/ui@57.0.14'
-  - expo-build-properties@57.0.15
-  - expo-haptics@57.0.2
-  - expo-image-picker@57.0.14
-  - expo-linking@57.0.8
-  - expo-location@57.0.14
-  - expo-router@57.0.17
-  - expo-secure-store@57.0.2
-  - expo-system-ui@57.0.3
-  - eslint-config-expo@57.0.2
+  - "@expo/cli"
+  - "@expo/inline-modules"
+  - "@expo/local-build-cache-provider"
+  - "@expo/log-box"
+  - "@expo/metro-config"
+  - "@expo/prebuild-config"
+  - "@expo/router-server"
+  - babel-preset-expo
+  - expo-asset
+  - expo-constants
+  - expo-file-system
+  - expo-modules-autolinking
+  - expo-modules-core
+  - expo-modules-jsi
+  - expo
+  - "@expo/ui"
+  - expo-build-properties
+  - expo-haptics
+  - expo-image-picker
+  - expo-linking
+  - expo-location
+  - expo-router
+  - expo-secure-store
+  - expo-system-ui
+  - eslint-config-expo
+  - "@expo/env"
+  - "@expo/fingerprint"
+  - expo-font
