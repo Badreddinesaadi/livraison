@@ -906,9 +906,20 @@ components:
         ]
 
     ObservedActivity:
-      type: string
-      description: Activité observée chez le client
-      enum: [Menuisier, Revendeur, Chantier, Industriel]
+      type: object
+      additionalProperties: false
+      required: [id, designation]
+      description: Activité observée référencée
+      properties:
+        id:
+          type: integer
+          description: Identifiant de l'activité observée
+        designation:
+          type: string
+          description: Libellé de l'activité observée
+        domaineId:
+          type: integer
+          description: Identifiant du domaine
 
     ActivityLevel:
       type: string
@@ -1089,6 +1100,94 @@ components:
           minimum: 1
           description: Nombre de jours du délai
 
+    Marque:
+      type: object
+      additionalProperties: false
+      required: [id, designation]
+      properties:
+        id:
+          type: integer
+          description: Identifiant de la marque
+        designation:
+          type: string
+          description: Libellé de la marque
+        domaineId:
+          type: integer
+          description: Identifiant du domaine
+
+    ProductCategory1:
+      type: object
+      additionalProperties: false
+      required: [id, designation]
+      properties:
+        id:
+          type: integer
+          description: Identifiant de la catégorie 1
+        designation:
+          type: string
+          description: Libellé de la catégorie 1
+        categorie2:
+          type: array
+          description: Catégories 2 associées
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, designation]
+            properties:
+              id:
+                type: integer
+              designation:
+                type: string
+
+    ProductCategory2:
+      type: object
+      additionalProperties: false
+      required: [id, designation, categorie3]
+      properties:
+        id:
+          type: integer
+          description: Identifiant de la catégorie 2
+        designation:
+          type: string
+          description: Libellé de la catégorie 2
+        idCategorie1:
+          type: integer
+          description: Identifiant de la catégorie 1 associée
+          nullable: true
+        domaineId:
+          type: integer
+          description: Identifiant du domaine
+        categorie3:
+          type: array
+          description: Catégories 3 associées
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, designation]
+            properties:
+              id:
+                type: integer
+              designation:
+                type: string
+
+    ProductCategory3:
+      type: object
+      additionalProperties: false
+      required: [id, designation, idCategorie2]
+      properties:
+        id:
+          type: integer
+          description: Identifiant de la catégorie 3
+        designation:
+          type: string
+          description: Libellé de la catégorie 3
+        idCategorie2:
+          type: integer
+          description: Identifiant de la catégorie 2 associée
+        domaineId:
+          type: integer
+          description: Identifiant du domaine
+
     ReferenceData:
       type: object
       additionalProperties: false
@@ -1097,6 +1196,7 @@ components:
           contactRoles,
           activityLevels,
           observedActivities,
+          marques,
           siteSizes,
           presenceLevels,
           sdkPositions,
@@ -1105,9 +1205,9 @@ components:
           visitResults,
           nextActions,
           actionDateOptions,
-          categories,
-          categoryTags,
-          subCategories,
+          productCategories,
+          productCategoriesLevel2,
+          productCategoriesLevel3,
           productSuggestions,
           qualityTags,
           allQualityOptions,
@@ -1125,8 +1225,6 @@ components:
           constructionPhases,
           industrialActivities,
           equipmentByActivity,
-          brandsByCategory,
-          extraPanelBrands,
           suppliersByCategory,
           competitors,
         ]
@@ -1146,6 +1244,11 @@ components:
           description: Activités observées proposées
           items:
             $ref: "#/components/schemas/ObservedActivity"
+        marques:
+          type: array
+          description: Marques proposées
+          items:
+            $ref: "#/components/schemas/Marque"
         siteSizes:
           type: array
           description: Tailles de site proposées
@@ -1186,25 +1289,21 @@ components:
           description: Délais de prochaine action proposés
           items:
             $ref: "#/components/schemas/ActionDateOption"
-        categories:
+        productCategories:
           type: array
-          description: Familles principales de produit
+          description: Catégories de niveau 1
           items:
-            $ref: "#/components/schemas/MainCategory"
-        categoryTags:
-          type: object
-          description: Tags par famille (libellés courts)
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        subCategories:
-          type: object
-          description: Sous-catégories par famille
-          additionalProperties:
-            type: array
-            items:
-              type: string
+            $ref: "#/components/schemas/ProductCategory1"
+        productCategoriesLevel2:
+          type: array
+          description: Catégories de niveau 2
+          items:
+            $ref: "#/components/schemas/ProductCategory2"
+        productCategoriesLevel3:
+          type: array
+          description: Catégories de niveau 3
+          items:
+            $ref: "#/components/schemas/ProductCategory3"
         productSuggestions:
           type: object
           description: Suggestions de produits par famille
@@ -1294,18 +1393,6 @@ components:
             type: array
             items:
               type: string
-        brandsByCategory:
-          type: object
-          description: Marques proposées par famille
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        extraPanelBrands:
-          type: array
-          description: Marques panneaux supplémentaires
-          items:
-            type: string
         suppliersByCategory:
           type: object
           description: Fournisseurs par famille
@@ -1410,7 +1497,7 @@ components:
       required: [brandId]
       properties:
         brandId:
-          type: string
+          type: integer
           description: Identifiant de la marque
         presence:
           $ref: "#/components/schemas/PresenceLevel"
@@ -1421,7 +1508,7 @@ components:
       required: [brandId, label]
       properties:
         brandId:
-          type: string
+          type: integer
           description: Identifiant de la marque
         label:
           type: string
@@ -1591,7 +1678,7 @@ components:
       additionalProperties: false
       properties:
         clientId:
-          type: string
+          type: integer
           description: Identifiant du client ERP visité
         startedAt:
           type: string
@@ -1615,9 +1702,18 @@ components:
           type: array
           maxItems: 1
           uniqueItems: true
-          description: Activité observée (au plus une)
+          description: Identifiants des activités observées (au plus un)
           items:
-            $ref: "#/components/schemas/ObservedActivity"
+            type: integer
+        categorie1:
+          type: integer
+          description: Identifiant de la catégorie 1 (famille produit)
+        categorie2:
+          type: integer
+          description: Identifiant de la catégorie 2 (sous-famille produit)
+        categorie3:
+          type: integer
+          description: Identifiant de la catégorie 3 (produit)
         equipment:
           type: array
           uniqueItems: true
@@ -1688,10 +1784,10 @@ components:
         - $ref: "#/components/schemas/VisitFields"
         - type: object
           required:
-            [roundId, clientId, startedAt, location, opportunity, results]
+            [roundId, clientId, startedAt, location, observedActivities, opportunity, results]
           properties:
             roundId:
-              type: string
+              type: integer
               description: Identifiant de la tournée (obligatoire dans le corps de la requête)
 
     VisitPatch:

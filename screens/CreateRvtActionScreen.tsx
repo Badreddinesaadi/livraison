@@ -129,39 +129,24 @@ export default function CreateRvtActionScreen() {
   };
 
   const buildVisitPayload = (roundId: string): VisitCreate => {
-    const isChantier = store.observedActivity === "Chantier";
-    const isIndustriel = store.observedActivity === "Industriel";
-    const isRevendeur = store.observedActivity === "Revendeur";
-
     const opportunityDetected = store.opportunityDetected === true;
 
     return {
-      roundId,
-      clientId: store.client ? String(store.client.id) : "",
+      roundId: Number(roundId),
+      clientId: store.client ? store.client.id : 0,
       startedAt: store.startedAt?.toISOString() ?? new Date().toISOString(),
       completedAt: new Date().toISOString(),
       location: store.location ?? { status: "GPS_UNAVAILABLE" },
       contactRole: store.contactRole ?? undefined,
       contactOther: store.contactOther.trim() || undefined,
       activityLevel: store.activityLevel ?? undefined,
-      observedActivities: store.observedActivity ? [store.observedActivity] : [],
+      observedActivities:
+        store.observedActivity != null ? [store.observedActivity] : [],
+      categorie1: store.categorie1Id ?? undefined,
+      categorie2: store.categorie2Id ?? undefined,
+      categorie3: store.categorie3Id ?? undefined,
       equipment: store.equipment,
       equipmentQuantities: store.equipmentQuantities,
-      constructionSite: isChantier
-        ? {
-            type: store.constructionType ?? undefined,
-            progressPhase: store.constructionPhase ?? undefined,
-          }
-        : undefined,
-      industrialSite: isIndustriel
-        ? {
-            activities: store.industrialActivities,
-            otherActivity: store.industrialOther.trim() || undefined,
-          }
-        : undefined,
-      resellerSite: isRevendeur
-        ? { offersCutting: store.offersCutting }
-        : undefined,
       siteSize: store.siteSize ?? undefined,
       products: store.products.map(({ lineId, productId, category2, presence, details }) => ({
         lineId,

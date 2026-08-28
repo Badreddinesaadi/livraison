@@ -66,7 +66,7 @@ export default function RvtDetailsScreen() {
       contactRole: report.contactRole,
       contactOther: report.contactOther,
       activityLevel: report.activityLevel,
-      observedActivity: report.observedActivities?.[0],
+      observedActivity: report.observedActivities?.[0]?.id ?? null,
       offersCutting: report.resellerSite?.offersCutting ?? null,
       constructionType: report.constructionSite?.type,
       constructionPhase: report.constructionSite?.progressPhase,
@@ -196,7 +196,11 @@ export default function RvtDetailsScreen() {
           <DetailRow
             icon="industry"
             label="Activité"
-            value={report.observedActivities?.join(", ") || "-"}
+            value={
+              report.observedActivities
+                ?.map((a) => a.designation ?? String(a.id))
+                .join(", ") || "-"
+            }
           />
           <DetailRow
             icon="vector-square"

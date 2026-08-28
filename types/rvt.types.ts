@@ -31,11 +31,11 @@ export type ContactRole =
   | "Responsable chantier"
   | "Autre";
 
-export type ObservedActivity =
-  | "Menuisier"
-  | "Revendeur"
-  | "Chantier"
-  | "Industriel";
+export type ObservedActivity = {
+  id: number;
+  designation: string;
+  domaineId?: number;
+};
 
 export type ActivityLevel = "Faible" | "Moyen" | "Fort";
 
@@ -120,10 +120,38 @@ export type ActionDateOption = {
   days: number;
 };
 
+export type Marque = {
+  id: number;
+  designation: string;
+  domaineId?: number;
+};
+
+export type ProductCategory1 = {
+  id: number;
+  designation: string;
+  categorie2?: { id: number; designation: string }[];
+};
+
+export type ProductCategory2 = {
+  id: number;
+  designation: string;
+  idCategorie1?: number | null;
+  domaineId?: number;
+  categorie3: { id: number; designation: string }[];
+};
+
+export type ProductCategory3 = {
+  id: number;
+  designation: string;
+  idCategorie2: number;
+  domaineId?: number;
+};
+
 export type ReferenceData = {
   contactRoles: ContactRole[];
   activityLevels: ActivityLevel[];
   observedActivities: ObservedActivity[];
+  marques: Marque[];
   siteSizes: ParkSize[];
   presenceLevels: PresenceLevel[];
   sdkPositions: SDKPosition[];
@@ -132,9 +160,9 @@ export type ReferenceData = {
   visitResults: VisitResult[];
   nextActions: NextAction[];
   actionDateOptions: ActionDateOption[];
-  categories: MainCategory[];
-  categoryTags: Record<string, string[]>;
-  subCategories: Record<string, string[]>;
+  productCategories: ProductCategory1[];
+  productCategoriesLevel2: ProductCategory2[];
+  productCategoriesLevel3: ProductCategory3[];
   productSuggestions: Record<string, string[]>;
   qualityTags: string[];
   allQualityOptions: string[];
@@ -152,8 +180,6 @@ export type ReferenceData = {
   constructionPhases: string[];
   industrialActivities: string[];
   equipmentByActivity: Record<string, string[]>;
-  brandsByCategory: Record<string, string[]>;
-  extraPanelBrands: string[];
   suppliersByCategory: Record<string, string[]>;
   competitors: string[];
 };
@@ -188,12 +214,12 @@ export type ObservedProduct = ObservedProductInput & {
 };
 
 export type ObservedBrandInput = {
-  brandId: string;
+  brandId: number;
   presence?: PresenceLevel;
 };
 
 export type ObservedBrand = {
-  brandId: string;
+  brandId: number;
   label: string;
   categoryId?: MainCategory;
   presence?: PresenceLevel;
@@ -262,14 +288,17 @@ export type VisitPhoto = {
 };
 
 export type VisitFields = {
-  clientId?: string;
+  clientId?: number;
   startedAt?: string;
   completedAt?: string;
   location?: Location;
   contactRole?: ContactRole;
   contactOther?: string;
   activityLevel?: ActivityLevel;
-  observedActivities?: ObservedActivity[];
+  observedActivities?: number[];
+  categorie1?: number;
+  categorie2?: number;
+  categorie3?: number;
   equipment?: string[];
   equipmentQuantities?: Record<string, number>;
   constructionSite?: ConstructionSiteInput;
@@ -290,10 +319,11 @@ export type VisitFields = {
 };
 
 export type VisitCreate = VisitFields & {
-  roundId: string;
-  clientId: string;
+  roundId: number;
+  clientId: number;
   startedAt: string;
   location: Location;
+  observedActivities: number[];
   opportunity: OpportunityInput;
   results: VisitResult[];
 };

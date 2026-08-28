@@ -103,35 +103,39 @@ export const RvtChipRow = ({
   onSelect: (value: string | null) => void;
   allowNull?: boolean;
   required?: boolean;
-}) => (
-  <View style={styles.fieldWrap}>
-    <Text style={styles.fieldLabel}>
-      {label} {required ? <Text style={styles.required}>*</Text> : null}
-    </Text>
-    <View style={styles.chipRow}>
-      {options.map((option) => {
-        const isSelected = selected === option;
-        return (
-          <Pressable
-            key={option}
-            onPress={() => {
-              if (allowNull && isSelected) {
-                onSelect(null);
-              } else {
-                onSelect(option);
-              }
-            }}
-            style={[styles.chip, isSelected && styles.chipSelected]}
-          >
-            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-              {option}
-            </Text>
-          </Pressable>
-        );
-      })}
+}) => {
+  return (
+    <View style={styles.fieldWrap}>
+      <Text style={styles.fieldLabel}>
+        {label} {required ? <Text style={styles.required}>*</Text> : null}
+      </Text>
+      <View style={styles.chipRow}>
+        {options.map((option) => {
+          const isSelected = selected === option;
+          return (
+            <Pressable
+              key={option}
+              onPress={() => {
+                if (allowNull && isSelected) {
+                  onSelect(null);
+                } else {
+                  onSelect(option);
+                }
+              }}
+              style={[styles.chip, isSelected && styles.chipSelected]}
+            >
+              <Text
+                style={[styles.chipText, isSelected && styles.chipTextSelected]}
+              >
+                {option}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 export const RvtPresenceLevels = ({
   value,
@@ -204,7 +208,9 @@ export const RvtChipsMulti = ({
             onPress={() => onToggle(option)}
             style={[styles.chip, isSelected && styles.chipSelected]}
           >
-            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+            <Text
+              style={[styles.chipText, isSelected && styles.chipTextSelected]}
+            >
               {option}
             </Text>
           </Pressable>

@@ -5,7 +5,6 @@ import {
   ErpClient,
   Location,
   NextAction,
-  ObservedActivity,
   ObservedBrandInput,
   ObservedProductInput,
   OpportunityHorizon,
@@ -36,7 +35,7 @@ type CreateVisitState = {
   contactOther: string;
   activityLevel: ActivityLevel | null;
 
-  observedActivity: ObservedActivity | null;
+  observedActivity: number | null;
   offersCutting: boolean | null;
   constructionType: string | null;
   constructionPhase: string | null;
@@ -46,6 +45,9 @@ type CreateVisitState = {
   equipment: string[];
   equipmentQuantities: Record<string, number>;
   siteSize: ParkSize | null;
+  categorie1Id: number | null;
+  categorie2Id: number | null;
+  categorie3Id: number | null;
 
   products: ObservedProductInput[];
   otherProduct: string;
@@ -80,7 +82,7 @@ type CreateVisitState = {
   setStartedAt: (startedAt: Date | null) => void;
   resetVisitFields: () => void;
 
-  setObservedActivity: (observedActivity: ObservedActivity | null) => void;
+  setObservedActivity: (observedActivity: number | null) => void;
   setOffersCutting: (offersCutting: boolean | null) => void;
   setConstructionType: (constructionType: string | null) => void;
   setConstructionPhase: (constructionPhase: string | null) => void;
@@ -90,14 +92,17 @@ type CreateVisitState = {
   toggleEquipment: (equipment: string) => void;
   setEquipmentQuantity: (equipment: string, quantity: number) => void;
   setSiteSize: (siteSize: ParkSize | null) => void;
+  setCategorie1Id: (categorie1Id: number | null) => void;
+  setCategorie2Id: (categorie2Id: number | null) => void;
+  setCategorie3Id: (categorie3Id: number | null) => void;
 
   addProduct: (product: ObservedProductInput) => void;
   updateProduct: (lineId: string, patch: Partial<ObservedProductInput>) => void;
   removeProduct: (lineId: string) => void;
   setOtherProduct: (otherProduct: string) => void;
-  addBrand: (brandId: string, presence?: PresenceLevel) => void;
-  removeBrand: (brandId: string) => void;
-  setBrandPresence: (brandId: string, presence: PresenceLevel) => void;
+  addBrand: (brandId: number, presence?: PresenceLevel) => void;
+  removeBrand: (brandId: number) => void;
+  setBrandPresence: (brandId: number, presence: PresenceLevel) => void;
 
   setSdkPosition: (sdkPosition: SDKPosition | null) => void;
   toggleCompetitor: (competitorId: string, presence?: PresenceLevel) => void;
@@ -134,7 +139,7 @@ type CreateVisitState = {
     contactRole?: ContactRole;
     contactOther?: string;
     activityLevel?: ActivityLevel;
-    observedActivity?: ObservedActivity;
+    observedActivity?: number | null;
     offersCutting?: boolean | null;
     constructionType?: string;
     constructionPhase?: string;
@@ -177,7 +182,7 @@ const initialState = {
   contactOther: "",
   activityLevel: null as ActivityLevel | null,
 
-  observedActivity: null as ObservedActivity | null,
+  observedActivity: null as number | null,
   offersCutting: null as boolean | null,
   constructionType: null as string | null,
   constructionPhase: null as string | null,
@@ -187,6 +192,9 @@ const initialState = {
   equipment: [] as string[],
   equipmentQuantities: {} as Record<string, number>,
   siteSize: null as ParkSize | null,
+  categorie1Id: null as number | null,
+  categorie2Id: null as number | null,
+  categorie3Id: null as number | null,
 
   products: [] as ObservedProductInput[],
   otherProduct: "",
@@ -261,6 +269,9 @@ export const useCreateVisitStore = create<CreateVisitState>((set) => ({
       },
     })),
   setSiteSize: (siteSize) => set({ siteSize }),
+  setCategorie1Id: (categorie1Id) => set({ categorie1Id }),
+  setCategorie2Id: (categorie2Id) => set({ categorie2Id }),
+  setCategorie3Id: (categorie3Id) => set({ categorie3Id }),
 
   addProduct: (product) =>
     set((state) => ({ products: [...state.products, product] })),
