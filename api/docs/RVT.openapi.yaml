@@ -865,7 +865,7 @@ components:
     GPSStatus:
       type: string
       description: Statut de la capture GPS
-      enum: [GPS_VALIDATED, GPS_DENIED, GPS_UNAVAILABLE, GPS_TIMEOUT]
+      enum: [GPS_VALIDATED, GPS_APPROXIMATE, GPS_UNAVAILABLE]
 
     SyncStatus:
       type: string
@@ -1051,38 +1051,113 @@ components:
 
     Location:
       type: object
-      additionalProperties: false
       required: [status]
       properties:
         status:
           $ref: "#/components/schemas/GPSStatus"
         latitude:
           type: number
-          minimum: -90
-          maximum: 90
+          format: double
           description: Latitude de la position
         longitude:
           type: number
-          minimum: -180
-          maximum: 180
+          format: double
           description: Longitude de la position
-        accuracy:
-          type: number
-          minimum: 0
-          description: Précision de la position en mètres
-        capturedAt:
-          type: string
-          format: date-time
-          description: Date et heure de la capture
-        address:
-          type: string
-          description: Adresse (si disponible)
         city:
           type: string
           description: Ville déduite
-        region:
+
+    EquipementRef:
+      type: object
+      additionalProperties: false
+      required: [id, libelle]
+      properties:
+        id:
+          type: integer
+        libelle:
           type: string
-          description: Région déduite
+
+    ChantierRef:
+      type: object
+      additionalProperties: false
+      required: [id, libelle]
+      properties:
+        id:
+          type: integer
+        libelle:
+          type: string
+
+    ActiviteIndustrielleRef:
+      type: object
+      additionalProperties: false
+      required: [id, libelle]
+      properties:
+        id:
+          type: integer
+        libelle:
+          type: string
+        estAutre:
+          type: boolean
+          description: Indique l'option « Autre » (autreActiviteIndustrielle requise)
+
+    ActiviteObserveeV2:
+      type: object
+      additionalProperties: false
+      required: [id, code, libelle, equipements]
+      description: Activité observée v2 (Menuisier/Revendeur/Chantier/Industriel)
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+          enum: [menuisier, revendeur, chantier, industriel]
+        libelle:
+          type: string
+        equipements:
+          type: array
+          items:
+            $ref: "#/components/schemas/EquipementRef"
+        serviceDecoupe:
+          type: boolean
+          description: Présent pour le code « revendeur »
+        chantierTypes:
+          type: array
+          description: Présent pour le code « chantier »
+          items:
+            $ref: "#/components/schemas/ChantierRef"
+        chantierPhases:
+          type: array
+          description: Présent pour le code « chantier »
+          items:
+            $ref: "#/components/schemas/ChantierRef"
+        activitesIndustrielles:
+          type: array
+          description: Présent pour le code « industriel »
+          items:
+            $ref: "#/components/schemas/ActiviteIndustrielleRef"
+
+    CompetitorRef:
+      type: object
+      additionalProperties: false
+      required: [id, designation]
+      properties:
+        id:
+          type: integer
+        designation:
+          type: string
+        domaineId:
+          type: integer
+
+    CategorieRef:
+      type: object
+      nullable: true
+      required: [id]
+      properties:
+        id:
+          type: integer
+        designation:
+          type: string
+          nullable: true
 
     ActionDateOption:
       type: object
@@ -1196,6 +1271,7 @@ components:
           contactRoles,
           activityLevels,
           observedActivities,
+          activiteObserveeV2,
           marques,
           siteSizes,
           presenceLevels,
@@ -1206,7 +1282,6 @@ components:
           nextActions,
           actionDateOptions,
           productCategories,
-          productCategoriesLevel2,
           productCategoriesLevel3,
           productSuggestions,
           qualityTags,
@@ -1241,9 +1316,14 @@ components:
             $ref: "#/components/schemas/ActivityLevel"
         observedActivities:
           type: array
-          description: Activités observées proposées
+          description: Activités observées proposées (legacy)
           items:
             $ref: "#/components/schemas/ObservedActivity"
+        activiteObserveeV2:
+          type: array
+          description: Activités observées v2 avec équipements et sous-référentiels
+          items:
+            $ref: "#/components/schemas/ActiviteObserveeV2"
         marques:
           type: array
           description: Marques proposées
@@ -1296,7 +1376,7 @@ components:
             $ref: "#/components/schemas/ProductCategory1"
         productCategoriesLevel2:
           type: array
-          description: Catégories de niveau 2
+          description: Catégories de niveau 2 (peut être absent de la réponse)
           items:
             $ref: "#/components/schemas/ProductCategory2"
         productCategoriesLevel3:
@@ -1404,7 +1484,7 @@ components:
           type: array
           description: Liste des concurrents
           items:
-            type: string
+            $ref: "#/components/schemas/CompetitorRef"
 
     ProductDetails:
       type: object
@@ -1441,7 +1521,6 @@ components:
 
     ObservedProductInput:
       type: object
-      additionalProperties: false
       required: [productId]
       properties:
         lineId:
@@ -1451,8 +1530,8 @@ components:
           type: string
           description: Identifiant du produit du catalogue
         category2:
-          type: string
-          description: Second niveau de catégorie sélectionné
+          type: integer
+          description: Id de categorie2 (jbm.produits_categorie2)
         presence:
           $ref: "#/components/schemas/PresenceLevel"
         details:
@@ -1460,32 +1539,22 @@ components:
 
     ObservedProduct:
       type: object
-      additionalProperties: false
-      required: [lineId, productId, label, categoryId, categoryLabel]
       properties:
         lineId:
           type: string
-          description: Identifiant de la ligne produit
+          nullable: true
         productId:
           type: string
-          description: Identifiant du produit du catalogue
+          nullable: true
         label:
           type: string
-          description: Libellé du produit
+          nullable: true
         categoryId:
-          $ref: "#/components/schemas/MainCategory"
+          type: integer
+          nullable: true
         categoryLabel:
           type: string
-          description: Libellé de la famille
-        subcategoryId:
-          type: string
-          description: Identifiant de la sous-famille
-        subcategoryLabel:
-          type: string
-          description: Libellé de la sous-famille
-        category2:
-          type: string
-          description: Second niveau de catégorie
+          nullable: true
         presence:
           $ref: "#/components/schemas/PresenceLevel"
         details:
@@ -1520,32 +1589,30 @@ components:
 
     ObservedCompetitorInput:
       type: object
-      additionalProperties: false
       required: [competitorId]
       properties:
         competitorId:
-          type: string
-          description: Identifiant du concurrent
+          type: integer
+          description: Id de concurrent (table concurrents)
         presence:
           $ref: "#/components/schemas/PresenceLevel"
 
     ObservedCompetitor:
       type: object
-      additionalProperties: false
-      required: [competitorId, label]
       properties:
         competitorId:
-          type: string
+          type: integer
+          nullable: true
           description: Identifiant du concurrent
         label:
           type: string
+          nullable: true
           description: Libellé du concurrent
         presence:
           $ref: "#/components/schemas/PresenceLevel"
 
     OpportunityInput:
       type: object
-      additionalProperties: false
       required: [detected]
       properties:
         detected:
@@ -1555,22 +1622,25 @@ components:
             - type: "null"
         productId:
           type: string
+          nullable: true
           description: Identifiant du produit concerné
         potential:
-          $ref: "#/components/schemas/OpportunityPotential"
+          type: string
+          nullable: true
         horizon:
-          $ref: "#/components/schemas/OpportunityHorizon"
+          type: string
+          nullable: true
         estimatedAmount:
           type: number
-          minimum: 0
+          nullable: true
           description: Montant estimé en DH
         competitorId:
-          type: string
+          type: integer
+          nullable: true
           description: Identifiant du concurrent principal
 
     Opportunity:
       type: object
-      additionalProperties: false
       required: [detected]
       properties:
         detected:
@@ -1580,82 +1650,55 @@ components:
             - type: "null"
         productId:
           type: string
-          description: Identifiant du produit concerné
+          nullable: true
         productLabel:
           type: string
-          description: Libellé du produit concerné
-        categoryId:
-          $ref: "#/components/schemas/MainCategory"
+          nullable: true
         potential:
-          $ref: "#/components/schemas/OpportunityPotential"
+          type: string
+          nullable: true
         horizon:
-          $ref: "#/components/schemas/OpportunityHorizon"
+          type: string
+          nullable: true
         estimatedAmount:
           type: number
-          minimum: 0
-          description: Montant estimé en DH
+          nullable: true
         competitorId:
           type: string
-          description: Identifiant du concurrent principal
+          nullable: true
         competitor:
           type: string
-          description: Libellé du concurrent principal
-
-    ConstructionSiteInput:
-      type: object
-      additionalProperties: false
-      properties:
-        type:
-          type: string
-          description: Type de chantier
-        progressPhase:
-          type: string
-          description: Phase d'avancement
-        signPhotoId:
-          type: string
-          description: Identifiant de la photo du panneau de chantier
+          nullable: true
 
     ConstructionSite:
       type: object
-      additionalProperties: false
+      nullable: true
       properties:
         type:
-          type: string
-          description: Type de chantier
+          $ref: "#/components/schemas/ChantierRef"
         progressPhase:
-          type: string
-          description: Phase d'avancement
-        signPhotoId:
-          type: string
-          description: Identifiant de la photo du panneau de chantier
-        signPhoto:
-          $ref: "#/components/schemas/VisitPhoto"
+          $ref: "#/components/schemas/ChantierRef"
 
     IndustrialSite:
       type: object
-      additionalProperties: false
-      required: [activities]
+      nullable: true
       properties:
         activities:
           type: array
-          uniqueItems: true
           description: Spécialités industrielles observées
           items:
-            type: string
+            $ref: "#/components/schemas/ActiviteIndustrielleRef"
         otherActivity:
           type: string
+          nullable: true
           description: Autre activité précisée
 
     ResellerSite:
       type: object
-      additionalProperties: false
-      required: [offersCutting]
+      nullable: true
       properties:
         offersCutting:
-          description: Indique si le revendeur propose un service de découpe
-          oneOf:
-            - type: boolean
-            - type: "null"
+          type: boolean
 
     OrderQuantities:
       type: object
@@ -1675,7 +1718,6 @@ components:
 
     VisitFields:
       type: object
-      additionalProperties: false
       properties:
         clientId:
           type: integer
@@ -1687,54 +1729,82 @@ components:
         completedAt:
           type: string
           format: date-time
-          description: Date et heure de fin facultative envoyée par le client. Le serveur peut la remplacer par son heure d'achèvement persistée.
+          nullable: true
+          description: Par défaut, heure serveur au moment de la création si absent
         location:
           $ref: "#/components/schemas/Location"
         contactRole:
-          $ref: "#/components/schemas/ContactRole"
+          type: string
+          nullable: true
         contactOther:
           type: string
+          nullable: true
           maxLength: 500
           description: Précision du contact lorsque le rôle est « Autre »
+        contactNom:
+          type: string
+          nullable: true
+          description: Nom du contact rencontré
         activityLevel:
-          $ref: "#/components/schemas/ActivityLevel"
-        observedActivities:
+          type: string
+          nullable: true
+        siteSize:
+          type: string
+          nullable: true
+        niveauPresence:
+          type: string
+          nullable: true
+        sdkPosition:
+          type: string
+          nullable: true
+        activiteObserveeId:
+          type: integer
+          nullable: true
+          description: Id de l'activité observée (activite_observee_v2)
+        equipementIds:
           type: array
-          maxItems: 1
-          uniqueItems: true
-          description: Identifiants des activités observées (au plus un)
+          description: Ids d'équipements, doivent appartenir à l'activité choisie
           items:
             type: integer
-        categorie1:
-          type: integer
-          description: Identifiant de la catégorie 1 (famille produit)
-        categorie2:
-          type: integer
-          description: Identifiant de la catégorie 2 (sous-famille produit)
-        categorie3:
-          type: integer
-          description: Identifiant de la catégorie 3 (produit)
-        equipment:
-          type: array
-          uniqueItems: true
-          description: Équipements sélectionnés
-          items:
-            type: string
-        equipmentQuantities:
+        equipementQuantites:
           type: object
-          description: Quantités observées par équipement
+          description: Quantités par équipement, clé = id d'équipement
           additionalProperties:
             type: integer
             minimum: 1
-            maximum: 999
-        constructionSite:
-          $ref: "#/components/schemas/ConstructionSiteInput"
-        industrialSite:
-          $ref: "#/components/schemas/IndustrialSite"
-        resellerSite:
-          $ref: "#/components/schemas/ResellerSite"
-        siteSize:
-          $ref: "#/components/schemas/ParkSize"
+        activitesIndustriellesIds:
+          type: array
+          description: Uniquement si l'activité a le code « industriel »
+          items:
+            type: integer
+        autreActiviteIndustrielle:
+          type: string
+          nullable: true
+          description: Requis si activitesIndustriellesIds contient l'option « Autre »
+        chantierTypeId:
+          type: integer
+          nullable: true
+          description: Uniquement si l'activité a le code « chantier »
+        chantierPhaseId:
+          type: integer
+          nullable: true
+          description: Uniquement si l'activité a le code « chantier »
+        serviceDecoupe:
+          type: boolean
+          nullable: true
+          description: Uniquement si l'activité a le code « revendeur »
+        categorie1:
+          type: integer
+          nullable: true
+          description: Id categorie1 (jbm.produits_categorie1)
+        categorie2:
+          type: integer
+          nullable: true
+          description: Id categorie2 (jbm.produits_categorie2)
+        categorie3:
+          type: integer
+          nullable: true
+          description: Id categorie3 (jbm.produits_categorie3)
         products:
           type: array
           description: Produits observés
@@ -1742,22 +1812,30 @@ components:
             $ref: "#/components/schemas/ObservedProductInput"
         otherProduct:
           type: string
+          nullable: true
           maxLength: 500
           description: Autre produit libre
+        qualite:
+          type: string
+          nullable: true
         brands:
           type: array
           uniqueItems: true
           description: Marques observées
           items:
             $ref: "#/components/schemas/ObservedBrandInput"
+        fournisseur:
+          type: string
+          nullable: true
         competitors:
           type: array
           uniqueItems: true
           description: Concurrents observés
           items:
             $ref: "#/components/schemas/ObservedCompetitorInput"
-        sdkPosition:
-          $ref: "#/components/schemas/SDKPosition"
+        specsTechniques:
+          type: string
+          nullable: true
         opportunity:
           $ref: "#/components/schemas/OpportunityInput"
         results:
@@ -1765,30 +1843,33 @@ components:
           uniqueItems: true
           description: Résultats de la visite
           items:
-            $ref: "#/components/schemas/VisitResult"
+            type: string
         orderQuantities:
-          $ref: "#/components/schemas/OrderQuantities"
+          type: object
+          nullable: true
+          additionalProperties: true
         nextAction:
-          $ref: "#/components/schemas/NextAction"
+          type: string
+          nullable: true
         nextActionDueAt:
           type: string
           format: date-time
+          nullable: true
           description: Échéance de la prochaine action
         note:
           type: string
-          maxLength: 10000
-          description: Note générale de la visite
+          nullable: true
 
     VisitCreate:
       allOf:
         - $ref: "#/components/schemas/VisitFields"
         - type: object
           required:
-            [roundId, clientId, startedAt, location, observedActivities, opportunity, results]
+            [roundId, clientId, startedAt, location, opportunity, results]
           properties:
             roundId:
               type: integer
-              description: Identifiant de la tournée (obligatoire dans le corps de la requête)
+              description: Id de la tournée en cours à laquelle rattacher la visite
 
     VisitPatch:
       description: Champs de visite modifiables. Les propriétés omises conservent leur valeur courante.
@@ -1814,10 +1895,7 @@ components:
           type: integer
           minimum: 0
           description: Taille en octets
-        capturedAt:
-          type: string
-          format: date-time
-          description: Date et heure de la capture
+
         remoteUrl:
           type: string
           format: uri
@@ -1850,7 +1928,6 @@ components:
 
     VisitReport:
       type: object
-      additionalProperties: false
       required:
         [
           id,
@@ -1866,7 +1943,6 @@ components:
           idempotencyKey,
           client,
           location,
-          observedActivities,
           equipment,
           equipmentQuantities,
           products,
@@ -1914,7 +1990,8 @@ components:
           minimum: 0
           description: Durée de la visite en secondes
         syncStatus:
-          $ref: "#/components/schemas/SyncStatus"
+          type: string
+          enum: [synced]
         idempotencyKey:
           type: string
           description: Clé d'idempotence de la création
@@ -1923,22 +2000,31 @@ components:
         location:
           $ref: "#/components/schemas/Location"
         contactRole:
-          $ref: "#/components/schemas/ContactRole"
+          type: string
+          nullable: true
         contactOther:
           type: string
+          nullable: true
           description: Précision du contact lorsque le rôle est « Autre »
         activityLevel:
-          $ref: "#/components/schemas/ActivityLevel"
-        observedActivities:
-          type: array
-          description: Activités observées
-          items:
-            $ref: "#/components/schemas/ObservedActivity"
+          type: string
+          nullable: true
+        activiteObservee:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+            code:
+              type: string
+              enum: [menuisier, revendeur, chantier, industriel]
+            libelle:
+              type: string
         equipment:
           type: array
           description: Équipements observés
           items:
-            type: string
+            $ref: "#/components/schemas/EquipementRef"
         equipmentQuantities:
           type: object
           description: Quantités observées par équipement
@@ -1951,7 +2037,14 @@ components:
         resellerSite:
           $ref: "#/components/schemas/ResellerSite"
         siteSize:
-          $ref: "#/components/schemas/ParkSize"
+          type: string
+          nullable: true
+        categorie1:
+          $ref: "#/components/schemas/CategorieRef"
+        categorie2:
+          $ref: "#/components/schemas/CategorieRef"
+        categorie3:
+          $ref: "#/components/schemas/CategorieRef"
         products:
           type: array
           description: Produits observés
@@ -1959,6 +2052,7 @@ components:
             $ref: "#/components/schemas/ObservedProduct"
         otherProduct:
           type: string
+          nullable: true
           description: Autre produit libre
         brands:
           type: array
@@ -1971,24 +2065,55 @@ components:
           items:
             $ref: "#/components/schemas/ObservedCompetitor"
         sdkPosition:
-          $ref: "#/components/schemas/SDKPosition"
+          type: string
+          nullable: true
         opportunity:
-          $ref: "#/components/schemas/Opportunity"
+          type: object
+          properties:
+            detected:
+              type: boolean
+              nullable: true
+            productId:
+              type: string
+              nullable: true
+            productLabel:
+              type: string
+              nullable: true
+            potential:
+              type: string
+              nullable: true
+            horizon:
+              type: string
+              nullable: true
+            estimatedAmount:
+              type: number
+              nullable: true
+            competitorId:
+              type: string
+              nullable: true
+            competitor:
+              type: string
+              nullable: true
         results:
           type: array
           description: Résultats de la visite
           items:
-            $ref: "#/components/schemas/VisitResult"
+            type: string
         orderQuantities:
-          $ref: "#/components/schemas/OrderQuantities"
+          type: object
+          nullable: true
+          additionalProperties: true
         nextAction:
-          $ref: "#/components/schemas/NextAction"
+          type: string
+          nullable: true
         nextActionDueAt:
           type: string
           format: date-time
+          nullable: true
           description: Échéance de la prochaine action
         note:
           type: string
+          nullable: true
           description: Note générale de la visite
         photos:
           type: array

@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { apiUrl } from "@/constants/query";
 import { SyncStatus, VisitPhoto } from "@/types/rvt.types";
 
 export const formatDateLabel = (value?: string | null) => {
@@ -20,9 +21,17 @@ export const formatDuration = (seconds?: number | null) => {
   return `${s}s`;
 };
 
-export const rvtPhotoUrl = (photo?: Pick<VisitPhoto, "remoteUrl" | "thumbnailUrl"> | null) => {
+export const rvtPhotoUrl = (
+  photo?: Pick<VisitPhoto, "remoteUrl" | "thumbnailUrl"> | null,
+) => {
   if (!photo) return null;
-  return photo.remoteUrl ?? photo.thumbnailUrl ?? null;
+  const raw = photo.remoteUrl ?? photo.thumbnailUrl ?? null;
+  if (!raw) return null;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const base = (apiUrl ?? "").replace(/\/+$/, "");
+  const path = raw.replace(/^\/+/, "");
+  if (!base) return raw;
+  return `${base}/sdkboard/api/${path}`;
 };
 
 export const SYNC_STATUS_UI: Record<

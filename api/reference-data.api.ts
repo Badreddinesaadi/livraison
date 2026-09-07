@@ -5,5 +5,6 @@ export const getReferenceData = async (): Promise<ReferenceData | null> => {
   return client.request<ReferenceData>({
     pathname: "/sdkboard/api/homescreen/rapport_terrain.php",
     method: "GET",
+    isDebug: true,
   });
 };

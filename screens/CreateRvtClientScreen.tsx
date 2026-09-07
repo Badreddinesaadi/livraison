@@ -1,5 +1,6 @@
 import { ListClients } from "@/api/users.api";
 import {
+  RvtChipRow,
   RvtFooterButton,
   RvtSelectorField,
   RvtTextInput,
@@ -12,16 +13,13 @@ import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
 import { Client } from "@/types/user.types";
-import { ContactRole } from "@/types/rvt.types";
+import { ActivityLevel, ContactRole } from "@/types/rvt.types";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
-
-const CAPTURE_TIMEOUT_MS = 15000;
 
 export default function CreateRvtClientScreen() {
   const router = useRouter();
@@ -31,8 +29,6 @@ export default function CreateRvtClientScreen() {
   const store = useCreateVisitStore();
   const openSelect = useRvtSheetStore((s) => s.openSelect);
   const { data: refData } = useReferenceData();
-
-  const [isCapturing, setIsCapturing] = useState(false);
 
   const { data: clients, isLoading: isLoadingClients } = useQuery({
     queryKey: ["clients", "full-list"],
@@ -45,65 +41,6 @@ export default function CreateRvtClientScreen() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleCaptureLocation = useCallback(async () => {
-    if (isCapturing) return;
-    setIsCapturing(true);
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        store.setLocation({
-          status: "GPS_DENIED",
-          capturedAt: new Date().toISOString(),
-        });
-        Toast.show({
-          type: "error",
-          text1: "Localisation refusée",
-          text2: "Autorisez la localisation pour la visite.",
-        });
-        return;
-      }
-
-      const timeout = setTimeout(() => {
-        store.setLocation({
-          status: "GPS_TIMEOUT",
-          capturedAt: new Date().toISOString(),
-        });
-        Toast.show({
-          type: "error",
-          text1: "Délai dépassé",
-          text2: "Impossible d'obtenir la position.",
-        });
-      }, CAPTURE_TIMEOUT_MS);
-
-      const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      clearTimeout(timeout);
-
-      const { latitude, longitude, accuracy } = position.coords;
-      store.setLocation({
-        status: "GPS_VALIDATED",
-        latitude,
-        longitude,
-        accuracy: accuracy ?? undefined,
-        capturedAt: new Date().toISOString(),
-      });
-    } catch {
-      store.setLocation({
-        status: "GPS_UNAVAILABLE",
-        capturedAt: new Date().toISOString(),
-      });
-      Toast.show({
-        type: "error",
-        text1: "Position indisponible",
-        text2: "Impossible de récupérer votre position.",
-      });
-    } finally {
-      setIsCapturing(false);
-    }
-  }, [isCapturing, store]);
 
   const handleSelectClient = () => {
     if (!clients?.length) {
@@ -172,8 +109,6 @@ export default function CreateRvtClientScreen() {
     );
   }
 
-  const location = store.location;
-
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -181,72 +116,6 @@ export default function CreateRvtClientScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <SectionCard title="Localisation GPS" icon="map-marker-alt">
-          {location?.status === "GPS_VALIDATED" ? (
-            <View style={styles.fieldStack}>
-              <FieldRow
-                icon="check-circle"
-                label="Statut"
-                value="Validée"
-                color={PRIMARY}
-              />
-              <FieldRow
-                icon="globe"
-                label="Latitude"
-                value={location.latitude?.toFixed(5) ?? "-"}
-              />
-              <FieldRow
-                icon="globe"
-                label="Longitude"
-                value={location.longitude?.toFixed(5) ?? "-"}
-              />
-              <FieldRow
-                icon="bullseye"
-                label="Précision"
-                value={
-                  location.accuracy
-                    ? `±${Math.round(location.accuracy)} m`
-                    : "-"
-                }
-              />
-            </View>
-          ) : location?.status === "GPS_TIMEOUT" ? (
-            <Text style={styles.statusText}>
-              Le délai de capture GPS a été dépassé.
-            </Text>
-          ) : location?.status === "GPS_DENIED" ? (
-            <Text style={styles.statusText}>
-              La localisation a été refusée.
-            </Text>
-          ) : location?.status === "GPS_UNAVAILABLE" ? (
-            <Text style={styles.statusText}>
-              La position est actuellement indisponible.
-            </Text>
-          ) : (
-            <Text style={styles.statusTextMuted}>
-              Aucune position capturée.
-            </Text>
-          )}
-
-          <Pressable
-            onPress={handleCaptureLocation}
-            disabled={isCapturing}
-            style={[
-              styles.captureButton,
-              isCapturing && styles.captureButtonDisabled,
-            ]}
-          >
-            <FontAwesome5
-              name={isCapturing ? "spinner" : "crosshairs"}
-              size={14}
-              color={PRIMARY}
-            />
-            <Text style={styles.captureButtonText}>
-              {isCapturing ? "Capture en cours..." : "Capturer la position"}
-            </Text>
-          </Pressable>
-        </SectionCard>
-
         <SectionCard title="Client" icon="building">
           <RvtSelectorField
             label="Client visité"
@@ -299,6 +168,16 @@ export default function CreateRvtClientScreen() {
               maxLength={500}
             />
           ) : null}
+        </SectionCard>
+
+        <SectionCard title="Niveau d'activité observé" icon="signal">
+          <RvtChipRow
+            label="Niveau d'activité"
+            options={refData?.activityLevels ?? []}
+            selected={store.activityLevel}
+            onSelect={(v) => store.setActivityLevel(v as ActivityLevel | null)}
+            allowNull
+          />
         </SectionCard>
       </ScrollView>
 
@@ -380,34 +259,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     flex: 1,
     flexWrap: "wrap",
-  },
-  statusText: {
-    color: "#666",
-    fontSize: 13,
-  },
-  statusTextMuted: {
-    color: "#999",
-    fontSize: 13,
-  },
-  captureButton: {
-    marginTop: 10,
-    paddingVertical: 11,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: PRIMARY,
-    backgroundColor: PRIMARY + "10",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  captureButtonDisabled: {
-    opacity: 0.6,
-  },
-  captureButtonText: {
-    color: PRIMARY,
-    fontWeight: "700",
-    fontSize: 14,
   },
   footer: {
     paddingBottom: 14,

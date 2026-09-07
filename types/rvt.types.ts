@@ -1,8 +1,4 @@
-export type GPSStatus =
-  | "GPS_VALIDATED"
-  | "GPS_DENIED"
-  | "GPS_UNAVAILABLE"
-  | "GPS_TIMEOUT";
+export type GPSStatus = "GPS_VALIDATED" | "GPS_APPROXIMATE" | "GPS_UNAVAILABLE";
 
 export type SyncStatus = "draft" | "pending_sync" | "synced" | "sync_error";
 
@@ -35,6 +31,50 @@ export type ObservedActivity = {
   id: number;
   designation: string;
   domaineId?: number;
+};
+
+export type CompetitorRef = {
+  id: number;
+  designation: string;
+  domaineId?: number;
+};
+
+export type EquipementRef = {
+  id: number;
+  libelle: string;
+};
+
+export type ChantierRef = {
+  id: number;
+  libelle: string;
+};
+
+export type ActiviteIndustrielleRef = {
+  id: number;
+  libelle: string;
+  estAutre?: boolean;
+};
+
+export type ActiviteObserveeCode =
+  | "menuisier"
+  | "revendeur"
+  | "chantier"
+  | "industriel";
+
+export type ActiviteObserveeV2 = {
+  id: number;
+  code: ActiviteObserveeCode;
+  libelle: string;
+  equipements: EquipementRef[];
+  serviceDecoupe?: boolean;
+  chantierTypes?: ChantierRef[];
+  chantierPhases?: ChantierRef[];
+  activitesIndustrielles?: ActiviteIndustrielleRef[];
+};
+
+export type CategorieRef = {
+  id: number;
+  designation?: string | null;
 };
 
 export type ActivityLevel = "Faible" | "Moyen" | "Fort";
@@ -129,7 +169,7 @@ export type Marque = {
 export type ProductCategory1 = {
   id: number;
   designation: string;
-  categorie2?: { id: number; designation: string }[];
+  categorie3?: { id: number; designation: string }[];
 };
 
 export type ProductCategory2 = {
@@ -151,6 +191,7 @@ export type ReferenceData = {
   contactRoles: ContactRole[];
   activityLevels: ActivityLevel[];
   observedActivities: ObservedActivity[];
+  activite_observee_v2: ActiviteObserveeV2[];
   marques: Marque[];
   siteSizes: ParkSize[];
   presenceLevels: PresenceLevel[];
@@ -161,8 +202,8 @@ export type ReferenceData = {
   nextActions: NextAction[];
   actionDateOptions: ActionDateOption[];
   productCategories: ProductCategory1[];
-  productCategoriesLevel2: ProductCategory2[];
-  productCategoriesLevel3: ProductCategory3[];
+  productCategoriesLevel2?: ProductCategory2[];
+  productCategoriesLevel3?: ProductCategory3[];
   productSuggestions: Record<string, string[]>;
   qualityTags: string[];
   allQualityOptions: string[];
@@ -181,7 +222,7 @@ export type ReferenceData = {
   industrialActivities: string[];
   equipmentByActivity: Record<string, string[]>;
   suppliersByCategory: Record<string, string[]>;
-  competitors: string[];
+  competitors: CompetitorRef[];
 };
 
 export type ProductDetails = {
@@ -199,18 +240,19 @@ export type ProductDetails = {
 export type ObservedProductInput = {
   lineId: string;
   productId: string;
-  category2?: string;
+  category2?: number;
   presence?: PresenceLevel;
   details?: ProductDetails;
 };
 
-export type ObservedProduct = ObservedProductInput & {
-  lineId: string;
-  label: string;
-  categoryId: MainCategory;
-  categoryLabel: string;
-  subcategoryId?: string;
-  subcategoryLabel?: string;
+export type ObservedProduct = {
+  lineId?: string;
+  productId?: string;
+  label?: string;
+  categoryId?: number | null;
+  categoryLabel?: string | null;
+  presence?: PresenceLevel | null;
+  details?: ProductDetails;
 };
 
 export type ObservedBrandInput = {
@@ -226,12 +268,12 @@ export type ObservedBrand = {
 };
 
 export type ObservedCompetitorInput = {
-  competitorId: string;
+  competitorId: number;
   presence?: PresenceLevel;
 };
 
 export type ObservedCompetitor = {
-  competitorId: string;
+  competitorId: number;
   label: string;
   presence?: PresenceLevel;
 };
@@ -242,7 +284,7 @@ export type OpportunityInput = {
   potential?: OpportunityPotential;
   horizon?: OpportunityHorizon;
   estimatedAmount?: number;
-  competitorId?: string;
+  competitorId?: number;
 };
 
 export type Opportunity = OpportunityInput & {
@@ -251,20 +293,16 @@ export type Opportunity = OpportunityInput & {
   competitor?: string;
 };
 
-export type ConstructionSiteInput = {
-  type?: string;
-  progressPhase?: string;
-  signPhotoId?: string;
-};
-
-export type ConstructionSite = ConstructionSiteInput & {
-  signPhoto?: VisitPhoto;
-};
+export type ConstructionSite = {
+  type?: ChantierRef | null;
+  progressPhase?: ChantierRef | null;
+  signPhoto?: VisitPhoto | null;
+} | null;
 
 export type IndustrialSite = {
-  activities: string[];
-  otherActivity?: string;
-};
+  activities: ActiviteIndustrielleRef[];
+  otherActivity?: string | null;
+} | null;
 
 export type ResellerSite = {
   offersCutting: boolean | null;
@@ -294,21 +332,28 @@ export type VisitFields = {
   location?: Location;
   contactRole?: ContactRole;
   contactOther?: string;
+  contactNom?: string;
   activityLevel?: ActivityLevel;
-  observedActivities?: number[];
+  niveauPresence?: PresenceLevel;
+  activiteObserveeId?: number;
+  equipementIds?: number[];
+  equipementQuantites?: Record<string, number>;
+  serviceDecoupe?: boolean | null;
+  chantierTypeId?: number | null;
+  chantierPhaseId?: number | null;
+  activitesIndustriellesIds?: number[];
+  autreActiviteIndustrielle?: string | null;
+  siteSize?: ParkSize;
   categorie1?: number;
   categorie2?: number;
   categorie3?: number;
-  equipment?: string[];
-  equipmentQuantities?: Record<string, number>;
-  constructionSite?: ConstructionSiteInput;
-  industrialSite?: IndustrialSite;
-  resellerSite?: ResellerSite;
-  siteSize?: ParkSize;
   products?: ObservedProductInput[];
   otherProduct?: string;
+  qualite?: string;
   brands?: ObservedBrandInput[];
+  fournisseur?: string;
   competitors?: ObservedCompetitorInput[];
+  specsTechniques?: string;
   sdkPosition?: SDKPosition;
   opportunity?: OpportunityInput;
   results?: VisitResult[];
@@ -323,7 +368,6 @@ export type VisitCreate = VisitFields & {
   clientId: number;
   startedAt: string;
   location: Location;
-  observedActivities: number[];
   opportunity: OpportunityInput;
   results: VisitResult[];
 };
@@ -348,13 +392,20 @@ export type VisitReport = {
   contactRole?: ContactRole;
   contactOther?: string;
   activityLevel?: ActivityLevel;
-  observedActivities: ObservedActivity[];
-  equipment: string[];
+  activiteObservee?: {
+    id: number;
+    code: ActiviteObserveeCode;
+    libelle: string;
+  } | null;
+  equipment: EquipementRef[];
   equipmentQuantities: Record<string, number>;
   constructionSite?: ConstructionSite;
   industrialSite?: IndustrialSite;
   resellerSite?: ResellerSite;
   siteSize?: ParkSize;
+  categorie1?: CategorieRef | null;
+  categorie2?: CategorieRef | null;
+  categorie3?: CategorieRef | null;
   products: ObservedProduct[];
   otherProduct?: string;
   brands: ObservedBrand[];
@@ -405,7 +456,6 @@ export type DashboardData = {
 
 export const GPS_STATUS_LABELS: Record<GPSStatus, string> = {
   GPS_VALIDATED: "Validée",
-  GPS_DENIED: "Refusée",
+  GPS_APPROXIMATE: "Approximative",
   GPS_UNAVAILABLE: "Indisponible",
-  GPS_TIMEOUT: "Délai dépassé",
 };

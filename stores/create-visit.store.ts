@@ -35,15 +35,15 @@ type CreateVisitState = {
   contactOther: string;
   activityLevel: ActivityLevel | null;
 
-  observedActivity: number | null;
-  offersCutting: boolean | null;
-  constructionType: string | null;
-  constructionPhase: string | null;
+  activiteObserveeId: number | null;
+  serviceDecoupe: boolean | null;
+  chantierTypeId: number | null;
+  chantierPhaseId: number | null;
   signPhoto: PendingVisitPhoto | null;
-  industrialActivities: string[];
+  activitesIndustriellesIds: number[];
   industrialOther: string;
-  equipment: string[];
-  equipmentQuantities: Record<string, number>;
+  equipementIds: number[];
+  equipementQuantites: Record<string, number>;
   siteSize: ParkSize | null;
   categorie1Id: number | null;
   categorie2Id: number | null;
@@ -55,7 +55,7 @@ type CreateVisitState = {
 
   sdkPosition: SDKPosition | null;
   competitors: {
-    competitorId: string;
+    competitorId: number;
     presence?: PresenceLevel;
   }[];
   opportunityDetected: boolean | null;
@@ -63,7 +63,7 @@ type CreateVisitState = {
   oppPotential: OpportunityPotential | null;
   oppHorizon: OpportunityHorizon | null;
   oppAmount: string;
-  oppCompetitorId: string | null;
+  oppCompetitorId: number | null;
 
   results: VisitResult[];
   orderSolo: string;
@@ -82,15 +82,16 @@ type CreateVisitState = {
   setStartedAt: (startedAt: Date | null) => void;
   resetVisitFields: () => void;
 
-  setObservedActivity: (observedActivity: number | null) => void;
-  setOffersCutting: (offersCutting: boolean | null) => void;
-  setConstructionType: (constructionType: string | null) => void;
-  setConstructionPhase: (constructionPhase: string | null) => void;
+  setActiviteObserveeId: (activiteObserveeId: number | null) => void;
+  setServiceDecoupe: (serviceDecoupe: boolean | null) => void;
+  setChantierTypeId: (chantierTypeId: number | null) => void;
+  setChantierPhaseId: (chantierPhaseId: number | null) => void;
   setSignPhoto: (signPhoto: PendingVisitPhoto | null) => void;
-  setIndustrialActivities: (industrialActivities: string[]) => void;
+  toggleActiviteIndustrielle: (id: number) => void;
   setIndustrialOther: (industrialOther: string) => void;
-  toggleEquipment: (equipment: string) => void;
-  setEquipmentQuantity: (equipment: string, quantity: number) => void;
+  toggleEquipement: (id: number) => void;
+  setEquipementQuantity: (id: number, quantity: number) => void;
+  clearEquipements: () => void;
   setSiteSize: (siteSize: ParkSize | null) => void;
   setCategorie1Id: (categorie1Id: number | null) => void;
   setCategorie2Id: (categorie2Id: number | null) => void;
@@ -105,18 +106,18 @@ type CreateVisitState = {
   setBrandPresence: (brandId: number, presence: PresenceLevel) => void;
 
   setSdkPosition: (sdkPosition: SDKPosition | null) => void;
-  toggleCompetitor: (competitorId: string, presence?: PresenceLevel) => void;
+  toggleCompetitor: (competitorId: number, presence?: PresenceLevel) => void;
   setCompetitorPresence: (
-    competitorId: string,
+    competitorId: number,
     presence: PresenceLevel,
   ) => void;
-  removeCompetitor: (competitorId: string) => void;
+  removeCompetitor: (competitorId: number) => void;
   setOpportunityDetected: (detected: boolean | null) => void;
   setOppProductId: (oppProductId: string | null) => void;
   setOppPotential: (oppPotential: OpportunityPotential | null) => void;
   setOppHorizon: (oppHorizon: OpportunityHorizon | null) => void;
   setOppAmount: (oppAmount: string) => void;
-  setOppCompetitorId: (oppCompetitorId: string | null) => void;
+  setOppCompetitorId: (oppCompetitorId: number | null) => void;
 
   toggleResult: (result: VisitResult) => void;
   setOrderSolo: (orderSolo: string) => void;
@@ -139,26 +140,30 @@ type CreateVisitState = {
     contactRole?: ContactRole;
     contactOther?: string;
     activityLevel?: ActivityLevel;
-    observedActivity?: number | null;
-    offersCutting?: boolean | null;
-    constructionType?: string;
-    constructionPhase?: string;
-    industrialActivities?: string[];
+    activiteObserveeId?: number | null;
+    serviceDecoupe?: boolean | null;
+    chantierTypeId?: number | null;
+    chantierPhaseId?: number | null;
+    activitesIndustriellesIds?: number[];
     industrialOther?: string;
-    equipment?: string[];
-    equipmentQuantities?: Record<string, number>;
+    signPhoto?: PendingVisitPhoto | null;
+    equipementIds?: number[];
+    equipementQuantites?: Record<string, number>;
     siteSize?: ParkSize;
+    categorie1Id?: number | null;
+    categorie2Id?: number | null;
+    categorie3Id?: number | null;
     products?: ObservedProductInput[];
     otherProduct?: string;
     brands?: ObservedBrandInput[];
     sdkPosition?: SDKPosition;
-    competitors?: { competitorId: string; presence?: PresenceLevel }[];
+    competitors?: { competitorId: number; presence?: PresenceLevel }[];
     opportunityDetected?: boolean | null;
     oppProductId?: string | null;
     oppPotential?: OpportunityPotential | null;
     oppHorizon?: OpportunityHorizon | null;
     oppAmount?: string;
-    oppCompetitorId?: string | null;
+    oppCompetitorId?: number | null;
     results?: VisitResult[];
     orderSolo?: string;
     orderSemiCombined?: string;
@@ -182,15 +187,15 @@ const initialState = {
   contactOther: "",
   activityLevel: null as ActivityLevel | null,
 
-  observedActivity: null as number | null,
-  offersCutting: null as boolean | null,
-  constructionType: null as string | null,
-  constructionPhase: null as string | null,
+  activiteObserveeId: null as number | null,
+  serviceDecoupe: null as boolean | null,
+  chantierTypeId: null as number | null,
+  chantierPhaseId: null as number | null,
   signPhoto: null as PendingVisitPhoto | null,
-  industrialActivities: [] as string[],
+  activitesIndustriellesIds: [] as number[],
   industrialOther: "",
-  equipment: [] as string[],
-  equipmentQuantities: {} as Record<string, number>,
+  equipementIds: [] as number[],
+  equipementQuantites: {} as Record<string, number>,
   siteSize: null as ParkSize | null,
   categorie1Id: null as number | null,
   categorie2Id: null as number | null,
@@ -201,13 +206,13 @@ const initialState = {
   brands: [] as ObservedBrandInput[],
 
   sdkPosition: null as SDKPosition | null,
-  competitors: [] as { competitorId: string; presence?: PresenceLevel }[],
+  competitors: [] as { competitorId: number; presence?: PresenceLevel }[],
   opportunityDetected: null as boolean | null,
   oppProductId: null as string | null,
   oppPotential: null as OpportunityPotential | null,
   oppHorizon: null as OpportunityHorizon | null,
   oppAmount: "",
-  oppCompetitorId: null as string | null,
+  oppCompetitorId: null as number | null,
 
   results: [] as VisitResult[],
   orderSolo: "",
@@ -235,39 +240,59 @@ export const useCreateVisitStore = create<CreateVisitState>((set) => ({
       startedAt: null,
     })),
 
-  setObservedActivity: (observedActivity) => set({ observedActivity }),
-  setOffersCutting: (offersCutting) => set({ offersCutting }),
-  setConstructionType: (constructionType) => set({ constructionType }),
-  setConstructionPhase: (constructionPhase) => set({ constructionPhase }),
+  setActiviteObserveeId: (activiteObserveeId) =>
+    set({
+      activiteObserveeId,
+      serviceDecoupe: null,
+      chantierTypeId: null,
+      chantierPhaseId: null,
+      signPhoto: null,
+      activitesIndustriellesIds: [],
+      industrialOther: "",
+      equipementIds: [],
+      equipementQuantites: {},
+    }),
+  setServiceDecoupe: (serviceDecoupe) => set({ serviceDecoupe }),
+  setChantierTypeId: (chantierTypeId) => set({ chantierTypeId }),
+  setChantierPhaseId: (chantierPhaseId) => set({ chantierPhaseId }),
   setSignPhoto: (signPhoto) => set({ signPhoto }),
-  setIndustrialActivities: (industrialActivities) =>
-    set({ industrialActivities }),
-  setIndustrialOther: (industrialOther) => set({ industrialOther }),
-  toggleEquipment: (equipment) =>
+  toggleActiviteIndustrielle: (id) =>
     set((state) => {
-      if (state.equipment.includes(equipment)) {
-        const quantities = { ...state.equipmentQuantities };
-        delete quantities[equipment];
+      if (state.activitesIndustriellesIds.includes(id)) {
         return {
-          equipment: state.equipment.filter((e) => e !== equipment),
-          equipmentQuantities: quantities,
+          activitesIndustriellesIds: state.activitesIndustriellesIds.filter(
+            (a) => a !== id,
+          ),
         };
       }
       return {
-        equipment: [...state.equipment, equipment],
-        equipmentQuantities: {
-          ...state.equipmentQuantities,
-          [equipment]: 1,
-        },
+        activitesIndustriellesIds: [...state.activitesIndustriellesIds, id],
       };
     }),
-  setEquipmentQuantity: (equipment, quantity) =>
+  setIndustrialOther: (industrialOther) => set({ industrialOther }),
+  toggleEquipement: (id) =>
+    set((state) => {
+      if (state.equipementIds.includes(id)) {
+        const quantities = { ...state.equipementQuantites };
+        delete quantities[String(id)];
+        return {
+          equipementIds: state.equipementIds.filter((e) => e !== id),
+          equipementQuantites: quantities,
+        };
+      }
+      return {
+        equipementIds: [...state.equipementIds, id],
+        equipementQuantites: { ...state.equipementQuantites, [String(id)]: 1 },
+      };
+    }),
+  setEquipementQuantity: (id, quantity) =>
     set((state) => ({
-      equipmentQuantities: {
-        ...state.equipmentQuantities,
-        [equipment]: quantity,
+      equipementQuantites: {
+        ...state.equipementQuantites,
+        [String(id)]: quantity,
       },
     })),
+  clearEquipements: () => set({ equipementIds: [], equipementQuantites: {} }),
   setSiteSize: (siteSize) => set({ siteSize }),
   setCategorie1Id: (categorie1Id) => set({ categorie1Id }),
   setCategorie2Id: (categorie2Id) => set({ categorie2Id }),

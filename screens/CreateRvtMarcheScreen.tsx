@@ -23,46 +23,18 @@ export default function CreateRvtMarcheScreen() {
   const openMultiSelect = useRvtSheetStore((s) => s.openMultiSelect);
   const { data: refData } = useReferenceData();
 
-  const categories1 = refData?.productCategories ?? [];
-  const categories2 = refData?.productCategoriesLevel2 ?? [];
-  const categories3 = refData?.productCategoriesLevel3 ?? [];
+  const productCategories = refData?.productCategories ?? [];
   const marques = refData?.marques ?? [];
 
-  const selectedCat1 = categories1.find((c) => c.id === store.categorie1Id);
-  const selectedCat2 = categories2.find((c) => c.id === store.categorie2Id);
-  const selectedCat3 = categories3.find((c) => c.id === store.categorie3Id);
-
-  const cat3Options = categories3.filter(
-    (c) => c.idCategorie2 === store.categorie2Id,
+  const selectedCat2 = productCategories.find(
+    (c) => c.id === store.categorie2Id,
+  );
+  const selectedCat3 = selectedCat2?.categorie3?.find(
+    (c) => c.id === store.categorie3Id,
   );
 
-  const handleSelectCategorie1 = () => {
-    if (!categories1.length) {
-      Toast.show({
-        type: "error",
-        text1: "Aucune catégorie",
-        text2: "Le référentiel des catégories est indisponible.",
-      });
-      return;
-    }
-    openSelect({
-      title: "Catégorie 1",
-      options: categories1.map((c) => ({
-        id: String(c.id),
-        label: c.designation,
-      })),
-      selectedId:
-        store.categorie1Id != null ? String(store.categorie1Id) : undefined,
-      onSelect: (id) => {
-        store.setCategorie1Id(Number(id));
-        store.setCategorie2Id(null);
-        store.setCategorie3Id(null);
-      },
-    });
-  };
-
   const handleSelectCategorie2 = () => {
-    if (!categories2.length) {
+    if (!productCategories.length) {
       Toast.show({
         type: "error",
         text1: "Aucune catégorie",
@@ -71,8 +43,8 @@ export default function CreateRvtMarcheScreen() {
       return;
     }
     openSelect({
-      title: "Catégorie 2",
-      options: categories2.map((c) => ({
+      title: "Famille produit",
+      options: productCategories.map((c) => ({
         id: String(c.id),
         label: c.designation,
       })),
@@ -88,17 +60,18 @@ export default function CreateRvtMarcheScreen() {
   };
 
   const handleSelectCategorie3 = () => {
-    if (!cat3Options.length) {
+    const options = selectedCat2?.categorie3 ?? [];
+    if (!options.length) {
       Toast.show({
         type: "error",
-        text1: "Aucune catégorie",
-        text2: "Sélectionnez d'abord une catégorie 2.",
+        text1: "Aucun produit",
+        text2: "Sélectionnez d'abord une famille de produits.",
       });
       return;
     }
     openSelect({
-      title: "Catégorie 3",
-      options: cat3Options.map((c) => ({
+      title: "Produit",
+      options: options.map((c) => ({
         id: String(c.id),
         label: c.designation,
       })),
@@ -164,20 +137,13 @@ export default function CreateRvtMarcheScreen() {
       >
         <SectionCard title="Produits observés" icon="boxes">
           <RvtSelectorField
-            label="Catégorie 1"
-            value={selectedCat1?.designation}
-            placeholder="Sélectionner"
-            onPress={handleSelectCategorie1}
-            required
-          />
-          <RvtSelectorField
-            label="Catégorie 2"
+            label="Famille produit"
             value={selectedCat2?.designation}
             placeholder="Sélectionner"
             onPress={handleSelectCategorie2}
           />
           <RvtSelectorField
-            label="Catégorie 3"
+            label="Produit"
             value={selectedCat3?.designation}
             placeholder="Sélectionner"
             onPress={handleSelectCategorie3}

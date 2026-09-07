@@ -1,10 +1,13 @@
 import { client, Pagination } from "@/constants/client";
+import { apiUrl } from "@/constants/query";
 import {
   VisitCreate,
   VisitPatch,
   VisitPhoto,
   VisitReport,
 } from "@/types/rvt.types";
+import { File, UploadType } from "expo-file-system";
+import * as SecureStore from "expo-secure-store";
 
 export type UploadVisitFile = {
   uri: string;
@@ -77,7 +80,7 @@ export const updateVisit = async ({
 }) => {
   return client.request<VisitReport>({
     pathname: "/sdkboard/api/rounds/visits.php",
-    method: "PATCH",
+    method: "PUT",
     searchParams: { id },
     headers: { "If-Match": String(version) },
     body: patch,
@@ -97,27 +100,73 @@ export const deleteVisit = async ({ id }: { id: string }) => {
 export const uploadVisitPhoto = async ({
   visitId,
   file,
-  capturedAt,
 }: {
   visitId: string;
   file: UploadVisitFile;
-  capturedAt: string;
-}) => {
-  const formData = new FormData();
-  formData.append("images", {
-    uri: file.uri,
-    name: file.name,
-    type: file.type,
-  } as any);
-  formData.append("capturedAt", capturedAt);
+}): Promise<VisitPhoto[] | null> => {
+  const base = (apiUrl ?? "").replace(/\/+$/, "");
+  const url = `${
+    base
+  }/sdkboard/api/rounds/visits.php?action=addPhoto&id=${encodeURIComponent(
+    String(visitId),
+  )}`;
+  const auth_token = (await SecureStore.getItemAsync("sessionToken")) ?? "";
 
-  return client.request<VisitPhoto>({
-    pathname: "/sdkboard/api/rounds/visits.php",
-    method: "POST",
-    searchParams: { action: "addPhoto", id: visitId },
-    body: formData,
-    isDebug: true,
-  });
+  const fileToUpload = new File(file.uri);
+  if (__DEV__) {
+    console.log("\n====== UPLOAD PHOTO DEBUG ======");
+    console.log("URL:", url);
+    console.log("visitId:", visitId);
+    console.log("fileUri:", file.uri);
+    console.log("fileName:", file.name, "| mimeType:", file.type);
+    console.log("fieldName: images[]");
+    console.log("===============================\n");
+  }
+
+  let result;
+  try {
+    result = await fileToUpload.upload(url, {
+      httpMethod: "POST",
+      uploadType: UploadType.MULTIPART,
+      fieldName: "images[]",
+      mimeType: file.type,
+      headers: {
+        login_token: "SDKWOOD",
+        code_token: "SDKWOOD/2026@!!",
+        auth_token,
+      },
+    });
+  } catch (error: any) {
+    if (__DEV__) {
+      console.log("\n====== UPLOAD PHOTO ERROR ======");
+      console.log("message:", error?.message ?? error);
+      console.log("===============================\n");
+    }
+    throw error;
+  }
+
+  if (__DEV__) {
+    console.log("\n====== UPLOAD PHOTO RESPONSE ======");
+    console.log("HTTP status:", result.status);
+    console.log("Body:", (result.body ?? "").slice(0, 500));
+    console.log("==================================\n");
+  }
+
+  const text = result.body ?? "";
+  let parsed: any;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Réponse non-JSON (HTTP ${result.status}): ${text.slice(0, 200)}`,
+    );
+  }
+
+  if (parsed.status === false) {
+    throw new Error(parsed.message || "Erreur lors de l'envoi de la photo");
+  }
+
+  return (parsed.data as VisitPhoto[]) ?? null;
 };
 
 export const deleteVisitPhoto = async ({
@@ -133,4 +182,74 @@ export const deleteVisitPhoto = async ({
     searchParams: { action: "deletePhoto", id: visitId, photoId },
     isDebug: true,
   });
+};
+
+export const uploadPanneauChantierPhoto = async ({
+  visitId,
+  file,
+}: {
+  visitId: string;
+  file: UploadVisitFile;
+}) => {
+  const base = (apiUrl ?? "").replace(/\/+$/, "");
+  const url = `${base}/sdkboard/api/rounds/panneau_chantier.php?id=${encodeURIComponent(
+    String(visitId),
+  )}`;
+  const auth_token = (await SecureStore.getItemAsync("sessionToken")) ?? "";
+
+  if (__DEV__) {
+    console.log("\n====== UPLOAD PANNEAU CHANTIER DEBUG ======");
+    console.log("URL:", url);
+    console.log("fileUri:", file.uri);
+    console.log("fileName:", file.name, "| mimeType:", file.type);
+    console.log("fieldName: image");
+    console.log("===========================================\n");
+  }
+
+  let result;
+  try {
+    result = await new File(file.uri).upload(url, {
+      httpMethod: "POST",
+      uploadType: UploadType.MULTIPART,
+      fieldName: "image",
+      mimeType: file.type,
+      headers: {
+        login_token: "SDKWOOD",
+        code_token: "SDKWOOD/2026@!!",
+        auth_token,
+      },
+    });
+  } catch (error: any) {
+    if (__DEV__) {
+      console.log("\n====== UPLOAD PANNEAU CHANTIER ERROR ======");
+      console.log("message:", error?.message ?? error);
+      console.log("===========================================\n");
+    }
+    throw error;
+  }
+
+  if (__DEV__) {
+    console.log("\n====== UPLOAD PANNEAU CHANTIER RESPONSE ======");
+    console.log("HTTP status:", result.status);
+    console.log("Body:", (result.body ?? "").slice(0, 500));
+    console.log("==============================================\n");
+  }
+
+  const text = result.body ?? "";
+  let parsed: any;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Réponse non-JSON (HTTP ${result.status}): ${text.slice(0, 200)}`,
+    );
+  }
+
+  if (parsed.status === false) {
+    throw new Error(
+      parsed.message || "Erreur lors de l'envoi de la photo du panneau",
+    );
+  }
+
+  return parsed.data ?? null;
 };

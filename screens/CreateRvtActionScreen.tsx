@@ -2,6 +2,7 @@ import { createRound, listRounds } from "@/api/rounds.api";
 import {
   createVisit,
   updateVisit,
+  uploadPanneauChantierPhoto,
   uploadVisitPhoto,
 } from "@/api/visits.api";
 import {
@@ -15,20 +16,21 @@ import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
 import { useReferenceData } from "@/hooks/use-reference-data";
 import { useSession } from "@/stores/auth.store";
-import { useCreateVisitStore, PendingVisitPhoto } from "@/stores/create-visit.store";
+import { useCreateVisitStore } from "@/stores/create-visit.store";
+import { useRvtCameraStore } from "@/stores/rvt-camera.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
 import { VisitCreate, VisitPatch } from "@/types/rvt.types";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CameraView, useCameraPermissions } from "expo-camera";
-import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
+import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 const MAX_PHOTOS = 5;
+const CAPTURE_TIMEOUT_MS = 15000;
 
 export default function CreateRvtActionScreen() {
   const router = useRouter();
@@ -38,12 +40,62 @@ export default function CreateRvtActionScreen() {
   const store = useCreateVisitStore();
   const openSelect = useRvtSheetStore((s) => s.openSelect);
   const openMultiSelect = useRvtSheetStore((s) => s.openMultiSelect);
+  const openCamera = useRvtCameraStore((s) => s.open);
   const { data: refData } = useReferenceData();
 
-  const cameraRef = useRef<CameraView>(null);
-  const [permission, requestPermission] = useCameraPermissions();
-  const [isCameraVisible, setIsCameraVisible] = useState(false);
-  const [isFileCooldown, setIsFileCooldown] = useState(false);
+  const [isCapturingLocation, setIsCapturingLocation] = useState(false);
+
+  const handleOpenPhotoPicker = useCallback(() => {
+    openCamera({
+      maxPhotos: Math.max(1, MAX_PHOTOS - store.photos.length),
+      multiple: true,
+      onConfirm: (photos) => {
+        photos.forEach((p) => store.addPhoto(p));
+      },
+    });
+    router.navigate("/rvt/camera");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openCamera, router, store.photos.length]);
+
+  const captureLocationIfMissing = useCallback(async () => {
+    if (store.location?.status === "GPS_VALIDATED") return;
+    setIsCapturingLocation(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        store.setLocation({
+          status: "GPS_UNAVAILABLE",
+          capturedAt: new Date().toISOString(),
+        });
+        return;
+      }
+      const timeout = setTimeout(() => {
+        store.setLocation({
+          status: "GPS_UNAVAILABLE",
+          capturedAt: new Date().toISOString(),
+        });
+      }, CAPTURE_TIMEOUT_MS);
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      clearTimeout(timeout);
+      const { latitude, longitude, accuracy } = position.coords;
+      store.setLocation({
+        status: "GPS_VALIDATED",
+        latitude,
+        longitude,
+        accuracy: accuracy ?? undefined,
+        capturedAt: new Date().toISOString(),
+      });
+    } catch {
+      store.setLocation({
+        status: "GPS_UNAVAILABLE",
+        capturedAt: new Date().toISOString(),
+      });
+    } finally {
+      setIsCapturingLocation(false);
+    }
+  }, [store]);
 
   const visitResults = refData?.visitResults ?? [];
   const nextActions = refData?.nextActions ?? [];
@@ -68,17 +120,46 @@ export default function CreateRvtActionScreen() {
       return createVisit(base);
     },
     onSuccess: async (report) => {
-      if (report?.id && store.photos.length > 0) {
-        const visitId = report.visitId || report.id;
-        await Promise.allSettled(
+      const visitId = report?.visitId || report?.id;
+      if (visitId && store.photos.length > 0) {
+        const results = await Promise.allSettled(
           store.photos.map((photo) =>
             uploadVisitPhoto({
               visitId,
               file: { uri: photo.uri, name: photo.name, type: photo.type },
-              capturedAt: photo.capturedAt,
             }),
           ),
         );
+        const failedCount = results.filter(
+          (r) => r.status === "rejected",
+        ).length;
+        if (failedCount > 0) {
+          Toast.show({
+            type: "error",
+            text1: "Photos non envoyées",
+            text2: `${failedCount} photo${failedCount > 1 ? "s" : ""} n'a pas pu être envoyée.`,
+          });
+        }
+      }
+
+      const isChantier =
+        refData?.activite_observee_v2?.find(
+          (a) => a.id === store.activiteObserveeId,
+        )?.code === "chantier";
+      if (visitId && isChantier && store.signPhoto) {
+        const wp = store.signPhoto;
+        try {
+          await uploadPanneauChantierPhoto({
+            visitId,
+            file: { uri: wp.uri, name: wp.name, type: wp.type },
+          });
+        } catch (error: any) {
+          Toast.show({
+            type: "error",
+            text1: "Photo du panneau non envoyée",
+            text2: error?.message || "Une erreur est survenue.",
+          });
+        }
       }
       queryClient.invalidateQueries({ queryKey: ["visits"] });
       queryClient.invalidateQueries({ queryKey: ["rounds"] });
@@ -130,6 +211,9 @@ export default function CreateRvtActionScreen() {
 
   const buildVisitPayload = (roundId: string): VisitCreate => {
     const opportunityDetected = store.opportunityDetected === true;
+    const activityCode = refData?.activite_observee_v2?.find(
+      (a) => a.id === store.activiteObserveeId,
+    )?.code;
 
     return {
       roundId: Number(roundId),
@@ -138,37 +222,68 @@ export default function CreateRvtActionScreen() {
       completedAt: new Date().toISOString(),
       location: store.location ?? { status: "GPS_UNAVAILABLE" },
       contactRole: store.contactRole ?? undefined,
-      contactOther: store.contactOther.trim() || undefined,
+      contactOther: (store.contactOther ?? "").trim() || undefined,
       activityLevel: store.activityLevel ?? undefined,
-      observedActivities:
-        store.observedActivity != null ? [store.observedActivity] : [],
-      categorie1: store.categorie1Id ?? undefined,
+      activiteObserveeId: store.activiteObserveeId ?? undefined,
+      equipementIds: store.equipementIds.length
+        ? store.equipementIds
+        : undefined,
+      equipementQuantites: Object.keys(store.equipementQuantites).length
+        ? store.equipementQuantites
+        : undefined,
+      serviceDecoupe:
+        activityCode === "revendeur" ? store.serviceDecoupe : undefined,
+      chantierTypeId:
+        activityCode === "chantier"
+          ? (store.chantierTypeId ?? undefined)
+          : undefined,
+      chantierPhaseId:
+        activityCode === "chantier"
+          ? (store.chantierPhaseId ?? undefined)
+          : undefined,
+      activitesIndustriellesIds:
+        activityCode === "industriel" && store.activitesIndustriellesIds.length
+          ? store.activitesIndustriellesIds
+          : undefined,
+      autreActiviteIndustrielle:
+        activityCode === "industriel" && (store.industrialOther ?? "").trim()
+          ? store.industrialOther.trim()
+          : undefined,
+      siteSize: store.siteSize ?? undefined,
+      categorie1: 171,
       categorie2: store.categorie2Id ?? undefined,
       categorie3: store.categorie3Id ?? undefined,
-      equipment: store.equipment,
-      equipmentQuantities: store.equipmentQuantities,
-      siteSize: store.siteSize ?? undefined,
-      products: store.products.map(({ lineId, productId, category2, presence, details }) => ({
-        lineId,
-        productId,
-        category2,
-        presence,
-        details,
-      })),
-      otherProduct: store.otherProduct.trim() || undefined,
+      products: store.products.map(
+        ({ lineId, productId, category2, presence, details }) => ({
+          lineId,
+          productId,
+          category2,
+          presence,
+          details,
+        }),
+      ),
+      otherProduct: (store.otherProduct ?? "").trim() || undefined,
       brands: store.brands,
       competitors: store.competitors,
       sdkPosition: store.sdkPosition ?? undefined,
       opportunity: {
         detected: store.opportunityDetected,
-        productId: opportunityDetected ? store.oppProductId ?? undefined : undefined,
-        potential: opportunityDetected ? store.oppPotential ?? undefined : undefined,
-        horizon: opportunityDetected ? store.oppHorizon ?? undefined : undefined,
+        productId: opportunityDetected
+          ? (store.oppProductId ?? undefined)
+          : undefined,
+        potential: opportunityDetected
+          ? (store.oppPotential ?? undefined)
+          : undefined,
+        horizon: opportunityDetected
+          ? (store.oppHorizon ?? undefined)
+          : undefined,
         estimatedAmount:
           opportunityDetected && store.oppAmount.trim()
             ? Number(store.oppAmount)
             : undefined,
-        competitorId: opportunityDetected ? store.oppCompetitorId ?? undefined : undefined,
+        competitorId: opportunityDetected
+          ? (store.oppCompetitorId ?? undefined)
+          : undefined,
       },
       results: store.results,
       orderQuantities: hasCommande
@@ -179,23 +294,28 @@ export default function CreateRvtActionScreen() {
         : undefined,
       nextAction: store.nextAction ?? undefined,
       nextActionDueAt: store.nextActionDueAt?.toISOString(),
-      note: store.note.trim() || undefined,
+      note: (store.note ?? "").trim() || undefined,
     };
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!store.client) {
-      Toast.show({ type: "error", text1: "Client requis", text2: "Sélectionnez un client." });
+      Toast.show({
+        type: "error",
+        text1: "Client requis",
+        text2: "Sélectionnez un client.",
+      });
       return;
     }
     if (store.results.length === 0) {
-      Toast.show({ type: "error", text1: "Résultat requis", text2: "Sélectionnez au moins un résultat de visite." });
+      Toast.show({
+        type: "error",
+        text1: "Résultat requis",
+        text2: "Sélectionnez au moins un résultat de visite.",
+      });
       return;
     }
-    if (store.opportunityDetected === true && !store.oppProductId) {
-      Toast.show({ type: "error", text1: "Opportunité incomplète", text2: "Précisez le produit concerné." });
-      return;
-    }
+    await captureLocationIfMissing();
     mutate();
   };
 
@@ -210,65 +330,6 @@ export default function CreateRvtActionScreen() {
       onToggle: (id) => useCreateVisitStore.getState().toggleResult(id as any),
       onConfirm: () => {},
     });
-  };
-
-  const takePhoto = async () => {
-    const hasPermission = permission?.granted === true;
-    if (!hasPermission) {
-      const req = await requestPermission();
-      if (!req.granted) {
-        Toast.show({
-          type: "error",
-          text1: "Caméra non autorisée",
-          text2: "Ajoutez des photos depuis la galerie.",
-        });
-        return;
-      }
-    }
-    if (!isCameraVisible) {
-      setIsCameraVisible(true);
-      return;
-    }
-    if (store.photos.length >= MAX_PHOTOS) {
-      Toast.show({ type: "error", text1: "Limite atteinte", text2: `Maximum ${MAX_PHOTOS} photos.` });
-      return;
-    }
-    const picture = await cameraRef.current?.takePictureAsync({ quality: 0.7 });
-    if (picture?.uri) {
-      const photo: PendingVisitPhoto = {
-        uri: picture.uri,
-        name: `visite-${Date.now()}.jpg`,
-        type: "image/jpeg",
-        capturedAt: new Date().toISOString(),
-      };
-      store.addPhoto(photo);
-      setIsFileCooldown(true);
-      setTimeout(() => setIsFileCooldown(false), 800);
-    }
-  };
-
-  const pickFromGallery = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: "image/*",
-      multiple: true,
-      copyToCacheDirectory: true,
-    });
-    if (result.canceled || result.assets.length === 0) return;
-    const remaining = MAX_PHOTOS - store.photos.length;
-    if (remaining <= 0) {
-      Toast.show({ type: "error", text1: "Limite atteinte", text2: `Maximum ${MAX_PHOTOS} photos.` });
-      return;
-    }
-    const selected = result.assets.slice(0, remaining).map((asset) => ({
-      uri: asset.uri,
-      name: asset.name || `photo-${Date.now()}.jpg`,
-      type: asset.mimeType ?? "image/jpeg",
-      capturedAt: new Date().toISOString(),
-    }));
-    selected.forEach((p) => store.addPhoto(p));
-    if (result.assets.length > remaining) {
-      Toast.show({ type: "info", text1: "Photos limitées", text2: `Seules ${remaining} photos ont été ajoutées.` });
-    }
   };
 
   const handleSelectNextAction = () => {
@@ -367,12 +428,13 @@ export default function CreateRvtActionScreen() {
               options={actionDateOptions.map((o) => o.label)}
               selected={
                 store.nextActionDueAt
-                  ? actionDateOptions.find(
+                  ? (actionDateOptions.find(
                       (o) =>
                         new Date(
                           new Date().getTime() + o.days * 86400000,
-                        ).toDateString() === store.nextActionDueAt?.toDateString(),
-                    )?.label ?? null
+                        ).toDateString() ===
+                        store.nextActionDueAt?.toDateString(),
+                    )?.label ?? null)
                   : null
               }
               onSelect={(v) => {
@@ -399,29 +461,47 @@ export default function CreateRvtActionScreen() {
           />
         </SectionCard>
 
-        <SectionCard title="Photos" icon="camera">
-          <View style={styles.photoActions}>
-            <Pressable
-              onPress={takePhoto}
-              disabled={isFileCooldown}
-              style={[styles.photoActionPrimary, isFileCooldown && styles.photoActionDisabled]}
-            >
-              <FontAwesome5 name="camera" size={14} color="#fff" />
-              <Text style={styles.photoActionPrimaryText}>
-                {isCameraVisible ? "Prendre" : "Caméra"}
-              </Text>
-            </Pressable>
-            <Pressable onPress={pickFromGallery} style={styles.photoActionGhost}>
-              <FontAwesome5 name="images" size={14} color={PRIMARY} />
-              <Text style={styles.photoActionGhostText}>Galerie</Text>
-            </Pressable>
-          </View>
+        <SectionCard title="Localisation" icon="map-marker-alt">
+          {store.location?.status === "GPS_VALIDATED" ? (
+            <Text style={styles.gpsStatus}>Position validée</Text>
+          ) : store.location?.status === "GPS_APPROXIMATE" ? (
+            <Text style={styles.gpsStatus}>
+              Position approximative capturée.
+            </Text>
+          ) : (
+            <Text style={styles.gpsStatusMuted}>Aucune position capturée.</Text>
+          )}
+          <Pressable
+            onPress={() => captureLocationIfMissing()}
+            disabled={isCapturingLocation}
+            style={[
+              styles.gpsButton,
+              isCapturingLocation && styles.gpsDisabled,
+            ]}
+          >
+            <FontAwesome5
+              name={isCapturingLocation ? "spinner" : "crosshairs"}
+              size={14}
+              color={PRIMARY}
+            />
+            <Text style={styles.gpsButtonText}>
+              {isCapturingLocation
+                ? "Capture en cours..."
+                : "Capturer la position"}
+            </Text>
+          </Pressable>
+        </SectionCard>
 
-          {isCameraVisible && permission?.granted ? (
-            <View style={styles.cameraWrap}>
-              <CameraView ref={cameraRef} style={styles.camera} facing="back" />
-            </View>
-          ) : null}
+        <SectionCard title="Photos" icon="camera">
+          <Pressable
+            onPress={handleOpenPhotoPicker}
+            style={styles.photoActionPrimary}
+          >
+            <FontAwesome5 name="camera" size={14} color="#fff" />
+            <Text style={styles.photoActionPrimaryText}>
+              Ajouter des photos
+            </Text>
+          </Pressable>
 
           {store.photos.length > 0 ? (
             <View style={styles.photoGrid}>
@@ -515,12 +595,41 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
   },
-  photoActions: {
+  gpsHint: {
+    fontSize: 12,
+    color: "#888",
+    marginBottom: 8,
+  },
+  gpsStatus: {
+    fontSize: 13,
+    color: "#16a34a",
+    marginBottom: 10,
+  },
+  gpsStatusMuted: {
+    fontSize: 13,
+    color: "#999",
+    marginBottom: 10,
+  },
+  gpsButton: {
+    paddingVertical: 11,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: PRIMARY,
+    backgroundColor: PRIMARY + "10",
+    alignItems: "center",
+    justifyContent: "center",
     flexDirection: "row",
-    gap: 10,
+    gap: 8,
+  },
+  gpsButtonText: {
+    color: PRIMARY,
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  gpsDisabled: {
+    opacity: 0.6,
   },
   photoActionPrimary: {
-    flex: 1,
     paddingVertical: 11,
     borderRadius: 10,
     backgroundColor: PRIMARY,
@@ -533,33 +642,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "700",
     fontSize: 13,
-  },
-  photoActionGhost: {
-    flex: 1,
-    paddingVertical: 11,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: PRIMARY,
-    backgroundColor: PRIMARY + "10",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  photoActionGhostText: {
-    color: PRIMARY,
-    fontWeight: "700",
-    fontSize: 13,
-  },
-  photoActionDisabled: {
-    opacity: 0.6,
-  },
-  cameraWrap: {
-    marginTop: 12,
-  },
-  camera: {
-    height: 220,
-    borderRadius: 10,
   },
   photoGrid: {
     flexDirection: "row",

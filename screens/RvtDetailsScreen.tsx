@@ -15,14 +15,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import {
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RvtDetailsScreen() {
   const router = useRouter();
@@ -45,6 +39,14 @@ export default function RvtDetailsScreen() {
     () => syncStatusUi(report?.syncStatus),
     [report?.syncStatus],
   );
+  const photos = useMemo(() => {
+    const list = [...(report?.photos ?? [])];
+    const signPhoto = report?.constructionSite?.signPhoto;
+    if (signPhoto?.remoteUrl) {
+      list.unshift(signPhoto);
+    }
+    return list;
+  }, [report]);
 
   const handleEdit = () => {
     if (!report) return;
@@ -64,19 +66,28 @@ export default function RvtDetailsScreen() {
       },
       location: report.location,
       contactRole: report.contactRole,
-      contactOther: report.contactOther,
+      contactOther: report.contactOther ?? "",
       activityLevel: report.activityLevel,
-      observedActivity: report.observedActivities?.[0]?.id ?? null,
-      offersCutting: report.resellerSite?.offersCutting ?? null,
-      constructionType: report.constructionSite?.type,
-      constructionPhase: report.constructionSite?.progressPhase,
-      industrialActivities: report.industrialSite?.activities ?? [],
+      activiteObserveeId: report.activiteObservee?.id ?? null,
+      serviceDecoupe: report.resellerSite?.offersCutting ?? null,
+      chantierTypeId: report.constructionSite?.type?.id ?? null,
+      chantierPhaseId: report.constructionSite?.progressPhase?.id ?? null,
+      activitesIndustriellesIds:
+        report.industrialSite?.activities?.map((a) => a.id) ?? [],
       industrialOther: report.industrialSite?.otherActivity ?? "",
-      equipment: report.equipment ?? [],
-      equipmentQuantities: report.equipmentQuantities ?? {},
+      equipementIds: report.equipment?.map((e) => e.id) ?? [],
+      equipementQuantites: report.equipmentQuantities ?? {},
       siteSize: report.siteSize,
-      products: report.products,
-      otherProduct: report.otherProduct,
+      categorie1Id: report.categorie1?.id ?? null,
+      categorie2Id: report.categorie2?.id ?? null,
+      categorie3Id: report.categorie3?.id ?? null,
+      products: (report.products ?? []).map((p) => ({
+        lineId: p.lineId ?? "",
+        productId: p.productId ?? "",
+        presence: p.presence ?? undefined,
+        details: p.details,
+      })),
+      otherProduct: report.otherProduct ?? "",
       brands: report.brands,
       sdkPosition: report.sdkPosition,
       competitors: report.competitors,
@@ -85,13 +96,16 @@ export default function RvtDetailsScreen() {
       oppPotential: report.opportunity?.potential ?? null,
       oppHorizon: report.opportunity?.horizon ?? null,
       oppAmount: report.opportunity?.estimatedAmount?.toString() ?? "",
-      oppCompetitorId: report.opportunity?.competitorId ?? null,
+      oppCompetitorId:
+        report.opportunity?.competitorId != null
+          ? Number(report.opportunity.competitorId)
+          : null,
       results: report.results,
       orderSolo: report.orderQuantities?.solo?.toString() ?? "",
       orderSemiCombined: report.orderQuantities?.semiCombined?.toString() ?? "",
       nextAction: report.nextAction,
       nextActionDueAt: report.nextActionDueAt,
-      note: report.note,
+      note: report.note ?? "",
     });
     router.navigate("/rvt/create/client");
   };
@@ -133,7 +147,6 @@ export default function RvtDetailsScreen() {
   const products = report.products ?? [];
   const brands = report.brands ?? [];
   const competitors = report.competitors ?? [];
-  const photos = report.photos ?? [];
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -196,11 +209,7 @@ export default function RvtDetailsScreen() {
           <DetailRow
             icon="industry"
             label="Activité"
-            value={
-              report.observedActivities
-                ?.map((a) => a.designation ?? String(a.id))
-                .join(", ") || "-"
-            }
+            value={report.activiteObservee?.libelle || "-"}
           />
           <DetailRow
             icon="vector-square"
@@ -219,12 +228,12 @@ export default function RvtDetailsScreen() {
               <DetailRow
                 icon="hard-hat"
                 label="Chantier"
-                value={report.constructionSite.type || "-"}
+                value={report.constructionSite.type?.libelle || "-"}
               />
               <DetailRow
                 icon="chart-line"
                 label="Phase"
-                value={report.constructionSite.progressPhase || "-"}
+                value={report.constructionSite.progressPhase?.libelle || "-"}
               />
             </>
           ) : null}
@@ -248,24 +257,41 @@ export default function RvtDetailsScreen() {
         </Section>
 
         <Section title="Marché — produits et marques" icon="boxes">
+          {report.categorie1 ? (
+            <DetailRow
+              icon="tags"
+              label="Catégorie 1"
+              value={report.categorie1.designation ?? String(report.categorie1.id)}
+            />
+          ) : null}
+          {report.categorie2 ? (
+            <DetailRow
+              icon="tags"
+              label="Catégorie 2"
+              value={report.categorie2.designation ?? String(report.categorie2.id)}
+            />
+          ) : null}
+          {report.categorie3 ? (
+            <DetailRow
+              icon="tags"
+              label="Catégorie 3"
+              value={report.categorie3.designation ?? String(report.categorie3.id)}
+            />
+          ) : null}
           {products.length === 0 && brands.length === 0 ? (
             <Text style={styles.mutedText}>Aucun produit relevé.</Text>
           ) : (
             <>
-              {products.map((product) => (
-                <View key={product.lineId} style={styles.productBlock}>
+              {products.map((product, index) => (
+                <View
+                  key={product.lineId ?? `product-${index}`}
+                  style={styles.productBlock}
+                >
                   <DetailRow
                     icon="box-open"
                     label="Produit"
-                    value={product.label}
+                    value={product.label ?? product.productId ?? "-"}
                   />
-                  {product.category2 ? (
-                    <DetailRow
-                      icon="tags"
-                      label="Sous-type"
-                      value={product.category2}
-                    />
-                  ) : null}
                   <DetailRow
                     icon="percent"
                     label="Présence"
@@ -280,12 +306,12 @@ export default function RvtDetailsScreen() {
                   ) : null}
                 </View>
               ))}
-              {brands.map((brand) => (
+              {brands.map((brand, index) => (
                 <DetailRow
-                  key={brand.brandId}
+                  key={brand.brandId ?? `brand-${index}`}
                   icon="trademark"
                   label="Marque"
-                  value={`${brand.label}${brand.presence ? ` (${brand.presence})` : ""}`}
+                  value={`${brand.label ?? brand.brandId ?? "-"}${brand.presence ? ` (${brand.presence})` : ""}`}
                 />
               ))}
             </>
@@ -404,11 +430,11 @@ export default function RvtDetailsScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.photoRow}
             >
-              {photos.map((photo) => {
+              {photos.map((photo, index) => {
                 const uri = rvtPhotoUrl(photo);
                 return (
                   <Pressable
-                    key={photo.id}
+                    key={photo.id ?? `sign-photo-${index}`}
                     onPress={() => uri && setPreviewUri(uri)}
                   >
                     {uri ? (
@@ -503,20 +529,20 @@ const resellerCuttingLabel = (site: ResellerSite) => {
   return site.offersCutting ? "Oui" : "Non";
 };
 
-const industrialLabel = (site: IndustrialSite) => {
-  const parts = [...(site.activities ?? [])];
+const industrialLabel = (site: NonNullable<IndustrialSite>) => {
+  const parts = (site.activities ?? []).map((a) => a.libelle);
   if (site.otherActivity) parts.push(site.otherActivity);
   return parts.join(", ") || "-";
 };
 
 const equipmentLabel = (
-  equipment: string[],
+  equipment: { id: number; libelle: string }[],
   quantities: Record<string, number> | undefined,
 ) =>
   (equipment ?? [])
     .map((eq) => {
-      const qty = quantities?.[eq];
-      return qty != null ? `${eq} (×${qty})` : eq;
+      const qty = quantities?.[String(eq.id)];
+      return qty != null ? `${eq.libelle} (×${qty})` : eq.libelle;
     })
     .join(", ") || "-";
 

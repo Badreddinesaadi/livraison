@@ -218,7 +218,12 @@ export default function StackLayout() {
             );
           },
         }}
-      />
+      >
+        <Stack.Screen
+          name="camera"
+          options={{ headerShown: false, animation: "fade_from_bottom" }}
+        />
+      </Stack>
 
       <BottomSheet
         onClose={closeSheet}

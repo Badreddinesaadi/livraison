@@ -29,7 +29,9 @@ export const RvtCard = ({
   const status = useMemo(() => syncStatusUi(item.syncStatus), [item.syncStatus]);
   const productCount = item.products?.length ?? 0;
   const brandCount = item.brands?.length ?? 0;
-  const photoCount = item.photos?.length ?? 0;
+  const photoCount =
+    (item.photos?.length ?? 0) +
+    (item.constructionSite?.signPhoto?.remoteUrl ? 1 : 0);
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

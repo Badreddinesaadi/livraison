@@ -53,12 +53,18 @@ export default function CreateRvtOpportuniteScreen() {
     }
     openMultiSelect({
       title: "Concurrents présents",
-      items: competitors.map((c) => ({ id: c, label: c })),
+      items: competitors.map((c) => ({
+        id: String(c.id),
+        label: c.designation,
+      })),
       getSelectedIds: () =>
-        useCreateVisitStore.getState().competitors.map((x) => x.competitorId),
+        useCreateVisitStore
+          .getState()
+          .competitors.map((x) => String(x.competitorId)),
       enableSearch: true,
       searchPlaceholder: "Rechercher un concurrent...",
-      onToggle: (id) => useCreateVisitStore.getState().toggleCompetitor(id),
+      onToggle: (id) =>
+        useCreateVisitStore.getState().toggleCompetitor(Number(id)),
       onConfirm: () => {},
     });
   };
@@ -84,13 +90,27 @@ export default function CreateRvtOpportuniteScreen() {
   const handleSelectOppCompetitor = () => {
     openSelect({
       title: "Concurrent principal",
-      options: competitors.map((c) => ({ id: c, label: c })),
-      selectedId: store.oppCompetitorId ?? undefined,
-      onSelect: (id) => store.setOppCompetitorId(id),
+      options: competitors.map((c) => ({
+        id: String(c.id),
+        label: c.designation,
+      })),
+      selectedId:
+        store.oppCompetitorId != null
+          ? String(store.oppCompetitorId)
+          : undefined,
+      onSelect: (id) => store.setOppCompetitorId(Number(id)),
     });
   };
 
   const handleNext = () => {
+    if (store.opportunityDetected === true && !store.oppProductId) {
+      Toast.show({
+        type: "error",
+        text1: "Opportunité incomplète",
+        text2: "Précisez le produit concerné.",
+      });
+      return;
+    }
     router.navigate("/rvt/create/action");
   };
 
@@ -135,27 +155,30 @@ export default function CreateRvtOpportuniteScreen() {
           />
           {store.competitors.length > 0 ? (
             <View style={styles.competitorList}>
-              {store.competitors.map((comp) => (
-                <View key={comp.competitorId} style={styles.competitorLine}>
-                  <View style={styles.competitorHeader}>
-                    <Text style={styles.competitorName}>
-                      {comp.competitorId}
-                    </Text>
-                    <Pressable
-                      onPress={() => store.removeCompetitor(comp.competitorId)}
-                      hitSlop={8}
-                    >
-                      <FontAwesome5 name="trash" size={12} color="#ff4d4f" />
-                    </Pressable>
+              {store.competitors.map((comp) => {
+                const info = competitors.find((c) => c.id === comp.competitorId);
+                return (
+                  <View key={comp.competitorId} style={styles.competitorLine}>
+                    <View style={styles.competitorHeader}>
+                      <Text style={styles.competitorName}>
+                        {info?.designation ?? comp.competitorId}
+                      </Text>
+                      <Pressable
+                        onPress={() => store.removeCompetitor(comp.competitorId)}
+                        hitSlop={8}
+                      >
+                        <FontAwesome5 name="trash" size={12} color="#ff4d4f" />
+                      </Pressable>
+                    </View>
+                    <RvtPresenceLevels
+                      value={comp.presence}
+                      onChange={(v) =>
+                        store.setCompetitorPresence(comp.competitorId, v)
+                      }
+                    />
                   </View>
-                  <RvtPresenceLevels
-                    value={comp.presence}
-                    onChange={(v) =>
-                      store.setCompetitorPresence(comp.competitorId, v)
-                    }
-                  />
-                </View>
-              ))}
+                );
+              })}
             </View>
           ) : null}
         </SectionCard>
@@ -208,7 +231,8 @@ export default function CreateRvtOpportuniteScreen() {
               <RvtSelectorField
                 label="Concurrent principal"
                 value={
-                  competitors.find((c) => c === store.oppCompetitorId) ?? undefined
+                  competitors.find((c) => c.id === store.oppCompetitorId)
+                    ?.designation
                 }
                 placeholder="Facultatif"
                 onPress={handleSelectOppCompetitor}
