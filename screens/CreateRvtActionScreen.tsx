@@ -1,6 +1,7 @@
-import { createRound, listRounds } from "@/api/rounds.api";
 import {
   createVisit,
+  deletePanneauChantierPhoto,
+  deleteVisitPhotos,
   updateVisit,
   uploadPanneauChantierPhoto,
   uploadVisitPhoto,
@@ -12,6 +13,7 @@ import {
   RvtTextInput,
   SectionCard,
 } from "@/components/RvtFormFields";
+import RvtPicturePreview from "@/components/RvtPicturePreview";
 import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
 import { useReferenceData } from "@/hooks/use-reference-data";
@@ -20,6 +22,7 @@ import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtCameraStore } from "@/stores/rvt-camera.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
 import { VisitCreate, VisitPatch } from "@/types/rvt.types";
+import { rvtPhotoUrl } from "@/utils/rvt-format";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -44,10 +47,19 @@ export default function CreateRvtActionScreen() {
   const { data: refData } = useReferenceData();
 
   const [isCapturingLocation, setIsCapturingLocation] = useState(false);
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+
+  const keptExistingPhotos = store.existingPhotos.filter(
+    (p) => !store.deletedVisitPhotoIds.includes(String(p.id)),
+  );
+  const totalPhotoCount = keptExistingPhotos.length + store.photos.length;
 
   const handleOpenPhotoPicker = useCallback(() => {
     openCamera({
-      maxPhotos: Math.max(1, MAX_PHOTOS - store.photos.length),
+      maxPhotos: Math.max(
+        1,
+        MAX_PHOTOS - (keptExistingPhotos.length + store.photos.length),
+      ),
       multiple: true,
       onConfirm: (photos) => {
         photos.forEach((p) => store.addPhoto(p));
@@ -55,7 +67,12 @@ export default function CreateRvtActionScreen() {
     });
     router.navigate("/rvt/camera");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openCamera, router, store.photos.length]);
+  }, [
+    openCamera,
+    router,
+    keptExistingPhotos.length,
+    store.photos.length,
+  ]);
 
   const captureLocationIfMissing = useCallback(async () => {
     if (store.location?.status === "GPS_VALIDATED") return;
@@ -106,8 +123,12 @@ export default function CreateRvtActionScreen() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      const roundId = await ensureRound();
-      const base = buildVisitPayload(roundId);
+      if (!store.roundId) {
+        throw new Error(
+          "Aucune tournée sélectionnée. Choisissez une tournée dans l'onglet Tournées.",
+        );
+      }
+      const base = buildVisitPayload(store.roundId);
       if (isEdit && store.visitId && store.version) {
         const patch: VisitPatch = { ...base };
         delete (patch as any).roundId;
@@ -121,6 +142,22 @@ export default function CreateRvtActionScreen() {
     },
     onSuccess: async (report) => {
       const visitId = report?.visitId || report?.id;
+
+      if (visitId && isEdit && store.deletedVisitPhotoIds.length > 0) {
+        try {
+          await deleteVisitPhotos({
+            visitId,
+            photoIds: store.deletedVisitPhotoIds,
+          });
+        } catch (error: any) {
+          Toast.show({
+            type: "error",
+            text1: "Photos non supprimées",
+            text2: error?.message || "Une erreur est survenue.",
+          });
+        }
+      }
+
       if (visitId && store.photos.length > 0) {
         const results = await Promise.allSettled(
           store.photos.map((photo) =>
@@ -146,6 +183,17 @@ export default function CreateRvtActionScreen() {
         refData?.activite_observee_v2?.find(
           (a) => a.id === store.activiteObserveeId,
         )?.code === "chantier";
+      if (visitId && isChantier && isEdit && store.signPhotoDeleted) {
+        try {
+          await deletePanneauChantierPhoto({ visitId });
+        } catch (error: any) {
+          Toast.show({
+            type: "error",
+            text1: "Photo du panneau non supprimée",
+            text2: error?.message || "Une erreur est survenue.",
+          });
+        }
+      }
       if (visitId && isChantier && store.signPhoto) {
         const wp = store.signPhoto;
         try {
@@ -170,9 +218,17 @@ export default function CreateRvtActionScreen() {
           ? "Les modifications ont été enregistrées."
           : "Le rapport de visite a été envoyé.",
       });
+      const originTourId = store.originTourId;
       store.resetVisitFields();
       router.dismissAll();
-      router.replace("/rvt");
+      if (isEdit || !originTourId) {
+        router.replace("/rvt");
+      } else {
+        router.replace({
+          pathname: "/rvt/tours/[roundId]",
+          params: { roundId: originTourId },
+        });
+      }
     },
     onError: (error: any) => {
       if (
@@ -193,21 +249,6 @@ export default function CreateRvtActionScreen() {
       });
     },
   });
-
-  const ensureRound = async (): Promise<string> => {
-    if (store.roundId) return store.roundId;
-    const open = await listRounds({ status: "open", page: 1, perPage: 1 });
-    if (open.data?.[0]) {
-      store.setRoundId(open.data[0].id);
-      return open.data[0].id;
-    }
-    const created = await createRound(new Date().toISOString().slice(0, 10));
-    if (created?.id) {
-      store.setRoundId(created.id);
-      return created.id;
-    }
-    throw new Error("Impossible d'ouvrir une tournée.");
-  };
 
   const buildVisitPayload = (roundId: string): VisitCreate => {
     const opportunityDetected = store.opportunityDetected === true;
@@ -304,6 +345,14 @@ export default function CreateRvtActionScreen() {
         type: "error",
         text1: "Client requis",
         text2: "Sélectionnez un client.",
+      });
+      return;
+    }
+    if (!isEdit && !store.roundId) {
+      Toast.show({
+        type: "error",
+        text1: "Aucune tournée sélectionnée",
+        text2: "Choisissez une tournée dans l'onglet Tournées.",
       });
       return;
     }
@@ -495,13 +544,42 @@ export default function CreateRvtActionScreen() {
         <SectionCard title="Photos" icon="camera">
           <Pressable
             onPress={handleOpenPhotoPicker}
-            style={styles.photoActionPrimary}
+            disabled={totalPhotoCount >= MAX_PHOTOS}
+            style={[
+              styles.photoActionPrimary,
+              totalPhotoCount >= MAX_PHOTOS && styles.photoActionDisabled,
+            ]}
           >
             <FontAwesome5 name="camera" size={14} color="#fff" />
             <Text style={styles.photoActionPrimaryText}>
               Ajouter des photos
             </Text>
           </Pressable>
+
+          {keptExistingPhotos.length > 0 ? (
+            <View style={styles.photoGrid}>
+              {keptExistingPhotos.map((photo) => {
+                const uri = rvtPhotoUrl(photo);
+                return (
+                  <View key={photo.id}>
+                    <Pressable onPress={() => uri && setPreviewUri(uri)}>
+                      <Image
+                        source={{ uri: uri ?? undefined }}
+                        style={styles.photoThumb}
+                        contentFit="cover"
+                      />
+                    </Pressable>
+                    <Pressable
+                      onPress={() => store.removeExistingPhoto(String(photo.id))}
+                      style={styles.photoRemove}
+                    >
+                      <FontAwesome5 name="times" size={10} color="#fff" />
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </View>
+          ) : null}
 
           {store.photos.length > 0 ? (
             <View style={styles.photoGrid}>
@@ -524,10 +602,15 @@ export default function CreateRvtActionScreen() {
           ) : null}
 
           <Text style={styles.photoCount}>
-            {store.photos.length}/{MAX_PHOTOS} photo
-            {store.photos.length > 1 ? "s" : ""}
+            {totalPhotoCount}/{MAX_PHOTOS} photo
+            {totalPhotoCount > 1 ? "s" : ""}
           </Text>
         </SectionCard>
+
+        <RvtPicturePreview
+          uri={previewUri}
+          onClose={() => setPreviewUri(null)}
+        />
       </ScrollView>
 
       <View style={styles.footer}>
@@ -637,6 +720,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
+  },
+  photoActionDisabled: {
+    opacity: 0.6,
   },
   photoActionPrimaryText: {
     color: "#fff",

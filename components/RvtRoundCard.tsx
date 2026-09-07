@@ -1,62 +1,55 @@
 import { PRIMARY } from "@/constants/theme";
-import { VisitReport } from "@/types/rvt.types";
-import { formatDateLabel, formatDuration } from "@/utils/rvt-format";
+import { Round } from "@/types/rvt.types";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import {
-  LayoutAnimation,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
+import { formatDateLabel } from "@/utils/rvt-format";
 
-export const RvtCard = ({
+export const RvtRoundCard = ({
   item,
-  canDelete = true,
   onShowDetails,
-  onDelete,
 }: {
-  item: VisitReport;
-  canDelete?: boolean;
+  item: Round;
   onShowDetails: () => void;
-  onDelete: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
 
-  const dateLabel = useMemo(
-    () => formatDateLabel(item.completedAt || item.createdAt),
-    [item.completedAt, item.createdAt],
+  const startedLabel = useMemo(
+    () => formatDateLabel(item.startedAt),
+    [item.startedAt],
   );
-  const productCount = item.products?.length ?? 0;
-  const brandCount = item.brands?.length ?? 0;
-  const photoCount =
-    (item.photos?.length ?? 0) +
-    (item.constructionSite?.signPhoto?.remoteUrl ? 1 : 0);
+  const isOpen = item.status === "open";
+  const statusUi = isOpen
+    ? { bg: "#f59e0b18", color: "#f59e0b", label: "En cours" }
+    : { bg: "#64748b18", color: "#64748b", label: "Clôturée" };
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded((v) => !v);
   };
+
   return (
     <Pressable onPress={toggle} style={styles.card}>
       <View style={styles.header}>
         <View style={styles.iconBubble}>
-          <FontAwesome5 name="clipboard-list" size={16} color={PRIMARY} />
+          <FontAwesome5 name="route" size={16} color={PRIMARY} />
         </View>
 
         <View style={styles.titleWrap}>
-          <Text style={styles.title}>
-            {item.client?.name || "Client inconnu"}
+          <Text style={styles.title} numberOfLines={1}>
+            {item.nom || "Tournée sans nom"}
           </Text>
           <Text style={styles.subtitle}>
-            {item.client?.city || "-"}
-            {item.visitId ? ` · #${item.visitId}` : ""}
-          </Text>
-        </View>
+            {startedLabel} · {item.visitCount} visite
+            {item.visitCount > 1 ? "s" : ""}
+          </Text>        </View>
 
         <View style={styles.meta}>
-          <Text style={styles.date}>{dateLabel}</Text>
+          <View style={[styles.statusPill, { backgroundColor: statusUi.bg }]}>
+            <Text style={[styles.statusText, { color: statusUi.color }]}>
+              {statusUi.label}
+            </Text>
+          </View>
         </View>
 
         <FontAwesome5
@@ -68,56 +61,30 @@ export const RvtCard = ({
 
       {expanded && (
         <View style={styles.body}>
-          <DetailText
-            icon="clock"
-            label="Durée"
-            value={formatDuration(item.durationSeconds)}
+          <DetailRow icon="hashtag" label="ID" value={`#${item.id}`} />
+          <DetailRow
+            icon="calendar-alt"
+            label="Début"
+            value={startedLabel}
           />
-          <DetailText
-            icon="map-marker-alt"
-            label="Ville"
-            value={item.client?.city || "-"}
-          />
-          <DetailText
-            icon="boxes"
-            label="Produits"
-            value={`${productCount} produit${productCount > 1 ? "s" : ""} · ${brandCount} marque${brandCount > 1 ? "s" : ""}`}
-          />
-          <DetailText
-            icon="camera"
-            label="Photos"
-            value={`${photoCount} photo${photoCount > 1 ? "s" : ""}`}
-          />
-          {item.results?.length ? (
-            <DetailText
-              icon="check-circle"
-              label="Résultats"
-              value={item.results.join(", ")}
+          {item.closedAt ? (
+            <DetailRow
+              icon="calendar-check"
+              label="Clôture"
+              value={formatDateLabel(item.closedAt)}
             />
           ) : null}
-          {item.note ? (
-            <DetailText
-              icon="comment-dots"
-              label="Note"
-              value={
-                item.note.length > 120
-                  ? `${item.note.slice(0, 120)}…`
-                  : item.note
-              }
-            />
-          ) : null}
+          <DetailRow
+            icon="clipboard-list"
+            label="Visites"
+            value={String(item.visitCount)}
+          />
 
           <View style={styles.actionRow}>
             <Pressable onPress={onShowDetails} style={styles.detailsButton}>
               <FontAwesome5 name="eye" size={14} color={PRIMARY} />
-              <Text style={styles.detailsButtonText}>Détails</Text>
+              <Text style={styles.detailsButtonText}>Voir la tournée</Text>
             </Pressable>
-
-            {canDelete && (
-              <Pressable onPress={onDelete} style={styles.deleteButton}>
-                <FontAwesome5 name="trash" size={14} color="#fff" />
-              </Pressable>
-            )}
           </View>
         </View>
       )}
@@ -125,7 +92,7 @@ export const RvtCard = ({
   );
 };
 
-const DetailText = ({
+const DetailRow = ({
   icon,
   label,
   value,
@@ -183,23 +150,16 @@ const styles = StyleSheet.create({
     color: "#1a1a2e",
   },
   subtitle: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: 11,
+    color: "#888",
     marginTop: 2,
   },
   meta: {
-    alignItems: "flex-end",
     marginRight: 10,
-  },
-  date: {
-    fontSize: 12,
-    color: "#94a3b8",
-    fontWeight: "600",
-    marginBottom: 2,
   },
   statusPill: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 999,
   },
   statusText: {
@@ -254,14 +214,5 @@ const styles = StyleSheet.create({
     color: PRIMARY,
     fontWeight: "600",
     fontSize: 13,
-  },
-  deleteButton: {
-    width: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: "#ff4d4f",
   },
 });

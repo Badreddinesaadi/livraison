@@ -106,6 +106,8 @@ export default function RvtDetailsScreen() {
       nextAction: report.nextAction,
       nextActionDueAt: report.nextActionDueAt,
       note: report.note ?? "",
+      existingPhotos: report.photos ?? [],
+      existingSignPhoto: report.constructionSite?.signPhoto ?? null,
     });
     router.navigate("/rvt/create/client");
   };

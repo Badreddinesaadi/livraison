@@ -169,17 +169,34 @@ export const uploadVisitPhoto = async ({
   return (parsed.data as VisitPhoto[]) ?? null;
 };
 
-export const deleteVisitPhoto = async ({
+export const deleteVisitPhotos = async ({
   visitId,
-  photoId,
+  photoIds,
 }: {
   visitId: string;
-  photoId: string;
+  photoIds: string[];
 }) => {
   return client.request<null>({
     pathname: "/sdkboard/api/rounds/visits.php",
     method: "DELETE",
-    searchParams: { action: "deletePhoto", id: visitId, photoId },
+    searchParams: {
+      action: "deletePhoto",
+      id: visitId,
+      photoIds: photoIds.join(","),
+    },
+    isDebug: true,
+  });
+};
+
+export const deletePanneauChantierPhoto = async ({
+  visitId,
+}: {
+  visitId: string;
+}) => {
+  return client.request<null>({
+    pathname: "/sdkboard/api/rounds/panneau_chantier.php",
+    method: "DELETE",
+    searchParams: { id: visitId },
     isDebug: true,
   });
 };

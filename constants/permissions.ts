@@ -153,6 +153,7 @@ const RAPPORT_VISITE_ACTIONS: PermissionAction[] = [
   "UPDATE",
   "LIST",
   "DELETE",
+  "ACHEVER_BL",
 ];
 
 export const hasRapportVisitePermission = (

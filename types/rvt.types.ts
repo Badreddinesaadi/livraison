@@ -423,6 +423,7 @@ export type VisitReport = {
 export type Round = {
   id: string;
   commercialId: string;
+  nom: string | null;
   startedAt: string;
   closedAt?: string;
   status: RoundStatus;

@@ -1,5 +1,8 @@
 import MultiSelectBottomSheetContent from "@/components/MultiSelectBottomSheetContent";
 import RvtDeleteConfirmBottomSheetContent from "@/components/RvtDeleteConfirmBottomSheetContent";
+import RvtRoundDeleteConfirmBottomSheetContent from "@/components/RvtRoundDeleteConfirmBottomSheetContent";
+import RvtRoundEditBottomSheetContent from "@/components/RvtRoundEditBottomSheetContent";
+import RvtRoundToggleConfirmBottomSheetContent from "@/components/RvtRoundToggleConfirmBottomSheetContent";
 import RvtSelectOptionBottomSheetContent from "@/components/RvtSelectOptionBottomSheetContent";
 import { Button } from "@/components/ui/button";
 import { Colors, PRIMARY } from "@/constants/theme";
@@ -39,6 +42,14 @@ export default function StackLayout() {
     (s) => s.isVisitDeletePending,
   );
   const confirmVisitDelete = useRvtSheetStore((s) => s.confirmVisitDelete);
+  const roundEditConfig = useRvtSheetStore((s) => s.roundEditConfig);
+  const roundDeleteConfig = useRvtSheetStore((s) => s.roundDeleteConfig);
+  const isRoundDeletePending = useRvtSheetStore((s) => s.isRoundDeletePending);
+  const roundToggleConfig = useRvtSheetStore((s) => s.roundToggleConfig);
+  const confirmRoundToggle = useRvtSheetStore((s) => s.confirmRoundToggle);
+  const updateRoundEditDraft = useRvtSheetStore((s) => s.updateRoundEditDraft);
+  const confirmRoundEdit = useRvtSheetStore((s) => s.confirmRoundEdit);
+  const confirmRoundDelete = useRvtSheetStore((s) => s.confirmRoundDelete);
   const chooseSelectOption = useRvtSheetStore((s) => s.chooseSelectOption);
   const toggleMultiSelectOption = useRvtSheetStore(
     (s) => s.toggleMultiSelectOption,
@@ -66,6 +77,12 @@ export default function StackLayout() {
         return ["65%"];
       case "rvt-visit-delete-confirm":
         return ["30%"];
+      case "rvt-round-edit":
+        return ["55%"];
+      case "rvt-round-delete-confirm":
+        return ["30%"];
+      case "rvt-round-toggle-confirm":
+        return ["30%"];
       default:
         return ["50%"];
     }
@@ -75,7 +92,10 @@ export default function StackLayout() {
     isSheetOpen &&
     (sheetType === "rvt-select" ||
       sheetType === "rvt-multi" ||
-      sheetType === "rvt-visit-delete-confirm");
+      sheetType === "rvt-visit-delete-confirm" ||
+      sheetType === "rvt-round-edit" ||
+      sheetType === "rvt-round-delete-confirm" ||
+      sheetType === "rvt-round-toggle-confirm");
 
   const { top, bottom } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -266,6 +286,31 @@ export default function StackLayout() {
             onCancel={closeSheet}
             onConfirm={confirmVisitDelete}
           />
+        ) : sheetType === "rvt-round-edit" && roundEditConfig ? (
+          <RvtRoundEditBottomSheetContent
+            nom={roundEditConfig.nom}
+            startedAt={roundEditConfig.startedAt}
+            onNomChange={(nom) => updateRoundEditDraft({ nom })}
+            onStartedAtChange={(startedAt) =>
+              updateRoundEditDraft({ startedAt })
+            }
+            onCancel={closeSheet}
+            onConfirm={confirmRoundEdit}
+          />
+        ) : sheetType === "rvt-round-delete-confirm" && roundDeleteConfig ? (
+          <RvtRoundDeleteConfirmBottomSheetContent
+            nom={roundDeleteConfig.nom}
+            isLoading={isRoundDeletePending}
+            onCancel={closeSheet}
+            onConfirm={confirmRoundDelete}
+          />
+        ) : sheetType === "rvt-round-toggle-confirm" && roundToggleConfig ? (
+          <RvtRoundToggleConfirmBottomSheetContent
+            nom={roundToggleConfig.nom}
+            isOpen={roundToggleConfig.isOpen}
+            onCancel={closeSheet}
+            onConfirm={confirmRoundToggle}
+          />
         ) : (
           <View style={styles.sheetFallback}>
             <Text style={styles.sheetFallbackText}>
@@ -328,4 +373,5 @@ const headerTitles: Record<string, string> = {
   "create/opportunite": "Opportunité",
   "create/action": "Action",
   "details/[visitId]": "Rapport",
+  "tours/[roundId]": "Détails de la tournée",
 };

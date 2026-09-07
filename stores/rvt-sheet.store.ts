@@ -10,6 +10,9 @@ type SheetType =
   | "rvt-select"
   | "rvt-multi"
   | "rvt-visit-delete-confirm"
+  | "rvt-round-edit"
+  | "rvt-round-delete-confirm"
+  | "rvt-round-toggle-confirm"
   | null;
 
 type SelectConfig = {
@@ -31,6 +34,26 @@ type MultiSelectConfig = {
   onConfirm: () => void;
 };
 
+type RoundEditConfig = {
+  roundId: string;
+  nom: string;
+  startedAt: Date;
+  onConfirm: (nom: string, startedAt: Date) => void;
+};
+
+type RoundDeleteConfig = {
+  roundId: string;
+  nom: string | null;
+  onConfirm: () => void;
+};
+
+type RoundToggleConfig = {
+  roundId: string;
+  nom: string | null;
+  isOpen: boolean;
+  onConfirm: () => void;
+};
+
 type VisitDeleteHandler = (visitId: string) => void;
 
 type RvtSheetState = {
@@ -41,6 +64,10 @@ type RvtSheetState = {
   visitDeleteId: string | null;
   visitDeleteHandler: VisitDeleteHandler | null;
   isVisitDeletePending: boolean;
+  roundEditConfig: RoundEditConfig | null;
+  roundDeleteConfig: RoundDeleteConfig | null;
+  roundToggleConfig: RoundToggleConfig | null;
+  isRoundDeletePending: boolean;
   isSheetOpen: boolean;
 
   openSelect: (config: SelectConfig) => void;
@@ -51,6 +78,15 @@ type RvtSheetState = {
   openVisitDeleteConfirm: (visitId: string, handler: VisitDeleteHandler) => void;
   confirmVisitDelete: () => void;
   finishVisitDelete: () => void;
+  openRoundEdit: (config: RoundEditConfig) => void;
+  updateRoundEditDraft: (patch: { nom?: string; startedAt?: Date }) => void;
+  confirmRoundEdit: () => void;
+  openRoundDeleteConfirm: (config: RoundDeleteConfig) => void;
+  confirmRoundDelete: () => void;
+  finishRoundDelete: () => void;
+  openRoundToggleConfirm: (config: RoundToggleConfig) => void;
+  confirmRoundToggle: () => void;
+  finishRoundToggle: () => void;
   closeSheet: () => void;
 };
 
@@ -62,6 +98,10 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
   visitDeleteId: null,
   visitDeleteHandler: null,
   isVisitDeletePending: false,
+  roundEditConfig: null,
+  roundDeleteConfig: null,
+  roundToggleConfig: null,
+  isRoundDeletePending: false,
   isSheetOpen: false,
 
   openSelect: (config) =>
@@ -69,9 +109,10 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
       sheetType: "rvt-select",
       selectConfig: config,
       multiSelectConfig: null,
-      visitDeleteId: null,
-      visitDeleteHandler: null,
-      isVisitDeletePending: false,
+      roundEditConfig: null,
+      roundDeleteConfig: null,
+      roundToggleConfig: null,
+      isRoundDeletePending: false,
       isSheetOpen: true,
     }),
   chooseSelectOption: (id) =>
@@ -85,9 +126,10 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
       sheetType: "rvt-multi",
       multiSelectConfig: config,
       selectConfig: null,
-      visitDeleteId: null,
-      visitDeleteHandler: null,
-      isVisitDeletePending: false,
+      roundEditConfig: null,
+      roundDeleteConfig: null,
+      roundToggleConfig: null,
+      isRoundDeletePending: false,
       selectionTick: 0,
       isSheetOpen: true,
     }),
@@ -112,6 +154,10 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
       visitDeleteHandler: handler,
       selectConfig: null,
       multiSelectConfig: null,
+      roundEditConfig: null,
+      roundDeleteConfig: null,
+      roundToggleConfig: null,
+      isRoundDeletePending: false,
       isVisitDeletePending: false,
       isSheetOpen: true,
     }),
@@ -133,5 +179,70 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
       visitDeleteId: null,
       visitDeleteHandler: null,
     }),
+  openRoundEdit: (config) =>
+    set({
+      sheetType: "rvt-round-edit",
+      roundEditConfig: { ...config },
+      selectConfig: null,
+      multiSelectConfig: null,
+      roundDeleteConfig: null,
+      roundToggleConfig: null,
+      isRoundDeletePending: false,
+      isSheetOpen: true,
+    }),
+  updateRoundEditDraft: (patch) =>
+    set((state) => ({
+      roundEditConfig: state.roundEditConfig
+        ? { ...state.roundEditConfig, ...patch }
+        : null,
+    })),
+  confirmRoundEdit: () => {
+    const config = get().roundEditConfig;
+    if (!config) return;
+    config.onConfirm(config.nom, config.startedAt);
+    if (get().sheetType === "rvt-round-edit") {
+      set({ roundEditConfig: null, isSheetOpen: false });
+    }
+  },
+  openRoundDeleteConfirm: (config) =>
+    set({
+      sheetType: "rvt-round-delete-confirm",
+      roundDeleteConfig: { ...config },
+      roundEditConfig: null,
+      selectConfig: null,
+      multiSelectConfig: null,
+      isVisitDeletePending: false,
+      isRoundDeletePending: false,
+      isSheetOpen: true,
+    }),
+  confirmRoundDelete: () =>
+    set((state) => {
+      if (state.isRoundDeletePending || !state.roundDeleteConfig) {
+        return state;
+      }
+      state.roundDeleteConfig.onConfirm();
+      return { isRoundDeletePending: true, isSheetOpen: false };
+    }),
+  finishRoundDelete: () =>
+    set({ isRoundDeletePending: false, roundDeleteConfig: null }),
+  openRoundToggleConfirm: (config) =>
+    set({
+      sheetType: "rvt-round-toggle-confirm",
+      roundToggleConfig: { ...config },
+      roundEditConfig: null,
+      selectConfig: null,
+      multiSelectConfig: null,
+      roundDeleteConfig: null,
+      isVisitDeletePending: false,
+      isRoundDeletePending: false,
+      isSheetOpen: true,
+    }),
+  confirmRoundToggle: () =>
+    set((state) => {
+      if (!state.roundToggleConfig) return state;
+      state.roundToggleConfig.onConfirm();
+      return { roundToggleConfig: null, isSheetOpen: false };
+    }),
+  finishRoundToggle: () => set({ roundToggleConfig: null }),
   closeSheet: () => set({ isSheetOpen: false }),
 }));

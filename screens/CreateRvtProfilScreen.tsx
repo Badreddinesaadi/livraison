@@ -10,6 +10,7 @@ import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtCameraStore } from "@/stores/rvt-camera.store";
 import { ActiviteObserveeCode, ActiviteObserveeV2 } from "@/types/rvt.types";
+import { rvtPhotoUrl } from "@/utils/rvt-format";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -279,13 +280,36 @@ export default function CreateRvtProfilScreen() {
               </View>
             ) : null}
 
+            {!store.signPhoto &&
+            store.existingSignPhoto?.remoteUrl &&
+            !store.signPhotoDeleted ? (
+              <View style={styles.signPhotoRow}>
+                <Image
+                  source={{ uri: rvtPhotoUrl(store.existingSignPhoto) ?? "" }}
+                  style={styles.signPhotoThumb}
+                  contentFit="cover"
+                />
+                <Pressable
+                  onPress={() => store.setSignPhotoDeleted(true)}
+                  style={styles.signPhotoRemove}
+                >
+                  <FontAwesome5 name="times" size={10} color="#fff" />
+                </Pressable>
+                <Text style={styles.signPhotoName} numberOfLines={1}>
+                  {store.existingSignPhoto.name ?? "Photo du panneau"}
+                </Text>
+              </View>
+            ) : null}
+
             <Pressable
               onPress={handleOpenSignPhotoPicker}
               style={styles.signPhotoButton}
             >
               <FontAwesome5 name="camera" size={14} color="#fff" />
               <Text style={styles.signPhotoButtonText}>
-                {store.signPhoto ? "Reprendre la photo" : "Ajouter une photo"}
+                {store.signPhoto
+                  ? "Reprendre la photo"
+                  : "Ajouter une photo"}
               </Text>
             </Pressable>
           </SectionCard>

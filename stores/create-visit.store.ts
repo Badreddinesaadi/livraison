@@ -12,6 +12,7 @@ import {
   ParkSize,
   PresenceLevel,
   SDKPosition,
+  VisitPhoto,
   VisitResult,
 } from "@/types/rvt.types";
 
@@ -25,6 +26,7 @@ export type PendingVisitPhoto = {
 type CreateVisitState = {
   type: "create" | "update";
   roundId: string | null;
+  originTourId: string | null;
   visitId: string | null;
   version: number | null;
   startedAt: Date | null;
@@ -72,6 +74,13 @@ type CreateVisitState = {
   nextActionDueAt: Date | null;
   note: string;
   photos: PendingVisitPhoto[];
+  existingPhotos: VisitPhoto[];
+  deletedVisitPhotoIds: string[];
+  existingSignPhoto: VisitPhoto | null;
+  signPhotoDeleted: boolean;
+
+  removeExistingPhoto: (photoId: string) => void;
+  setSignPhotoDeleted: (deleted: boolean) => void;
 
   setClient: (client: ErpClient | null) => void;
   setLocation: (location: Location | null) => void;
@@ -79,6 +88,7 @@ type CreateVisitState = {
   setContactOther: (contactOther: string) => void;
   setActivityLevel: (activityLevel: ActivityLevel | null) => void;
   setRoundId: (roundId: string | null) => void;
+  setOriginTourId: (originTourId: string | null) => void;
   setStartedAt: (startedAt: Date | null) => void;
   resetVisitFields: () => void;
 
@@ -170,6 +180,8 @@ type CreateVisitState = {
     nextAction?: NextAction | null;
     nextActionDueAt?: string | null;
     note?: string;
+    existingPhotos?: VisitPhoto[];
+    existingSignPhoto?: VisitPhoto | null;
   }) => void;
   resetAll: () => void;
 };
@@ -177,6 +189,7 @@ type CreateVisitState = {
 const initialState = {
   type: "create" as const,
   roundId: null,
+  originTourId: null,
   visitId: null,
   version: null,
   startedAt: null,
@@ -221,6 +234,10 @@ const initialState = {
   nextActionDueAt: null as Date | null,
   note: "",
   photos: [] as PendingVisitPhoto[],
+  existingPhotos: [] as VisitPhoto[],
+  deletedVisitPhotoIds: [] as string[],
+  existingSignPhoto: null as VisitPhoto | null,
+  signPhotoDeleted: false,
 };
 
 export const useCreateVisitStore = create<CreateVisitState>((set) => ({
@@ -232,6 +249,7 @@ export const useCreateVisitStore = create<CreateVisitState>((set) => ({
   setContactOther: (contactOther) => set({ contactOther }),
   setActivityLevel: (activityLevel) => set({ activityLevel }),
   setRoundId: (roundId) => set({ roundId }),
+  setOriginTourId: (originTourId) => set({ originTourId }),
   setStartedAt: (startedAt) => set({ startedAt }),
   resetVisitFields: () =>
     set((state) => ({
@@ -372,6 +390,13 @@ export const useCreateVisitStore = create<CreateVisitState>((set) => ({
   addPhoto: (photo) => set((state) => ({ photos: [...state.photos, photo] })),
   removePhoto: (uri) =>
     set((state) => ({ photos: state.photos.filter((p) => p.uri !== uri) })),
+  removeExistingPhoto: (photoId) =>
+    set((state) => ({
+      deletedVisitPhotoIds: state.deletedVisitPhotoIds.includes(photoId)
+        ? state.deletedVisitPhotoIds
+        : [...state.deletedVisitPhotoIds, photoId],
+    })),
+  setSignPhotoDeleted: (signPhotoDeleted) => set({ signPhotoDeleted }),
 
   configureEdit: (data) =>
     set({
