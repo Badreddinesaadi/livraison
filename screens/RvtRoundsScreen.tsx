@@ -54,7 +54,7 @@ export default function RvtRoundsScreen() {
 
   const { mutate: createRoundMutate, isPending } = useMutation({
     mutationFn: () => createRound(nom.trim()),
-    onSuccess: () => {
+    onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ["rounds"] });
       Toast.show({
         type: "success",
@@ -63,6 +63,12 @@ export default function RvtRoundsScreen() {
       });
       setCreateVisible(false);
       setNom("");
+      if (created?.id) {
+        router.replace({
+          pathname: "/rvt/tours/[roundId]",
+          params: { roundId: created.id },
+        });
+      }
     },
     onError: (error: any) => {
       Toast.show({

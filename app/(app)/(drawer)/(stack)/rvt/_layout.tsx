@@ -194,6 +194,7 @@ export default function StackLayout() {
                       startSpin();
                       queryClient.invalidateQueries({ queryKey: ["visits"] });
                       queryClient.invalidateQueries({ queryKey: ["rounds"] });
+                      queryClient.invalidateQueries({ queryKey: ["rvt-analytics"] });
                       timeoutRef.current = setTimeout(() => {
                         stopSpin();
                         setIsRefreshing(false);
