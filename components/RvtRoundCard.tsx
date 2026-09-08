@@ -1,9 +1,15 @@
 import { PRIMARY } from "@/constants/theme";
 import { Round } from "@/types/rvt.types";
+import { formatDateLabel } from "@/utils/rvt-format";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import { LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
-import { formatDateLabel } from "@/utils/rvt-format";
+import {
+  LayoutAnimation,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export const RvtRoundCard = ({
   item,
@@ -42,7 +48,8 @@ export const RvtRoundCard = ({
           <Text style={styles.subtitle}>
             {startedLabel} · {item.visitCount} visite
             {item.visitCount > 1 ? "s" : ""}
-          </Text>        </View>
+          </Text>
+        </View>
 
         <View style={styles.meta}>
           <View style={[styles.statusPill, { backgroundColor: statusUi.bg }]}>
@@ -62,11 +69,7 @@ export const RvtRoundCard = ({
       {expanded && (
         <View style={styles.body}>
           <DetailRow icon="hashtag" label="ID" value={`#${item.id}`} />
-          <DetailRow
-            icon="calendar-alt"
-            label="Début"
-            value={startedLabel}
-          />
+          <DetailRow icon="calendar-alt" label="Début" value={startedLabel} />
           {item.closedAt ? (
             <DetailRow
               icon="calendar-check"
