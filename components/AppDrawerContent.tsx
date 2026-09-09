@@ -60,7 +60,7 @@ const DRAWER_ITEMS: DrawerMenuItem[] = [
     icon: "swap-horizontal",
   },
   {
-    label: "Rapport de visite",
+    label: "Tournées de visite",
     route: "/rvt",
     icon: "clipboard-list-outline",
   },

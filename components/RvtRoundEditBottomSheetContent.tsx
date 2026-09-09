@@ -3,14 +3,17 @@ import {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type RvtRoundEditBottomSheetContentProps = {
   nom: string;
   startedAt: Date;
+  closedAt: Date | null;
   isLoading?: boolean;
   onNomChange: (nom: string) => void;
   onStartedAtChange: (date: Date) => void;
+  onClosedAtChange: (date: Date | null) => void;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -21,22 +24,30 @@ const formatDate = (d: Date) =>
 export default function RvtRoundEditBottomSheetContent({
   nom,
   startedAt,
+  closedAt,
   isLoading = false,
   onNomChange,
   onStartedAtChange,
+  onClosedAtChange,
   onConfirm,
   onCancel,
 }: RvtRoundEditBottomSheetContentProps) {
-  const showCalendar = () => {
-    const show = (event: any, date?: Date) => {
-      if (date) onStartedAtChange(date);
-      if (Platform.OS === "android") return;
-    };
+  const pickDate = (mode: "startedAt" | "closedAt") => {
+    const current = mode === "startedAt" ? startedAt : (closedAt ?? new Date());
     DateTimePickerAndroid.open({
-      value: startedAt,
+      value: current,
       mode: "date",
       display: "default",
-      onChange: show,
+      onValueChange: (_event, date) => {
+        if (!date) return;
+        if (mode === "startedAt") {
+          onStartedAtChange(date);
+          if (closedAt && date > closedAt) onClosedAtChange(date);
+        } else {
+          onClosedAtChange(date);
+          if (date < startedAt) onStartedAtChange(date);
+        }
+      },
     });
   };
 
@@ -54,8 +65,30 @@ export default function RvtRoundEditBottomSheetContent({
       />
 
       <Text style={styles.label}>Date de début</Text>
-      <Pressable onPress={showCalendar} style={styles.dateButton}>
+      <Pressable onPress={() => pickDate("startedAt")} style={styles.dateButton}>
         <Text style={styles.dateText}>{formatDate(startedAt)}</Text>
+      </Pressable>
+
+      <Text style={styles.label}>Date de clôture (optionnelle)</Text>
+      <Pressable onPress={() => pickDate("closedAt")} style={styles.dateButton}>
+        <View style={styles.dateButtonInner}>
+          <Text
+            style={[
+              styles.dateText,
+              !closedAt && styles.dateTextPlaceholder,
+            ]}
+          >
+            {closedAt ? formatDate(closedAt) : "Non définie"}
+          </Text>
+          {closedAt ? (
+            <Pressable
+              onPress={() => onClosedAtChange(null)}
+              hitSlop={8}
+            >
+              <FontAwesome5 name="times" size={12} color="#ff4d4f" />
+            </Pressable>
+          ) : null}
+        </View>
       </Pressable>
 
       <View style={styles.buttonRow}>
@@ -117,11 +150,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     backgroundColor: "#fff",
-    marginBottom: 16,
+    marginBottom: 14,
+  },
+  dateButtonInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   dateText: {
     fontSize: 14,
     color: "#222",
+  },
+  dateTextPlaceholder: {
+    color: "#999",
   },
   buttonRow: {
     flexDirection: "row",

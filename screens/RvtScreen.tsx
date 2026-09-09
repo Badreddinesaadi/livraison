@@ -1,10 +1,10 @@
 import { listRounds } from "@/api/rounds.api";
-import RvtRoundsScreen from "@/screens/RvtRoundsScreen";
-import RvtAnalyticsScreen from "@/screens/RvtAnalyticsScreen";
 import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
-import { useCreateVisitStore } from "@/stores/create-visit.store";
+import RvtAnalyticsScreen from "@/screens/RvtAnalyticsScreen";
+import RvtRoundsScreen from "@/screens/RvtRoundsScreen";
 import { useSession } from "@/stores/auth.store";
+import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -63,7 +63,12 @@ export default function RvtScreen() {
               style={[styles.tab, active && styles.tabActive]}
               onPress={() => setTab(item.key)}
             >
-              <FontAwesome5 name={item.icon} size={12} color={active ? "#fff" : "#7a8496"} solid />
+              <FontAwesome5
+                name={item.icon}
+                size={12}
+                color={active ? "#fff" : "#7a8496"}
+                solid
+              />
               <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
                 {item.label}
               </Text>
@@ -72,26 +77,7 @@ export default function RvtScreen() {
         })}
       </View>
 
-      {tab === "tours" ? (
-        <>
-          {openRound ? (
-            <View style={styles.roundBanner}>
-              <View style={styles.roundBannerHeader}>
-                <FontAwesome5 name="route" size={14} color={PRIMARY} />
-                <Text style={styles.roundBannerTitle}>Tournée en cours</Text>
-              </View>
-              <Text style={styles.roundBannerSubtitle}>
-                {openRound.nom || "Sans nom"} · {openRound.visitCount} visite
-                {openRound.visitCount > 1 ? "s" : ""} enregistrée
-                {openRound.visitCount > 1 ? "s" : ""}
-              </Text>
-            </View>
-          ) : null}
-          <RvtRoundsScreen />
-        </>
-      ) : (
-        <RvtAnalyticsScreen />
-      )}
+      {tab === "tours" ? <RvtRoundsScreen /> : <RvtAnalyticsScreen />}
     </View>
   );
 }

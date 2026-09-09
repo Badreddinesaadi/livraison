@@ -10,6 +10,9 @@ import {
   ResellerSite,
 } from "@/types/rvt.types";
 import { formatDuration, rvtPhotoUrl, syncStatusUi } from "@/utils/rvt-format";
+import { downloadPdf } from "@/utils/pdf-download";
+import { apiUrl } from "@/constants/query";
+import Toast from "react-native-toast-message";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -27,6 +30,7 @@ export default function RvtDetailsScreen() {
 
   const { visitId } = useLocalSearchParams<{ visitId: string }>();
   const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const [isPdfPending, setIsPdfPending] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["visits", "details", visitId],
@@ -47,6 +51,23 @@ export default function RvtDetailsScreen() {
     }
     return list;
   }, [report]);
+
+  const handleDownloadPdf = () => {
+    if (!report) return;
+    if (report.version > 1) {
+      Toast.show({
+        type: "info",
+        text1: "Visite modifiée",
+        text2: "Seule la dernière version peut être exportée.",
+      });
+      return;
+    }
+    downloadPdf(
+      `${apiUrl}/sdkboard/api/rounds/visit_pdf.php?id=${report.visitId || report.id}`,
+      `visite-${report.visitId || report.id}`,
+      setIsPdfPending,
+    );
+  };
 
   const handleEdit = () => {
     if (!report) return;
@@ -461,12 +482,25 @@ export default function RvtDetailsScreen() {
           </View>
         ) : null}
 
-        {canUpdate ? (
-          <Pressable onPress={handleEdit} style={styles.editButton}>
-            <FontAwesome5 name="edit" size={14} color={PRIMARY} />
-            <Text style={styles.editButtonText}>Modifier</Text>
-          </Pressable>
-        ) : null}
+        <View style={styles.footerButtonsRow}>
+          {canUpdate ? (
+            <Pressable onPress={handleEdit} style={styles.editButton}>
+              <FontAwesome5 name="edit" size={14} color={PRIMARY} />
+              <Text style={styles.editButtonText}>Modifier</Text>
+            </Pressable>
+          ) : null}
+          {isPdfPending ? (
+            <View style={styles.pdfButton}>
+              <FontAwesome5 name="spinner" size={14} color={PRIMARY} />
+              <Text style={styles.pdfButtonText}>Génération...</Text>
+            </View>
+          ) : (
+            <Pressable onPress={handleDownloadPdf} style={styles.pdfButton}>
+              <FontAwesome5 name="file-pdf" size={14} color={PRIMARY} />
+              <Text style={styles.pdfButtonText}>Exporter PDF</Text>
+            </Pressable>
+          )}
+        </View>
       </ScrollView>
 
       <RvtPicturePreview uri={previewUri} onClose={() => setPreviewUri(null)} />
@@ -656,7 +690,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  footerButtonsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
   editButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -666,6 +705,21 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   editButtonText: {
+    color: PRIMARY,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  pdfButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: PRIMARY + "18",
+    gap: 6,
+  },
+  pdfButtonText: {
     color: PRIMARY,
     fontWeight: "600",
     fontSize: 14,

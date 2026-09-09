@@ -16,6 +16,8 @@ import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
 import { useSession } from "@/stores/auth.store";
 import { formatDateLabel } from "@/utils/rvt-format";
+import { downloadPdf } from "@/utils/pdf-download";
+import { apiUrl } from "@/constants/query";
 import { FontAwesome5 } from "@expo/vector-icons";
 import {
   useInfiniteQuery,
@@ -27,7 +29,7 @@ import {
   useLocalSearchParams,
   useRouter,
 } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -173,9 +175,11 @@ export default function RvtTourDetailsScreen() {
       mutationFn: ({
         nom,
         startedAt,
+        closedAt,
       }: {
         nom: string;
         startedAt: Date;
+        closedAt: Date | null;
       }) =>
         updateRound({
           id: String(roundId),
@@ -183,6 +187,11 @@ export default function RvtTourDetailsScreen() {
           startedAt: `${startedAt.getFullYear()}-${String(
             startedAt.getMonth() + 1,
           ).padStart(2, "0")}-${String(startedAt.getDate()).padStart(2, "0")}`,
+          closedAt: closedAt
+            ? `${closedAt.getFullYear()}-${String(
+                closedAt.getMonth() + 1,
+              ).padStart(2, "0")}-${String(closedAt.getDate()).padStart(2, "0")}`
+            : null,
         }),
       onSuccess: () => {
         invalidateAll();
@@ -238,7 +247,9 @@ export default function RvtTourDetailsScreen() {
       roundId: String(roundId),
       nom: round.nom ?? "",
       startedAt: new Date(round.startedAt),
-      onConfirm: (nom, startedAt) => updateRoundMutate({ nom, startedAt }),
+      closedAt: round.closedAt ? new Date(round.closedAt) : null,
+      onConfirm: (nom, startedAt, closedAt) =>
+        updateRoundMutate({ nom, startedAt, closedAt }),
     });
   }, [round, canUpdate, isOpen, openRoundEdit, updateRoundMutate, roundId]);
 
@@ -311,6 +322,16 @@ export default function RvtTourDetailsScreen() {
     router.navigate("/rvt/create/client");
   }, [canCreate, isOpen, store, roundId, router]);
 
+  const [isPdfPending, setIsPdfPending] = useState(false);
+
+  const handleDownloadPdf = useCallback(() => {
+    downloadPdf(
+      `${apiUrl}/sdkboard/api/rounds/round_pdf.php?id=${roundId}`,
+      `tournee-${round?.nom || roundId}`,
+      setIsPdfPending,
+    );
+  }, [round, roundId]);
+
   if (!canList) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -364,17 +385,22 @@ export default function RvtTourDetailsScreen() {
                 {formatDateLabel(round.startedAt)} · {round.visitCount} visite
                 {round.visitCount > 1 ? "s" : ""}
               </Text>
+              {round.closedAt ? (
+                <Text style={styles.summaryClosedAt}>
+                  Clôturée le {formatDateLabel(round.closedAt)}
+                </Text>
+              ) : null}
             </View>
             <View
               style={[
                 styles.statusPill,
-                { backgroundColor: isOpen ? "#f59e0b18" : "#64748b18" },
+                isOpen ? styles.statusPillOpen : styles.statusPillClosed,
               ]}
             >
               <Text
                 style={[
                   styles.statusText,
-                  { color: isOpen ? "#f59e0b" : "#64748b" },
+                  isOpen ? styles.statusPillTextOpen : styles.statusPillTextClosed,
                 ]}
               >
                 {isOpen ? "En cours" : "Clôturée"}
@@ -419,6 +445,20 @@ export default function RvtTourDetailsScreen() {
                 </Text>
               </Pressable>
             ) : null}
+            {isPdfPending ? (
+              <View style={styles.actionButton}>
+                <FontAwesome5 name="spinner" size={12} color={PRIMARY} />
+                <Text style={styles.actionButtonTextPrimary}>Génération...</Text>
+              </View>
+            ) : (
+              <Pressable
+                onPress={handleDownloadPdf}
+                style={styles.actionButton}
+              >
+                <FontAwesome5 name="file-pdf" size={12} color={PRIMARY} />
+                <Text style={styles.actionButtonTextPrimary}>PDF</Text>
+              </Pressable>
+            )}
           </View>
         </View>
 
@@ -538,18 +578,36 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 2,
   },
+  summaryClosedAt: {
+    fontSize: 12,
+    color: "#f59e0b",
+    marginTop: 2,
+  },
   statusPill: {
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 999,
     marginLeft: 8,
   },
+  statusPillOpen: {
+    backgroundColor: "#f59e0b18",
+  },
+  statusPillClosed: {
+    backgroundColor: "#64748b18",
+  },
   statusText: {
     fontSize: 11,
     fontWeight: "700",
   },
+  statusPillTextOpen: {
+    color: "#f59e0b",
+  },
+  statusPillTextClosed: {
+    color: "#64748b",
+  },
   actionsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
     marginTop: 14,
     paddingTop: 12,
@@ -565,7 +623,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
     backgroundColor: PRIMARY + "10",
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: "48%",
   },
   actionButtonTextPrimary: {
     color: PRIMARY,

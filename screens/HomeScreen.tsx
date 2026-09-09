@@ -83,7 +83,7 @@ export default function HomeScreen() {
       canAccess: canAccessDemandeTransfertModule,
     },
     {
-      label: "Rapport de visite",
+      label: "Tournées de visite",
       icon: "clipboard-list-outline",
       route: "/rvt",
       canAccess: canAccessRapportVisiteModule,

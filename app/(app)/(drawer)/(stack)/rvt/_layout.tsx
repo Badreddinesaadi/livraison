@@ -3,6 +3,7 @@ import RvtDeleteConfirmBottomSheetContent from "@/components/RvtDeleteConfirmBot
 import RvtRoundDeleteConfirmBottomSheetContent from "@/components/RvtRoundDeleteConfirmBottomSheetContent";
 import RvtRoundEditBottomSheetContent from "@/components/RvtRoundEditBottomSheetContent";
 import RvtRoundToggleConfirmBottomSheetContent from "@/components/RvtRoundToggleConfirmBottomSheetContent";
+import RvtRoundFiltersBottomSheetContent from "@/components/RvtRoundFiltersBottomSheetContent";
 import RvtSelectOptionBottomSheetContent from "@/components/RvtSelectOptionBottomSheetContent";
 import { Button } from "@/components/ui/button";
 import { Colors, PRIMARY } from "@/constants/theme";
@@ -78,11 +79,13 @@ export default function StackLayout() {
       case "rvt-visit-delete-confirm":
         return ["30%"];
       case "rvt-round-edit":
-        return ["55%"];
+        return ["60%"];
       case "rvt-round-delete-confirm":
         return ["30%"];
       case "rvt-round-toggle-confirm":
         return ["30%"];
+      case "rvt-round-filters":
+        return ["55%"];
       default:
         return ["50%"];
     }
@@ -95,7 +98,8 @@ export default function StackLayout() {
       sheetType === "rvt-visit-delete-confirm" ||
       sheetType === "rvt-round-edit" ||
       sheetType === "rvt-round-delete-confirm" ||
-      sheetType === "rvt-round-toggle-confirm");
+      sheetType === "rvt-round-toggle-confirm" ||
+      sheetType === "rvt-round-filters");
 
   const { top, bottom } = useSafeAreaInsets();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -182,7 +186,7 @@ export default function StackLayout() {
                     <FontAwesome name="arrow-left" size={24} color="black" />
                   </TouchableWithoutFeedback>
                   <Text style={styles.headerTitle}>
-                    {headerTitles[s.route.name] ?? "Rapports de visite"}
+                    {headerTitles[s.route.name] ?? "Tournées de visite"}
                   </Text>
                   <Button
                     preset="ghost"
@@ -291,9 +295,13 @@ export default function StackLayout() {
           <RvtRoundEditBottomSheetContent
             nom={roundEditConfig.nom}
             startedAt={roundEditConfig.startedAt}
+            closedAt={roundEditConfig.closedAt}
             onNomChange={(nom) => updateRoundEditDraft({ nom })}
             onStartedAtChange={(startedAt) =>
               updateRoundEditDraft({ startedAt })
+            }
+            onClosedAtChange={(closedAt) =>
+              updateRoundEditDraft({ closedAt })
             }
             onCancel={closeSheet}
             onConfirm={confirmRoundEdit}
@@ -312,6 +320,8 @@ export default function StackLayout() {
             onCancel={closeSheet}
             onConfirm={confirmRoundToggle}
           />
+        ) : sheetType === "rvt-round-filters" ? (
+          <RvtRoundFiltersBottomSheetContent />
         ) : (
           <View style={styles.sheetFallback}>
             <Text style={styles.sheetFallbackText}>
@@ -367,7 +377,7 @@ const styles = StyleSheet.create({
 });
 
 const headerTitles: Record<string, string> = {
-  index: "Rapports de visite",
+  index: "Tournées de visite",
   "create/client": "Client",
   "create/profil": "Profil terrain",
   "create/marche": "Marché",

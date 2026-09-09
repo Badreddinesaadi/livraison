@@ -13,6 +13,7 @@ type SheetType =
   | "rvt-round-edit"
   | "rvt-round-delete-confirm"
   | "rvt-round-toggle-confirm"
+  | "rvt-round-filters"
   | null;
 
 type SelectConfig = {
@@ -38,7 +39,8 @@ type RoundEditConfig = {
   roundId: string;
   nom: string;
   startedAt: Date;
-  onConfirm: (nom: string, startedAt: Date) => void;
+  closedAt: Date | null;
+  onConfirm: (nom: string, startedAt: Date, closedAt: Date | null) => void;
 };
 
 type RoundDeleteConfig = {
@@ -54,6 +56,20 @@ type RoundToggleConfig = {
   onConfirm: () => void;
 };
 
+export type RoundFiltersStatus = "all" | "open" | "closed";
+
+type RoundFiltersConfig = {
+  initialStatus: RoundFiltersStatus;
+  initialFrom: Date | null;
+  initialTo: Date | null;
+  onApply: (
+    status: RoundFiltersStatus,
+    from: Date | null,
+    to: Date | null,
+  ) => void;
+  onReset: () => void;
+};
+
 type VisitDeleteHandler = (visitId: string) => void;
 
 type RvtSheetState = {
@@ -67,6 +83,7 @@ type RvtSheetState = {
   roundEditConfig: RoundEditConfig | null;
   roundDeleteConfig: RoundDeleteConfig | null;
   roundToggleConfig: RoundToggleConfig | null;
+  roundFiltersConfig: RoundFiltersConfig | null;
   isRoundDeletePending: boolean;
   isSheetOpen: boolean;
 
@@ -79,7 +96,11 @@ type RvtSheetState = {
   confirmVisitDelete: () => void;
   finishVisitDelete: () => void;
   openRoundEdit: (config: RoundEditConfig) => void;
-  updateRoundEditDraft: (patch: { nom?: string; startedAt?: Date }) => void;
+  updateRoundEditDraft: (patch: {
+    nom?: string;
+    startedAt?: Date;
+    closedAt?: Date | null;
+  }) => void;
   confirmRoundEdit: () => void;
   openRoundDeleteConfirm: (config: RoundDeleteConfig) => void;
   confirmRoundDelete: () => void;
@@ -87,6 +108,13 @@ type RvtSheetState = {
   openRoundToggleConfirm: (config: RoundToggleConfig) => void;
   confirmRoundToggle: () => void;
   finishRoundToggle: () => void;
+  openRoundFilters: (config: RoundFiltersConfig) => void;
+  applyRoundFilters: (
+    status: RoundFiltersStatus,
+    from: Date | null,
+    to: Date | null,
+  ) => void;
+  resetRoundFilters: () => void;
   closeSheet: () => void;
 };
 
@@ -101,6 +129,7 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
   roundEditConfig: null,
   roundDeleteConfig: null,
   roundToggleConfig: null,
+  roundFiltersConfig: null,
   isRoundDeletePending: false,
   isSheetOpen: false,
 
@@ -199,7 +228,7 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
   confirmRoundEdit: () => {
     const config = get().roundEditConfig;
     if (!config) return;
-    config.onConfirm(config.nom, config.startedAt);
+    config.onConfirm(config.nom, config.startedAt, config.closedAt);
     if (get().sheetType === "rvt-round-edit") {
       set({ roundEditConfig: null, isSheetOpen: false });
     }
@@ -244,5 +273,34 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
       return { roundToggleConfig: null, isSheetOpen: false };
     }),
   finishRoundToggle: () => set({ roundToggleConfig: null }),
+  openRoundFilters: (config) =>
+    set({
+      sheetType: "rvt-round-filters",
+      roundFiltersConfig: { ...config },
+      selectConfig: null,
+      multiSelectConfig: null,
+      roundEditConfig: null,
+      roundDeleteConfig: null,
+      roundToggleConfig: null,
+      isVisitDeletePending: false,
+      isRoundDeletePending: false,
+      isSheetOpen: true,
+    }),
+  applyRoundFilters: (status, from, to) =>
+    set((state) => {
+      state.roundFiltersConfig?.onApply(status, from, to);
+      if (get().sheetType === "rvt-round-filters") {
+        return { roundFiltersConfig: null, isSheetOpen: false };
+      }
+      return {};
+    }),
+  resetRoundFilters: () =>
+    set((state) => {
+      state.roundFiltersConfig?.onReset();
+      if (get().sheetType === "rvt-round-filters") {
+        return { roundFiltersConfig: null, isSheetOpen: false };
+      }
+      return {};
+    }),
   closeSheet: () => set({ isSheetOpen: false }),
 }));
