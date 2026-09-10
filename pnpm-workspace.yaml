@@ -29,3 +29,5 @@ minimumReleaseAgeExclude:
   - "@expo/env"
   - "@expo/fingerprint"
   - expo-font
+  - '@expo/metro-file-map@57.0.3'
+  - expo-glass-effect@57.0.2
