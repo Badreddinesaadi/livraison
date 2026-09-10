@@ -1,5 +1,8 @@
 workspace:
   id: c5d07ecc-9fb3-40d7-ae8d-9ff35a06293c
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
 cloudResources:
   collections:
     ../postman/collections/SDKWOOD APP: 39068232-7de8009e-3b6b-452b-8c6c-0659979de365
