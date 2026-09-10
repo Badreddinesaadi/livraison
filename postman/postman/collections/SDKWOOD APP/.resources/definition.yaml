@@ -1,0 +1,10 @@
+$kind: collection
+variables:
+  BACKEND_URL: ""
+auth:
+  - id: 2343e777-6940-4902-8155-8194dfd592e9
+    type: apikey
+    name: apikey auth
+    credentials:
+      key: auth_token
+      value: "{{AUTH_TOKEN}}"

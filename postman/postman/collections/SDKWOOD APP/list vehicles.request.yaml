@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/vehicule/vehicule.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+settings: {}
+examples: ./.resources/list vehicles.resources/examples
+order: 11000

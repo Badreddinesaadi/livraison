@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/rounds/rounds.php?perPage=200&page=1"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  - key: perPage
+    value: "200"
+  - key: page
+    value: "1"
+  - key: "roundId "
+    value: "2"
+    disabled: true
+body:
+  type: formdata
+  content:
+    - type: file
+      key: ""
+      src: ""
+      disabled: true
+settings: {}
+examples: ./.resources/list tournée.resources/examples
+order: 1000

@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/rapport_terrain.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+  auth_token: a9c86a057a9def730d9bc7f43f1f6ad34adc21d3ea4e3215de71567b6c6e38ed1788769456
+queryParams:
+  - key: client_id
+    value: "1099"
+    disabled: true
+  - key: chauffeur_id
+    value: "5"
+    disabled: true
+auth:
+  type: noauth
+settings: {}
+order: 5000

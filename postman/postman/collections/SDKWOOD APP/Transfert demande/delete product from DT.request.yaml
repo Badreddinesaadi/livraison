@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/details_demande_transfert.php"
+method: DELETE
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \  \"type\": \"transfert\",\r
+
+    \  \"id\": 10\r
+
+    }"
+settings: {}
+order: 6000

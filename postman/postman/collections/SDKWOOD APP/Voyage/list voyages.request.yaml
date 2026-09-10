@@ -1,0 +1,39 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/voyage.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  - key: id
+    value: "39"
+    disabled: true
+  - key: idClient
+    value: ""
+    disabled: true
+  - key: idChauffeur
+    value: "5"
+    disabled: true
+  - key: idDepot
+    value: "31"
+    disabled: true
+  - key: page
+    value: "1"
+    disabled: true
+  - key: idVehicule
+    value: "9"
+    disabled: true
+  - key: codeQuery
+    value: "48"
+    disabled: true
+body:
+  type: formdata
+  content:
+    - type: file
+      key: ""
+      src: ""
+      disabled: true
+settings: {}
+examples: ./.resources/list voyages.resources/examples
+order: 2000

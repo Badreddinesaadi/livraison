@@ -1,0 +1,29 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/users/authentification.php"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\": \"badr.saadi@sdkwood.ma\",\r
+
+    \    \"password\": \"Sdk@2025\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "const token = pm.response.json().data.token; // Assuming the token is returned in the response\r
+
+      if (token) {\r
+
+      \    pm.environment.set(\"AUTH_TOKEN\", token);\r
+
+      }"
+    language: text/javascript
+settings: {}
+examples: ./.resources/login.resources/examples
+order: 1000

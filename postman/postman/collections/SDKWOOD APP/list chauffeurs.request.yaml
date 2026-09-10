@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/users/chauffeur.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+settings: {}
+examples: ./.resources/list chauffeurs.resources/examples
+order: 8000

@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/voyage.php"
+method: DELETE
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: "{\r\n  \"id\" : 84\r\n}"
+settings: {}
+order: 3000

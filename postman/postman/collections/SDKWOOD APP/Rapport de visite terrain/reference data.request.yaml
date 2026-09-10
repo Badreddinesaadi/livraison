@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/rapport_terrain.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: formdata
+  content:
+    - type: file
+      key: images
+      src: /C:/Users/dell/Pictures/WhatsApp Image 2025-10-25 à 23.47.37_7040176f.jpg
+      disabled: true
+settings: {}
+order: 4000

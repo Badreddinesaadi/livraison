@@ -1,0 +1,53 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/projet.php"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  - key: id
+    value: "6"
+    disabled: true
+  - key: idClient
+    value: ""
+    disabled: true
+  - key: idChauffeur
+    value: "5"
+    disabled: true
+  - key: idDepot
+    value: "31"
+    disabled: true
+  - key: page
+    value: "1"
+    disabled: true
+  - key: idVehicule
+    value: "9"
+    disabled: true
+body:
+  type: formdata
+  content:
+    - type: text
+      key: contact_nom
+      value: mustafa
+    - type: text
+      key: contact_telephone
+      value: "070707070707"
+    - type: text
+      key: projet
+      value: chantier
+    - type: text
+      key: localisation
+      value: non
+    - type: text
+      key: commentaire
+      value: non
+    - type: file
+      key: images[]
+      src: postman-cloud:///1f033731-dd96-4f10-9e17-5917f7f5cef4
+    - type: text
+      key: idCreat
+      value: "5"
+      disabled: true
+settings: {}
+order: 2000

@@ -1,0 +1,43 @@
+$kind: http-example
+request:
+  url: 192.168.1.111:8075/sdkboard/api/users/authentification.php
+  method: POST
+  headers:
+    login_token: SDKWOOD
+    code_token: SDKWOOD/2026@!!
+    content_type: application/json
+  body:
+    type: json
+    content: "{\r
+
+      \    \"username\": \"badr.saadi@sdkwood.ma\",\r
+
+      \    \"password\": \"Sdk@2025\"\r
+
+      }"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Date: Mon, 09 Mar 2026 11:14:33 GMT
+    Server: Apache/2.4.17 (Win32) OpenSSL/1.0.2d PHP/5.6.21
+    X-Powered-By: PHP/5.6.21
+    Access-Control-Allow-Origin: "*"
+    Access-Control-Allow-Methods: POST
+    Content-Length: "166"
+    Keep-Alive: timeout=5, max=100
+    Connection: Keep-Alive
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+          "status": true,
+          "message": "Login successful",
+          "data": {
+              "user_id": 9,
+              "name": "BADREDDINE SAADI",
+              "token": "ba21b8db23a787fb4170132f95944dedd19893ec55ab0f5f126f194c9ab26dab"
+          }
+      }
+order: 1000

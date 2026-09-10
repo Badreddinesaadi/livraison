@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/rounds/rounds.php"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: ""
+settings: {}
+order: 2000

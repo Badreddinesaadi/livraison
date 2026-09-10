@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/rounds/visits.php?action=addPhoto&id=7"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+  auth_token: 07170b33cfce800cc18c15bec68fbbc9f16a69e5040fe5472898e6111c2832ce1788769211
+queryParams:
+  action: addPhoto
+  id: "7"
+body:
+  type: formdata
+  content:
+    - type: file
+      key: images[]
+      src: /C:/Users/dell/Downloads/9EB1C2F5-B726-429F-ADD2-DC0E822014AA.webp
+auth:
+  type: noauth
+settings: {}
+order: 3000

@@ -1,0 +1,56 @@
+$kind: http-example
+request:
+  url: "{{BACKEND_URL}}/sdkboard/api/rounds/rounds.php?perPage=1&page=1"
+  method: GET
+  headers:
+    login_token: SDKWOOD
+    code_token: SDKWOOD/2026@!!
+    content_type: application/json
+  queryParams:
+    perPage: "1"
+    page: "1"
+  body:
+    type: formdata
+    content:
+      - type: file
+        key: ""
+        src: ""
+        disabled: true
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Date: Thu, 13 Aug 2026 08:07:59 GMT
+    Server: Apache/2.4.17 (Win32) OpenSSL/1.0.2d PHP/5.6.21
+    X-Powered-By: PHP/5.6.21
+    Access-Control-Allow-Origin: "*"
+    Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+    Content-Length: "254"
+    Keep-Alive: timeout=5, max=99
+    Connection: Keep-Alive
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+          "status": true,
+          "pagination": {
+              "page": 1,
+              "perPage": 1,
+              "total": 2,
+              "totalPages": 2
+          },
+          "data": [
+              {
+                  "id": 2,
+                  "commercialId": 9,
+                  "dateDebut": "2026-08-12",
+                  "dateFin": null,
+                  "statut": "en_cours",
+                  "visitCount": 1,
+                  "createdAt": "2026-08-12 17:31:31",
+                  "updatedAt": "2026-08-12 17:31:31"
+              }
+          ]
+      }
+order: 1000

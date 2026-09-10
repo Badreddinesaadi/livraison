@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/demande_transfert.php?page=1"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  page: "1"
+settings: {}
+examples: ./.resources/list transfert.resources/examples
+order: 1000

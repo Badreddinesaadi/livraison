@@ -1,0 +1,32 @@
+$kind: http-request
+url: 192.168.1.111:8075/sdkboard/api/homescreen/voyage_chauffeur.php
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: idBL
+      value: "1539"
+    - type: text
+      key: idVoyage
+      value: "88"
+    - type: text
+      key: status
+      value: Livré
+    - type: file
+      key: image[]
+      src: ""
+    - type: text
+      key: coordinates
+      value: '{\"x\":-7.5671727,\"y\":33.5300432}'
+auth:
+  type: apikey
+  credentials:
+    value: ed9867583562668e59378b649507e28e85cbbd5efc5acc28e971957da446ec8f1773317071
+    key: auth_token
+settings: {}
+order: 5000

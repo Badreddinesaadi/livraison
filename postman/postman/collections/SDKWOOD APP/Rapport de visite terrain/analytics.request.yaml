@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/rounds/analytics.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: formdata
+  content:
+    - type: file
+      key: ""
+      src: ""
+      disabled: true
+settings: {}
+order: 3000

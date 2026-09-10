@@ -1,0 +1,49 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/rounds/rounds.php"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  - key: id
+    value: "6"
+    disabled: true
+  - key: idClient
+    value: ""
+    disabled: true
+  - key: idChauffeur
+    value: "5"
+    disabled: true
+  - key: idDepot
+    value: "31"
+    disabled: true
+  - key: page
+    value: "1"
+    disabled: true
+  - key: idVehicule
+    value: "9"
+    disabled: true
+body:
+  type: formdata
+  content:
+    - type: text
+      key: Bl_cachetet
+      value: non
+    - type: text
+      key: reglement
+      value: non
+    - type: text
+      key: retour_Mse
+      value: non
+    - type: text
+      key: reclamation
+      value: Retard de livraison
+    - type: file
+      key: images[]
+      src: postman-cloud:///1f033731-dd96-4f10-9e17-5917f7f5cef4
+    - type: text
+      key: client_id
+      value: "1089"
+settings: {}
+order: 2000

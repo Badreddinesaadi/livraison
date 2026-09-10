@@ -1,0 +1,46 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/demande_transfert.php"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  - key: id
+    value: "6"
+    disabled: true
+  - key: idClient
+    value: ""
+    disabled: true
+  - key: idChauffeur
+    value: "5"
+    disabled: true
+  - key: idDepot
+    value: "31"
+    disabled: true
+  - key: page
+    value: "1"
+    disabled: true
+  - key: idVehicule
+    value: "9"
+    disabled: true
+body:
+  type: json
+  content: "{\r
+
+    \  \"idDepotSource\": 1,\r
+
+    \  \"idDepotDestination\": 2,\r
+
+    \  \"dum\": \"DUM-2026-001\",\r
+
+    \  \"transporteur\": \"Société Atlas Transport\",\r
+
+    \  \"matricule\": \"12345-A-67\",\r
+
+    \  \"observation\": \"Transfert urgent de stock vers dépôt Casablanca\"\r
+
+    }"
+settings: {}
+examples: ./.resources/create transport.resources/examples
+order: 8000

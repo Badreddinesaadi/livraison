@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/depots/depots.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+  auth_token: 0b275123e22781d8ab4e3aff1f9add11bbe7c72ae261db4e2eac91f0f6f29a44
+settings: {}
+examples: ./.resources/list depots.resources/examples
+order: 14000

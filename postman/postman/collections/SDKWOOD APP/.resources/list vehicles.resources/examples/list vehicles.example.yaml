@@ -1,0 +1,520 @@
+$kind: http-example
+request:
+  url: 192.168.1.111:8075/sdkboard/api/vehicule/vehicule.php
+  method: GET
+  headers:
+    login_token: SDKWOOD
+    code_token: SDKWOOD/2026@!!
+    content_type: application/json
+    auth_token: ad230f3875c1e1aa094d775e6933d97a64364e22c711eb84619c5bb30c45c0e9
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Date: Fri, 06 Mar 2026 10:33:20 GMT
+    Server: Apache/2.4.17 (Win32) OpenSSL/1.0.2d PHP/5.6.21
+    X-Powered-By: PHP/5.6.21
+    Access-Control-Allow-Origin: "*"
+    Keep-Alive: timeout=5, max=100
+    Connection: Keep-Alive
+    Transfer-Encoding: chunked
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "status": true,
+          "data": [
+              {
+                  "id": 1,
+                  "immatriculation": "35839-A-9",
+                  "nameVehicule": "ZOULAL YOUNESS",
+                  "vehiculeType": "SEMI REMORQUE",
+                  "vehiculeMarque": "MERCEDES",
+                  "compteurActuel": "391910",
+                  "km_depart": 120500,
+                  "verification_km": "OK"
+              },
+              {
+                  "id": 2,
+                  "immatriculation": "3880-03",
+                  "nameVehicule": "MOHAMED LACHHAB",
+                  "vehiculeType": "PLATEAU",
+                  "vehiculeMarque": "RENAULT",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 3,
+                  "immatriculation": "38181-A-9",
+                  "nameVehicule": "IMAD ELOUAHIDI",
+                  "vehiculeType": "SEMI REMORQUE",
+                  "vehiculeMarque": "MERCEDES",
+                  "compteurActuel": "230084",
+                  "km_depart": 50800,
+                  "verification_km": "OK"
+              },
+              {
+                  "id": 5,
+                  "immatriculation": "3944-03",
+                  "nameVehicule": "AYOUB ORKHIS",
+                  "vehiculeType": "PLATEAU",
+                  "vehiculeMarque": "RENAULT",
+                  "compteurActuel": null,
+                  "km_depart": 1200,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 6,
+                  "immatriculation": "92520-E-6",
+                  "nameVehicule": "REKIK YASSER",
+                  "vehiculeType": "SEMI REMORQUE",
+                  "vehiculeMarque": "FORD",
+                  "compteurActuel": "512361",
+                  "km_depart": 2888,
+                  "verification_km": "OK"
+              },
+              {
+                  "id": 7,
+                  "immatriculation": "3777-010",
+                  "nameVehicule": "REKIK YASSER",
+                  "vehiculeType": "PLATEAU",
+                  "vehiculeMarque": "RENAULT",
+                  "compteurActuel": null,
+                  "km_depart": 1500,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 8,
+                  "immatriculation": "68966-E-6",
+                  "nameVehicule": "ABD EL WAHED EL KHATTAT",
+                  "vehiculeType": "SOLO CAMION",
+                  "vehiculeMarque": "FORD",
+                  "compteurActuel": "536758",
+                  "km_depart": 120,
+                  "verification_km": "OK"
+              },
+              {
+                  "id": 9,
+                  "immatriculation": "91642-E-6",
+                  "nameVehicule": "ABDERRAHIM AIT TALEB",
+                  "vehiculeType": "SOLO CAMION",
+                  "vehiculeMarque": "FORD",
+                  "compteurActuel": "422763",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 10,
+                  "immatriculation": "68965-E-6",
+                  "nameVehicule": "SAKHRI LARBI",
+                  "vehiculeType": "SOLO CAMION",
+                  "vehiculeMarque": "FORD",
+                  "compteurActuel": "485914",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 11,
+                  "immatriculation": "35449-E-6",
+                  "nameVehicule": "GHRIZIL BADER",
+                  "vehiculeType": "SOLO CAMION",
+                  "vehiculeMarque": "FORD",
+                  "compteurActuel": "583886",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 12,
+                  "immatriculation": "91643-E-6",
+                  "nameVehicule": "MUSTAPHA EL HATTABI",
+                  "vehiculeType": "SOLO CAMION",
+                  "vehiculeMarque": "FORD",
+                  "compteurActuel": "424055",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 13,
+                  "immatriculation": "35450-E-6",
+                  "nameVehicule": "LOUDINI ABDELHAK",
+                  "vehiculeType": "SOLO CAMION",
+                  "vehiculeMarque": "FORD",
+                  "compteurActuel": "586629",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 14,
+                  "immatriculation": "96782-E-6",
+                  "nameVehicule": "SAID HAYSOUK",
+                  "vehiculeType": "CANTER",
+                  "vehiculeMarque": "ISUZU",
+                  "compteurActuel": "154312",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 15,
+                  "immatriculation": "38391-A-9",
+                  "nameVehicule": "SAKHRI LARBI",
+                  "vehiculeType": "CANTER",
+                  "vehiculeMarque": "ISUZU",
+                  "compteurActuel": "95901",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 16,
+                  "immatriculation": "07-H2X396A00374",
+                  "nameVehicule": "07",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "28299",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 17,
+                  "immatriculation": "50876-A-11",
+                  "nameVehicule": "DOUMYANI",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "FIAT",
+                  "compteurActuel": "209545",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 18,
+                  "immatriculation": "33187-E-6",
+                  "nameVehicule": "Fayçal LAHYAN",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "RENAULT",
+                  "compteurActuel": "0",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 19,
+                  "immatriculation": "78049-H-6",
+                  "nameVehicule": "ABD EALLAH CHAMI",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "AUDI",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 20,
+                  "immatriculation": "38213-A-9",
+                  "nameVehicule": "MEHDI AZIZI",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "DACIA LOGAN",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 21,
+                  "immatriculation": "38214-A-9",
+                  "nameVehicule": "MOHAMED JAWAHIR",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "DACIA LOGAN",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 22,
+                  "immatriculation": "35362-A-9",
+                  "nameVehicule": "BADR EDDINE ZAMRANE",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "PEUGEOT",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 23,
+                  "immatriculation": "83606-A7",
+                  "nameVehicule": "IDRISS NAIM",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "JAGUAR",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 24,
+                  "immatriculation": "52272-H-1",
+                  "nameVehicule": "SEDDIK EL AROUI",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "BMW",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 25,
+                  "immatriculation": "88947-D-6",
+                  "nameVehicule": "Mme HIND",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "LAND ROVER",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 26,
+                  "immatriculation": "46999-E-1",
+                  "nameVehicule": "LHAJ AHMED",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "MERCEDES",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 27,
+                  "immatriculation": "46010-B-72",
+                  "nameVehicule": "L HAJA",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "VOLKSWAGEN",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 28,
+                  "immatriculation": "39153-A-9",
+                  "nameVehicule": "AHMED MOUMEN",
+                  "vehiculeType": "SEMI REMORQUE",
+                  "vehiculeMarque": "MERCEDES",
+                  "compteurActuel": "145620",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 29,
+                  "immatriculation": "39154-A-9",
+                  "nameVehicule": "KCHIRI AMINE",
+                  "vehiculeType": "SEMI REMORQUE",
+                  "vehiculeMarque": "MERCEDES",
+                  "compteurActuel": "137681",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 30,
+                  "immatriculation": "3971-03",
+                  "nameVehicule": "AHMED MOUMEN",
+                  "vehiculeType": "PLATEAU",
+                  "vehiculeMarque": "TOTAL BENNE",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 31,
+                  "immatriculation": "3970-03",
+                  "nameVehicule": "KCHIRI AMINE",
+                  "vehiculeType": "PLATEAU",
+                  "vehiculeMarque": "TOTAL BENNE",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 32,
+                  "immatriculation": "01-394S02506",
+                  "nameVehicule": "01",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "26269",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 33,
+                  "immatriculation": "02-E1X353U01605",
+                  "nameVehicule": "02",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "0",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 34,
+                  "immatriculation": "03-H2X394R01527",
+                  "nameVehicule": "03",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "37107",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 35,
+                  "immatriculation": "04-SAN-NUM",
+                  "nameVehicule": "04",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "0",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 36,
+                  "immatriculation": "05-H2X352N00980",
+                  "nameVehicule": "05",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "25211",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 37,
+                  "immatriculation": "06-352002003945",
+                  "nameVehicule": "06",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "15936",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 38,
+                  "immatriculation": "08-H2X396D50323",
+                  "nameVehicule": "08",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "0",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 39,
+                  "immatriculation": "09-H2X396E50358",
+                  "nameVehicule": "09",
+                  "vehiculeType": "ELEVATEUR",
+                  "vehiculeMarque": "LINDE",
+                  "compteurActuel": "0",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 40,
+                  "immatriculation": "39205-A-9",
+                  "nameVehicule": "JAMAL LABSIME",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "DACIA LOGAN",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 41,
+                  "immatriculation": "39204-A-9",
+                  "nameVehicule": "ISSAM EL HAMESS",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "DACIA LOGAN",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 42,
+                  "immatriculation": "39203-A-9",
+                  "nameVehicule": "SEDDIK EL AROUI",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "RENAULT",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 43,
+                  "immatriculation": "94040-H-6",
+                  "nameVehicule": "FOUAD LAMARTI SEFIAN",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "VOLVO",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 44,
+                  "immatriculation": "39524-A-9",
+                  "nameVehicule": "ABGHOUCH MOHAMED",
+                  "vehiculeType": "SEMI REMORQUE",
+                  "vehiculeMarque": "MERCEDES",
+                  "compteurActuel": "66176",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 45,
+                  "immatriculation": "3988-03",
+                  "nameVehicule": "ABGHOUCH MOHAMED",
+                  "vehiculeType": "PLATEAU",
+                  "vehiculeMarque": "TOTAL BENNE",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 46,
+                  "immatriculation": "39525-A-9",
+                  "nameVehicule": "EL MEDOUANI JALAL",
+                  "vehiculeType": "SEMI REMORQUE",
+                  "vehiculeMarque": "MERCEDES",
+                  "compteurActuel": "73048",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 47,
+                  "immatriculation": "3989-03",
+                  "nameVehicule": "EL MEDOUANI JALAL",
+                  "vehiculeType": "PLATEAU",
+                  "vehiculeMarque": "TOTAL BENNE",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 48,
+                  "immatriculation": "13630T1",
+                  "nameVehicule": "Voiture Service",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "DACIA LOGAN",
+                  "compteurActuel": "44833",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 49,
+                  "immatriculation": "72-023924",
+                  "nameVehicule": "Abdelati",
+                  "vehiculeType": "CYCLOMOTEUR",
+                  "vehiculeMarque": "ALFA",
+                  "compteurActuel": null,
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              },
+              {
+                  "id": 50,
+                  "immatriculation": "25943T1",
+                  "nameVehicule": "MOHAMED ",
+                  "vehiculeType": "VOITURE",
+                  "vehiculeMarque": "RENAULT",
+                  "compteurActuel": "52658",
+                  "km_depart": null,
+                  "verification_km": "ERREUR"
+              }
+          ]
+      }
+order: 1000

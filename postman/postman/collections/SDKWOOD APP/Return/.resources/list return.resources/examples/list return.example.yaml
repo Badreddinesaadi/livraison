@@ -1,0 +1,218 @@
+$kind: http-example
+request:
+  url: "{{BACKEND_URL}}/sdkboard/api/homescreen/retour_chauffeur.php"
+  method: GET
+  headers:
+    login_token: SDKWOOD
+    code_token: SDKWOOD/2026@!!
+    content_type: application/json
+  queryParams:
+    - key: id
+      value: "6"
+      disabled: true
+    - key: idClient
+      value: ""
+      disabled: true
+    - key: idChauffeur
+      value: "5"
+      disabled: true
+    - key: idDepot
+      value: "31"
+      disabled: true
+    - key: page
+      value: "1"
+      disabled: true
+    - key: idVehicule
+      value: "9"
+      disabled: true
+  body:
+    type: formdata
+    content:
+      - type: file
+        key: ""
+        src: ""
+        disabled: true
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Date: Fri, 27 Mar 2026 08:45:28 GMT
+    Server: Apache/2.4.17 (Win32) OpenSSL/1.0.2d PHP/5.6.21
+    X-Powered-By: PHP/5.6.21
+    Access-Control-Allow-Origin: "*"
+    Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+    Content-Length: "3671"
+    Keep-Alive: timeout=5, max=99
+    Connection: Keep-Alive
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+          "status": true,
+          "data": [
+              {
+                  "id": "14",
+                  "Bl_cachetet": "non",
+                  "reglement": "non",
+                  "retour_Mse": "non",
+                  "reclamation": "Retard de livraison",
+                  "statut": "",
+                  "client_id": "1089",
+                  "client": "AMRIDIL BOIS",
+                  "images": [
+                      {
+                          "id": "24",
+                          "nom_fichier": "1774544197_3141.png",
+                          "chemin_fichier": "data/retour_chauffeur/14/1774544197_3141.png",
+                          "date_upload": "2026-03-26 17:56:37"
+                      },
+                      {
+                          "id": "25",
+                          "nom_fichier": "1774544197_3001.png",
+                          "chemin_fichier": "data/retour_chauffeur/14/1774544197_3001.png",
+                          "date_upload": "2026-03-26 17:56:37"
+                      },
+                      {
+                          "id": "26",
+                          "nom_fichier": "1774544197_2187.png",
+                          "chemin_fichier": "data/retour_chauffeur/14/1774544197_2187.png",
+                          "date_upload": "2026-03-26 17:56:37"
+                      }
+                  ]
+              },
+              {
+                  "id": "11",
+                  "Bl_cachetet": "oui",
+                  "reglement": "oui",
+                  "retour_Mse": "oui",
+                  "reclamation": "Retard de livraison",
+                  "statut": "",
+                  "client_id": "1099",
+                  "client": "BOIS DAR BOUAZZA",
+                  "images": [
+                      {
+                          "id": "17",
+                          "nom_fichier": "Capture d'écran 2024-12-31 173600.png",
+                          "chemin_fichier": "C:\\xampp\\htdocs\\sdkboard\\api\\homescreen/../../data/retour_chauffeur/11/Capture d'écran 2024-12-31 173600.png",
+                          "date_upload": "2026-03-26 17:15:54"
+                      },
+                      {
+                          "id": "18",
+                          "nom_fichier": "Capture d'écran 2024-12-31 173613.png",
+                          "chemin_fichier": "C:\\xampp\\htdocs\\sdkboard\\api\\homescreen/../../data/retour_chauffeur/11/Capture d'écran 2024-12-31 173613.png",
+                          "date_upload": "2026-03-26 17:15:54"
+                      }
+                  ]
+              },
+              {
+                  "id": "9",
+                  "Bl_cachetet": "oui",
+                  "reglement": "oui",
+                  "retour_Mse": "oui",
+                  "reclamation": "Retard de livraison",
+                  "statut": "terminer",
+                  "client_id": "1090",
+                  "client": "ARCOBATI MAROC",
+                  "images": [
+                      {
+                          "id": "14",
+                          "nom_fichier": "Capture d'Ã©cran 2024-12-31 173600.png",
+                          "chemin_fichier": "C:\\xampp\\htdocs\\sdkboard\\api\\homescreen/uploads/retour_chauffeur/Capture d'Ã©cran 2024-12-31 173600.png",
+                          "date_upload": "2026-03-26 16:29:29"
+                      }
+                  ]
+              },
+              {
+                  "id": "8",
+                  "Bl_cachetet": "oui",
+                  "reglement": "non",
+                  "retour_Mse": "non",
+                  "reclamation": "Retard de livraison",
+                  "statut": "",
+                  "client_id": "1088",
+                  "client": "ADAM BOIS",
+                  "images": [
+                      {
+                          "id": "13",
+                          "nom_fichier": "Capture d'Ã©cran 2024-12-31 173600.png",
+                          "chemin_fichier": "C:\\xampp\\htdocs\\sdkboard\\api\\homescreen/uploads/retour_chauffeur/Capture d'Ã©cran 2024-12-31 173600.png",
+                          "date_upload": "2026-03-26 16:24:45"
+                      }
+                  ]
+              },
+              {
+                  "id": "7",
+                  "Bl_cachetet": "oui",
+                  "reglement": "oui",
+                  "retour_Mse": "oui",
+                  "reclamation": "Prix incorrect",
+                  "statut": "",
+                  "client_id": "1088",
+                  "client": "ADAM BOIS",
+                  "images": [
+                      {
+                          "id": "11",
+                          "nom_fichier": "Capture d'écran 2024-12-31 163453.png",
+                          "chemin_fichier": "C:\\xampp\\htdocs\\sdkboard\\api\\homescreen/uploads/retour_chauffeur/Capture d'écran 2024-12-31 163453.png",
+                          "date_upload": "2026-03-26 16:10:30"
+                      },
+                      {
+                          "id": "12",
+                          "nom_fichier": "Capture d'écran 2025-01-02 111128.png",
+                          "chemin_fichier": "C:\\xampp\\htdocs\\sdkboard\\api\\homescreen/uploads/retour_chauffeur/Capture d'écran 2025-01-02 111128.png",
+                          "date_upload": "2026-03-26 16:10:30"
+                      }
+                  ]
+              },
+              {
+                  "id": "3",
+                  "Bl_cachetet": "oui",
+                  "reglement": "non",
+                  "retour_Mse": "oui",
+                  "reclamation": "Retard de livraison",
+                  "statut": "",
+                  "client_id": "1099",
+                  "client": "BOIS DAR BOUAZZA",
+                  "images": [
+                      {
+                          "id": "5",
+                          "nom_fichier": "photo1.jpg",
+                          "chemin_fichier": "/uploads/retours/photo1.jpg",
+                          "date_upload": "2026-03-26 15:47:23"
+                      },
+                      {
+                          "id": "6",
+                          "nom_fichier": "photo2.jpg",
+                          "chemin_fichier": "/uploads/retours/photo2.jpg",
+                          "date_upload": "2026-03-26 15:47:23"
+                      }
+                  ]
+              },
+              {
+                  "id": "2",
+                  "Bl_cachetet": "oui",
+                  "reglement": "non",
+                  "retour_Mse": "oui",
+                  "reclamation": "Retard de livraison",
+                  "statut": "terminer",
+                  "client_id": "1091",
+                  "client": "AYAR BOIS",
+                  "images": [
+                      {
+                          "id": "3",
+                          "nom_fichier": "photo1.jpg",
+                          "chemin_fichier": "/uploads/retours/photo1.jpg",
+                          "date_upload": "2026-03-26 15:36:46"
+                      },
+                      {
+                          "id": "4",
+                          "nom_fichier": "photo2.jpg",
+                          "chemin_fichier": "/uploads/retours/photo2.jpg",
+                          "date_upload": "2026-03-26 15:36:46"
+                      }
+                  ]
+              }
+          ]
+      }
+order: 1000

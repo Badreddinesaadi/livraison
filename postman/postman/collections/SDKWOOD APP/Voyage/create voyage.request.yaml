@@ -1,0 +1,34 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/voyage.php"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \  \"date_depart\": \"2026-03-20 15:10:00\",\r
+
+    \  \"idChauffeur\": 5,\r
+
+    \  \"idVehicule\": 7,\r
+
+    \  \"km_depart\": 99500,\r
+
+    \  \"depot_depart\":25,\r
+
+    \  \"bl_list\": [\r
+
+    \    {\"id\": 1539},\r
+
+    \    {\"id\": 1540}\r
+
+    \  ],\r
+
+    \  \"idVille\":1\r
+
+    }"
+settings: {}
+order: 1000

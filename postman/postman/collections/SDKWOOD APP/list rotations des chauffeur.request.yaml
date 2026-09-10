@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/rotation_chauffeur.php?page=1&disponibilite=false"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  page: "1"
+  disponibilite: "false"
+settings: {}
+examples: ./.resources/list rotations des chauffeur.resources/examples
+order: 13000

@@ -1,0 +1,66 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/details_demande_transfert.php"
+method: PUT
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \  \"type\": \"update_lot\",\r
+
+    \  \"lots_update\": [\r
+
+    \    {\r
+
+    \      \"idItem\": 1,\r
+
+    \      \"idProduit\": 10,\r
+
+    \      \"old_lot\": \"LOT-A001\",\r
+
+    \      \"new_lot\": \"LOT-A002\",\r
+
+    \      \"qte\": 50\r
+
+    \    }\r
+
+    \  ],\r
+
+    \r
+
+    \  \"lots_insert\": [\r
+
+    \    {\r
+
+    \      \"idProduit\": 10,\r
+
+    \      \"Lot\": \"LOT-A005\",\r
+
+    \      \"qte\": 20\r
+
+    \    }\r
+
+    \  ],\r
+
+    \r
+
+    \  \"lots_delete\": [\r
+
+    \    {\r
+
+    \      \"idItem\": 3,\r
+
+    \      \"idProduit\": 10,\r
+
+    \      \"Lot\": \"LOT-A003\"\r
+
+    \    }\r
+
+    \  ]\r
+
+    }"
+settings: {}
+order: 5000

@@ -1,0 +1,201 @@
+$kind: http-example
+name: list return
+request:
+  url: "{{BACKEND_URL}}/sdkboard/api/homescreen/retour_chauffeur.php"
+  method: GET
+  headers:
+    login_token: SDKWOOD
+    code_token: SDKWOOD/2026@!!
+    content_type: application/json
+  queryParams:
+    - key: id
+      value: "6"
+      disabled: true
+    - key: client_id
+      value: "1099"
+      disabled: true
+    - key: chauffeur_id
+      value: "5"
+      disabled: true
+    - key: idDepot
+      value: "31"
+      disabled: true
+    - key: page
+      value: "1"
+      disabled: true
+    - key: idVehicule
+      value: "9"
+      disabled: true
+  body:
+    type: formdata
+    content:
+      - type: file
+        key: ""
+        src: ""
+        disabled: true
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Date: Fri, 27 Mar 2026 11:58:31 GMT
+    Server: Apache/2.4.17 (Win32) OpenSSL/1.0.2d PHP/5.6.21
+    X-Powered-By: PHP/5.6.21
+    Access-Control-Allow-Origin: "*"
+    Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+    Content-Length: "2975"
+    Keep-Alive: timeout=5, max=99
+    Connection: Keep-Alive
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+          "status": true,
+          "data": [
+              {
+                  "id": 36,
+                  "Bl_cachetet": "non",
+                  "reglement": "oui",
+                  "retour_Mse": "oui",
+                  "reclamation": "Prix incorrect",
+                  "statut": "envoyer",
+                  "client_id": 1591,
+                  "chauffeur_id": 5,
+                  "client": "ABDERRAHIM KHALLOUQ",
+                  "nomChauffeur": "AIT BOUHOU  RACHID",
+                  "images": [
+                      {
+                          "id": "52",
+                          "nom_fichier": "1774612644_2520.jpg",
+                          "chemin_fichier": "data/retour_chauffeur/36/1774612644_2520.jpg",
+                          "date_upload": "2026-03-27 12:57:24"
+                      },
+                      {
+                          "id": "53",
+                          "nom_fichier": "1774612644_3626.jpg",
+                          "chemin_fichier": "data/retour_chauffeur/36/1774612644_3626.jpg",
+                          "date_upload": "2026-03-27 12:57:24"
+                      }
+                  ]
+              },
+              {
+                  "id": 35,
+                  "Bl_cachetet": "oui",
+                  "reglement": "oui",
+                  "retour_Mse": "oui",
+                  "reclamation": "Retard de livraison",
+                  "statut": "envoyer",
+                  "client_id": 1545,
+                  "chauffeur_id": 5,
+                  "client": " GHNIMI",
+                  "nomChauffeur": "AIT BOUHOU  RACHID",
+                  "images": [
+                      {
+                          "id": "51",
+                          "nom_fichier": "1774612534_4095.jpg",
+                          "chemin_fichier": "data/retour_chauffeur/35/1774612534_4095.jpg",
+                          "date_upload": "2026-03-27 12:55:34"
+                      }
+                  ]
+              },
+              {
+                  "id": 34,
+                  "Bl_cachetet": "oui",
+                  "reglement": "oui",
+                  "retour_Mse": "non",
+                  "reclamation": "",
+                  "statut": "envoyer",
+                  "client_id": 1411,
+                  "chauffeur_id": 5,
+                  "client": " FEKIH SAFI",
+                  "nomChauffeur": "AIT BOUHOU  RACHID",
+                  "images": [
+                      {
+                          "id": "47",
+                          "nom_fichier": "1774608718_3600.jpg",
+                          "chemin_fichier": "data/retour_chauffeur/34/1774608718_3600.jpg",
+                          "date_upload": "2026-03-27 11:51:58"
+                      },
+                      {
+                          "id": "48",
+                          "nom_fichier": "1774608718_8389.jpg",
+                          "chemin_fichier": "data/retour_chauffeur/34/1774608718_8389.jpg",
+                          "date_upload": "2026-03-27 11:51:58"
+                      },
+                      {
+                          "id": "49",
+                          "nom_fichier": "1774608718_5460.jpg",
+                          "chemin_fichier": "data/retour_chauffeur/34/1774608718_5460.jpg",
+                          "date_upload": "2026-03-27 11:51:58"
+                      },
+                      {
+                          "id": "50",
+                          "nom_fichier": "1774608718_3343.jpg",
+                          "chemin_fichier": "data/retour_chauffeur/34/1774608718_3343.jpg",
+                          "date_upload": "2026-03-27 11:51:58"
+                      }
+                  ]
+              },
+              {
+                  "id": 27,
+                  "Bl_cachetet": "non",
+                  "reglement": "non",
+                  "retour_Mse": "non",
+                  "reclamation": "Retard de livraison",
+                  "statut": "terminer",
+                  "client_id": 1089,
+                  "chauffeur_id": 5,
+                  "client": "AMRIDIL BOIS",
+                  "nomChauffeur": "AIT BOUHOU  RACHID",
+                  "images": [
+                      {
+                          "id": "39",
+                          "nom_fichier": "1774604287_1156.png",
+                          "chemin_fichier": "data/retour_chauffeur/27/1774604287_1156.png",
+                          "date_upload": "2026-03-27 10:38:07"
+                      }
+                  ]
+              },
+              {
+                  "id": 18,
+                  "Bl_cachetet": "non",
+                  "reglement": "non",
+                  "retour_Mse": "non",
+                  "reclamation": "Retard de livraison",
+                  "statut": "terminer",
+                  "client_id": 1089,
+                  "chauffeur_id": 5,
+                  "client": "AMRIDIL BOIS",
+                  "nomChauffeur": "AIT BOUHOU  RACHID",
+                  "images": [
+                      {
+                          "id": "30",
+                          "nom_fichier": "1774601541_7974.png",
+                          "chemin_fichier": "data/retour_chauffeur/18/1774601541_7974.png",
+                          "date_upload": "2026-03-27 09:52:21"
+                      }
+                  ]
+              },
+              {
+                  "id": 8,
+                  "Bl_cachetet": "oui",
+                  "reglement": "non",
+                  "retour_Mse": "non",
+                  "reclamation": "Retard de livraison",
+                  "statut": "terminer",
+                  "client_id": 1088,
+                  "chauffeur_id": 5,
+                  "client": "ADAM BOIS",
+                  "nomChauffeur": "AIT BOUHOU  RACHID",
+                  "images": [
+                      {
+                          "id": "13",
+                          "nom_fichier": "Capture d'Ã©cran 2024-12-31 173600.png",
+                          "chemin_fichier": "C:\\xampp\\htdocs\\sdkboard\\api\\homescreen/uploads/retour_chauffeur/Capture d'Ã©cran 2024-12-31 173600.png",
+                          "date_upload": "2026-03-26 16:24:45"
+                      }
+                  ]
+              }
+          ]
+      }
+order: 2000

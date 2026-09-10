@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/details_demande_transfert.php"
+method: POST
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \  \"type\": \"detail\",\r
+
+    \  \"idDT\": 101,\r
+
+    \  \"idProduit\": 55,\r
+
+    \  \"qte\": 10,\r
+
+    \  \"nbrFDX\": 2,\r
+
+    \  \"unite\": \"pcs\"\r
+
+    }\r\n"
+settings: {}
+order: 4000

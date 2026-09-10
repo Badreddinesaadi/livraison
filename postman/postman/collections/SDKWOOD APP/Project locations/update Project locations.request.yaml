@@ -1,0 +1,31 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/projet.php"
+method: PUT
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  - key: id
+    value: "6"
+    disabled: true
+  - key: idClient
+    value: ""
+    disabled: true
+  - key: idChauffeur
+    value: "5"
+    disabled: true
+  - key: idDepot
+    value: "31"
+    disabled: true
+  - key: page
+    value: "1"
+    disabled: true
+  - key: idVehicule
+    value: "9"
+    disabled: true
+body:
+  type: json
+  content: "{\r\n    \"projet\" : \"sss\"\r\n}"
+settings: {}
+order: 3000

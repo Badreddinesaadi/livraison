@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/voyage.php"
+method: PUT
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"id\": 24,\r
+
+    \    \"statut\" : \"terminer\",\r
+
+    \    \"km_retour\" : 6969,\r
+
+    \    \"date_retour\" : \"2026-03-18 12:00:00\"\r
+
+    }"
+settings: {}
+order: 4000

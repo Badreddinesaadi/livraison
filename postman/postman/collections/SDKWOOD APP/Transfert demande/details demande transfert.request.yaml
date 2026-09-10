@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/homescreen/details_demande_transfert.php?idDT=1536&details=1"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  idDT: "1536"
+  details: "1"
+settings: {}
+order: 3000

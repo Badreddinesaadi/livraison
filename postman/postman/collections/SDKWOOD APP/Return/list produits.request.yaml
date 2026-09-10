@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/sdkboard/api/produit/produits.php"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  - key: client_id
+    value: "1099"
+    disabled: true
+  - key: chauffeur_id
+    value: "5"
+    disabled: true
+body:
+  type: formdata
+  content:
+    - type: file
+      key: ""
+      src: ""
+      disabled: true
+settings: {}
+order: 4000
