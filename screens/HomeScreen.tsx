@@ -131,7 +131,7 @@ export default function HomeScreen() {
         ListHeaderComponent={
           <View style={styles.greeting}>
             <Text style={styles.greetingTitle}>
-              Bonjour, {user?.name || "Utilisateur"}
+              Bonjour, {user?.name || "Utilisateur"}.
             </Text>
             <Text style={styles.greetingSubtitle}>Choisissez un module</Text>
           </View>

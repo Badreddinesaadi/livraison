@@ -29,10 +29,6 @@
       ],
       "package": "com.anubus298.SDKWood"
     },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
     "plugins": [
       [
         "expo-build-properties",
@@ -115,7 +111,10 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/6f2b9c19-3ca8-43c8-a48c-ab5c2431556c"
+      "url": "https://u.expo.dev/6f2b9c19-3ca8-43c8-a48c-ab5c2431556c",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
     }
   }
 }
