@@ -9,6 +9,7 @@
     "prebuild:clean": "npx expo prebuild --clean",
     "web": "expo start --web",
     "lint": "expo lint",
+    "upload-source-sentry": "npx sentry-expo-upload-sourcemaps dist",
     "typecheck": "npx tsgo --noEmit",
     "upgrade-deps": "npx expo install --fix --pnpm"
   },
@@ -18,6 +19,7 @@
     "@react-native-community/datetimepicker": "9.1.0",
     "@react-native-community/netinfo": "12.0.1",
     "@react-native-picker/picker": "2.11.4",
+    "@sentry/react-native": "^8.26.0",
     "@tanstack/react-query": "^5.90.21",
     "date-fns": "^4.1.0",
     "expo": "^57.0.21",
