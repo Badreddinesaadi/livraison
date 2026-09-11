@@ -2,8 +2,8 @@ import MultiSelectBottomSheetContent from "@/components/MultiSelectBottomSheetCo
 import RvtDeleteConfirmBottomSheetContent from "@/components/RvtDeleteConfirmBottomSheetContent";
 import RvtRoundDeleteConfirmBottomSheetContent from "@/components/RvtRoundDeleteConfirmBottomSheetContent";
 import RvtRoundEditBottomSheetContent from "@/components/RvtRoundEditBottomSheetContent";
-import RvtRoundToggleConfirmBottomSheetContent from "@/components/RvtRoundToggleConfirmBottomSheetContent";
 import RvtRoundFiltersBottomSheetContent from "@/components/RvtRoundFiltersBottomSheetContent";
+import RvtRoundToggleConfirmBottomSheetContent from "@/components/RvtRoundToggleConfirmBottomSheetContent";
 import RvtSelectOptionBottomSheetContent from "@/components/RvtSelectOptionBottomSheetContent";
 import { Button } from "@/components/ui/button";
 import { Colors, PRIMARY } from "@/constants/theme";
@@ -39,8 +39,9 @@ export default function StackLayout() {
   const selectConfig = useRvtSheetStore((s) => s.selectConfig);
   const multiSelectConfig = useRvtSheetStore((s) => s.multiSelectConfig);
   const visitDeleteId = useRvtSheetStore((s) => s.visitDeleteId);
-  const isVisitDeletePending = useRvtSheetStore(
-    (s) => s.isVisitDeletePending,
+  const isVisitDeletePending = useRvtSheetStore((s) => s.isVisitDeletePending);
+  const unselectAllMultiSelect = useRvtSheetStore(
+    (s) => s.unselectAllMultiSelect,
   );
   const confirmVisitDelete = useRvtSheetStore((s) => s.confirmVisitDelete);
   const roundEditConfig = useRvtSheetStore((s) => s.roundEditConfig);
@@ -170,9 +171,7 @@ export default function StackLayout() {
           header: (s) => {
             const stepIndex = CREATE_STEP_ORDER.indexOf(s.route.name);
             return (
-              <View
-                style={[styles.header, { marginTop: top }]}
-              >
+              <View style={[styles.header, { marginTop: top }]}>
                 <View style={styles.headerRow}>
                   <TouchableWithoutFeedback
                     onPress={() => {
@@ -198,7 +197,9 @@ export default function StackLayout() {
                       startSpin();
                       queryClient.invalidateQueries({ queryKey: ["visits"] });
                       queryClient.invalidateQueries({ queryKey: ["rounds"] });
-                      queryClient.invalidateQueries({ queryKey: ["rvt-analytics"] });
+                      queryClient.invalidateQueries({
+                        queryKey: ["rvt-analytics"],
+                      });
                       timeoutRef.current = setTimeout(() => {
                         stopSpin();
                         setIsRefreshing(false);
@@ -211,12 +212,10 @@ export default function StackLayout() {
                         outputRange: ["0deg", "360deg"],
                       });
                       return (
-                        <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                          <FontAwesome
-                            name="refresh"
-                            size={24}
-                            color="black"
-                          />
+                        <Animated.View
+                          style={{ transform: [{ rotate: spin }] }}
+                        >
+                          <FontAwesome name="refresh" size={24} color="black" />
                         </Animated.View>
                       );
                     }}
@@ -246,7 +245,7 @@ export default function StackLayout() {
       >
         <Stack.Screen
           name="camera"
-          options={{ headerShown: false, animation: "fade_from_bottom" }}
+          options={{ headerShown: false, animation: "flip" }}
         />
       </Stack>
 
@@ -275,8 +274,11 @@ export default function StackLayout() {
             enableSearch={selectConfig.enableSearch}
             searchPlaceholder={selectConfig.searchPlaceholder}
           />
-        ) : sheetType === "rvt-multi" && multiSelectConfig && renderedMultiItems ? (
+        ) : sheetType === "rvt-multi" &&
+          multiSelectConfig &&
+          renderedMultiItems ? (
           <MultiSelectBottomSheetContent
+            unselectAll={unselectAllMultiSelect}
             title={multiSelectConfig.title}
             items={renderedMultiItems}
             onToggle={toggleMultiSelectOption}
@@ -300,9 +302,7 @@ export default function StackLayout() {
             onStartedAtChange={(startedAt) =>
               updateRoundEditDraft({ startedAt })
             }
-            onClosedAtChange={(closedAt) =>
-              updateRoundEditDraft({ closedAt })
-            }
+            onClosedAtChange={(closedAt) => updateRoundEditDraft({ closedAt })}
             onCancel={closeSheet}
             onConfirm={confirmRoundEdit}
           />

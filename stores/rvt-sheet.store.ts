@@ -92,7 +92,10 @@ type RvtSheetState = {
   openMultiSelect: (config: MultiSelectConfig) => void;
   toggleMultiSelectOption: (id: string) => void;
   confirmMultiSelect: () => void;
-  openVisitDeleteConfirm: (visitId: string, handler: VisitDeleteHandler) => void;
+  openVisitDeleteConfirm: (
+    visitId: string,
+    handler: VisitDeleteHandler,
+  ) => void;
   confirmVisitDelete: () => void;
   finishVisitDelete: () => void;
   openRoundEdit: (config: RoundEditConfig) => void;
@@ -102,6 +105,7 @@ type RvtSheetState = {
     closedAt?: Date | null;
   }) => void;
   confirmRoundEdit: () => void;
+  unselectAllMultiSelect: () => void;
   openRoundDeleteConfirm: (config: RoundDeleteConfig) => void;
   confirmRoundDelete: () => void;
   finishRoundDelete: () => void;
@@ -303,4 +307,12 @@ export const useRvtSheetStore = create<RvtSheetState>((set, get) => ({
       return {};
     }),
   closeSheet: () => set({ isSheetOpen: false }),
+  unselectAllMultiSelect: () =>
+    set((state) => {
+      const config = state.multiSelectConfig;
+      if (!config) return state;
+      const selectedIds = config.getSelectedIds();
+      selectedIds.forEach((id) => config.onToggle(id));
+      return { selectionTick: state.selectionTick + 1 };
+    }),
 }));

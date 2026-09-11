@@ -28,6 +28,7 @@ export default function CreateRvtOpportuniteScreen() {
 
   const sdkPositions = refData?.sdkPositions ?? [];
   const competitors = refData?.competitors ?? [];
+  const produitConcerne = refData?.catalogueProduits ?? [];
   const potentials = refData?.opportunityPotentials ?? [];
   const horizons = refData?.opportunityHorizons ?? [];
 
@@ -69,7 +70,7 @@ export default function CreateRvtOpportuniteScreen() {
     });
   };
 
-  const handleSelectOppProduct = () => {
+  const handleSelectProduitConcerne = () => {
     if (!productOptions.length) {
       Toast.show({
         type: "error",
@@ -78,12 +79,66 @@ export default function CreateRvtOpportuniteScreen() {
       });
       return;
     }
-    openSelect({
-      title: "Produit concerné",
-      options: productOptions,
+    openMultiSelect({
+      title: "Produits concernés",
+      items: produitConcerne.map((p) => ({
+        id:
+          (p.categ || "-") +
+          "::" +
+          (p.categ2 || "-") +
+          "::" +
+          (p.couleur || "-") +
+          "::" +
+          (p.finition || "-") +
+          "::" +
+          (p.marque || "-") +
+          "::" +
+          (p.scateg || "-"),
+        label: p.categ + " / " + p.categ2 + " / " + p.marque,
+        subLabel:
+          (p.couleur || "-") +
+          " / " +
+          (p.finition || "-") +
+          " / " +
+          (p.scateg || "-"),
+      })),
+      getSelectedIds: () =>
+        useCreateVisitStore
+          .getState()
+          .produit_concerne.map(
+            (x) =>
+              (x.categ || "-") +
+              "::" +
+              (x.categ2 || "-") +
+              "::" +
+              (x.couleur || "-") +
+              "::" +
+              (x.finition || "-") +
+              "::" +
+              (x.marque || "-") +
+              "::" +
+              (x.scateg || "-"),
+          ),
       enableSearch: true,
-      searchPlaceholder: "Rechercher un produit...",
-      onSelect: (id) => store.setOppProductId(id),
+      searchPlaceholder: "Rechercher un concurrent...",
+      onToggle: (id) => {
+        const splitted = id.split("::");
+        const categ = splitted[0] !== "-" ? splitted[0] : "";
+        const categ2 = splitted[1] !== "-" ? splitted[1] : "";
+        const couleur = splitted[2] !== "-" ? splitted[2] : "";
+        const finition = splitted[3] !== "-" ? splitted[3] : "";
+        const marque = splitted[4] !== "-" ? splitted[4] : "";
+        const scateg = splitted[5] !== "-" ? splitted[5] : "";
+        useCreateVisitStore.getState().toggleProduitConcerne({
+          categ,
+          categ2,
+          couleur,
+          finition,
+          marque,
+          scateg,
+        });
+      },
+      onConfirm: () => {},
     });
   };
 
@@ -103,7 +158,10 @@ export default function CreateRvtOpportuniteScreen() {
   };
 
   const handleNext = () => {
-    if (store.opportunityDetected === true && !store.oppProductId) {
+    if (
+      store.opportunityDetected === true &&
+      store.produit_concerne.length === 0
+    ) {
       Toast.show({
         type: "error",
         text1: "Opportunité incomplète",
@@ -156,7 +214,9 @@ export default function CreateRvtOpportuniteScreen() {
           {store.competitors.length > 0 ? (
             <View style={styles.competitorList}>
               {store.competitors.map((comp) => {
-                const info = competitors.find((c) => c.id === comp.competitorId);
+                const info = competitors.find(
+                  (c) => c.id === comp.competitorId,
+                );
                 return (
                   <View key={comp.competitorId} style={styles.competitorLine}>
                     <View style={styles.competitorHeader}>
@@ -164,7 +224,9 @@ export default function CreateRvtOpportuniteScreen() {
                         {info?.designation ?? comp.competitorId}
                       </Text>
                       <Pressable
-                        onPress={() => store.removeCompetitor(comp.competitorId)}
+                        onPress={() =>
+                          store.removeCompetitor(comp.competitorId)
+                        }
                         hitSlop={8}
                       >
                         <FontAwesome5 name="trash" size={12} color="#ff4d4f" />
@@ -204,9 +266,13 @@ export default function CreateRvtOpportuniteScreen() {
             <View style={styles.oppBlock}>
               <RvtSelectorField
                 label="Produit / famille concerné"
-                value={oppProduct?.label}
+                value={
+                  store.produit_concerne.length > 0
+                    ? `${store.produit_concerne.length} produit${store.produit_concerne.length > 1 ? "s" : ""}`
+                    : undefined
+                }
                 placeholder="Sélectionner"
-                onPress={handleSelectOppProduct}
+                onPress={handleSelectProduitConcerne}
                 required
               />
               <RvtChipRow

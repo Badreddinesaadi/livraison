@@ -1,5 +1,6 @@
 import { PRIMARY } from "@/constants/theme";
 import { RvtOption } from "@/stores/rvt-sheet.store";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   BottomSheetFlatList,
   BottomSheetTextInput,
@@ -20,6 +21,7 @@ type MultiSelectBottomSheetContentProps = {
   items: MultiSelectItem[];
   onToggle: (id: string) => void;
   onConfirm: () => void;
+  unselectAll: () => void;
   enableSearch?: boolean;
   searchPlaceholder?: string;
   confirmLabel?: string;
@@ -58,6 +60,7 @@ export default function MultiSelectBottomSheetContent({
   items,
   onToggle,
   onConfirm,
+  unselectAll,
   enableSearch = false,
   searchPlaceholder = "Rechercher...",
   confirmLabel = "Valider",
@@ -101,11 +104,14 @@ export default function MultiSelectBottomSheetContent({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        <View style={styles.counterPill}>
-          <Text style={styles.counterText}>
-            {selectedCount} sélectionné{selectedCount > 1 ? "s" : ""}
-          </Text>
-        </View>
+        {selectedCount > 0 && (
+          <Pressable onPress={unselectAll} style={styles.counterPill}>
+            <Text style={styles.counterText}>
+              {selectedCount} sélectionné{selectedCount > 1 ? "s" : ""}
+            </Text>
+            <FontAwesome name="close" size={16} color={PRIMARY} />
+          </Pressable>
+        )}
       </View>
 
       {shouldShowSearch ? (
@@ -174,6 +180,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
     backgroundColor: PRIMARY + "18",
+    flexDirection: "row",
+    gap: 6,
   },
   counterText: {
     fontSize: 12,

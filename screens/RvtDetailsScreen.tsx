@@ -1,6 +1,7 @@
 import { getVisitById } from "@/api/visits.api";
 import RvtPicturePreview from "@/components/RvtPicturePreview";
 import { hasRapportVisitePermission } from "@/constants/permissions";
+import { apiUrl } from "@/constants/query";
 import { PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
@@ -9,10 +10,8 @@ import {
   IndustrialSite,
   ResellerSite,
 } from "@/types/rvt.types";
-import { formatDuration, rvtPhotoUrl, syncStatusUi } from "@/utils/rvt-format";
 import { downloadPdf } from "@/utils/pdf-download";
-import { apiUrl } from "@/constants/query";
-import Toast from "react-native-toast-message";
+import { formatDuration, rvtPhotoUrl, syncStatusUi } from "@/utils/rvt-format";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -20,6 +19,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function RvtDetailsScreen() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function RvtDetailsScreen() {
     enabled: canList && Boolean(visitId),
   });
 
-  const report = data ?? null;
+  const report = useMemo(() => data ?? null, [data]);
   const status = useMemo(
     () => syncStatusUi(report?.syncStatus),
     [report?.syncStatus],
@@ -87,6 +87,7 @@ export default function RvtDetailsScreen() {
       },
       location: report.location,
       contactRole: report.contactRole,
+      produit_concerne: report.produitConcerne ?? [],
       contactOther: report.contactOther ?? "",
       activityLevel: report.activityLevel,
       activiteObserveeId: report.activiteObservee?.id ?? null,
@@ -241,7 +242,7 @@ export default function RvtDetailsScreen() {
           />
           {report.resellerSite ? (
             <DetailRow
-              icon="scissors"
+              icon="cut"
               label="Découpe"
               value={resellerCuttingLabel(report.resellerSite)}
             />
@@ -279,26 +280,32 @@ export default function RvtDetailsScreen() {
           ) : null}
         </Section>
 
-        <Section title="Marché — produits et marques" icon="boxes">
+        <Section title="Marché — produits et marques observés" icon="boxes">
           {report.categorie1 ? (
             <DetailRow
               icon="tags"
               label="Catégorie 1"
-              value={report.categorie1.designation ?? String(report.categorie1.id)}
+              value={
+                report.categorie1.designation ?? String(report.categorie1.id)
+              }
             />
           ) : null}
           {report.categorie2 ? (
             <DetailRow
               icon="tags"
               label="Catégorie 2"
-              value={report.categorie2.designation ?? String(report.categorie2.id)}
+              value={
+                report.categorie2.designation ?? String(report.categorie2.id)
+              }
             />
           ) : null}
           {report.categorie3 ? (
             <DetailRow
               icon="tags"
               label="Catégorie 3"
-              value={report.categorie3.designation ?? String(report.categorie3.id)}
+              value={
+                report.categorie3.designation ?? String(report.categorie3.id)
+              }
             />
           ) : null}
           {products.length === 0 && brands.length === 0 ? (

@@ -1,4 +1,3 @@
-import { create } from "zustand";
 import {
   ActivityLevel,
   ContactRole,
@@ -11,10 +10,12 @@ import {
   OpportunityPotential,
   ParkSize,
   PresenceLevel,
+  produitConcerne,
   SDKPosition,
   VisitPhoto,
   VisitResult,
 } from "@/types/rvt.types";
+import { create } from "zustand";
 
 export type PendingVisitPhoto = {
   uri: string;
@@ -50,6 +51,7 @@ type CreateVisitState = {
   categorie1Id: number | null;
   categorie2Id: number | null;
   categorie3Id: number | null;
+  produit_concerne: produitConcerne[];
 
   products: ObservedProductInput[];
   otherProduct: string;
@@ -115,6 +117,13 @@ type CreateVisitState = {
   removeBrand: (brandId: number) => void;
   setBrandPresence: (brandId: number, presence: PresenceLevel) => void;
 
+  addproduitConcerne: (produit: produitConcerne) => void;
+  removeproduitConcerne: (produit: produitConcerne) => void;
+  updateproduitConcerne: (
+    index: number,
+    patch: Partial<produitConcerne>,
+  ) => void;
+  toggleProduitConcerne: (produit: produitConcerne) => void;
   setSdkPosition: (sdkPosition: SDKPosition | null) => void;
   toggleCompetitor: (competitorId: number, presence?: PresenceLevel) => void;
   setCompetitorPresence: (
@@ -164,6 +173,7 @@ type CreateVisitState = {
     categorie2Id?: number | null;
     categorie3Id?: number | null;
     products?: ObservedProductInput[];
+    produit_concerne: produitConcerne[];
     otherProduct?: string;
     brands?: ObservedBrandInput[];
     sdkPosition?: SDKPosition;
@@ -226,6 +236,7 @@ const initialState = {
   oppHorizon: null as OpportunityHorizon | null,
   oppAmount: "",
   oppCompetitorId: null as number | null,
+  produit_concerne: [] as produitConcerne[],
 
   results: [] as VisitResult[],
   orderSolo: "",
@@ -355,7 +366,9 @@ export const useCreateVisitStore = create<CreateVisitState>((set) => ({
           ),
         };
       }
-      return { competitors: [...state.competitors, { competitorId, presence }] };
+      return {
+        competitors: [...state.competitors, { competitorId, presence }],
+      };
     }),
   setCompetitorPresence: (competitorId, presence) =>
     set((state) => ({
@@ -412,6 +425,55 @@ export const useCreateVisitStore = create<CreateVisitState>((set) => ({
       nextActionDueAt: report.nextActionDueAt
         ? new Date(report.nextActionDueAt)
         : null,
+    }),
+  addproduitConcerne: (produit) =>
+    set((state) => ({
+      produit_concerne: [...state.produit_concerne, produit],
+    })),
+  removeproduitConcerne: (produit) =>
+    set((state) => ({
+      produit_concerne: state.produit_concerne.filter(
+        (p) =>
+          p.categ !== produit.categ &&
+          p.scateg !== produit.scateg &&
+          p.categ2 !== produit.categ2 &&
+          p.marque !== produit.marque &&
+          p.couleur !== produit.couleur &&
+          p.finition !== produit.finition,
+      ),
+    })),
+  updateproduitConcerne: (index, patch) =>
+    set((state) => ({
+      produit_concerne: state.produit_concerne.map((p, i) =>
+        i === index ? { ...p, ...patch } : p,
+      ),
+    })),
+  toggleProduitConcerne: (produit) =>
+    set((state) => {
+      const exists = state.produit_concerne.some(
+        (p) =>
+          p.categ === produit.categ &&
+          p.scateg === produit.scateg &&
+          p.categ2 === produit.categ2 &&
+          p.marque === produit.marque &&
+          p.couleur === produit.couleur &&
+          p.finition === produit.finition,
+      );
+      return {
+        produit_concerne: exists
+          ? state.produit_concerne.filter(
+              (p) =>
+                !(
+                  p.categ === produit.categ &&
+                  p.scateg === produit.scateg &&
+                  p.categ2 === produit.categ2 &&
+                  p.marque === produit.marque &&
+                  p.couleur === produit.couleur &&
+                  p.finition === produit.finition
+                ),
+            )
+          : [...state.produit_concerne, produit],
+      };
     }),
   resetAll: () => set({ ...initialState }),
 }));

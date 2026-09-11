@@ -223,6 +223,7 @@ export type ReferenceData = {
   equipmentByActivity: Record<string, string[]>;
   suppliersByCategory: Record<string, string[]>;
   competitors: CompetitorRef[];
+  catalogueProduits: produitConcerne[];
 };
 
 export type ProductDetails = {
@@ -370,6 +371,7 @@ export type VisitCreate = VisitFields & {
   location: Location;
   opportunity: OpportunityInput;
   results: VisitResult[];
+  produit_concerne?: produitConcerne[];
 };
 
 export type VisitPatch = VisitFields;
@@ -418,6 +420,7 @@ export type VisitReport = {
   nextActionDueAt?: string;
   note?: string;
   photos: VisitPhoto[];
+  produitConcerne?: produitConcerne[] | null;
 };
 
 export type Round = {
@@ -459,4 +462,13 @@ export const GPS_STATUS_LABELS: Record<GPSStatus, string> = {
   GPS_VALIDATED: "Validée",
   GPS_APPROXIMATE: "Approximative",
   GPS_UNAVAILABLE: "Indisponible",
+};
+
+export type produitConcerne = {
+  categ: string;
+  scateg: string;
+  categ2: string;
+  marque: string;
+  couleur: string;
+  finition: string;
 };

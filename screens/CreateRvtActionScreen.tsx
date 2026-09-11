@@ -67,12 +67,7 @@ export default function CreateRvtActionScreen() {
     });
     router.navigate("/rvt/camera");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    openCamera,
-    router,
-    keptExistingPhotos.length,
-    store.photos.length,
-  ]);
+  }, [openCamera, router, keptExistingPhotos.length, store.photos.length]);
 
   const captureLocationIfMissing = useCallback(async () => {
     if (store.location?.status === "GPS_VALIDATED") return;
@@ -304,6 +299,7 @@ export default function CreateRvtActionScreen() {
         }),
       ),
       otherProduct: (store.otherProduct ?? "").trim() || undefined,
+      produit_concerne: store.produit_concerne ?? [],
       brands: store.brands,
       competitors: store.competitors,
       sdkPosition: store.sdkPosition ?? undefined,
@@ -570,7 +566,9 @@ export default function CreateRvtActionScreen() {
                       />
                     </Pressable>
                     <Pressable
-                      onPress={() => store.removeExistingPhoto(String(photo.id))}
+                      onPress={() =>
+                        store.removeExistingPhoto(String(photo.id))
+                      }
                       style={styles.photoRemove}
                     >
                       <FontAwesome5 name="times" size={10} color="#fff" />
