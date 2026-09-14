@@ -1,15 +1,17 @@
 import OfflineNotice from "@/components/OfflineNotice";
 import { SplashScreenController } from "@/components/splash";
 import { queryClient } from "@/constants/query";
+import { useApiUrlStore } from "@/stores/api-url.store";
 import { SessionProvider, useSession } from "@/stores/auth.store";
+import * as Sentry from "@sentry/react-native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import Toast from "react-native-toast-message";
-import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
-  dsn: 'https://db4c2b3e4c28ab5e373dad6c73917a13@o4510540277612544.ingest.de.sentry.io/4512067805773904',
+  dsn: "https://db4c2b3e4c28ab5e373dad6c73917a13@o4510540277612544.ingest.de.sentry.io/4512067805773904",
 
   // Adds more context data to events (IP address, cookies, user, etc.)
   // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
@@ -38,12 +40,22 @@ export default Sentry.wrap(function Layout() {
 
 const InnerLayout = () => {
   const session = useSession();
+  const apiUrl = useApiUrlStore((s) => s.apiUrl);
+  const isApiUrlLoaded = useApiUrlStore((s) => s.isLoaded);
+  const initApiUrl = useApiUrlStore((s) => s.initApiUrl);
+
+  useEffect(() => {
+    initApiUrl();
+  }, [initApiUrl]);
 
   return (
     <>
       <StatusBar style="light" />
       <SplashScreenController />
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={isApiUrlLoaded && !apiUrl}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
         <Stack.Protected guard={!!session.user}>
           <Stack.Screen name="(app)/(drawer)" />
         </Stack.Protected>
@@ -51,7 +63,7 @@ const InnerLayout = () => {
           <Stack.Screen name="(driver)/index" />
         </Stack.Protected> */}
 
-        <Stack.Protected guard={!session.user}>
+        <Stack.Protected guard={!session.user && isApiUrlLoaded && !!apiUrl}>
           <Stack.Screen name="sign-in" />
         </Stack.Protected>
       </Stack>

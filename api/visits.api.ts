@@ -1,5 +1,5 @@
 import { client, Pagination } from "@/constants/client";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import {
   VisitCreate,
   VisitPatch,
@@ -104,7 +104,7 @@ export const uploadVisitPhoto = async ({
   visitId: string;
   file: UploadVisitFile;
 }): Promise<VisitPhoto[] | null> => {
-  const base = (apiUrl ?? "").replace(/\/+$/, "");
+  const base = (getApiUrl() ?? "").replace(/\/+$/, "");
   const url = `${
     base
   }/sdkboard/api/rounds/visits.php?action=addPhoto&id=${encodeURIComponent(
@@ -208,7 +208,7 @@ export const uploadPanneauChantierPhoto = async ({
   visitId: string;
   file: UploadVisitFile;
 }) => {
-  const base = (apiUrl ?? "").replace(/\/+$/, "");
+  const base = (getApiUrl() ?? "").replace(/\/+$/, "");
   const url = `${base}/sdkboard/api/rounds/panneau_chantier.php?id=${encodeURIComponent(
     String(visitId),
   )}`;

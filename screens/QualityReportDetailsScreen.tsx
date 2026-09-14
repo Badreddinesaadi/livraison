@@ -1,7 +1,7 @@
 import { getQualityReportById } from "@/api/quality-report.api";
 import Loader from "@/components/Loader";
 import { hasRapportQualitePermission } from "@/constants/permissions";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -60,7 +60,7 @@ const buildFileUrl = (cheminFichier?: string | null) => {
     return null;
   }
 
-  const normalizedBaseUrl = (apiUrl ?? "").replace(/\/$/, "");
+  const normalizedBaseUrl = (getApiUrl() ?? "").replace(/\/$/, "");
   const normalizedPath = cheminFichier.replace(/^\/+/, "");
 
   if (!normalizedBaseUrl) {

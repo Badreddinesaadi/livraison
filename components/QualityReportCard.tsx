@@ -1,5 +1,5 @@
 import { QualityReport } from "@/api/quality-report.api";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY } from "@/constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { format } from "date-fns";
@@ -54,7 +54,7 @@ const buildFileUrl = (cheminFichier?: string | null) => {
     return null;
   }
 
-  const normalizedBaseUrl = (apiUrl ?? "").replace(/\/$/, "");
+  const normalizedBaseUrl = (getApiUrl() ?? "").replace(/\/$/, "");
   const normalizedPath = cheminFichier.replace(/^\/+/, "");
 
   if (!normalizedBaseUrl) {

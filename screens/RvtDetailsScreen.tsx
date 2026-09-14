@@ -1,7 +1,7 @@
 import { getVisitById } from "@/api/visits.api";
 import RvtPicturePreview from "@/components/RvtPicturePreview";
 import { hasRapportVisitePermission } from "@/constants/permissions";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
@@ -63,7 +63,7 @@ export default function RvtDetailsScreen() {
       return;
     }
     downloadPdf(
-      `${apiUrl}/sdkboard/api/rounds/visit_pdf.php?id=${report.visitId || report.id}`,
+      `${getApiUrl()}/sdkboard/api/rounds/visit_pdf.php?id=${report.visitId || report.id}`,
       `visite-${report.visitId || report.id}`,
       setIsPdfPending,
     );

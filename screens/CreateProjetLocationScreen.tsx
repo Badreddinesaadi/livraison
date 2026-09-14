@@ -7,7 +7,7 @@ import {
 } from "@/api/projet-location.api";
 import { Button } from "@/components/ui/button";
 import { hasProjetPermission } from "@/constants/permissions";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { useProjetLocationSheetStore } from "@/stores/projet-location.store";
@@ -120,7 +120,7 @@ const buildFileUrl = (cheminFichier?: string) => {
     return null;
   }
 
-  return `${apiUrl}/sdkboard/${cheminFichier}`;
+  return `${getApiUrl()}/sdkboard/${cheminFichier}`;
 };
 
 export const CreateProjetLocationScreen = () => {

@@ -17,7 +17,7 @@ import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
 import { useSession } from "@/stores/auth.store";
 import { formatDateLabel } from "@/utils/rvt-format";
 import { downloadPdf } from "@/utils/pdf-download";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import {
   useInfiniteQuery,
@@ -326,7 +326,7 @@ export default function RvtTourDetailsScreen() {
 
   const handleDownloadPdf = useCallback(() => {
     downloadPdf(
-      `${apiUrl}/sdkboard/api/rounds/round_pdf.php?id=${roundId}`,
+      `${getApiUrl()}/sdkboard/api/rounds/round_pdf.php?id=${roundId}`,
       `tournee-${round?.nom || roundId}`,
       setIsPdfPending,
     );

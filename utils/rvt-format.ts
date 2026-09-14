@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import { SyncStatus, VisitPhoto } from "@/types/rvt.types";
 
 export const formatDateLabel = (value?: string | null) => {
@@ -28,7 +28,7 @@ export const rvtPhotoUrl = (
   const raw = photo.remoteUrl ?? photo.thumbnailUrl ?? null;
   if (!raw) return null;
   if (/^https?:\/\//i.test(raw)) return raw;
-  const base = (apiUrl ?? "").replace(/\/+$/, "");
+  const base = (getApiUrl() ?? "").replace(/\/+$/, "");
   const path = raw.replace(/^\/+/, "");
   if (!base) return raw;
   return `${base}/sdkboard/api/${path}`;

@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
-import { apiUrl, queryClient } from "./query";
+import { queryClient } from "./query";
+import { getApiUrl } from "@/stores/api-url.store";
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -27,11 +28,9 @@ export type PaginatedResult<T> = {
 };
 
 class ApiClient {
-  private baseUrl: string;
   private defaultHeaders: Record<string, string>;
 
   constructor() {
-    this.baseUrl = apiUrl || "";
     this.defaultHeaders = {
       "Content-Type": "application/json",
       login_token: "SDKWOOD",
@@ -57,7 +56,7 @@ class ApiClient {
       withPagination = false,
     } = options;
 
-    const url = this.baseUrl + pathname;
+    const url = (getApiUrl() || "") + pathname;
     let finalUrl = url;
 
     if (

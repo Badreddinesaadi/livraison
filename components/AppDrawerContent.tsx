@@ -28,7 +28,8 @@ type DrawerRoute =
   | "/rotation-chauffeur"
   | "/projet-locations"
   | "/demande-transferts"
-  | "/rvt";
+  | "/rvt"
+  | "/settings";
 
 type DrawerMenuItem = {
   label: string;
@@ -64,6 +65,7 @@ const DRAWER_ITEMS: DrawerMenuItem[] = [
     route: "/rvt",
     icon: "clipboard-list-outline",
   },
+  { label: "Paramètres", route: "/settings", icon: "cog-outline" },
 ];
 
 function isRouteActive(pathname: string, route: DrawerRoute) {

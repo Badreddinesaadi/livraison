@@ -19,7 +19,7 @@ export const queryClient = new QueryClient({
     },
   },
 });
-export const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 // This code is only for TypeScript
 declare global {
   interface Window {

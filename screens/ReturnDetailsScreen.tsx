@@ -1,7 +1,7 @@
 import { getReturnById } from "@/api/return.api";
 import Loader from "@/components/Loader";
 import { hasRetourPermission } from "@/constants/permissions";
-import { apiUrl } from "@/constants/query";
+import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -50,7 +50,7 @@ const buildFileUrl = (cheminFichier?: string) => {
     return null;
   }
 
-  return `${apiUrl}/sdkboard/${cheminFichier}`;
+  return `${getApiUrl()}/sdkboard/${cheminFichier}`;
 };
 
 const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "heic"];
