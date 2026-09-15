@@ -18,9 +18,9 @@ import {
 } from "react-native";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("rachid.aitbouhou@sdkwood.ma");
+  const [email, setEmail] = useState("");
 
-  const [password, setPassword] = useState("Sdk@2025");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const { signIn, signInIsPending } = useSession();
