@@ -1,4 +1,5 @@
 import { normalizeApiUrl, useApiUrlStore } from "@/stores/api-url.store";
+import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import { useState } from "react";
@@ -13,9 +14,15 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function OnboardingUrlScreen() {
+export default function OnboardingUrlScreen({
+  canGoBack = false,
+}: {
+  canGoBack?: boolean;
+}) {
   const router = useRouter();
   const saveApiUrl = useApiUrlStore((s) => s.saveApiUrl);
   const [url, setUrl] = useState("");
@@ -41,10 +48,20 @@ export default function OnboardingUrlScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <SafeAreaView style={styles.flex}>
+      {canGoBack ? (
+        <View style={styles.header}>
+          <TouchableWithoutFeedback onPress={() => router.back()}>
+            <FontAwesome name="arrow-left" size={24} color="black" />
+          </TouchableWithoutFeedback>
+          <Text style={styles.headerTitle}>Adresse du serveur</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+      ) : null}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           contentContainerStyle={styles.container}
@@ -81,18 +98,39 @@ export default function OnboardingUrlScreen() {
             {isSaving ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Continuer</Text>
+              <Text style={styles.buttonText}>
+                {canGoBack ? "Enregistrer" : "Continuer"}
+              </Text>
             )}
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    height: 60,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  headerSpacer: {
+    width: 24,
   },
   container: {
     flexGrow: 1,

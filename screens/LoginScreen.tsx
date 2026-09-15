@@ -2,6 +2,7 @@ import { useSession } from "@/stores/auth.store";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -16,8 +17,11 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -61,6 +65,14 @@ export default function LoginScreen() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
+          <TouchableOpacity
+            style={[styles.settingsButton, { top: insets.top + 8 }]}
+            onPress={() => router.push("/api-url")}
+            hitSlop={8}
+          >
+            <MaterialIcons name="settings" size={22} color="#ED5623" />
+          </TouchableOpacity>
+
           <Image
             source={require("../assets/images/logo.jpeg")}
             style={styles.logo}
@@ -124,6 +136,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
+  settingsButton: {
+    position: "absolute",
+    right: 16,
+    padding: 4,
+  },
   logo: {
     width: 220,
     height: 130,
@@ -136,6 +153,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 6,
     marginBottom: 15,
+    color: "#11181C",
   },
   passwordContainer: {
     flexDirection: "row",
@@ -149,6 +167,7 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     paddingVertical: 14,
+    color: "#11181C",
   },
   button: {
     backgroundColor: "#ED5623",
