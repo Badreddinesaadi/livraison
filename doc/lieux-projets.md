@@ -1,6 +1,6 @@
 # Lieux de Projets — API Documentation
 
-**Base path:** `/sdkboard/api/homescreen/projet.php`
+**Base path:** `/api/homescreen/projet.php`
 
 **Authentication:** All requests require a valid `auth_token` header.
 
@@ -10,20 +10,20 @@
 
 ### 1. List Project Locations
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Path** | `/sdkboard/api/homescreen/projet.php` |
-| **Auth** | Required |
+| Field      | Value                        |
+| ---------- | ---------------------------- |
+| **Method** | `GET`                        |
+| **Path**   | `/api/homescreen/projet.php` |
+| **Auth**   | Required                     |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number (default: 1) |
-| `limit` | int | No | Items per page (default: 10) |
-| `id` | int | No | Get a single project location by ID |
-| `idCreate` | int | No | Filter by creator user ID |
+| Parameter  | Type | Required | Description                         |
+| ---------- | ---- | -------- | ----------------------------------- |
+| `page`     | int  | No       | Page number (default: 1)            |
+| `limit`    | int  | No       | Items per page (default: 10)        |
+| `id`       | int  | No       | Get a single project location by ID |
+| `idCreate` | int  | No       | Filter by creator user ID           |
 
 > **Note:** The frontend does NOT use `idCreate` despite the backend supporting it. There is also no server-side search; the frontend filters locally.
 
@@ -65,34 +65,34 @@
 
 ### 2. Create Project Location
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Path** | `/sdkboard/api/homescreen/projet.php` |
-| **Content-Type** | `multipart/form-data` |
-| **Auth** | Required |
+| Field            | Value                        |
+| ---------------- | ---------------------------- |
+| **Method**       | `POST`                       |
+| **Path**         | `/api/homescreen/projet.php` |
+| **Content-Type** | `multipart/form-data`        |
+| **Auth**         | Required                     |
 
 > The authenticated user's ID is stored as `idCreate` (unless overridden via `idCreate` field).
 
 #### Form Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `projet` | string | Yes | Project type (`chantier` or `depot`) |
-| `localisation` | string | Yes | JSON string with GPS coordinates `{"x": longitude, "y": latitude}` |
-| `commentaire` | string | No | Comment text |
-| `contact_nom` | string | No | Contact name |
-| `contact_telephone` | string | No | Contact phone number |
-| `idCreate` | int | No | Override creator ID (defaults to authenticated user) |
+| Field               | Type   | Required | Description                                                        |
+| ------------------- | ------ | -------- | ------------------------------------------------------------------ |
+| `projet`            | string | Yes      | Project type (`chantier` or `depot`)                               |
+| `localisation`      | string | Yes      | JSON string with GPS coordinates `{"x": longitude, "y": latitude}` |
+| `commentaire`       | string | No       | Comment text                                                       |
+| `contact_nom`       | string | No       | Contact name                                                       |
+| `contact_telephone` | string | No       | Contact phone number                                               |
+| `idCreate`          | int    | No       | Override creator ID (defaults to authenticated user)               |
 
 #### File Upload
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `images[]` | files | No* | Uploaded files |
-| `images_base64` | array | No* | Alternative: Base64-encoded strings |
+| Field           | Type  | Required | Description                         |
+| --------------- | ----- | -------- | ----------------------------------- |
+| `images[]`      | files | No\*     | Uploaded files                      |
+| `images_base64` | array | No\*     | Alternative: Base64-encoded strings |
 
-> *Neither is required by the backend (unlike other modules). Images are optional.
+> \*Neither is required by the backend (unlike other modules). Images are optional.
 
 #### Response
 
@@ -112,23 +112,23 @@
 
 ### 3. Update Project Location
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
-| **Path** | `/sdkboard/api/homescreen/projet.php` |
-| **Content-Type** | `application/json` |
-| **Auth** | Required |
+| Field            | Value                        |
+| ---------------- | ---------------------------- |
+| **Method**       | `PUT`                        |
+| **Path**         | `/api/homescreen/projet.php` |
+| **Content-Type** | `application/json`           |
+| **Auth**         | Required                     |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | int | Yes | Project location ID |
-| `projet` | string | No | Project type (`chantier` / `depot`) |
-| `localisation` | string | No | JSON GPS coordinates |
-| `commentaire` | string | No | Comment text |
-| `contact_nom` | string | No | Contact name |
-| `contact_telephone` | string | No | Contact phone |
+| Field               | Type   | Required | Description                         |
+| ------------------- | ------ | -------- | ----------------------------------- |
+| `id`                | int    | Yes      | Project location ID                 |
+| `projet`            | string | No       | Project type (`chantier` / `depot`) |
+| `localisation`      | string | No       | JSON GPS coordinates                |
+| `commentaire`       | string | No       | Comment text                        |
+| `contact_nom`       | string | No       | Contact name                        |
+| `contact_telephone` | string | No       | Contact phone                       |
 
 > **Note:** The update endpoint does NOT support file upload. Existing images cannot be modified, replaced, or added through this endpoint.
 
@@ -142,15 +142,16 @@
 
 ### 4. Delete Project Location
 
-| Field | Value |
-|-------|-------|
-| **Method** | `DELETE` |
-| **Path** | `/sdkboard/api/homescreen/projet.php` |
-| **Auth** | Required |
+| Field      | Value                        |
+| ---------- | ---------------------------- |
+| **Method** | `DELETE`                     |
+| **Path**   | `/api/homescreen/projet.php` |
+| **Auth**   | Required                     |
 
 #### Request
 
 The `id` can be provided via:
+
 - Query parameter: `?id=8`
 - JSON body: `{ "id": 8 }`
 
@@ -168,24 +169,24 @@ Deletes associated images first (`projet_image`), then the project record. Uses 
 
 ## Projet Types
 
-| Value | Label | Description |
-|-------|-------|-------------|
+| Value      | Label    | Description       |
+| ---------- | -------- | ----------------- |
 | `chantier` | Chantier | Construction site |
-| `depot` | Dépôt | Warehouse / depot |
+| `depot`    | Dépôt    | Warehouse / depot |
 
 ---
 
 ## Frontend ↔ Backend Differences
 
-| Frontend Call | Backend Exists? | Notes |
-|---------------|----------------|-------|
-| `listProjetLocation` (GET) | Yes | Frontend sends `page` but not `idCreate` |
-| `getProjetLocationById` (GET with `?id=`) | Yes | Returns single record with images |
-| `createProjetLocation` (POST multipart) | Yes | Matches |
-| `updateProjetLocation` (PUT JSON) | Yes | No file upload support on PUT |
-| `deleteProjetLocation` (DELETE) | Yes | Matches |
-| Frontend search (local filtering) | N/A | No server-side search parameter exists |
-| Frontend type filter (chantier/depot) | N/A | No backend filter parameter exists; done client-side |
+| Frontend Call                             | Backend Exists? | Notes                                                |
+| ----------------------------------------- | --------------- | ---------------------------------------------------- |
+| `listProjetLocation` (GET)                | Yes             | Frontend sends `page` but not `idCreate`             |
+| `getProjetLocationById` (GET with `?id=`) | Yes             | Returns single record with images                    |
+| `createProjetLocation` (POST multipart)   | Yes             | Matches                                              |
+| `updateProjetLocation` (PUT JSON)         | Yes             | No file upload support on PUT                        |
+| `deleteProjetLocation` (DELETE)           | Yes             | Matches                                              |
+| Frontend search (local filtering)         | N/A             | No server-side search parameter exists               |
+| Frontend type filter (chantier/depot)     | N/A             | No backend filter parameter exists; done client-side |
 
 ---
 

@@ -1,6 +1,6 @@
 # Voyages — API Documentation
 
-**Base path:** `/sdkboard/api/homescreen/voyage.php`
+**Base path:** `/api/homescreen/voyage.php`
 
 **Authentication:** All requests require a valid `auth_token` header.
 
@@ -10,25 +10,25 @@
 
 ### 1. List Voyages
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Path** | `/sdkboard/api/homescreen/voyage.php` |
-| **Auth** | Required |
+| Field           | Value                            |
+| --------------- | -------------------------------- |
+| **Method**      | `GET`                            |
+| **Path**        | `/api/homescreen/voyage.php`     |
+| **Auth**        | Required                         |
 | **Role filter** | Chauffeur role: only own voyages |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number (default: 1) |
-| `codeQuery` | string | No | Search across driver name, vehicle, brand, client, BL code, depot name |
-| `idChauffeur` | int | No | Filter by driver ID |
-| `idVehicule` | int | No | Filter by vehicle ID |
-| `idDepot` | int | No | Filter by departure depot ID |
-| `idVille` | int | No | Filter by city ID |
-| `idClient` | int | No | Filter by client ID |
-| `id` | int | No | Get a single voyage by ID |
+| Parameter     | Type   | Required | Description                                                            |
+| ------------- | ------ | -------- | ---------------------------------------------------------------------- |
+| `page`        | int    | No       | Page number (default: 1)                                               |
+| `codeQuery`   | string | No       | Search across driver name, vehicle, brand, client, BL code, depot name |
+| `idChauffeur` | int    | No       | Filter by driver ID                                                    |
+| `idVehicule`  | int    | No       | Filter by vehicle ID                                                   |
+| `idDepot`     | int    | No       | Filter by departure depot ID                                           |
+| `idVille`     | int    | No       | Filter by city ID                                                      |
+| `idClient`    | int    | No       | Filter by client ID                                                    |
+| `id`          | int    | No       | Get a single voyage by ID                                              |
 
 #### Response
 
@@ -85,24 +85,24 @@
 
 ### 2. Create Voyage
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Path** | `/sdkboard/api/homescreen/voyage.php` |
-| **Content-Type** | `application/json` |
-| **Auth** | Required |
+| Field            | Value                        |
+| ---------------- | ---------------------------- |
+| **Method**       | `POST`                       |
+| **Path**         | `/api/homescreen/voyage.php` |
+| **Content-Type** | `application/json`           |
+| **Auth**         | Required                     |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `date_depart` | string | Yes | Departure date/time |
-| `idChauffeur` | int | Yes | Driver ID |
-| `idVehicule` | int | Yes | Vehicle ID |
-| `km_depart` | int | Yes | Starting km |
-| `depot_depart` | int | Yes | Departure depot ID |
-| `idVille` | int | Yes | Destination city ID |
-| `bl_list` | array | No | Array of `{id: number}` representing BL IDs to link |
+| Field          | Type   | Required | Description                                         |
+| -------------- | ------ | -------- | --------------------------------------------------- |
+| `date_depart`  | string | Yes      | Departure date/time                                 |
+| `idChauffeur`  | int    | Yes      | Driver ID                                           |
+| `idVehicule`   | int    | Yes      | Vehicle ID                                          |
+| `km_depart`    | int    | Yes      | Starting km                                         |
+| `depot_depart` | int    | Yes      | Departure depot ID                                  |
+| `idVille`      | int    | Yes      | Destination city ID                                 |
+| `bl_list`      | array  | No       | Array of `{id: number}` representing BL IDs to link |
 
 #### Response
 
@@ -118,28 +118,28 @@
 
 ### 3. Update Voyage
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
-| **Path** | `/sdkboard/api/homescreen/voyage.php` |
-| **Content-Type** | `application/json` |
-| **Auth** | Required |
-| **Role filter** | Chauffeur role: can only update own voyages |
+| Field            | Value                                       |
+| ---------------- | ------------------------------------------- |
+| **Method**       | `PUT`                                       |
+| **Path**         | `/api/homescreen/voyage.php`                |
+| **Content-Type** | `application/json`                          |
+| **Auth**         | Required                                    |
+| **Role filter**  | Chauffeur role: can only update own voyages |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | int | Yes | Voyage ID to update |
-| `statut` | string | No | Status (`encours`, `terminer`) |
-| `idVehicule` | int | No | Vehicle ID |
-| `depot_depart` | int | No | Departure depot ID |
-| `date_depart` | string | No | Departure date/time |
-| `km_depart` | int | No | Starting km |
-| `km_retour` | int | No | Return km |
-| `date_retour` | string | No | Return date/time |
-| `idVille` | int | No | Destination city ID |
-| `bl_list` | array | No | Replaces all BL links: `[{id: number}]` |
+| Field          | Type   | Required | Description                             |
+| -------------- | ------ | -------- | --------------------------------------- |
+| `id`           | int    | Yes      | Voyage ID to update                     |
+| `statut`       | string | No       | Status (`encours`, `terminer`)          |
+| `idVehicule`   | int    | No       | Vehicle ID                              |
+| `depot_depart` | int    | No       | Departure depot ID                      |
+| `date_depart`  | string | No       | Departure date/time                     |
+| `km_depart`    | int    | No       | Starting km                             |
+| `km_retour`    | int    | No       | Return km                               |
+| `date_retour`  | string | No       | Return date/time                        |
+| `idVille`      | int    | No       | Destination city ID                     |
+| `bl_list`      | array  | No       | Replaces all BL links: `[{id: number}]` |
 
 > **Note:** If `bl_list` is provided, all existing BL links are deleted and replaced with the new list.
 
@@ -163,19 +163,19 @@
 
 ### 4. Delete Voyage
 
-| Field | Value |
-|-------|-------|
-| **Method** | `DELETE` |
-| **Path** | `/sdkboard/api/homescreen/voyage.php` |
-| **Content-Type** | `application/json` |
-| **Auth** | Required |
-| **Role filter** | Chauffeur role: can only delete own voyages |
+| Field            | Value                                       |
+| ---------------- | ------------------------------------------- |
+| **Method**       | `DELETE`                                    |
+| **Path**         | `/api/homescreen/voyage.php`                |
+| **Content-Type** | `application/json`                          |
+| **Auth**         | Required                                    |
+| **Role filter**  | Chauffeur role: can only delete own voyages |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | int | Yes | Voyage ID to delete |
+| Field | Type | Required | Description         |
+| ----- | ---- | -------- | ------------------- |
+| `id`  | int  | Yes      | Voyage ID to delete |
 
 #### Behavior
 
@@ -193,19 +193,19 @@ Deletes the voyage's BL links first (`voyage_bl`), then the voyage record. Uses 
 
 ### BL List (for voyage creation)
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Path** | `/sdkboard/api/homescreen/bl_voyage_list.php` |
-| **Auth** | Required |
+| Field      | Value                                |
+| ---------- | ------------------------------------ |
+| **Method** | `GET`                                |
+| **Path**   | `/api/homescreen/bl_voyage_list.php` |
+| **Auth**   | Required                             |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number (default: 1) |
-| `perPage` | int | No | Items per page (default: 30) |
-| `codeQuery` | string | No | Search BL code |
+| Parameter   | Type   | Required | Description                  |
+| ----------- | ------ | -------- | ---------------------------- |
+| `page`      | int    | No       | Page number (default: 1)     |
+| `perPage`   | int    | No       | Items per page (default: 30) |
+| `codeQuery` | string | No       | Search BL code               |
 
 Returns available BLs (not yet assigned to any voyage), with client info and images.
 
@@ -213,9 +213,9 @@ Returns available BLs (not yet assigned to any voyage), with client info and ima
 
 ### Voyage Chauffeur (mobile driver endpoint)
 
-| Field | Value |
-|-------|-------|
-| **Path** | `/sdkboard/api/homescreen/voyage_chauffeur.php` |
+| Field    | Value                                  |
+| -------- | -------------------------------------- |
+| **Path** | `/api/homescreen/voyage_chauffeur.php` |
 
 This is a **separate endpoint** for the mobile chauffeur app. It only returns voyages belonging to the authenticated chauffeur.
 
@@ -225,13 +225,13 @@ Same pagination as main voyage endpoint. BL images and coordinates are included.
 
 #### POST — Upload BL photo + update BL statut
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `idBL` | int | Yes | BL ID |
-| `idVoyage` | int | Yes | Voyage ID |
-| `statut` | string | No | BL status (default: `Livré`) |
-| `images` | files | Yes | Photo files (or `images_base64` array) |
-| `coordinates` | string | No | JSON coordinates |
+| Parameter     | Type   | Required | Description                            |
+| ------------- | ------ | -------- | -------------------------------------- |
+| `idBL`        | int    | Yes      | BL ID                                  |
+| `idVoyage`    | int    | Yes      | Voyage ID                              |
+| `statut`      | string | No       | BL status (default: `Livré`)           |
+| `images`      | files  | Yes      | Photo files (or `images_base64` array) |
+| `coordinates` | string | No       | JSON coordinates                       |
 
 #### PUT — Update BL or close all BLs
 
@@ -242,21 +242,21 @@ Same pagination as main voyage endpoint. BL images and coordinates are included.
 
 ## Statut Values
 
-| Value | Label | Description |
-|-------|-------|-------------|
-| `encours` | En cours | Voyage is in progress |
-| `terminer` | Terminé | Voyage is completed |
+| Value      | Label    | Description           |
+| ---------- | -------- | --------------------- |
+| `encours`  | En cours | Voyage is in progress |
+| `terminer` | Terminé  | Voyage is completed   |
 
 ---
 
 ## Frontend ↔ Backend Differences
 
-| Frontend Call | Backend Exists? | Notes |
-|---------------|----------------|-------|
-| `updateVoyage` (PUT with fields including `statut`, `km_retour`, `date_retour`) | Yes | Same endpoint, different payload shapes depending on update type |
-| `changeVoyageStatus` (PUT with `statut`, `km_retour`, `date_retour`) | Yes | Uses the same PUT endpoint |
-| `listVoyage` with `idClient` filter | Partially | Backend supports `idClient` filter via `idClient` query param but it filters through BL join |
-| `getVoyageById` (GET with `?id=`) | Yes | Achieved by passing `id` as a query parameter to the list endpoint |
+| Frontend Call                                                                   | Backend Exists? | Notes                                                                                        |
+| ------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------- |
+| `updateVoyage` (PUT with fields including `statut`, `km_retour`, `date_retour`) | Yes             | Same endpoint, different payload shapes depending on update type                             |
+| `changeVoyageStatus` (PUT with `statut`, `km_retour`, `date_retour`)            | Yes             | Uses the same PUT endpoint                                                                   |
+| `listVoyage` with `idClient` filter                                             | Partially       | Backend supports `idClient` filter via `idClient` query param but it filters through BL join |
+| `getVoyageById` (GET with `?id=`)                                               | Yes             | Achieved by passing `id` as a query parameter to the list endpoint                           |
 
 ---
 

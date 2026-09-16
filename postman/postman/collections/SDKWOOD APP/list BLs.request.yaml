@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{BACKEND_URL}}/sdkboard/api/homescreen/bl_voyage_list.php"
+url: "{{BACKEND_URL}}/api/homescreen/bl_voyage_list.php"
 method: GET
 headers:
   login_token: SDKWOOD

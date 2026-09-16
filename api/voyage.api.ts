@@ -13,7 +13,7 @@ export type CreateVoyageRequest = {
 export const createVoyage = async (request: CreateVoyageRequest) => {
   //log body
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/voyage.php",
+    pathname: "/api/homescreen/voyage.php",
     method: "POST",
     body: request,
     isDebug: false,
@@ -75,7 +75,7 @@ export const listVoyage = async ({
   idClient?: number;
 }) => {
   const result = await client.request<VoyageListItem[]>({
-    pathname: `/sdkboard/api/homescreen/voyage.php`,
+    pathname: `/api/homescreen/voyage.php`,
     method: "GET",
     searchParams: {
       page,
@@ -101,7 +101,7 @@ export const updateVoyage = async (
 ) => {
   //log body
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/voyage.php",
+    pathname: "/api/homescreen/voyage.php",
     method: "PUT",
     body: request,
     isDebug: true,
@@ -111,7 +111,7 @@ export const updateVoyage = async (
 
 export const deleteVoyage = async (idVoyage: number) => {
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/voyage.php",
+    pathname: "/api/homescreen/voyage.php",
     method: "DELETE",
     body: { id: idVoyage },
     isDebug: true,
@@ -127,7 +127,7 @@ export const changeVoyageStatus = async (request: {
 }) => {
   //log body
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/voyage.php",
+    pathname: "/api/homescreen/voyage.php",
     method: "PUT",
     body: request,
     isDebug: true,
@@ -137,7 +137,7 @@ export const changeVoyageStatus = async (request: {
 
 export const getVoyageById = async ({ id }: { id: number }) => {
   const result = await client.request<VoyageListItem[]>({
-    pathname: `/sdkboard/api/homescreen/voyage.php?id=${id}`,
+    pathname: `/api/homescreen/voyage.php?id=${id}`,
     method: "GET",
     isDebug: false,
   });

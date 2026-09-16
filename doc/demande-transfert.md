@@ -1,10 +1,11 @@
 # Demande de Transfert — API Documentation
 
 **Base paths:**
-- Header/CRUD: `/sdkboard/api/homescreen/demande_transfert.php`
-- Details/Products/Lots: `/sdkboard/api/homescreen/details_demande_transfert.php`
-- Preparation: `/sdkboard/api/homescreen/preparation_transfert.php`
-- Validation: `/sdkboard/api/homescreen/validation_transfert.php`
+
+- Header/CRUD: `/api/homescreen/demande_transfert.php`
+- Details/Products/Lots: `/api/homescreen/details_demande_transfert.php`
+- Preparation: `/api/homescreen/preparation_transfert.php`
+- Validation: `/api/homescreen/validation_transfert.php`
 
 **Authentication:** All endpoints require a valid `auth_token` header.
 
@@ -14,27 +15,27 @@
 
 ### 1.1 List Demande de Transferts
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Auth** | Required |
+| Field      | Value    |
+| ---------- | -------- |
+| **Method** | `GET`    |
+| **Auth**   | Required |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number (default: 1, perPage: 10) |
-| `searchquery` | string | No | Global search across reference, observation, DUM, matricule, transporteur, statut, depot names, creator name |
-| `reference` | string | No | Filter by reference (LIKE) |
-| `date` | string | No | Filter by date (exact match `DATE(dt.date)`) |
-| `observation` | string | No | Filter by observation (LIKE) |
-| `demandeur` | string | No | Filter by creator name (LIKE on nom, prenom, or concatenated) |
-| `depotSource` | string | No | Filter by source depot name (LIKE) |
-| `depotDestination` | string | No | Filter by destination depot name (LIKE) |
-| `dum` | string | No | Filter by DUM (LIKE) |
-| `matricule` | string | No | Filter by matricule (LIKE) |
-| `transporteur` | string | No | Filter by transporteur (LIKE) |
-| `statut` | string | No | Filter by status (exact match) |
+| Parameter          | Type   | Required | Description                                                                                                  |
+| ------------------ | ------ | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `page`             | int    | No       | Page number (default: 1, perPage: 10)                                                                        |
+| `searchquery`      | string | No       | Global search across reference, observation, DUM, matricule, transporteur, statut, depot names, creator name |
+| `reference`        | string | No       | Filter by reference (LIKE)                                                                                   |
+| `date`             | string | No       | Filter by date (exact match `DATE(dt.date)`)                                                                 |
+| `observation`      | string | No       | Filter by observation (LIKE)                                                                                 |
+| `demandeur`        | string | No       | Filter by creator name (LIKE on nom, prenom, or concatenated)                                                |
+| `depotSource`      | string | No       | Filter by source depot name (LIKE)                                                                           |
+| `depotDestination` | string | No       | Filter by destination depot name (LIKE)                                                                      |
+| `dum`              | string | No       | Filter by DUM (LIKE)                                                                                         |
+| `matricule`        | string | No       | Filter by matricule (LIKE)                                                                                   |
+| `transporteur`     | string | No       | Filter by transporteur (LIKE)                                                                                |
+| `statut`           | string | No       | Filter by status (exact match)                                                                               |
 
 #### Response
 
@@ -72,22 +73,22 @@
 
 ### 1.2 Create Demande de Transfert
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `POST`             |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `idDepotSource` | int | Yes | Source depot ID |
-| `idDepotDestination` | int | Yes | Destination depot ID |
-| `dum` | string | No | DUM reference |
-| `transporteur` | string | No | Transporter name |
-| `matricule` | string | No | Vehicle registration |
-| `observation` | string | No | Observation text |
+| Field                | Type   | Required | Description          |
+| -------------------- | ------ | -------- | -------------------- |
+| `idDepotSource`      | int    | Yes      | Source depot ID      |
+| `idDepotDestination` | int    | Yes      | Destination depot ID |
+| `dum`                | string | No       | DUM reference        |
+| `transporteur`       | string | No       | Transporter name     |
+| `matricule`          | string | No       | Vehicle registration |
+| `observation`        | string | No       | Observation text     |
 
 > **Reference generation:** The backend auto-generates the reference as `DT` + sequential number (e.g., `DT2500001`). The `statut` is always set to `Brouillon` on creation. The `idCreate` is set to the authenticated user's ID.
 
@@ -108,27 +109,27 @@
 
 ### 1.3 Update / Change Statut
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `PUT`              |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 This endpoint handles **statut transitions** based on the current status and user role:
 
-| Current Statut | Condition | New Statut | Fields Updated |
-|----------------|-----------|------------|----------------|
-| `Brouillon` | `idCreate == userId` (creator) | `Envoye` | `idSigneDemamdeur`, `dateSingeDemandeur`, `idEnvoie`, `dateEnvoie` |
-| `Encours` | `userRole == 'admin'` | `Envoye` | `idEnvoie`, `dateEnvoie` |
-| `Envoye` | `userRole == 'admin'` | `Reçue` | `idRecu`, `dateRecu` |
+| Current Statut | Condition                      | New Statut | Fields Updated                                                     |
+| -------------- | ------------------------------ | ---------- | ------------------------------------------------------------------ |
+| `Brouillon`    | `idCreate == userId` (creator) | `Envoye`   | `idSigneDemamdeur`, `dateSingeDemandeur`, `idEnvoie`, `dateEnvoie` |
+| `Encours`      | `userRole == 'admin'`          | `Envoye`   | `idEnvoie`, `dateEnvoie`                                           |
+| `Envoye`       | `userRole == 'admin'`          | `Reçue`    | `idRecu`, `dateRecu`                                               |
 
 > **Note:** The frontend `updateDemandeTransfert` call (which sends `transporteur`, `matricule`, `observation`, `statut`) hits the same PUT endpoint, but the backend **only processes statut changes**, not field updates. **There is no backend endpoint for updating DT header fields.**
 
 #### Request Body
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | int | Yes | DT ID |
+| ----- | ---- | -------- | ----------- |
+| `id`  | int  | Yes      | DT ID       |
 
 > If no statut transition applies, the response returns `"Aucune action"`.
 
@@ -142,17 +143,17 @@ This endpoint handles **statut transitions** based on the current status and use
 
 ### 1.4 Delete Demande de Transfert
 
-| Field | Value |
-|-------|-------|
-| **Method** | `DELETE` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `DELETE`           |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | int | Yes | DT ID to delete |
+| Field | Type | Required | Description     |
+| ----- | ---- | -------- | --------------- |
+| `id`  | int  | Yes      | DT ID to delete |
 
 #### Behavior
 
@@ -170,17 +171,17 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 
 ### 2.1 Get DT Details (Products + Lots)
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Auth** | Required |
+| Field      | Value    |
+| ---------- | -------- |
+| **Method** | `GET`    |
+| **Auth**   | Required |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `idDT` | int | Yes | Demande de transfert ID |
-| `details` | string | Yes | Must be `"1"` |
+| Parameter | Type   | Required | Description             |
+| --------- | ------ | -------- | ----------------------- |
+| `idDT`    | int    | Yes      | Demande de transfert ID |
+| `details` | string | Yes      | Must be `"1"`           |
 
 #### Response
 
@@ -222,25 +223,25 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 
 ### 2.2 Add Product (with Lots)
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `POST`             |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 > **Important:** Use `type: "detail_lots"` (not `"detail"` as in the frontend).
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `type` | string | Yes | Must be `"detail_lots"` |
-| `idDT` | int | Yes | DT ID |
-| `idProduit` | int | Yes | Product ID |
-| `qte` | number | Yes | Quantity |
-| `nbrFDX` | int | Yes | Number of FDX |
-| `unite` | string | Yes | Unit (`pcs` or `fdx`) |
-| `lots` | array | No | Initial lots: `[{Lot: string, qte: number}]` |
+| Field       | Type   | Required | Description                                  |
+| ----------- | ------ | -------- | -------------------------------------------- |
+| `type`      | string | Yes      | Must be `"detail_lots"`                      |
+| `idDT`      | int    | Yes      | DT ID                                        |
+| `idProduit` | int    | Yes      | Product ID                                   |
+| `qte`       | number | Yes      | Quantity                                     |
+| `nbrFDX`    | int    | Yes      | Number of FDX                                |
+| `unite`     | string | Yes      | Unit (`pcs` or `fdx`)                        |
+| `lots`      | array  | No       | Initial lots: `[{Lot: string, qte: number}]` |
 
 #### Response
 
@@ -256,37 +257,37 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 
 ### 2.3 Update Lots
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `PUT`              |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `type` | string | Yes | Must be `"update_lot"` |
-| `lots_update` | array | No | Lots to update: `[{idItem, idProduit, old_lot, new_lot, qte}]` |
-| `lots_insert` | array | No | Lots to insert: `[{idItem, idProduit, Lot, qte}]` |
-| `lots_delete` | array | No | Lots to delete: `[{idItem, idProduit, Lot}]` |
+| Field         | Type   | Required | Description                                                    |
+| ------------- | ------ | -------- | -------------------------------------------------------------- |
+| `type`        | string | Yes      | Must be `"update_lot"`                                         |
+| `lots_update` | array  | No       | Lots to update: `[{idItem, idProduit, old_lot, new_lot, qte}]` |
+| `lots_insert` | array  | No       | Lots to insert: `[{idItem, idProduit, Lot, qte}]`              |
+| `lots_delete` | array  | No       | Lots to delete: `[{idItem, idProduit, Lot}]`                   |
 
 ---
 
 ### 2.4 Delete Product Detail
 
-| Field | Value |
-|-------|-------|
-| **Method** | `DELETE` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `DELETE`           |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `type` | string | Yes | `"detail"` for product deletion |
-| `id` | int | Yes | Product detail ID |
+| Field  | Type   | Required | Description                     |
+| ------ | ------ | -------- | ------------------------------- |
+| `type` | string | Yes      | `"detail"` for product deletion |
+| `id`   | int    | Yes      | Product detail ID               |
 
 Also supports `type: "transfert"` to delete an entire DT (same as the main endpoint DELETE).
 
@@ -296,16 +297,16 @@ Also supports `type: "transfert"` to delete an entire DT (same as the main endpo
 
 ### 3.1 Get Detail + Lots by idItem
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Auth** | Required |
+| Field      | Value    |
+| ---------- | -------- |
+| **Method** | `GET`    |
+| **Auth**   | Required |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `idItem` | int | Yes | Product detail ID |
+| Parameter | Type | Required | Description       |
+| --------- | ---- | -------- | ----------------- |
+| `idItem`  | int  | Yes      | Product detail ID |
 
 #### Response
 
@@ -321,39 +322,39 @@ Also supports `type: "transfert"` to delete an entire DT (same as the main endpo
 
 ### 3.2 Save Lots (replace all)
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `POST`             |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 Deletes all existing lots for the idItem/idProduit pair, then re-inserts the provided lots and recalculates `Qte` and `nbrFDX` on the detail.
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `idItem` | int | Yes | Product detail ID |
-| `idProduit` | int | Yes | Product ID |
-| `lots` | array | No | New lots: `[{lot: string, qte: number}]` |
+| Field       | Type  | Required | Description                              |
+| ----------- | ----- | -------- | ---------------------------------------- |
+| `idItem`    | int   | Yes      | Product detail ID                        |
+| `idProduit` | int   | Yes      | Product ID                               |
+| `lots`      | array | No       | New lots: `[{lot: string, qte: number}]` |
 
 ---
 
 ### 3.3 Prepare a Lot
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `PUT`              |
 | **Content-Type** | `application/json` |
-| **Auth** | Required |
+| **Auth**         | Required           |
 
 #### Request Body (action = `preparer_lot`)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `action` | string | Yes | `"preparer_lot"` |
-| `idItem` | int | Yes | Product detail ID |
-| `lot` | string | Yes | Lot number to prepare |
+| Field    | Type   | Required | Description           |
+| -------- | ------ | -------- | --------------------- |
+| `action` | string | Yes      | `"preparer_lot"`      |
+| `idItem` | int    | Yes      | Product detail ID     |
+| `lot`    | string | Yes      | Lot number to prepare |
 
 Sets `preparer = 'Oui'` and `idModif` on the matching `transfer_lots` row.
 
@@ -361,21 +362,21 @@ Sets `preparer = 'Oui'` and `idModif` on the matching `transfer_lots` row.
 
 ### 3.4 Modify a Lot
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
-| **Auth** | Required |
+| Field      | Value    |
+| ---------- | -------- |
+| **Method** | `PUT`    |
+| **Auth**   | Required |
 
 #### Request Body (action = `modifier_lot`)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `action` | string | Yes | `"modifier_lot"` |
-| `idItem` | int | Yes | Product detail ID |
-| `idProduit` | int | Yes | Product ID |
-| `oldLot` | string | Yes | Current lot number |
-| `newLot` | string | Yes | New lot number |
-| `qte` | number | Yes | New quantity |
+| Field       | Type   | Required | Description        |
+| ----------- | ------ | -------- | ------------------ |
+| `action`    | string | Yes      | `"modifier_lot"`   |
+| `idItem`    | int    | Yes      | Product detail ID  |
+| `idProduit` | int    | Yes      | Product ID         |
+| `oldLot`    | string | Yes      | Current lot number |
+| `newLot`    | string | Yes      | New lot number     |
+| `qte`       | number | Yes      | New quantity       |
 
 Updates the lot and recalculates `Qte`/`nbrFDX` on the detail.
 
@@ -383,16 +384,16 @@ Updates the lot and recalculates `Qte`/`nbrFDX` on the detail.
 
 ### 3.5 Delete Product + Lots (by idItem)
 
-| Field | Value |
-|-------|-------|
+| Field      | Value    |
+| ---------- | -------- |
 | **Method** | `DELETE` |
-| **Auth** | Required |
+| **Auth**   | Required |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `idItem` | int | Yes | Product detail ID |
+| Field    | Type | Required | Description       |
+| -------- | ---- | -------- | ----------------- |
+| `idItem` | int  | Yes      | Product detail ID |
 
 Deletes all `transfer_lots` for this idItem, then the `demandetransfert_details` row.
 
@@ -404,20 +405,20 @@ This endpoint handles server-side permission checks and statut transitions.
 
 ### 4.1 List DTs (with permission filter)
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Auth** | Required |
+| Field          | Value               |
+| -------------- | ------------------- |
+| **Method**     | `GET`               |
+| **Auth**       | Required            |
 | **Permission** | `can_view` required |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number |
-| `perPage` | int | No | Items per page (default: 10) |
-| `id` | int | No | Filter by DT ID |
-| `statut` | string | No | Filter by statut |
+| Parameter | Type   | Required | Description                  |
+| --------- | ------ | -------- | ---------------------------- |
+| `page`    | int    | No       | Page number                  |
+| `perPage` | int    | No       | Items per page (default: 10) |
+| `id`      | int    | No       | Filter by DT ID              |
+| `statut`  | string | No       | Filter by statut             |
 
 > **Note:** This is a separate listing endpoint that checks `can_view` permission from the `permissions` table. It is **not used by the frontend**.
 
@@ -425,19 +426,19 @@ This endpoint handles server-side permission checks and statut transitions.
 
 ### 4.2 Prepare a Product Item
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Auth** | Required |
+| Field          | Value                 |
+| -------------- | --------------------- |
+| **Method**     | `POST`                |
+| **Auth**       | Required              |
 | **Permission** | `can_update` required |
 
 #### Request Body (action = `preparerItem`)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `action` | string | Yes | `"preparerItem"` |
-| `id_item` | int | Yes | Product detail ID |
-| `id_document` | int | Yes | DT ID |
+| Field         | Type   | Required | Description       |
+| ------------- | ------ | -------- | ----------------- |
+| `action`      | string | Yes      | `"preparerItem"`  |
+| `id_item`     | int    | Yes      | Product detail ID |
+| `id_document` | int    | Yes      | DT ID             |
 
 Sets `preparer = 'Oui'` on the detail. If all items in the DT are prepared, auto-sets `statut = 'Envoye'` and `dateEnvoie = NOW()`.
 
@@ -445,37 +446,37 @@ Sets `preparer = 'Oui'` on the detail. If all items in the DT are prepared, auto
 
 ### 4.3 Prepare a Lot
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Auth** | Required |
+| Field          | Value                 |
+| -------------- | --------------------- |
+| **Method**     | `POST`                |
+| **Auth**       | Required              |
 | **Permission** | `can_update` required |
 
 #### Request Body (action = `preparerLot`)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `action` | string | Yes | `"preparerLot"` |
-| `id_item` | int | Yes | Product detail ID |
-| `id_lot` | int | Yes | Lot ID (note: different from `lot` string in preparation_transfert.php) |
+| Field     | Type   | Required | Description                                                             |
+| --------- | ------ | -------- | ----------------------------------------------------------------------- |
+| `action`  | string | Yes      | `"preparerLot"`                                                         |
+| `id_item` | int    | Yes      | Product detail ID                                                       |
+| `id_lot`  | int    | Yes      | Lot ID (note: different from `lot` string in preparation_transfert.php) |
 
 ---
 
 ### 4.4 Cancel Preparation
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Auth** | Required |
+| Field          | Value                 |
+| -------------- | --------------------- |
+| **Method**     | `POST`                |
+| **Auth**       | Required              |
 | **Permission** | `can_update` required |
 
 #### Request Body (action = `annulerPreparation`)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `action` | string | Yes | `"annulerPreparation"` |
-| `id_item` | int | Yes | Product detail ID |
-| `id_document` | int | Yes | DT ID |
+| Field         | Type   | Required | Description            |
+| ------------- | ------ | -------- | ---------------------- |
+| `action`      | string | Yes      | `"annulerPreparation"` |
+| `id_item`     | int    | Yes      | Product detail ID      |
+| `id_document` | int    | Yes      | DT ID                  |
 
 Sets `preparer = 'Non'` on the item and `statut = 'Encours'` on the DT.
 
@@ -485,18 +486,18 @@ Sets `preparer = 'Non'` on the item and `statut = 'Encours'` on the DT.
 
 ### 4.5 Final Validation
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Auth** | Required |
+| Field          | Value                  |
+| -------------- | ---------------------- |
+| **Method**     | `POST`                 |
+| **Auth**       | Required               |
 | **Permission** | `can_achever` required |
 
 #### Request Body (action = `validation`)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `action` | string | Yes | `"validation"` |
-| `id` | int | Yes | DT ID |
+| Field    | Type   | Required | Description    |
+| -------- | ------ | -------- | -------------- |
+| `action` | string | Yes      | `"validation"` |
+| `id`     | int    | Yes      | DT ID          |
 
 Sets `statut = 'Reçue'`, `idRecu = userId`, `dateRecu = NOW()`.
 
@@ -506,12 +507,12 @@ Sets `statut = 'Reçue'`, `idRecu = userId`, `dateRecu = NOW()`.
 
 ## Statut Values
 
-| Value | Label | Description |
-|-------|-------|-------------|
-| `Brouillon` | Brouillon (Draft) | Initial status on creation |
-| `Encours` | En cours (In Progress) | Processing |
-| `Envoye` | Envoyé (Sent) | Sent/signed by creator or validated by admin |
-| `Reçue` | Reçue (Received) | Final validated status |
+| Value       | Label                  | Description                                  |
+| ----------- | ---------------------- | -------------------------------------------- |
+| `Brouillon` | Brouillon (Draft)      | Initial status on creation                   |
+| `Encours`   | En cours (In Progress) | Processing                                   |
+| `Envoye`    | Envoyé (Sent)          | Sent/signed by creator or validated by admin |
+| `Reçue`     | Reçue (Received)       | Final validated status                       |
 
 ### Statut Transition Flow
 
@@ -525,19 +526,19 @@ Envoye    --[admin validates]--> Reçue
 
 ## Frontend ↔ Backend Differences
 
-| Frontend Call | Backend Exists? | Notes |
-|---------------|----------------|-------|
-| `updateDemandeTransfert` (PUT with transporteur, matricule, observation) | **NO** | The backend PUT only handles statut transitions, NOT field updates. Updating transporteur/matricule/observation is **not supported** by the backend. |
-| `changeDTStatut` (PUT with `id` and `statut`) | Partial | The backend determines the new statut based on current statut and user role, NOT from a `statut` field in the request |
-| `addProductToDT` (POST with `type: "detail"`) | **MISMATCH** | Frontend sends `type: "detail"`, but the backend expects `type: "detail_lots"` for creating a product with lots |
-| `getProductLots` (GET produits/lots_produits.php) | Yes | Separate endpoint, outside this module |
-| `listDemandeTransfert` search | Yes | `searchquery` matches `searchquery` backend param |
-| `deleteProductFromDT` (DELETE with `type: "detail"`) | Yes | Matches `details_demande_transfert.php` DELETE with `type: "detail"` |
-| `updateProductLots` (PUT with lots_update/insert/delete) | Yes | Matches `details_demande_transfert.php` PUT with `type: "update_lot"` |
-| `preparerDemandeTransfert` (POST for product/lot) | Yes | Backend uses `validation_transfert.php` with `action: "preparerItem"` or `"preparerLot"` |
-| `validation_transfert.php` GET listing | **NOT USED** | Frontend lists DTs via `demande_transfert.php` GET |
-| `validation_transfert.php` POST `annulerPreparation` | **NOT USED** | No cancel preparation UI in frontend |
-| `validation_transfert.php` POST `validation` | **NOT USED** | Frontend uses PUT on `demande_transfert.php` for statut changes |
+| Frontend Call                                                            | Backend Exists? | Notes                                                                                                                                                |
+| ------------------------------------------------------------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `updateDemandeTransfert` (PUT with transporteur, matricule, observation) | **NO**          | The backend PUT only handles statut transitions, NOT field updates. Updating transporteur/matricule/observation is **not supported** by the backend. |
+| `changeDTStatut` (PUT with `id` and `statut`)                            | Partial         | The backend determines the new statut based on current statut and user role, NOT from a `statut` field in the request                                |
+| `addProductToDT` (POST with `type: "detail"`)                            | **MISMATCH**    | Frontend sends `type: "detail"`, but the backend expects `type: "detail_lots"` for creating a product with lots                                      |
+| `getProductLots` (GET produits/lots_produits.php)                        | Yes             | Separate endpoint, outside this module                                                                                                               |
+| `listDemandeTransfert` search                                            | Yes             | `searchquery` matches `searchquery` backend param                                                                                                    |
+| `deleteProductFromDT` (DELETE with `type: "detail"`)                     | Yes             | Matches `details_demande_transfert.php` DELETE with `type: "detail"`                                                                                 |
+| `updateProductLots` (PUT with lots_update/insert/delete)                 | Yes             | Matches `details_demande_transfert.php` PUT with `type: "update_lot"`                                                                                |
+| `preparerDemandeTransfert` (POST for product/lot)                        | Yes             | Backend uses `validation_transfert.php` with `action: "preparerItem"` or `"preparerLot"`                                                             |
+| `validation_transfert.php` GET listing                                   | **NOT USED**    | Frontend lists DTs via `demande_transfert.php` GET                                                                                                   |
+| `validation_transfert.php` POST `annulerPreparation`                     | **NOT USED**    | No cancel preparation UI in frontend                                                                                                                 |
+| `validation_transfert.php` POST `validation`                             | **NOT USED**    | Frontend uses PUT on `demande_transfert.php` for statut changes                                                                                      |
 
 ---
 

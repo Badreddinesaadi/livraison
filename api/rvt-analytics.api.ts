@@ -15,7 +15,7 @@ export const getAnalytics = async ({
   to?: string;
 } = {}) => {
   return client.request<DashboardData>({
-    pathname: "/sdkboard/api/rounds/analytics.php",
+    pathname: "/api/rounds/analytics.php",
     method: "GET",
     searchParams: { roundId, clientId, city, from, to },
     isDebug: false,

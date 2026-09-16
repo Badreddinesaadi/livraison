@@ -86,7 +86,7 @@ tags:
 security:
   - authToken: []
 paths:
-  /sdkboard/api/users/clients.php:
+  /api/users/clients.php:
     get:
       tags: [Clients]
       operationId: listClients
@@ -118,7 +118,7 @@ paths:
         "401":
           $ref: "#/components/responses/NonAutorise"
 
-  /sdkboard/api/homescreen/rapport_terrain.php:
+  /api/homescreen/rapport_terrain.php:
     get:
       tags: [Données de référence]
       operationId: getReferenceData
@@ -152,13 +152,13 @@ paths:
         "401":
           $ref: "#/components/responses/NonAutorise"
 
-  /sdkboard/api/rounds/rounds.php:
+  /api/rounds/rounds.php:
     post:
       tags: [Tournées]
       operationId: createRound
       summary: Ouvrir une nouvelle tournée commerciale
       description: |
-        Point d'entrée PHP unique `/sdkboard/api/rounds/rounds.php`. Le serveur
+        Point d'entrée PHP unique `/api/rounds/rounds.php`. Le serveur
         dérive `commercialId` depuis `auth_token` et rejette la création tant
         qu'une tournée est déjà ouverte pour ce commercial (409
         `ROUND_ALREADY_OPEN`). `idempotencyKey` est transmise dans l'URL ; la
@@ -276,13 +276,13 @@ paths:
         "422":
           $ref: "#/components/responses/ErreurValidation"
 
-  /sdkboard/api/rounds/rounds.php/close:
+  /api/rounds/rounds.php/close:
     post:
       tags: [Tournées]
       operationId: closeRound
       summary: Clôturer une tournée commerciale
       description: |
-        Appel réel : `POST /sdkboard/api/rounds/rounds.php?action=close&id={roundId}`.
+        Appel réel : `POST /api/rounds/rounds.php?action=close&id={roundId}`.
         La clôture est refusée si la tournée n'est plus en cours (409
         `ROUND_ALREADY_CLOSED`).
       parameters:
@@ -330,13 +330,13 @@ paths:
         "409":
           $ref: "#/components/responses/Conflit"
 
-  /sdkboard/api/rounds/visits.php:
+  /api/rounds/visits.php:
     post:
       tags: [Visites]
       operationId: createVisit
       summary: Soumettre un rapport de visite
       description: |
-        Point d'entrée PHP unique `/sdkboard/api/rounds/visits.php`. Sans
+        Point d'entrée PHP unique `/api/rounds/visits.php`. Sans
         paramètre `action`, crée le rapport : `roundId` est attendu dans le
         corps de la requête et `idempotencyKey` dans l'URL. La requête est
         rejetée lorsque la tournée est clôturée (409 `ROUND_CLOSED`). La même
@@ -486,7 +486,7 @@ paths:
       operationId: updateVisit
       summary: Mettre à jour un rapport de visite
       description: |
-        Appel réel : `PATCH /sdkboard/api/rounds/visits.php?id={visitId}`.
+        Appel réel : `PATCH /api/rounds/visits.php?id={visitId}`.
         Incrémente la version du rapport. Le client doit envoyer dans `If-Match`
         la version lue précédemment afin d'éviter les mises à jour perdues
         (409 `VERSION_MISMATCH`).
@@ -535,7 +535,7 @@ paths:
       operationId: deleteVisit
       summary: Supprimer un rapport de visite
       description: |
-        Appel réel : `DELETE /sdkboard/api/rounds/visits.php?id={visitId}`.
+        Appel réel : `DELETE /api/rounds/visits.php?id={visitId}`.
         Extension implémentée côté serveur mais non exposée dans l'interface
         de l'application. Un utilisateur `commercial` ne peut supprimer que
         ses propres visites (403 sinon).
@@ -574,13 +574,13 @@ paths:
         "404":
           $ref: "#/components/responses/Introuvable"
 
-  /sdkboard/api/rounds/visits.php/photos:
+  /api/rounds/visits.php/photos:
     post:
       tags: [Photos]
       operationId: uploadVisitPhoto
       summary: Envoyer et traiter une photo de visite
       description: |
-        Appel réel : `POST /sdkboard/api/rounds/visits.php?action=addPhoto&id={visitId}`.
+        Appel réel : `POST /api/rounds/visits.php?action=addPhoto&id={visitId}`.
         Un seul fichier par appel, champ `file`. Maximum 5 photos par visite.
         Extensions autorisées : jpg, jpeg, png, webp (taille maximale 8 Mo).
       parameters:
@@ -634,13 +634,13 @@ paths:
         "422":
           $ref: "#/components/responses/ErreurValidation"
 
-  /sdkboard/api/rounds/visits.php/photos/{photoId}:
+  /api/rounds/visits.php/photos/{photoId}:
     delete:
       tags: [Photos]
       operationId: deleteVisitPhoto
       summary: Retirer une photo d'une visite
       description: |
-        Appel réel : `DELETE /sdkboard/api/rounds/visits.php?action=deletePhoto&id={visitId}&photoId={photoId}`.
+        Appel réel : `DELETE /api/rounds/visits.php?action=deletePhoto&id={visitId}&photoId={photoId}`.
       parameters:
         - name: action
           in: query
@@ -683,13 +683,13 @@ paths:
         "404":
           $ref: "#/components/responses/Introuvable"
 
-  /sdkboard/api/rounds/analytics.php:
+  /api/rounds/analytics.php:
     get:
       tags: [Analyses]
       operationId: getAnalytics
       summary: Obtenir les indicateurs du tableau de bord des visites
       description: |
-        Point d'entrée PHP unique `/sdkboard/api/rounds/analytics.php` (GET
+        Point d'entrée PHP unique `/api/rounds/analytics.php` (GET
         uniquement). Calcule les agrégats sur les visites filtrées. Pour un
         utilisateur `commercial`, les visites sont limitées aux siennes.
         Les classements (`*Ranking`) retournent le top 10 trié par occurrences

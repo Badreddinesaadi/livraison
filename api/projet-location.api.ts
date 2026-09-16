@@ -49,7 +49,7 @@ export const listProjetLocation = async ({
   createId?: number;
 }) => {
   const result = await client.request<ProjetLocation[]>({
-    pathname: `/sdkboard/api/homescreen/projet.php`,
+    pathname: `/api/homescreen/projet.php`,
     method: "GET",
     searchParams: {
       page,
@@ -67,7 +67,7 @@ export const listProjetLocation = async ({
 
 export const getProjetLocationById = async ({ id }: { id: string }) => {
   const result = await client.request<ProjetLocation[]>({
-    pathname: `/sdkboard/api/homescreen/projet.php?id=${id}`,
+    pathname: `/api/homescreen/projet.php?id=${id}`,
     method: "GET",
     isDebug: true,
   });
@@ -103,7 +103,7 @@ export const createProjetLocation = async (
   });
 
   return client.request({
-    pathname: `/sdkboard/api/homescreen/projet.php`,
+    pathname: `/api/homescreen/projet.php`,
     method: "POST",
     body: formData,
     isDebug: true,
@@ -113,7 +113,7 @@ export const updateProjetLocation = async (
   request: { id: number } & Partial<Omit<CreateProjetLocationRequest, "files">>,
 ) => {
   return client.request({
-    pathname: `/sdkboard/api/homescreen/projet.php`,
+    pathname: `/api/homescreen/projet.php`,
     method: "PUT",
     body: request,
     isDebug: true,
@@ -122,7 +122,7 @@ export const updateProjetLocation = async (
 
 export const deleteProjetLocation = async (projetId: number) => {
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/projet.php",
+    pathname: "/api/homescreen/projet.php",
     method: "DELETE",
     body: { id: projetId },
     isDebug: true,
@@ -140,7 +140,7 @@ export const deleteProjetLocation = async (projetId: number) => {
 //   commentaire: string;
 // }) => {
 //   return client.request({
-//     pathname: `/sdkboard/api/homescreen/projet.php`,
+//     pathname: `/api/homescreen/projet.php`,
 //     method: "PUT",
 //     body: {
 //       id,

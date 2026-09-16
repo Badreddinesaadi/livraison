@@ -1,6 +1,6 @@
 # Rotation Chauffeur — API Documentation
 
-**Base path:** `/sdkboard/api/homescreen/rotation_chauffeur.php`
+**Base path:** `/api/homescreen/rotation_chauffeur.php`
 
 **Authentication:** All requests require a valid `auth_token` header.
 
@@ -12,31 +12,31 @@
 
 ### 1. List Rotations
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Path** | `/sdkboard/api/homescreen/rotation_chauffeur.php` |
-| **Auth** | Required |
+| Field      | Value                                    |
+| ---------- | ---------------------------------------- |
+| **Method** | `GET`                                    |
+| **Path**   | `/api/homescreen/rotation_chauffeur.php` |
+| **Auth**   | Required                                 |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number (default: 1) |
-| `perPage` | int | No | Items per page (default: 10) |
-| `vehicule_id` | int | No | Filter by vehicle ID |
-| `chauffeur_id` | int | No | Filter by driver ID |
-| `disponibilite` | string | No | Filter by availability: `1`/`true` = Available, `0`/`false` = Reserved |
+| Parameter       | Type   | Required | Description                                                            |
+| --------------- | ------ | -------- | ---------------------------------------------------------------------- |
+| `page`          | int    | No       | Page number (default: 1)                                               |
+| `perPage`       | int    | No       | Items per page (default: 10)                                           |
+| `vehicule_id`   | int    | No       | Filter by vehicle ID                                                   |
+| `chauffeur_id`  | int    | No       | Filter by driver ID                                                    |
+| `disponibilite` | string | No       | Filter by availability: `1`/`true` = Available, `0`/`false` = Reserved |
 
 > **Note:** Date range filtering (`date_du`, `date_au`) is **not implemented** in the backend despite the frontend sending these parameters.
 
 #### Availability Logic (Backend)
 
-| Condition | Result |
-|-----------|--------|
-| `voyage.statut IS NULL` | Available (`disponibilite = true`) |
-| `voyage.statut = 'terminer'` | Available (`disponibilite = true`) |
-| `voyage.statut = 'encours'` | Reserved/On-trip (`disponibilite = false`) |
+| Condition                    | Result                                     |
+| ---------------------------- | ------------------------------------------ |
+| `voyage.statut IS NULL`      | Available (`disponibilite = true`)         |
+| `voyage.statut = 'terminer'` | Available (`disponibilite = true`)         |
+| `voyage.statut = 'encours'`  | Reserved/On-trip (`disponibilite = false`) |
 
 #### How Rotations Work
 
@@ -81,9 +81,9 @@ The `km_parcourus` field is calculated as `SUM(ville.kmDeCasa * 2)` across all v
 
 ## Frontend ↔ Backend Differences
 
-| Frontend Call | Backend Exists? | Notes |
-|---------------|----------------|-------|
-| `ListRotations` (GET with `page`, `date_du`, `date_au`, `vehicule_id`, `chauffeur_id`, `disponibilite`) | Partial | `date_du` and `date_au` parameters are **sent by the frontend but ignored by the backend**. No date filtering is implemented in the SQL query. |
+| Frontend Call                                                                                           | Backend Exists? | Notes                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ListRotations` (GET with `page`, `date_du`, `date_au`, `vehicule_id`, `chauffeur_id`, `disponibilite`) | Partial         | `date_du` and `date_au` parameters are **sent by the frontend but ignored by the backend**. No date filtering is implemented in the SQL query. |
 
 > **Missing backend feature:** Date range filtering (`date_du`, `date_au`) is not implemented. The rotation_chauffeur.php file has no `$_GET['date_du']` or `$_GET['date_au']` handling.
 

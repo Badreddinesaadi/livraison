@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{BACKEND_URL}}/sdkboard/api/homescreen/rotation_chauffeur.php?page=1&disponibilite=false"
+url: "{{BACKEND_URL}}/api/homescreen/rotation_chauffeur.php?page=1&disponibilite=false"
 method: GET
 headers:
   login_token: SDKWOOD

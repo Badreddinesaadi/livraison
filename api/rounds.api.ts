@@ -16,7 +16,7 @@ export const createRound = async ({
   if (closedAt) formData.append("closedAt", closedAt);
 
   return client.request<Round>({
-    pathname: "/sdkboard/api/rounds/rounds.php",
+    pathname: "/api/rounds/rounds.php",
     method: "POST",
     body: formData,
     isDebug: true,
@@ -39,7 +39,7 @@ export const listRounds = async ({
   perPage?: number;
 }) => {
   const result = await client.request<Round[]>({
-    pathname: "/sdkboard/api/rounds/rounds.php",
+    pathname: "/api/rounds/rounds.php",
     method: "GET",
     searchParams: { nom, status, from, to, page, perPage },
     isDebug: false,
@@ -54,7 +54,7 @@ export const listRounds = async ({
 
 export const getRoundById = async ({ id }: { id: string }) => {
   return client.request<Round>({
-    pathname: "/sdkboard/api/rounds/rounds.php",
+    pathname: "/api/rounds/rounds.php",
     method: "GET",
     searchParams: { id },
     isDebug: false,
@@ -73,7 +73,7 @@ export const updateRound = async ({
   closedAt?: string | null;
 }) => {
   return client.request<Round>({
-    pathname: "/sdkboard/api/rounds/rounds.php",
+    pathname: "/api/rounds/rounds.php",
     method: "PATCH",
     searchParams: { id },
     body: {
@@ -87,7 +87,7 @@ export const updateRound = async ({
 
 export const deleteRound = async ({ id }: { id: string }) => {
   return client.request<null>({
-    pathname: "/sdkboard/api/rounds/rounds.php",
+    pathname: "/api/rounds/rounds.php",
     method: "DELETE",
     searchParams: { id },
     isDebug: true,
@@ -96,7 +96,7 @@ export const deleteRound = async ({ id }: { id: string }) => {
 
 export const closeRound = async ({ id }: { id: string }) => {
   return client.request<Round>({
-    pathname: "/sdkboard/api/rounds/rounds.php",
+    pathname: "/api/rounds/rounds.php",
     method: "POST",
     searchParams: { action: "close", id },
     isDebug: true,
@@ -105,7 +105,7 @@ export const closeRound = async ({ id }: { id: string }) => {
 
 export const reopenRound = async ({ id }: { id: string }) => {
   return client.request<Round>({
-    pathname: "/sdkboard/api/rounds/rounds.php",
+    pathname: "/api/rounds/rounds.php",
     method: "POST",
     searchParams: { action: "open", id },
     body: { status: "open" },

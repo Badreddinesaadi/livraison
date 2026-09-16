@@ -58,7 +58,7 @@ export type ProduitLot = {
 
 export const listProduits = async () => {
   const data = await client.request<Produit[]>({
-    pathname: "/sdkboard/api/produit/produits.php",
+    pathname: "/api/produit/produits.php",
     method: "GET",
     isDebug: true,
   });
@@ -71,7 +71,7 @@ export const getProductLots = async ({
   idProduit: number | string;
 }) => {
   const data = await client.request<ProduitLot[]>({
-    pathname: "/sdkboard/api/produit/lots_produits.php",
+    pathname: "/api/produit/lots_produits.php",
     method: "GET",
     searchParams: { idProduit },
     isDebug: true,

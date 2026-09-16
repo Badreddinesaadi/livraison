@@ -44,7 +44,7 @@ export const listQualityReports = async ({
   search?: string;
 }) => {
   const result = await client.request<QualityReport[]>({
-    pathname: "/sdkboard/api/homescreen/rapport_qualite.php",
+    pathname: "/api/homescreen/rapport_qualite.php",
     method: "GET",
     searchParams: { page, search },
     isDebug: false,
@@ -59,7 +59,7 @@ export const listQualityReports = async ({
 
 export const getQualityReportById = async ({ id }: { id: string }) => {
   const result = await client.request<QualityReport[]>({
-    pathname: `/sdkboard/api/homescreen/rapport_qualite.php?id=${id}`,
+    pathname: `/api/homescreen/rapport_qualite.php?id=${id}`,
     method: "GET",
     isDebug: false,
   });
@@ -101,7 +101,7 @@ export const createQualityReport = async (
   });
 
   return client.request({
-    pathname: "/sdkboard/api/homescreen/rapport_qualite.php",
+    pathname: "/api/homescreen/rapport_qualite.php",
     method: "POST",
     body: formData,
     isDebug: true,
@@ -110,7 +110,7 @@ export const createQualityReport = async (
 
 export const deleteQualityReport = async (qualityReportId: number) => {
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/rapport_qualite.php",
+    pathname: "/api/homescreen/rapport_qualite.php",
     method: "DELETE",
     body: { id: qualityReportId },
     isDebug: true,

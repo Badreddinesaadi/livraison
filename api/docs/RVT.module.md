@@ -70,7 +70,7 @@ Ce premier écran prépare la visite.
 | Fonction | Endpoint |
 | --- | --- |
 | Identifier le commercial connecté | `GET /me` |
-| Récupérer la liste des clients ERP | `GET /sdkboard/api/users/clients.php` |
+| Récupérer la liste des clients ERP | `GET /api/users/clients.php` |
 
 ---
 
@@ -100,7 +100,7 @@ Cet écran décrit l'activité et l'équipement du site visité.
 **Points d'entrée API associés :**
 | Fonction | Endpoint |
 | --- | --- |
-| Charger les options et le catalogue | `GET /sdkboard/api/homescreen/rapport_terrain.php` |
+| Charger les options et le catalogue | `GET /api/homescreen/rapport_terrain.php` |
 
 ---
 
@@ -129,7 +129,7 @@ Cet écran réalise le relevé terrain du stock présent chez le client.
 **Points d'entrée API associés :**
 | Fonction | Endpoint |
 | --- | --- |
-| Charger le catalogue et les marques | `GET /sdkboard/api/homescreen/rapport_terrain.php` |
+| Charger le catalogue et les marques | `GET /api/homescreen/rapport_terrain.php` |
 | Consulter un produit et ses options | `GET /products/{productId}` |
 
 ---
@@ -152,7 +152,7 @@ Cet écran analyse la position de SDK WOOD et les opportunités.
 **Points d'entrée API associés :**
 | Fonction | Endpoint |
 | --- | --- |
-| Charger concurrents et options | `GET /sdkboard/api/homescreen/rapport_terrain.php` |
+| Charger concurrents et options | `GET /api/homescreen/rapport_terrain.php` |
 
 ---
 
@@ -183,9 +183,9 @@ Cet écran conclut la visite et définit le suivi.
 **Points d'entrée API associés :**
 | Fonction | Endpoint |
 | --- | --- |
-| Soumettre le rapport de visite | `POST /sdkboard/api/rounds/visits.php?idempotencyKey=...` (roundId dans le corps) |
-| Envoyer et traiter une photo | `POST /sdkboard/api/rounds/visits.php?action=addPhoto&id={visitId}` |
-| Retirer une photo | `DELETE /sdkboard/api/rounds/visits.php?action=deletePhoto&id={visitId}&photoId={photoId}` |
+| Soumettre le rapport de visite | `POST /api/rounds/visits.php?idempotencyKey=...` (roundId dans le corps) |
+| Envoyer et traiter une photo | `POST /api/rounds/visits.php?action=addPhoto&id={visitId}` |
+| Retirer une photo | `DELETE /api/rounds/visits.php?action=deletePhoto&id={visitId}&photoId={photoId}` |
 
 ---
 
@@ -231,10 +231,10 @@ Cette vue regroupe le tableau de bord, l'historique.
 **Points d'entrée API associés :**
 | Fonction | Endpoint |
 | --- | --- |
-| Rechercher / paginer les visites | `GET /sdkboard/api/rounds/visits.php?roundId=...` |
-| Consulter un rapport | `GET /sdkboard/api/rounds/visits.php?id={visitId}` |
-| Mettre à jour un rapport | `PATCH /sdkboard/api/rounds/visits.php?id={visitId}` |
-| Obtenir les indicateurs du tableau de bord | `GET /sdkboard/api/rounds/analytics.php` |
+| Rechercher / paginer les visites | `GET /api/rounds/visits.php?roundId=...` |
+| Consulter un rapport | `GET /api/rounds/visits.php?id={visitId}` |
+| Mettre à jour un rapport | `PATCH /api/rounds/visits.php?id={visitId}` |
+| Obtenir les indicateurs du tableau de bord | `GET /api/rounds/analytics.php` |
 
 ---
 
@@ -256,11 +256,11 @@ session.
 **Points d'entrée API associés :**
 | Fonction | Endpoint |
 | --- | --- |
-| Récupérer/ouvrir la tournée du commercial | `GET /sdkboard/api/rounds/rounds.php` / `POST /sdkboard/api/rounds/rounds.php?idempotencyKey=...` |
-| Consulter une tournée | `GET /sdkboard/api/rounds/rounds.php?id={roundId}` |
-| Lister les tournées | `GET /sdkboard/api/rounds/rounds.php` |
-| Clôturer la tournée | `POST /sdkboard/api/rounds/rounds.php?action=close&id={roundId}` |
-| Lister les visites de la tournée | `GET /sdkboard/api/rounds/visits.php?roundId={roundId}` |
+| Récupérer/ouvrir la tournée du commercial | `GET /api/rounds/rounds.php` / `POST /api/rounds/rounds.php?idempotencyKey=...` |
+| Consulter une tournée | `GET /api/rounds/rounds.php?id={roundId}` |
+| Lister les tournées | `GET /api/rounds/rounds.php` |
+| Clôturer la tournée | `POST /api/rounds/rounds.php?action=close&id={roundId}` |
+| Lister les visites de la tournée | `GET /api/rounds/visits.php?roundId={roundId}` |
 
 ---
 
@@ -285,20 +285,20 @@ La consultation d'un rapport affiche l'ensemble des données saisies :
 
 ## 8. Récapitulatif : fonctionnalité → endpoint
 
-| Fonctionnalité                           | Écran / zone    | Endpoint                                                          | Méthode    |
-| ---------------------------------------- | --------------- | ----------------------------------------------------------------- | ---------- |
-| Récupération de la liste des clients     | Étape 1         | `/sdkboard/api/users/clients.php`                                 | GET        |
-| Catalogue, marques, concurrents, options | Étapes 2, 3, 4  | `/sdkboard/api/homescreen/rapport_terrain.php`                    | GET        |
-| Tournée en cours                         | Bandeau tournée | `/sdkboard/api/rounds/rounds.php`                                 | GET / POST |
-| Détail d'une tournée                     | Tournée         | `/sdkboard/api/rounds/rounds.php?id=`                             | GET        |
-| Clôture de la tournée                    | Tournée         | `/sdkboard/api/rounds/rounds.php?action=close&id=`                | POST       |
-| Validation d'une visite                  | Étape 5         | `/sdkboard/api/rounds/visits.php`                                 | POST       |
-| Photos de la visite                      | Étape 5         | `/sdkboard/api/rounds/visits.php?action=addPhoto&id=`             | POST       |
-| Suppression d'une photo                  | Étape 5         | `/sdkboard/api/rounds/visits.php?action=deletePhoto&id=&photoId=` | DELETE     |
-| Historique et recherche                  | Vue RAPPORTS    | `/sdkboard/api/rounds/visits.php?roundId=`                        | GET        |
-| Détail d'un rapport                      | Vue RAPPORTS    | `/sdkboard/api/rounds/visits.php?id=`                             | GET        |
-| Modification d'un rapport                | Vue RAPPORTS    | `/sdkboard/api/rounds/visits.php?id=`                             | PATCH      |
-| Tableau de bord                          | Vue RAPPORTS    | `/sdkboard/api/rounds/analytics.php`                              | GET        |
+| Fonctionnalité                           | Écran / zone    | Endpoint                                                 | Méthode    |
+| ---------------------------------------- | --------------- | -------------------------------------------------------- | ---------- |
+| Récupération de la liste des clients     | Étape 1         | `/api/users/clients.php`                                 | GET        |
+| Catalogue, marques, concurrents, options | Étapes 2, 3, 4  | `/api/homescreen/rapport_terrain.php`                    | GET        |
+| Tournée en cours                         | Bandeau tournée | `/api/rounds/rounds.php`                                 | GET / POST |
+| Détail d'une tournée                     | Tournée         | `/api/rounds/rounds.php?id=`                             | GET        |
+| Clôture de la tournée                    | Tournée         | `/api/rounds/rounds.php?action=close&id=`                | POST       |
+| Validation d'une visite                  | Étape 5         | `/api/rounds/visits.php`                                 | POST       |
+| Photos de la visite                      | Étape 5         | `/api/rounds/visits.php?action=addPhoto&id=`             | POST       |
+| Suppression d'une photo                  | Étape 5         | `/api/rounds/visits.php?action=deletePhoto&id=&photoId=` | DELETE     |
+| Historique et recherche                  | Vue RAPPORTS    | `/api/rounds/visits.php?roundId=`                        | GET        |
+| Détail d'un rapport                      | Vue RAPPORTS    | `/api/rounds/visits.php?id=`                             | GET        |
+| Modification d'un rapport                | Vue RAPPORTS    | `/api/rounds/visits.php?id=`                             | PATCH      |
+| Tableau de bord                          | Vue RAPPORTS    | `/api/rounds/analytics.php`                              | GET        |
 
 ---
 

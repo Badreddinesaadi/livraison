@@ -37,7 +37,7 @@ export const listVisits = async ({
   sort?: "completedAt" | "-completedAt" | "createdAt" | "-createdAt";
 }) => {
   const result = await client.request<VisitReport[]>({
-    pathname: "/sdkboard/api/rounds/visits.php",
+    pathname: "/api/rounds/visits.php",
     method: "GET",
     searchParams: { roundId, page, perPage, sort },
     isDebug: false,
@@ -52,7 +52,7 @@ export const listVisits = async ({
 
 export const getVisitById = async ({ id }: { id: string }) => {
   return client.request<VisitReport>({
-    pathname: "/sdkboard/api/rounds/visits.php",
+    pathname: "/api/rounds/visits.php",
     method: "GET",
     searchParams: { id },
     isDebug: false,
@@ -61,7 +61,7 @@ export const getVisitById = async ({ id }: { id: string }) => {
 
 export const createVisit = async (request: VisitCreate) => {
   return client.request<VisitReport>({
-    pathname: "/sdkboard/api/rounds/visits.php",
+    pathname: "/api/rounds/visits.php",
     method: "POST",
     searchParams: { idempotencyKey: generateIdempotencyKey() },
     body: request,
@@ -79,7 +79,7 @@ export const updateVisit = async ({
   patch: VisitPatch;
 }) => {
   return client.request<VisitReport>({
-    pathname: "/sdkboard/api/rounds/visits.php",
+    pathname: "/api/rounds/visits.php",
     method: "PUT",
     searchParams: { id },
     headers: { "If-Match": String(version) },
@@ -90,7 +90,7 @@ export const updateVisit = async ({
 
 export const deleteVisit = async ({ id }: { id: string }) => {
   return client.request<null>({
-    pathname: "/sdkboard/api/rounds/visits.php",
+    pathname: "/api/rounds/visits.php",
     method: "DELETE",
     searchParams: { id },
     isDebug: true,
@@ -107,7 +107,7 @@ export const uploadVisitPhoto = async ({
   const base = (getApiUrl() ?? "").replace(/\/+$/, "");
   const url = `${
     base
-  }/sdkboard/api/rounds/visits.php?action=addPhoto&id=${encodeURIComponent(
+  }/api/rounds/visits.php?action=addPhoto&id=${encodeURIComponent(
     String(visitId),
   )}`;
   const auth_token = (await SecureStore.getItemAsync("sessionToken")) ?? "";
@@ -177,7 +177,7 @@ export const deleteVisitPhotos = async ({
   photoIds: string[];
 }) => {
   return client.request<null>({
-    pathname: "/sdkboard/api/rounds/visits.php",
+    pathname: "/api/rounds/visits.php",
     method: "DELETE",
     searchParams: {
       action: "deletePhoto",
@@ -194,7 +194,7 @@ export const deletePanneauChantierPhoto = async ({
   visitId: string;
 }) => {
   return client.request<null>({
-    pathname: "/sdkboard/api/rounds/panneau_chantier.php",
+    pathname: "/api/rounds/panneau_chantier.php",
     method: "DELETE",
     searchParams: { id: visitId },
     isDebug: true,
@@ -209,7 +209,7 @@ export const uploadPanneauChantierPhoto = async ({
   file: UploadVisitFile;
 }) => {
   const base = (getApiUrl() ?? "").replace(/\/+$/, "");
-  const url = `${base}/sdkboard/api/rounds/panneau_chantier.php?id=${encodeURIComponent(
+  const url = `${base}/api/rounds/panneau_chantier.php?id=${encodeURIComponent(
     String(visitId),
   )}`;
   const auth_token = (await SecureStore.getItemAsync("sessionToken")) ?? "";

@@ -42,7 +42,7 @@ export const ListRotations = async ({
       : {}),
   };
   const res = await client.request<Rotation[]>({
-    pathname: "/sdkboard/api/homescreen/rotation_chauffeur.php",
+    pathname: "/api/homescreen/rotation_chauffeur.php",
     method: "GET",
     withPagination: true,
     isDebug: true,

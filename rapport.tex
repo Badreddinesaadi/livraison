@@ -1124,7 +1124,7 @@ Les actions détaillées pour chaque module illustrent les flux essentiels : de 
     \label{fig:apache-logo}
     \end{figure}
 
-    Le backend PHP est hébergé sur un serveur web Apache, qui assure la réception des requêtes HTTP entrantes, leur routage vers les fichiers PHP correspondants et la transmission des réponses au client mobile. Apache est configuré pour servir les endpoints de l'API REST dans le répertoire \texttt{/sdkboard/api/}, avec le module de réécriture d'URL activé pour prendre en charge les méthodes HTTP étendues (PUT, DELETE) nécessaires aux opérations CRUD.
+    Le backend PHP est hébergé sur un serveur web Apache, qui assure la réception des requêtes HTTP entrantes, leur routage vers les fichiers PHP correspondants et la transmission des réponses au client mobile. Apache est configuré pour servir les endpoints de l'API REST dans le répertoire \texttt{/api/}, avec le module de réécriture d'URL activé pour prendre en charge les méthodes HTTP étendues (PUT, DELETE) nécessaires aux opérations CRUD.
 
     Le choix d'Apache repose sur sa maturité, sa stabilité en production et son intégration native avec PHP via le module \texttt{mod\_php}. Sa configuration simplifiée permet un déploiement direct des fichiers PHP sans couche intermédiaire, en cohérence avec l'approche sans framework adoptée pour le backend.
 

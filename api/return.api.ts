@@ -54,7 +54,7 @@ export const listReturn = async ({
   client_id?: number;
 }) => {
   const result = await client.request<Return[]>({
-    pathname: `/sdkboard/api/homescreen/retour_chauffeur.php`,
+    pathname: `/api/homescreen/retour_chauffeur.php`,
     method: "GET",
     searchParams: {
       page,
@@ -73,7 +73,7 @@ export const listReturn = async ({
 
 export const getReturnById = async ({ id }: { id: string }) => {
   const result = await client.request<Return[]>({
-    pathname: `/sdkboard/api/homescreen/retour_chauffeur.php?id=${id}`,
+    pathname: `/api/homescreen/retour_chauffeur.php?id=${id}`,
     method: "GET",
     isDebug: false,
   });
@@ -101,7 +101,7 @@ export const createReturn = async (request: CreateReturnRequest) => {
   });
 
   return client.request({
-    pathname: `/sdkboard/api/homescreen/retour_chauffeur.php`,
+    pathname: `/api/homescreen/retour_chauffeur.php`,
     method: "POST",
     body: formData,
     isDebug: true,
@@ -110,7 +110,7 @@ export const createReturn = async (request: CreateReturnRequest) => {
 
 export const deleteReturn = async (returnId: number) => {
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/retour_chauffeur.php",
+    pathname: "/api/homescreen/retour_chauffeur.php",
     method: "DELETE",
     body: { id: returnId },
     isDebug: true,
@@ -128,7 +128,7 @@ export const ValidateReturn = async ({
   commentaire: string;
 }) => {
   return client.request({
-    pathname: `/sdkboard/api/homescreen/retour_chauffeur.php`,
+    pathname: `/api/homescreen/retour_chauffeur.php`,
     method: "PUT",
     body: {
       id,

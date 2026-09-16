@@ -47,7 +47,7 @@ export const listDemandeTransfert = async ({
   searchquery?: string;
 }) => {
   const result = await client.request<DemandeTransfert[]>({
-    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    pathname: "/api/homescreen/demande_transfert.php",
     method: "GET",
     searchParams: {
       page,
@@ -67,7 +67,7 @@ export const createDemandeTransfert = async (
   request: CreateDemandeTransfertRequest,
 ) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    pathname: "/api/homescreen/demande_transfert.php",
     method: "POST",
     body: request,
     isDebug: true,
@@ -112,7 +112,7 @@ export type DemandeTransfertDetails = {
 
 export const getDemandeTransfertDetails = async ({ id }: { id: string }) => {
   const result = await client.request<DemandeTransfertDetails>({
-    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    pathname: "/api/homescreen/details_demande_transfert.php",
     method: "GET",
     searchParams: { idDT: id, details: 1 },
     isDebug: true,
@@ -165,7 +165,7 @@ export type UpdateLotsRequest = {
 
 export const addProductToDT = async (request: AddProductToDTRequest) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    pathname: "/api/homescreen/details_demande_transfert.php",
     method: "POST",
     body: request,
     isDebug: true,
@@ -176,7 +176,7 @@ export const deleteProductFromDT = async (
   request: DeleteProductFromDTRequest,
 ) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    pathname: "/api/homescreen/details_demande_transfert.php",
     method: "DELETE",
     body: request,
     isDebug: true,
@@ -185,7 +185,7 @@ export const deleteProductFromDT = async (
 
 export const updateProductLots = async (request: UpdateLotsRequest) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    pathname: "/api/homescreen/details_demande_transfert.php",
     method: "PUT",
     body: request,
     isDebug: true,
@@ -208,7 +208,7 @@ export const preparerDemandeTransfert = async (
   request: PreparerProduitRequest | PreparerLotRequest,
 ) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/details_demande_transfert.php",
+    pathname: "/api/homescreen/details_demande_transfert.php",
     method: "POST",
     body: request,
     isDebug: true,
@@ -222,7 +222,7 @@ export type ChangeDTStatutRequest = {
 
 export const changeDTStatut = async (request: ChangeDTStatutRequest) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    pathname: "/api/homescreen/demande_transfert.php",
     method: "PUT",
     body: request,
     isDebug: true,
@@ -235,7 +235,7 @@ export type DeleteDTRequest = {
 
 export const deleteDemandeTransfert = async (request: DeleteDTRequest) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    pathname: "/api/homescreen/demande_transfert.php",
     method: "DELETE",
     body: request,
     isDebug: true,
@@ -254,7 +254,7 @@ export const updateDemandeTransfert = async (
   request: UpdateDemandeTransfertRequest,
 ) => {
   return client.request({
-    pathname: "/sdkboard/api/homescreen/demande_transfert.php",
+    pathname: "/api/homescreen/demande_transfert.php",
     method: "PUT",
     body: request,
     isDebug: true,

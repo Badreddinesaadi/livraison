@@ -1,6 +1,6 @@
 # Rapports Qualité — API Documentation
 
-**Base path:** `/sdkboard/api/homescreen/rapport_qualite.php`
+**Base path:** `/api/homescreen/rapport_qualite.php`
 
 **Authentication:** All requests require a valid `auth_token` header.
 
@@ -10,21 +10,21 @@
 
 ### 1. List Quality Reports
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Path** | `/sdkboard/api/homescreen/rapport_qualite.php` |
-| **Auth** | Required |
+| Field      | Value                                 |
+| ---------- | ------------------------------------- |
+| **Method** | `GET`                                 |
+| **Path**   | `/api/homescreen/rapport_qualite.php` |
+| **Auth**   | Required                              |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number (default: 1) |
-| `perPage` | int | No | Items per page (default: 10) |
-| `id` | int | No | Get a single report by ID |
-| `user_id` | int | No | Filter by creator user ID |
-| `search` | string | No | Search across `dum`, `dossier`, and `commentaire` fields |
+| Parameter | Type   | Required | Description                                              |
+| --------- | ------ | -------- | -------------------------------------------------------- |
+| `page`    | int    | No       | Page number (default: 1)                                 |
+| `perPage` | int    | No       | Items per page (default: 10)                             |
+| `id`      | int    | No       | Get a single report by ID                                |
+| `user_id` | int    | No       | Filter by creator user ID                                |
+| `search`  | string | No       | Search across `dum`, `dossier`, and `commentaire` fields |
 
 #### Response
 
@@ -67,33 +67,33 @@
 
 ### 2. Create Quality Report
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Path** | `/sdkboard/api/homescreen/rapport_qualite.php` |
-| **Content-Type** | `multipart/form-data` |
-| **Auth** | Required |
+| Field            | Value                                 |
+| ---------------- | ------------------------------------- |
+| **Method**       | `POST`                                |
+| **Path**         | `/api/homescreen/rapport_qualite.php` |
+| **Content-Type** | `multipart/form-data`                 |
+| **Auth**         | Required                              |
 
 > The authenticated user's ID is stored as both `user_id` and `idCreate`.
 
 #### Form Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `dum` | string | Yes | DUM reference |
-| `dossier` | string | Yes | Dossier reference |
-| `commentaire` | string | Yes | Comment text |
+| Field         | Type   | Required | Description       |
+| ------------- | ------ | -------- | ----------------- |
+| `dum`         | string | Yes      | DUM reference     |
+| `dossier`     | string | Yes      | Dossier reference |
+| `commentaire` | string | Yes      | Comment text      |
 
 > **Note:** The backend requires all three fields as non-empty. The frontend relaxes this to "at least one of `dum` or `dossier` must be filled".
 
 #### File Upload
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `images[]` | files | Yes* | Uploaded files |
-| `images_base64` | array | Yes* | Alternative: Base64-encoded strings |
+| Field           | Type  | Required | Description                         |
+| --------------- | ----- | -------- | ----------------------------------- |
+| `images[]`      | files | Yes\*    | Uploaded files                      |
+| `images_base64` | array | Yes\*    | Alternative: Base64-encoded strings |
 
-> *One of `images` or `images_base64` must be provided. The backend throws an exception if neither is present.
+> \*One of `images` or `images_base64` must be provided. The backend throws an exception if neither is present.
 
 #### Response
 
@@ -112,26 +112,27 @@
 
 ### 3. Update Quality Report
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
-| **Path** | `/sdkboard/api/homescreen/rapport_qualite.php` |
-| **Auth** | Required |
+| Field      | Value                                 |
+| ---------- | ------------------------------------- |
+| **Method** | `PUT`                                 |
+| **Path**   | `/api/homescreen/rapport_qualite.php` |
+| **Auth**   | Required                              |
 
 > **Note:** This endpoint exists in the backend but **is NOT used by the frontend app**. There is no edit screen or update API call in the client code.
 
 #### Request Body
 
 The `id` can be provided via:
+
 - `$_POST['id']` (form data)
 - JSON body `data['id']`
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | int | Yes | Report ID |
-| `dum` | string | No | Updated DUM reference |
-| `dossier` | string | No | Updated dossier reference |
-| `commentaire` | string | No | Updated comment |
+| Field         | Type   | Required | Description               |
+| ------------- | ------ | -------- | ------------------------- |
+| `id`          | int    | Yes      | Report ID                 |
+| `dum`         | string | No       | Updated DUM reference     |
+| `dossier`     | string | No       | Updated dossier reference |
+| `commentaire` | string | No       | Updated comment           |
 
 #### Behavior
 
@@ -147,15 +148,16 @@ Updates the specified fields and sets `idModif` to the authenticated user's ID a
 
 ### 4. Delete Quality Report
 
-| Field | Value |
-|-------|-------|
-| **Method** | `DELETE` |
-| **Path** | `/sdkboard/api/homescreen/rapport_qualite.php` |
-| **Auth** | Required |
+| Field      | Value                                 |
+| ---------- | ------------------------------------- |
+| **Method** | `DELETE`                              |
+| **Path**   | `/api/homescreen/rapport_qualite.php` |
+| **Auth**   | Required                              |
 
 #### Request
 
 The `id` can be provided via:
+
 - Query parameter: `?id=5`
 - JSON body: `{ "id": 5 }`
 
@@ -173,13 +175,13 @@ Deletes associated images first (`rapport_qualite_image`), then the report recor
 
 ## Frontend ↔ Backend Differences
 
-| Frontend Call | Backend Exists? | Notes |
-|---------------|----------------|-------|
-| `listQualityReports` (GET with `search` param) | Yes | Server-side search works |
-| `createQualityReport` (POST multipart) | Yes | Matches |
-| `getQualityReportById` (GET with `?id=`) | Yes | Returns single report with images |
-| `deleteQualityReport` (DELETE) | Yes | Matches |
-| UPDATE / Edit report | Yes (backend) | **Backend supports PUT, but frontend has no edit screen or update API call** |
+| Frontend Call                                  | Backend Exists? | Notes                                                                        |
+| ---------------------------------------------- | --------------- | ---------------------------------------------------------------------------- |
+| `listQualityReports` (GET with `search` param) | Yes             | Server-side search works                                                     |
+| `createQualityReport` (POST multipart)         | Yes             | Matches                                                                      |
+| `getQualityReportById` (GET with `?id=`)       | Yes             | Returns single report with images                                            |
+| `deleteQualityReport` (DELETE)                 | Yes             | Matches                                                                      |
+| UPDATE / Edit report                           | Yes (backend)   | **Backend supports PUT, but frontend has no edit screen or update API call** |
 
 ---
 

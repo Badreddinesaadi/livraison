@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{BACKEND_URL}}/sdkboard/api/users/authentification.php"
+url: "{{BACKEND_URL}}/api/users/authentification.php"
 method: POST
 headers:
   login_token: SDKWOOD
@@ -16,7 +16,8 @@ body:
     }"
 scripts:
   - type: afterResponse
-    code: "const token = pm.response.json().data.token; // Assuming the token is returned in the response\r
+    code:
+      "const token = pm.response.json().data.token; // Assuming the token is returned in the response\r
 
       if (token) {\r
 

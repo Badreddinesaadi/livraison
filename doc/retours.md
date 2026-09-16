@@ -1,6 +1,6 @@
 # Retours — API Documentation
 
-**Base path:** `/sdkboard/api/homescreen/retour_chauffeur.php`
+**Base path:** `/api/homescreen/retour_chauffeur.php`
 
 **Authentication:** All requests require a valid `auth_token` header.
 
@@ -10,21 +10,21 @@
 
 ### 1. List Returns
 
-| Field | Value |
-|-------|-------|
-| **Method** | `GET` |
-| **Path** | `/sdkboard/api/homescreen/retour_chauffeur.php` |
-| **Auth** | Required |
+| Field      | Value                                  |
+| ---------- | -------------------------------------- |
+| **Method** | `GET`                                  |
+| **Path**   | `/api/homescreen/retour_chauffeur.php` |
+| **Auth**   | Required                               |
 
 #### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | int | No | Page number (default: 1) |
-| `perPage` | int | No | Items per page (default: 10) |
-| `chauffeur_id` | int | No | Filter by driver ID |
-| `client_id` | int | No | Filter by client ID |
-| `id` | int | No | Get a single return by ID |
+| Parameter      | Type | Required | Description                  |
+| -------------- | ---- | -------- | ---------------------------- |
+| `page`         | int  | No       | Page number (default: 1)     |
+| `perPage`      | int  | No       | Items per page (default: 10) |
+| `chauffeur_id` | int  | No       | Filter by driver ID          |
+| `client_id`    | int  | No       | Filter by client ID          |
+| `id`           | int  | No       | Get a single return by ID    |
 
 #### Response
 
@@ -70,42 +70,42 @@
 
 ### 2. Create Return
 
-| Field | Value |
-|-------|-------|
-| **Method** | `POST` |
-| **Path** | `/sdkboard/api/homescreen/retour_chauffeur.php` |
-| **Content-Type** | `multipart/form-data` |
-| **Auth** | Required |
+| Field            | Value                                  |
+| ---------------- | -------------------------------------- |
+| **Method**       | `POST`                                 |
+| **Path**         | `/api/homescreen/retour_chauffeur.php` |
+| **Content-Type** | `multipart/form-data`                  |
+| **Auth**         | Required                               |
 
 > The authenticated user's ID is stored as `chauffeur_id` automatically.
 
 #### Form Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `Bl_cachetet` | string | Yes | Stamped BL? (`oui` / `non`) |
-| `reglement` | string | Yes | Settlement received? (`oui` / `non`) |
-| `retour_Mse` | string | Yes | Return to MSE? (`oui` / `non`) |
-| `client_id` | int | Yes | Client ID |
-| `reclamation` | string | No | Complaint type (see values below) |
+| Field         | Type   | Required | Description                          |
+| ------------- | ------ | -------- | ------------------------------------ |
+| `Bl_cachetet` | string | Yes      | Stamped BL? (`oui` / `non`)          |
+| `reglement`   | string | Yes      | Settlement received? (`oui` / `non`) |
+| `retour_Mse`  | string | Yes      | Return to MSE? (`oui` / `non`)       |
+| `client_id`   | int    | Yes      | Client ID                            |
+| `reclamation` | string | No       | Complaint type (see values below)    |
 
 #### File Upload
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `images[]` | files | Yes* | Uploaded files (at least 1 image required) |
-| `images_base64` | array | Yes* | Alternative: Base64-encoded image strings |
+| Field           | Type  | Required | Description                                |
+| --------------- | ----- | -------- | ------------------------------------------ |
+| `images[]`      | files | Yes\*    | Uploaded files (at least 1 image required) |
+| `images_base64` | array | Yes\*    | Alternative: Base64-encoded image strings  |
 
-> *One of `images` or `images_base64` must be provided.
+> \*One of `images` or `images_base64` must be provided.
 
 #### Reclamation Values
 
-| Value | Description |
-|-------|-------------|
-| `Retard de livraison` | Late delivery |
-| `Prix incorrect` | Incorrect price |
-| `Qte incorrecte` | Incorrect quantity |
-| `Mauvaise qualité` | Poor quality |
+| Value                 | Description        |
+| --------------------- | ------------------ |
+| `Retard de livraison` | Late delivery      |
+| `Prix incorrect`      | Incorrect price    |
+| `Qte incorrecte`      | Incorrect quantity |
+| `Mauvaise qualité`    | Poor quality       |
 
 #### Response
 
@@ -124,26 +124,26 @@
 
 ### 3. Validate / Update Return
 
-| Field | Value |
-|-------|-------|
-| **Method** | `PUT` |
-| **Path** | `/sdkboard/api/homescreen/retour_chauffeur.php` |
-| **Content-Type** | `application/json` |
-| **Auth** | Required |
+| Field            | Value                                  |
+| ---------------- | -------------------------------------- |
+| **Method**       | `PUT`                                  |
+| **Path**         | `/api/homescreen/retour_chauffeur.php` |
+| **Content-Type** | `application/json`                     |
+| **Auth**         | Required                               |
 
 > **Authorization gate:** Only users with `ValidationRetourChauffeur = 'Oui'` in the `utilisateur` table can modify `statut` and `commentaire`.
 
 #### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | int | Yes | Return ID |
-| `Bl_cachetet` | string | No | Stamped BL (`oui` / `non`) |
-| `reglement` | string | No | Settlement (`oui` / `non`) |
-| `retour_Mse` | string | No | Return to MSE (`oui` / `non`) |
-| `reclamation` | string | No | Complaint type |
-| `statut` | string | No* | Status (`terminer` / `refuser`) — only if user has validation permission |
-| `commentaire` | string | No* | Comment — only if user has validation permission |
+| Field         | Type   | Required | Description                                                              |
+| ------------- | ------ | -------- | ------------------------------------------------------------------------ |
+| `id`          | int    | Yes      | Return ID                                                                |
+| `Bl_cachetet` | string | No       | Stamped BL (`oui` / `non`)                                               |
+| `reglement`   | string | No       | Settlement (`oui` / `non`)                                               |
+| `retour_Mse`  | string | No       | Return to MSE (`oui` / `non`)                                            |
+| `reclamation` | string | No       | Complaint type                                                           |
+| `statut`      | string | No\*     | Status (`terminer` / `refuser`) — only if user has validation permission |
+| `commentaire` | string | No\*     | Comment — only if user has validation permission                         |
 
 #### Response
 
@@ -155,15 +155,16 @@
 
 ### 4. Delete Return
 
-| Field | Value |
-|-------|-------|
-| **Method** | `DELETE` |
-| **Path** | `/sdkboard/api/homescreen/retour_chauffeur.php` |
-| **Auth** | Required |
+| Field      | Value                                  |
+| ---------- | -------------------------------------- |
+| **Method** | `DELETE`                               |
+| **Path**   | `/api/homescreen/retour_chauffeur.php` |
+| **Auth**   | Required                               |
 
 #### Request
 
 The `id` can be provided via:
+
 - Query parameter: `?id=15`
 - JSON body: `{ "id": 15 }`
 
@@ -181,22 +182,22 @@ Deletes associated images first (`retour_chauffeur_image`), then the return reco
 
 ## Statut Values
 
-| Value | Label | Description |
-|-------|-------|-------------|
-| `envoyer` | Envoyé | Initial status after creation |
-| `terminer` | Terminé | Accepted / validated |
-| `refuser` | Refusé | Rejected |
+| Value      | Label   | Description                   |
+| ---------- | ------- | ----------------------------- |
+| `envoyer`  | Envoyé  | Initial status after creation |
+| `terminer` | Terminé | Accepted / validated          |
+| `refuser`  | Refusé  | Rejected                      |
 
 ---
 
 ## Frontend ↔ Backend Differences
 
-| Frontend Call | Backend Exists? | Notes |
-|---------------|----------------|-------|
-| `ValidateReturn` (PUT with `id`, `statut`, `commentaire`) | Yes | Backend uses same PUT endpoint with `ValidationRetourChauffeur` permission gate |
-| `deleteReturn` (DELETE with body `{id}`) | Yes | Backend also supports `?id=` query param |
-| `getReturnById` (GET with `?id=`) | Yes | Filter by `id` query parameter |
-| Client-side search filtering | No backend search | Frontend filters locally; no `searchquery` param on this endpoint |
+| Frontend Call                                             | Backend Exists?   | Notes                                                                           |
+| --------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------- |
+| `ValidateReturn` (PUT with `id`, `statut`, `commentaire`) | Yes               | Backend uses same PUT endpoint with `ValidationRetourChauffeur` permission gate |
+| `deleteReturn` (DELETE with body `{id}`)                  | Yes               | Backend also supports `?id=` query param                                        |
+| `getReturnById` (GET with `?id=`)                         | Yes               | Filter by `id` query parameter                                                  |
+| Client-side search filtering                              | No backend search | Frontend filters locally; no `searchquery` param on this endpoint               |
 
 ---
 

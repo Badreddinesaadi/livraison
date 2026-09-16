@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{BACKEND_URL}}/sdkboard/api/users/chauffeur.php"
+  url: "{{BACKEND_URL}}/api/users/chauffeur.php"
   method: GET
   headers:
     login_token: SDKWOOD

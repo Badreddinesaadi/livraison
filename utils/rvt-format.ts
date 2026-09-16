@@ -1,6 +1,6 @@
-import { format } from "date-fns";
 import { getApiUrl } from "@/stores/api-url.store";
 import { SyncStatus, VisitPhoto } from "@/types/rvt.types";
+import { format } from "date-fns";
 
 export const formatDateLabel = (value?: string | null) => {
   if (!value) return "-";
@@ -31,7 +31,7 @@ export const rvtPhotoUrl = (
   const base = (getApiUrl() ?? "").replace(/\/+$/, "");
   const path = raw.replace(/^\/+/, "");
   if (!base) return raw;
-  return `${base}/sdkboard/api/${path}`;
+  return `${base}/api/${path}`;
 };
 
 export const SYNC_STATUS_UI: Record<

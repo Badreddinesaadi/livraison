@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: 192.168.1.111:8075/sdkboard/api/homescreen/voyage.php
+  url: 192.168.1.111:8075/api/homescreen/voyage.php
   method: GET
   headers:
     login_token: SDKWOOD
