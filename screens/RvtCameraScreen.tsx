@@ -241,13 +241,15 @@ export default function RvtCameraScreen() {
         />
 
         <View style={styles.controls}>
-          <Pressable
-            onPress={pickFromGallery}
-            style={styles.galleryButton}
-            hitSlop={6}
-          >
-            <FontAwesome5 name="images" size={22} color="#fff" />
-          </Pressable>
+          <View style={styles.sideSlotLeft}>
+            <Pressable
+              onPress={pickFromGallery}
+              style={styles.galleryButton}
+              hitSlop={6}
+            >
+              <FontAwesome5 name="images" size={22} color="#fff" />
+            </Pressable>
+          </View>
 
           <Pressable
             onPress={handleCapture}
@@ -260,18 +262,20 @@ export default function RvtCameraScreen() {
             <View style={styles.captureInner} />
           </Pressable>
 
-          <Pressable
-            onPress={handleValidate}
-            disabled={photos.length === 0}
-            style={[
-              styles.validateButton,
-              photos.length === 0 && styles.validateDisabled,
-            ]}
-          >
-            <Text style={styles.validateText}>
-              Valider ({photos.length})
-            </Text>
-          </Pressable>
+          <View style={styles.sideSlotRight}>
+            <Pressable
+              onPress={handleValidate}
+              disabled={photos.length === 0}
+              style={[
+                styles.validateButton,
+                photos.length === 0 && styles.validateDisabled,
+              ]}
+            >
+              <Text style={styles.validateText}>
+                Valider ({photos.length})
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -379,9 +383,16 @@ const styles = StyleSheet.create({
   controls: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 24,
     marginTop: 10,
+  },
+  sideSlotLeft: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  sideSlotRight: {
+    flex: 1,
+    alignItems: "flex-end",
   },
   galleryButton: {
     width: 44,

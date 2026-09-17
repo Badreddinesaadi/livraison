@@ -242,6 +242,8 @@ const styles = StyleSheet.create({
   itemSubLabel: {
     color: "#888",
     marginTop: 2,
+    fontSize: 12,
+    lineHeight: 16,
   },
   checkbox: {
     width: 22,

@@ -1,7 +1,7 @@
 import { normalizeApiUrl, useApiUrlStore } from "@/stores/api-url.store";
 import { FontAwesome } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -62,49 +62,52 @@ export default function OnboardingUrlScreen({
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Image
-            source={require("../assets/images/logo.jpeg")}
-            style={styles.logo}
-            contentFit="contain"
-          />
-
-          <Text style={styles.title}>Bienvenue sur SDK Wood</Text>
-          <Text style={styles.subtitle}>
-            {"Pour commencer, veuillez saisir l'adresse complète du serveur de l'application (IP ou URL http/https)"}
-          </Text>
-
-          <TextInput
-            placeholder="http://192.168.1.128:8075"
-            style={styles.input}
-            value={url}
-            onChangeText={setUrl}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-          />
-
-          <Text style={styles.error}>{error}</Text>
-
-          <TouchableOpacity
-            style={[styles.button, !url && styles.buttonDisabled]}
-            disabled={isSaving || !url}
-            onPress={handleSave}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
           >
-            {isSaving ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>
-                {canGoBack ? "Enregistrer" : "Continuer"}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+            <Image
+              source={require("../assets/images/logo.jpeg")}
+              style={styles.logo}
+              contentFit="contain"
+            />
+
+            <Text style={styles.title}>Bienvenue sur SDK Wood</Text>
+            <Text style={styles.subtitle}>
+              {
+                "Pour commencer, veuillez saisir l'adresse complète du serveur de l'application (IP ou URL http/https)"
+              }
+              {}
+            </Text>
+
+            <TextInput
+              placeholder="http://192.168.1.128:8075"
+              style={styles.input}
+              value={url}
+              onChangeText={setUrl}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+            />
+
+            <Text style={styles.error}>{error}</Text>
+
+            <TouchableOpacity
+              style={[styles.button, !url && styles.buttonDisabled]}
+              disabled={isSaving || !url}
+              onPress={handleSave}
+            >
+              {isSaving ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>
+                  {canGoBack ? "Enregistrer" : "Continuer"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </ScrollView>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

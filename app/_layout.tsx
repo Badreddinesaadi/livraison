@@ -1,4 +1,3 @@
-import OfflineNotice from "@/components/OfflineNotice";
 import { SplashScreenController } from "@/components/splash";
 import { queryClient } from "@/constants/query";
 import { useApiUrlStore } from "@/stores/api-url.store";
@@ -9,7 +8,6 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import Toast from "react-native-toast-message";
-
 Sentry.init({
   dsn: "https://db4c2b3e4c28ab5e373dad6c73917a13@o4510540277612544.ingest.de.sentry.io/4512067805773904",
 
@@ -48,26 +46,29 @@ const InnerLayout = () => {
     initApiUrl();
   }, [initApiUrl]);
 
+  const isReady = isApiUrlLoaded && !session.isLoading;
+
   return (
     <>
       <StatusBar style="light" />
       <SplashScreenController />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={isApiUrlLoaded && !apiUrl}>
-          <Stack.Screen name="onboarding" />
-        </Stack.Protected>
-        <Stack.Protected guard={!!session.user}>
-          <Stack.Screen name="(app)/(drawer)" />
-        </Stack.Protected>
-        {/* <Stack.Protected guard={!!session.user}>
-          <Stack.Screen name="(driver)/index" />
-        </Stack.Protected> */}
+      {isReady ? (
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={!apiUrl}>
+            <Stack.Screen name="onboarding" />
+          </Stack.Protected>
+          <Stack.Protected guard={!!session.user}>
+            <Stack.Screen name="(app)/(drawer)" />
+          </Stack.Protected>
+          {/* <Stack.Protected guard={!!session.user}>
+            <Stack.Screen name="(driver)/index" />
+          </Stack.Protected> */}
 
-        <Stack.Protected guard={!session.user && isApiUrlLoaded && !!apiUrl}>
-          <Stack.Screen name="sign-in" />
-        </Stack.Protected>
-      </Stack>
-      <OfflineNotice />
+          <Stack.Protected guard={!!apiUrl && !session.user}>
+            <Stack.Screen name="sign-in" />
+          </Stack.Protected>
+        </Stack>
+      ) : null}
       <Toast visibilityTime={2000} />
     </>
   );

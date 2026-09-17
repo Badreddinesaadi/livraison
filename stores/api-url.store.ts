@@ -38,6 +38,9 @@ export const useApiUrlStore = create<ApiUrlState>((set) => ({
     } catch {
       stored = null;
     }
+    if (__DEV__) {
+      console.log("[apiUrl] hydrated:", stored);
+    }
     set({ isLoaded: true, apiUrl: stored || null });
   },
 

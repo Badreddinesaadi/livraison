@@ -50,9 +50,7 @@ export default function LoginScreen() {
       return;
     }
 
-    signIn(email, password, (message) => {
-      setError(message);
-    });
+    signIn(email, password, () => {});
   };
 
   return (
@@ -97,6 +95,8 @@ export default function LoginScreen() {
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
             />
 
             <TouchableWithoutFeedback
@@ -123,7 +123,7 @@ export default function LoginScreen() {
               <Text style={styles.buttonText}>Se connecter</Text>
             )}
           </TouchableOpacity>
-          <Text>0.0.3</Text>
+          <Text style={styles.version}>0.0.3</Text>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -184,5 +184,10 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
     marginBottom: 10,
+  },
+  version: {
+    marginTop: 16,
+    textAlign: "center",
+    color: "#94A3B8",
   },
 });

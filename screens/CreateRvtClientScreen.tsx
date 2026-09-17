@@ -9,6 +9,7 @@ import {
 import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
 import { useReferenceData } from "@/hooks/use-reference-data";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
@@ -29,6 +30,8 @@ export default function CreateRvtClientScreen() {
   const store = useCreateVisitStore();
   const openSelect = useRvtSheetStore((s) => s.openSelect);
   const { data: refData } = useReferenceData();
+  const { hasReachedBottom, onScroll, onContentLayout, onViewportLayout } =
+    useScrollToBottom();
 
   const { data: clients, isLoading: isLoadingClients } = useQuery({
     queryKey: ["clients", "full-list"],
@@ -113,9 +116,12 @@ export default function CreateRvtClientScreen() {
     <View style={styles.screen}>
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onLayout={onViewportLayout}
       >
+        <View style={styles.scrollContent} onLayout={onContentLayout}>
         <SectionCard title="Client" icon="building">
           <RvtSelectorField
             label="Client visité"
@@ -179,10 +185,15 @@ export default function CreateRvtClientScreen() {
             allowNull
           />
         </SectionCard>
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <RvtFooterButton label="Suivant" onPress={handleNext} />
+        <RvtFooterButton
+          label="Suivant"
+          onPress={handleNext}
+          disabled={!hasReachedBottom}
+        />
       </View>
     </View>
   );

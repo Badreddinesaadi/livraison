@@ -8,6 +8,7 @@ import {
 } from "@/components/RvtFormFields";
 import { hasRapportVisitePermission } from "@/constants/permissions";
 import { useReferenceData } from "@/hooks/use-reference-data";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
@@ -25,6 +26,8 @@ export default function CreateRvtOpportuniteScreen() {
   const openSelect = useRvtSheetStore((s) => s.openSelect);
   const openMultiSelect = useRvtSheetStore((s) => s.openMultiSelect);
   const { data: refData } = useReferenceData();
+  const { hasReachedBottom, onScroll, onContentLayout, onViewportLayout } =
+    useScrollToBottom();
 
   const sdkPositions = refData?.sdkPositions ?? [];
   const competitors = refData?.competitors ?? [];
@@ -94,13 +97,8 @@ export default function CreateRvtOpportuniteScreen() {
           (p.marque || "-") +
           "::" +
           (p.scateg || "-"),
-        label: p.categ + " / " + p.categ2 + " / " + p.marque,
-        subLabel:
-          (p.couleur || "-") +
-          " / " +
-          (p.finition || "-") +
-          " / " +
-          (p.scateg || "-"),
+        label: `${p.categ || "-"} / ${p.scateg || "-"} / ${p.categ2 || "-"}`,
+        subLabel: `marque : ${p.marque || "-"}\ncouleur : ${p.couleur || "-"}\nfinition : ${p.finition || "-"}`,
       })),
       getSelectedIds: () =>
         useCreateVisitStore
@@ -187,9 +185,12 @@ export default function CreateRvtOpportuniteScreen() {
     <View style={styles.screen}>
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onLayout={onViewportLayout}
       >
+        <View style={styles.scrollContent} onLayout={onContentLayout}>
         <SectionCard title="Position SDK WOOD" icon="chart-line">
           <RvtChipRow
             label="Position chez ce client"
@@ -306,10 +307,15 @@ export default function CreateRvtOpportuniteScreen() {
             </View>
           ) : null}
         </SectionCard>
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <RvtFooterButton label="Suivant" onPress={handleNext} />
+        <RvtFooterButton
+          label="Suivant"
+          onPress={handleNext}
+          disabled={!hasReachedBottom}
+        />
       </View>
     </View>
   );

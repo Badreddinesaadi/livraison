@@ -6,6 +6,7 @@ import {
 import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { useReferenceData } from "@/hooks/use-reference-data";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtCameraStore } from "@/stores/rvt-camera.store";
@@ -24,6 +25,8 @@ export default function CreateRvtProfilScreen() {
   const canCreate = hasRapportVisitePermission(user, "CREATE");
   const store = useCreateVisitStore();
   const { data: refData } = useReferenceData();
+  const { hasReachedBottom, onScroll, onContentLayout, onViewportLayout } =
+    useScrollToBottom();
 
   const activities = useMemo(
     () => refData?.activite_observee_v2 ?? [],
@@ -126,9 +129,12 @@ export default function CreateRvtProfilScreen() {
     <View style={styles.screen}>
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onLayout={onViewportLayout}
       >
+        <View style={styles.scrollContent} onLayout={onContentLayout}>
         <SectionCard title="Activités observées" icon="chart-line">
           <Text style={styles.hint}>
             Un choix adapte automatiquement les équipements proposés.
@@ -450,10 +456,15 @@ export default function CreateRvtProfilScreen() {
             )}
           </SectionCard>
         ) : null}
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <RvtFooterButton label="Suivant" onPress={handleNext} />
+        <RvtFooterButton
+          label="Suivant"
+          onPress={handleNext}
+          disabled={!hasReachedBottom}
+        />
       </View>
     </View>
   );

@@ -17,6 +17,7 @@ import RvtPicturePreview from "@/components/RvtPicturePreview";
 import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
 import { useReferenceData } from "@/hooks/use-reference-data";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtCameraStore } from "@/stores/rvt-camera.store";
@@ -45,6 +46,8 @@ export default function CreateRvtActionScreen() {
   const openMultiSelect = useRvtSheetStore((s) => s.openMultiSelect);
   const openCamera = useRvtCameraStore((s) => s.open);
   const { data: refData } = useReferenceData();
+  const { hasReachedBottom, onScroll, onContentLayout, onViewportLayout } =
+    useScrollToBottom();
 
   const [isCapturingLocation, setIsCapturingLocation] = useState(false);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
@@ -407,9 +410,12 @@ export default function CreateRvtActionScreen() {
     <View style={styles.screen}>
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onLayout={onViewportLayout}
       >
+        <View style={styles.scrollContent} onLayout={onContentLayout}>
         <SectionCard title="Résultats de la visite" icon="check-circle">
           <RvtSelectorField
             label="Résultats"
@@ -609,6 +615,7 @@ export default function CreateRvtActionScreen() {
           uri={previewUri}
           onClose={() => setPreviewUri(null)}
         />
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -616,7 +623,7 @@ export default function CreateRvtActionScreen() {
           label={isEdit ? "Enregistrer les modifications" : "VALIDER LA VISITE"}
           onPress={handleSubmit}
           isLoading={isPending}
-          disabled={isPending}
+          disabled={isPending || !hasReachedBottom}
         />
       </View>
     </View>
