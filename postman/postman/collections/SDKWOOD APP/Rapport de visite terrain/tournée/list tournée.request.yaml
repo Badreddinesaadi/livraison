@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{BACKEND_URL}}/sdkboard/api/rounds/rounds.php?perPage=200&page=1"
+url: "{{BACKEND_URL}}/api/rounds/rounds.php?perPage=200&page=1"
 method: GET
 headers:
   login_token: SDKWOOD

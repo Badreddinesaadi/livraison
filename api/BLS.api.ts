@@ -19,7 +19,7 @@ export const listBLSEnCours = async ({
 }> => {
   const data = await client.request<BLResponse[]>({
     pathname:
-      "/sdkboard/api/homescreen/bl_voyage_list.php?page=" +
+      "/api/homescreen/bl_voyage_list.php?page=" +
       page +
       (codeQuery ? "&codeQuery=" + codeQuery : ""),
     method: "GET",
@@ -62,7 +62,7 @@ export const closeBL = async ({
   formdata.append("coordinates", JSON.stringify(coordinates));
 
   const data = await client.request({
-    pathname: "/sdkboard/api/homescreen/voyage_chauffeur.php",
+    pathname: "/api/homescreen/voyage_chauffeur.php",
     method: "POST",
     body: formdata,
     isDebug: true,

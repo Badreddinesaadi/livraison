@@ -1,8 +1,8 @@
 import { getQualityReportById } from "@/api/quality-report.api";
 import Loader from "@/components/Loader";
 import { hasRapportQualitePermission } from "@/constants/permissions";
-import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY } from "@/constants/theme";
+import { getApiUrl } from "@/stores/api-url.store";
 import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -64,10 +64,10 @@ const buildFileUrl = (cheminFichier?: string | null) => {
   const normalizedPath = cheminFichier.replace(/^\/+/, "");
 
   if (!normalizedBaseUrl) {
-    return `/sdkboard/${normalizedPath}`;
+    return `/${normalizedPath}`;
   }
 
-  return `${normalizedBaseUrl}/sdkboard/${normalizedPath}`;
+  return `${normalizedBaseUrl}/${normalizedPath}`;
 };
 
 const formatDateTime = (value?: string | null) => {

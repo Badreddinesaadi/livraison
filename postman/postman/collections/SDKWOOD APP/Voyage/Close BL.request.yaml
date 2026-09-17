@@ -1,5 +1,5 @@
 $kind: http-request
-url: 192.168.1.111:8075/sdkboard/api/homescreen/voyage_chauffeur.php
+url: 192.168.1.111:8075/api/homescreen/voyage_chauffeur.php
 method: POST
 headers:
   login_token: SDKWOOD

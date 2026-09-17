@@ -2,8 +2,8 @@ import { getVoyageById } from "@/api/voyage.api";
 import Loader from "@/components/Loader";
 import { DetailRow } from "@/components/voyageCard";
 import { hasVoyagePermission } from "@/constants/permissions";
-import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
+import { getApiUrl } from "@/stores/api-url.store";
 import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -58,7 +58,7 @@ const buildImageUrl = (cheminFichier?: string, nomFichier?: string) => {
     return null;
   }
 
-  const combinedPath = getApiUrl() + "/sdkboard/" + rawPath;
+  const combinedPath = getApiUrl() + "/" + rawPath;
 
   if (/^(https?:)?\/\//i.test(combinedPath)) {
     return combinedPath;

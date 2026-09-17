@@ -8,16 +8,14 @@ import {
 import { deleteVisit, listVisits } from "@/api/visits.api";
 import Loader from "@/components/Loader";
 import { RvtCard } from "@/components/RvtCard";
-import {
-  hasRapportVisitePermission,
-} from "@/constants/permissions";
+import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
+import { getApiUrl } from "@/stores/api-url.store";
+import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
-import { useSession } from "@/stores/auth.store";
-import { formatDateLabel } from "@/utils/rvt-format";
 import { downloadPdf } from "@/utils/pdf-download";
-import { getApiUrl } from "@/stores/api-url.store";
+import { formatDateLabel } from "@/utils/rvt-format";
 import { FontAwesome5 } from "@expo/vector-icons";
 import {
   useInfiniteQuery,
@@ -25,18 +23,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
@@ -84,7 +73,11 @@ export default function RvtTourDetailsScreen() {
   } = useInfiniteQuery({
     queryKey: ["visits", "list", { roundId }],
     queryFn: ({ pageParam }) =>
-      listVisits({ roundId: roundId ? String(roundId) : undefined, page: pageParam, perPage: 20 }),
+      listVisits({
+        roundId: roundId ? String(roundId) : undefined,
+        page: pageParam,
+        perPage: 20,
+      }),
     enabled: canList && Boolean(roundId),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -108,8 +101,8 @@ export default function RvtTourDetailsScreen() {
     queryClient.invalidateQueries({ queryKey: ["visits"] });
   }, [queryClient]);
 
-  const { mutate: deleteVisitMutate, isPending: isDeletingVisit } =
-    useMutation({
+  const { mutate: deleteVisitMutate, isPending: isDeletingVisit } = useMutation(
+    {
       mutationFn: deleteVisit,
       onSuccess: () => {
         invalidateAll();
@@ -126,10 +119,11 @@ export default function RvtTourDetailsScreen() {
           text2: error?.message || "Une erreur est survenue.",
         }),
       onSettled: finishVisitDelete,
-    });
+    },
+  );
 
-  const { mutate: roundStatusMutate, isPending: isStatusPending } =
-    useMutation({
+  const { mutate: roundStatusMutate, isPending: isStatusPending } = useMutation(
+    {
       mutationFn: async ({ action }: { action: "close" | "open" }) =>
         action === "close"
           ? closeRound({ id: String(roundId) })
@@ -139,7 +133,9 @@ export default function RvtTourDetailsScreen() {
         Toast.show({
           type: "success",
           text1:
-            updated?.status === "open" ? "Tournée rouverte" : "Tournée clôturée",
+            updated?.status === "open"
+              ? "Tournée rouverte"
+              : "Tournée clôturée",
         });
       },
       onError: (error: any) =>
@@ -148,10 +144,11 @@ export default function RvtTourDetailsScreen() {
           text1: "Action impossible",
           text2: error?.message || "Une erreur est survenue.",
         }),
-    });
+    },
+  );
 
-  const { mutate: deleteRoundMutate, isPending: isDeletingRound } =
-    useMutation({
+  const { mutate: deleteRoundMutate, isPending: isDeletingRound } = useMutation(
+    {
       mutationFn: () => deleteRound({ id: String(roundId) }),
       onSuccess: () => {
         invalidateAll();
@@ -168,10 +165,11 @@ export default function RvtTourDetailsScreen() {
           text2: error?.message || "Une erreur est survenue.",
         }),
       onSettled: finishRoundDelete,
-    });
+    },
+  );
 
-  const { mutate: updateRoundMutate, isPending: isUpdatingRound } =
-    useMutation({
+  const { mutate: updateRoundMutate, isPending: isUpdatingRound } = useMutation(
+    {
       mutationFn: ({
         nom,
         startedAt,
@@ -190,7 +188,10 @@ export default function RvtTourDetailsScreen() {
           closedAt: closedAt
             ? `${closedAt.getFullYear()}-${String(
                 closedAt.getMonth() + 1,
-              ).padStart(2, "0")}-${String(closedAt.getDate()).padStart(2, "0")}`
+              ).padStart(
+                2,
+                "0",
+              )}-${String(closedAt.getDate()).padStart(2, "0")}`
             : null,
         }),
       onSuccess: () => {
@@ -206,7 +207,8 @@ export default function RvtTourDetailsScreen() {
           text1: "Modification impossible",
           text2: error?.message || "Une erreur est survenue.",
         }),
-    });
+    },
+  );
 
   const handleDeleteVisit = useCallback(
     (visitId: string) => {
@@ -326,7 +328,7 @@ export default function RvtTourDetailsScreen() {
 
   const handleDownloadPdf = useCallback(() => {
     downloadPdf(
-      `${getApiUrl()}/sdkboard/api/rounds/round_pdf.php?id=${roundId}`,
+      `${getApiUrl()}/api/rounds/round_pdf.php?id=${roundId}`,
       `tournee-${round?.nom || roundId}`,
       setIsPdfPending,
     );
@@ -400,7 +402,9 @@ export default function RvtTourDetailsScreen() {
               <Text
                 style={[
                   styles.statusText,
-                  isOpen ? styles.statusPillTextOpen : styles.statusPillTextClosed,
+                  isOpen
+                    ? styles.statusPillTextOpen
+                    : styles.statusPillTextClosed,
                 ]}
               >
                 {isOpen ? "En cours" : "Clôturée"}
@@ -448,7 +452,9 @@ export default function RvtTourDetailsScreen() {
             {isPdfPending ? (
               <View style={styles.actionButton}>
                 <FontAwesome5 name="spinner" size={12} color={PRIMARY} />
-                <Text style={styles.actionButtonTextPrimary}>Génération...</Text>
+                <Text style={styles.actionButtonTextPrimary}>
+                  Génération...
+                </Text>
               </View>
             ) : (
               <Pressable

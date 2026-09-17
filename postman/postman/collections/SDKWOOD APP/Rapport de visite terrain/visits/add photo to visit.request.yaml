@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{BACKEND_URL}}/sdkboard/api/rounds/visits.php?action=addPhoto&id=7"
+url: "{{BACKEND_URL}}/api/rounds/visits.php?action=addPhoto&id=7"
 method: POST
 headers:
   login_token: SDKWOOD

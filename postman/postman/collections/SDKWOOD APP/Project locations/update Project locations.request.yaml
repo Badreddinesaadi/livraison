@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{BACKEND_URL}}/sdkboard/api/homescreen/projet.php"
+url: "{{BACKEND_URL}}/api/homescreen/projet.php"
 method: PUT
 headers:
   login_token: SDKWOOD

@@ -1,6 +1,6 @@
 import { ProjetLocation } from "@/api/projet-location.api";
-import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY } from "@/constants/theme";
+import { getApiUrl } from "@/stores/api-url.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
@@ -83,7 +83,7 @@ const buildFileUrl = (cheminFichier?: string) => {
     return null;
   }
 
-  return `${getApiUrl()}/sdkboard/${cheminFichier}`;
+  return `${getApiUrl()}/${cheminFichier}`;
 };
 
 export const ProjetLocationCard = ({

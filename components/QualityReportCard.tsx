@@ -1,6 +1,6 @@
 import { QualityReport } from "@/api/quality-report.api";
-import { getApiUrl } from "@/stores/api-url.store";
 import { PRIMARY } from "@/constants/theme";
+import { getApiUrl } from "@/stores/api-url.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { Image } from "expo-image";
@@ -58,10 +58,10 @@ const buildFileUrl = (cheminFichier?: string | null) => {
   const normalizedPath = cheminFichier.replace(/^\/+/, "");
 
   if (!normalizedBaseUrl) {
-    return `/sdkboard/${normalizedPath}`;
+    return `/${normalizedPath}`;
   }
 
-  return `${normalizedBaseUrl}/sdkboard/${normalizedPath}`;
+  return `${normalizedBaseUrl}/${normalizedPath}`;
 };
 
 export const QualityReportCard = ({
