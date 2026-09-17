@@ -214,32 +214,6 @@ export const ReturnDetailsScreen = () => {
     [data?.date],
   );
 
-  if (!canListReturns) {
-    return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
-        <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
-          Vous n'avez pas la permission de consulter les retours.
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
   const handleDownloadFile = useCallback(
     async (fileUrl: string, sourceName?: string | null, fileId?: string) => {
       const fallbackName = `retour-${returnId ?? "fichier"}-${Date.now()}`;
@@ -553,6 +527,32 @@ export const ReturnDetailsScreen = () => {
     },
     [downloadFileToCache],
   );
+
+  if (!canListReturns) {
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          backgroundColor: "#f7f8fa",
+        }}
+      >
+        <FontAwesome5 name="lock" size={34} color="#bbb" />
+        <Text
+          style={{
+            marginTop: 12,
+            color: "#666",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Vous n&apos;avez pas la permission de consulter les retours.
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView

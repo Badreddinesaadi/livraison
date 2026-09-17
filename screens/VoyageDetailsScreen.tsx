@@ -110,7 +110,7 @@ export const VoyageDetailsScreen = () => {
             textAlign: "center",
           }}
         >
-          Vous n'avez pas la permission de consulter les voyages.
+          Vous n&apos;avez pas la permission de consulter les voyages.
         </Text>
       </View>
     );
