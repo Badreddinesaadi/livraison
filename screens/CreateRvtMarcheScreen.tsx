@@ -12,7 +12,15 @@ import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 export default function CreateRvtMarcheScreen() {
@@ -133,9 +141,14 @@ export default function CreateRvtMarcheScreen() {
 
   return (
     <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
         style={styles.flex}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         onScroll={onScroll}
         scrollEventThrottle={16}
         onLayout={onViewportLayout}
@@ -204,6 +217,7 @@ export default function CreateRvtMarcheScreen() {
           disabled={!hasReachedBottom}
         />
       </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }

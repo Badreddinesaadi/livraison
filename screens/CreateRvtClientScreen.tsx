@@ -19,7 +19,14 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 export default function CreateRvtClientScreen() {
@@ -114,9 +121,14 @@ export default function CreateRvtClientScreen() {
 
   return (
     <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
         style={styles.flex}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         onScroll={onScroll}
         scrollEventThrottle={16}
         onLayout={onViewportLayout}
@@ -195,6 +207,7 @@ export default function CreateRvtClientScreen() {
           disabled={!hasReachedBottom}
         />
       </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }

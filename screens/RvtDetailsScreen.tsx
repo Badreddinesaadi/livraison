@@ -43,14 +43,9 @@ export default function RvtDetailsScreen() {
     () => syncStatusUi(report?.syncStatus),
     [report?.syncStatus],
   );
-  const photos = useMemo(() => {
-    const list = [...(report?.photos ?? [])];
-    const signPhoto = report?.constructionSite?.signPhoto;
-    if (signPhoto?.remoteUrl) {
-      list.unshift(signPhoto);
-    }
-    return list;
-  }, [report]);
+  const photos = useMemo(() => report?.photos ?? [], [report]);
+  const signPhoto = report?.constructionSite?.signPhoto ?? null;
+  const signPhotoUri = rvtPhotoUrl(signPhoto);
 
   const handleDownloadPdf = () => {
     if (!report) return;
@@ -170,6 +165,7 @@ export default function RvtDetailsScreen() {
 
   const products = report.products ?? [];
   const brands = report.brands ?? [];
+  const produitsConcernes = report.produitConcerne ?? [];
   const competitors = report.competitors ?? [];
 
   return (
@@ -191,7 +187,7 @@ export default function RvtDetailsScreen() {
           />
           <DetailRow
             icon="barcode"
-            label="Code"
+            label="Client code"
             value={report.client?.code || "-"}
           />
           <DetailRow
@@ -226,7 +222,6 @@ export default function RvtDetailsScreen() {
             label="Date"
             value={formatReportDate(report.completedAt)}
           />
-          <DetailRow icon="sync" label="Sync" value={status.label} />
         </Section>
 
         <Section title="Profil terrain" icon="industry">
@@ -235,11 +230,7 @@ export default function RvtDetailsScreen() {
             label="Activité"
             value={report.activiteObservee?.libelle || "-"}
           />
-          <DetailRow
-            icon="vector-square"
-            label="Taille"
-            value={report.siteSize || "-"}
-          />
+
           {report.resellerSite ? (
             <DetailRow
               icon="cut"
@@ -260,6 +251,26 @@ export default function RvtDetailsScreen() {
                 value={report.constructionSite.progressPhase?.libelle || "-"}
               />
             </>
+          ) : null}
+          {signPhoto ? (
+            <View style={styles.signPhotoBlock}>
+              <Text style={styles.signPhotoLabel}>Panneau de chantier</Text>
+              <Pressable
+                onPress={() => signPhotoUri && setPreviewUri(signPhotoUri)}
+              >
+                {signPhotoUri ? (
+                  <Image
+                    source={{ uri: signPhotoUri }}
+                    style={styles.photoThumb}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <View style={styles.photoThumbLoading}>
+                    <FontAwesome5 name="spinner" size={16} color="#64748b" />
+                  </View>
+                )}
+              </Pressable>
+            </View>
           ) : null}
           {report.industrialSite ? (
             <DetailRow
@@ -350,6 +361,38 @@ export default function RvtDetailsScreen() {
             <DetailRow icon="pen" label="Autre" value={report.otherProduct} />
           ) : null}
         </Section>
+
+        {produitsConcernes.length > 0 ? (
+          <Section title="Produits concernés" icon="tag">
+            {produitsConcernes.map((item, index) => (
+              <View
+                key={`concerne-${index}`}
+                style={styles.productBlock}
+              >
+                <Text style={styles.concerneTitle}>
+                  {[item.categ, item.scateg, item.categ2]
+                    .filter(Boolean)
+                    .join(" / ")}
+                </Text>
+                <DetailRow
+                  icon="trademark"
+                  label="Marque"
+                  value={item.marque || "-"}
+                />
+                <DetailRow
+                  icon="palette"
+                  label="Couleur"
+                  value={item.couleur || "-"}
+                />
+                <DetailRow
+                  icon="cog"
+                  label="Finition"
+                  value={item.finition || "-"}
+                />
+              </View>
+            ))}
+          </Section>
+        ) : null}
 
         <Section title="Concurrence et opportunité" icon="lightbulb">
           <DetailRow
@@ -680,6 +723,12 @@ const styles = StyleSheet.create({
   productBlock: {
     marginBottom: 10,
   },
+  concerneTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1a1a2e",
+    marginBottom: 6,
+  },
   photoRow: {
     columnGap: 8,
   },
@@ -696,6 +745,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f5f9",
     alignItems: "center",
     justifyContent: "center",
+  },
+  signPhotoBlock: {
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  signPhotoLabel: {
+    fontSize: 13,
+    color: "#888",
+    marginBottom: 6,
   },
   footerButtonsRow: {
     flexDirection: "row",

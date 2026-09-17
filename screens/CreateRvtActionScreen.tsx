@@ -30,11 +30,18 @@ import { Image } from "expo-image";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 const MAX_PHOTOS = 5;
-const CAPTURE_TIMEOUT_MS = 15000;
 
 export default function CreateRvtActionScreen() {
   const router = useRouter();
@@ -49,7 +56,6 @@ export default function CreateRvtActionScreen() {
   const { hasReachedBottom, onScroll, onContentLayout, onViewportLayout } =
     useScrollToBottom();
 
-  const [isCapturingLocation, setIsCapturingLocation] = useState(false);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
 
   const keptExistingPhotos = store.existingPhotos.filter(
@@ -72,28 +78,14 @@ export default function CreateRvtActionScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openCamera, router, keptExistingPhotos.length, store.photos.length]);
 
-  const captureLocationIfMissing = useCallback(async () => {
+  const captureLocationOnSubmit = useCallback(async () => {
     if (store.location?.status === "GPS_VALIDATED") return;
-    setIsCapturingLocation(true);
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        store.setLocation({
-          status: "GPS_UNAVAILABLE",
-          capturedAt: new Date().toISOString(),
-        });
-        return;
-      }
-      const timeout = setTimeout(() => {
-        store.setLocation({
-          status: "GPS_UNAVAILABLE",
-          capturedAt: new Date().toISOString(),
-        });
-      }, CAPTURE_TIMEOUT_MS);
+      const { granted } = await Location.getForegroundPermissionsAsync();
+      if (!granted) return;
       const position = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      clearTimeout(timeout);
       const { latitude, longitude, accuracy } = position.coords;
       store.setLocation({
         status: "GPS_VALIDATED",
@@ -107,8 +99,6 @@ export default function CreateRvtActionScreen() {
         status: "GPS_UNAVAILABLE",
         capturedAt: new Date().toISOString(),
       });
-    } finally {
-      setIsCapturingLocation(false);
     }
   }, [store]);
 
@@ -363,7 +353,7 @@ export default function CreateRvtActionScreen() {
       });
       return;
     }
-    await captureLocationIfMissing();
+    await captureLocationOnSubmit();
     mutate();
   };
 
@@ -408,9 +398,14 @@ export default function CreateRvtActionScreen() {
 
   return (
     <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
         style={styles.flex}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         onScroll={onScroll}
         scrollEventThrottle={16}
         onLayout={onViewportLayout}
@@ -512,37 +507,6 @@ export default function CreateRvtActionScreen() {
           />
         </SectionCard>
 
-        <SectionCard title="Localisation" icon="map-marker-alt">
-          {store.location?.status === "GPS_VALIDATED" ? (
-            <Text style={styles.gpsStatus}>Position validée</Text>
-          ) : store.location?.status === "GPS_APPROXIMATE" ? (
-            <Text style={styles.gpsStatus}>
-              Position approximative capturée.
-            </Text>
-          ) : (
-            <Text style={styles.gpsStatusMuted}>Aucune position capturée.</Text>
-          )}
-          <Pressable
-            onPress={() => captureLocationIfMissing()}
-            disabled={isCapturingLocation}
-            style={[
-              styles.gpsButton,
-              isCapturingLocation && styles.gpsDisabled,
-            ]}
-          >
-            <FontAwesome5
-              name={isCapturingLocation ? "spinner" : "crosshairs"}
-              size={14}
-              color={PRIMARY}
-            />
-            <Text style={styles.gpsButtonText}>
-              {isCapturingLocation
-                ? "Capture en cours..."
-                : "Capturer la position"}
-            </Text>
-          </Pressable>
-        </SectionCard>
-
         <SectionCard title="Photos" icon="camera">
           <Pressable
             onPress={handleOpenPhotoPicker}
@@ -626,6 +590,7 @@ export default function CreateRvtActionScreen() {
           disabled={isPending || !hasReachedBottom}
         />
       </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -682,40 +647,6 @@ const styles = StyleSheet.create({
   dueText: {
     fontSize: 12,
     color: "#888",
-  },
-  gpsHint: {
-    fontSize: 12,
-    color: "#888",
-    marginBottom: 8,
-  },
-  gpsStatus: {
-    fontSize: 13,
-    color: "#16a34a",
-    marginBottom: 10,
-  },
-  gpsStatusMuted: {
-    fontSize: 13,
-    color: "#999",
-    marginBottom: 10,
-  },
-  gpsButton: {
-    paddingVertical: 11,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: PRIMARY,
-    backgroundColor: PRIMARY + "10",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  gpsButtonText: {
-    color: PRIMARY,
-    fontWeight: "700",
-    fontSize: 14,
-  },
-  gpsDisabled: {
-    opacity: 0.6,
   },
   photoActionPrimary: {
     paddingVertical: 11,

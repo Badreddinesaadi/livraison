@@ -16,7 +16,15 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 export default function CreateRvtProfilScreen() {
@@ -127,9 +135,14 @@ export default function CreateRvtProfilScreen() {
 
   return (
     <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
         style={styles.flex}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         onScroll={onScroll}
         scrollEventThrottle={16}
         onLayout={onViewportLayout}
@@ -466,6 +479,7 @@ export default function CreateRvtProfilScreen() {
           disabled={!hasReachedBottom}
         />
       </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }

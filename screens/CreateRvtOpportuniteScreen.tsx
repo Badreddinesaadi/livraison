@@ -15,7 +15,15 @@ import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 export default function CreateRvtOpportuniteScreen() {
@@ -183,9 +191,14 @@ export default function CreateRvtOpportuniteScreen() {
 
   return (
     <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
         style={styles.flex}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         onScroll={onScroll}
         scrollEventThrottle={16}
         onLayout={onViewportLayout}
@@ -317,6 +330,7 @@ export default function CreateRvtOpportuniteScreen() {
           disabled={!hasReachedBottom}
         />
       </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
