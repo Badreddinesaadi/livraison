@@ -243,6 +243,8 @@ export default function CreateRvtActionScreen() {
     const activityCode = refData?.activite_observee_v2?.find(
       (a) => a.id === store.activiteObserveeId,
     )?.code;
+    const categories = store.categories.length ? store.categories : undefined;
+    const lastCategory = categories?.[categories.length - 1];
 
     return {
       roundId: Number(roundId),
@@ -280,8 +282,9 @@ export default function CreateRvtActionScreen() {
           : undefined,
       siteSize: store.siteSize ?? undefined,
       categorie1: 171,
-      categorie2: store.categorie2Id ?? undefined,
-      categorie3: store.categorie3Id ?? undefined,
+      categorie2: lastCategory?.categorie2,
+      categorie3: lastCategory?.categorie3,
+      categories,
       products: store.products.map(
         ({ lineId, productId, category2, presence, details }) => ({
           lineId,

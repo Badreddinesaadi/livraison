@@ -2,6 +2,7 @@ import { getVisitById } from "@/api/visits.api";
 import RvtPicturePreview from "@/components/RvtPicturePreview";
 import { hasRapportVisitePermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
+import { useReferenceData } from "@/hooks/use-reference-data";
 import { getApiUrl } from "@/stores/api-url.store";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
@@ -11,7 +12,12 @@ import {
   ResellerSite,
 } from "@/types/rvt.types";
 import { downloadPdf } from "@/utils/pdf-download";
-import { formatDuration, rvtPhotoUrl, syncStatusUi } from "@/utils/rvt-format";
+import {
+  formatDuration,
+  normalizeVisitCategories,
+  resolveCategoryNames,
+  rvtPhotoUrl,
+} from "@/utils/rvt-format";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -31,6 +37,7 @@ export default function RvtDetailsScreen() {
   const { visitId } = useLocalSearchParams<{ visitId: string }>();
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [isPdfPending, setIsPdfPending] = useState(false);
+  const { data: refData } = useReferenceData();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["visits", "details", visitId],
@@ -39,10 +46,6 @@ export default function RvtDetailsScreen() {
   });
 
   const report = useMemo(() => data ?? null, [data]);
-  const status = useMemo(
-    () => syncStatusUi(report?.syncStatus),
-    [report?.syncStatus],
-  );
   const photos = useMemo(() => report?.photos ?? [], [report]);
   const signPhoto = report?.constructionSite?.signPhoto ?? null;
   const signPhotoUri = rvtPhotoUrl(signPhoto);
@@ -96,8 +99,9 @@ export default function RvtDetailsScreen() {
       equipementQuantites: report.equipmentQuantities ?? {},
       siteSize: report.siteSize,
       categorie1Id: report.categorie1?.id ?? null,
-      categorie2Id: report.categorie2?.id ?? null,
-      categorie3Id: report.categorie3?.id ?? null,
+      categorie2Id: null,
+      categorie3Id: null,
+      categories: normalizeVisitCategories(report),
       products: (report.products ?? []).map((p) => ({
         lineId: p.lineId ?? "",
         productId: p.productId ?? "",
@@ -166,6 +170,8 @@ export default function RvtDetailsScreen() {
   const products = report.products ?? [];
   const brands = report.brands ?? [];
   const produitsConcernes = report.produitConcerne ?? [];
+  const productCategories = refData?.productCategories ?? [];
+  const categoryPairs = normalizeVisitCategories(report);
   const competitors = report.competitors ?? [];
 
   return (
@@ -301,24 +307,17 @@ export default function RvtDetailsScreen() {
               }
             />
           ) : null}
-          {report.categorie2 ? (
-            <DetailRow
-              icon="tags"
-              label="Catégorie 2"
-              value={
-                report.categorie2.designation ?? String(report.categorie2.id)
-              }
-            />
-          ) : null}
-          {report.categorie3 ? (
-            <DetailRow
-              icon="tags"
-              label="Catégorie 3"
-              value={
-                report.categorie3.designation ?? String(report.categorie3.id)
-              }
-            />
-          ) : null}
+          {categoryPairs.map((pair, index) => {
+            const names = resolveCategoryNames(pair, productCategories);
+            return (
+              <DetailRow
+                key={`categorie-${index}`}
+                icon="tags"
+                label="Catégorie"
+                value={`${names.famille} / ${names.produit}`}
+              />
+            );
+          })}
           {products.length === 0 && brands.length === 0 ? (
             <Text style={styles.mutedText}>Aucun produit relevé.</Text>
           ) : (
@@ -365,10 +364,7 @@ export default function RvtDetailsScreen() {
         {produitsConcernes.length > 0 ? (
           <Section title="Produits concernés" icon="tag">
             {produitsConcernes.map((item, index) => (
-              <View
-                key={`concerne-${index}`}
-                style={styles.productBlock}
-              >
+              <View key={`concerne-${index}`} style={styles.productBlock}>
                 <Text style={styles.concerneTitle}>
                   {[item.categ, item.scateg, item.categ2]
                     .filter(Boolean)

@@ -10,6 +10,7 @@ import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useSession } from "@/stores/auth.store";
 import { useCreateVisitStore } from "@/stores/create-visit.store";
 import { useRvtSheetStore } from "@/stores/rvt-sheet.store";
+import { resolveCategoryNames } from "@/utils/rvt-format";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
@@ -88,7 +89,27 @@ export default function CreateRvtMarcheScreen() {
       })),
       selectedId:
         store.categorie3Id != null ? String(store.categorie3Id) : undefined,
-      onSelect: (id) => store.setCategorie3Id(Number(id)),
+      onSelect: (id) => {
+        const categorie2Id = store.categorie2Id;
+        if (categorie2Id == null) return;
+        const pair = { categorie2: categorie2Id, categorie3: Number(id) };
+        const exists = store.categories.some(
+          (c) =>
+            c.categorie2 === pair.categorie2 &&
+            c.categorie3 === pair.categorie3,
+        );
+        if (exists) {
+          Toast.show({
+            type: "info",
+            text1: "Déjà ajouté",
+            text2: "Cette combinaison est déjà dans la liste.",
+          });
+          return;
+        }
+        store.addCategory(pair);
+        store.setCategorie2Id(null);
+        store.setCategorie3Id(null);
+      },
     });
   };
 
@@ -167,6 +188,29 @@ export default function CreateRvtMarcheScreen() {
             placeholder="Sélectionner"
             onPress={handleSelectCategorie3}
           />
+          {store.categories.length > 0 ? (
+            <View style={styles.brandList}>
+              {store.categories.map((pair) => {
+                const names = resolveCategoryNames(pair, productCategories);
+                const key = `${pair.categorie2}-${pair.categorie3}`;
+                return (
+                  <View key={key} style={styles.brandLine}>
+                    <View style={styles.brandLineHeader}>
+                      <Text style={styles.brandLineTitle}>
+                        {names.famille} / {names.produit}
+                      </Text>
+                      <Pressable
+                        onPress={() => store.removeCategory(pair)}
+                        hitSlop={8}
+                      >
+                        <FontAwesome5 name="trash" size={12} color="#ff4d4f" />
+                      </Pressable>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          ) : null}
         </SectionCard>
 
         <SectionCard title="Marques observées" icon="trademark">

@@ -10,6 +10,7 @@ import {
   OpportunityPotential,
   ParkSize,
   PresenceLevel,
+  ProductCategoriesJson,
   produitConcerne,
   SDKPosition,
   VisitPhoto,
@@ -31,7 +32,7 @@ type CreateVisitState = {
   visitId: string | null;
   version: number | null;
   startedAt: Date | null;
-
+    categories: ProductCategoriesJson[];
   client: ErpClient | null;
   location: Location | null;
   contactRole: ContactRole | null;
@@ -137,7 +138,8 @@ type CreateVisitState = {
   setOppHorizon: (oppHorizon: OpportunityHorizon | null) => void;
   setOppAmount: (oppAmount: string) => void;
   setOppCompetitorId: (oppCompetitorId: number | null) => void;
-
+  addCategory: (pair: ProductCategoriesJson) => void;
+  removeCategory: (pair: ProductCategoriesJson) => void;
   toggleResult: (result: VisitResult) => void;
   setOrderSolo: (orderSolo: string) => void;
   setOrderSemiCombined: (orderSemiCombined: string) => void;
@@ -172,6 +174,7 @@ type CreateVisitState = {
     categorie1Id?: number | null;
     categorie2Id?: number | null;
     categorie3Id?: number | null;
+  categories: ProductCategoriesJson[];
     products?: ObservedProductInput[];
     produit_concerne: produitConcerne[];
     otherProduct?: string;
@@ -227,7 +230,7 @@ const initialState = {
   products: [] as ObservedProductInput[],
   otherProduct: "",
   brands: [] as ObservedBrandInput[],
-
+  categories: [] as ProductCategoriesJson[],
   sdkPosition: null as SDKPosition | null,
   competitors: [] as { competitorId: number; presence?: PresenceLevel }[],
   opportunityDetected: null as boolean | null,
@@ -475,5 +478,26 @@ export const useCreateVisitStore = create<CreateVisitState>((set) => ({
           : [...state.produit_concerne, produit],
       };
     }),
+  addCategory: (pair) =>
+    set((state) =>
+      state.categories.some(
+        (c) =>
+          c.categorie2 === pair.categorie2 &&
+          c.categorie3 === pair.categorie3,
+      )
+        ? state
+        : { categories: [...state.categories, pair] },
+    ),
+  removeCategory: (pair) =>
+    set((state) => ({
+      categories: state.categories.filter(
+        (c) =>
+          !(
+            c.categorie2 === pair.categorie2 &&
+            c.categorie3 === pair.categorie3
+          ),
+      ),
+    })),
+
   resetAll: () => set({ ...initialState }),
 }));

@@ -187,6 +187,11 @@ export type ProductCategory3 = {
   domaineId?: number;
 };
 
+export type ProductCategoriesJson = {
+  categorie2: number;
+  categorie3: number;
+};
+
 export type ReferenceData = {
   contactRoles: ContactRole[];
   activityLevels: ActivityLevel[];
@@ -202,6 +207,7 @@ export type ReferenceData = {
   nextActions: NextAction[];
   actionDateOptions: ActionDateOption[];
   productCategories: ProductCategory1[];
+  productCategorieJson: ProductCategoriesJson[];
   productCategoriesLevel2?: ProductCategory2[];
   productCategoriesLevel3?: ProductCategory3[];
   productSuggestions: Record<string, string[]>;
@@ -348,6 +354,7 @@ export type VisitFields = {
   categorie1?: number;
   categorie2?: number;
   categorie3?: number;
+  categories?: ProductCategoriesJson[];
   products?: ObservedProductInput[];
   otherProduct?: string;
   qualite?: string;
@@ -408,6 +415,7 @@ export type VisitReport = {
   categorie1?: CategorieRef | null;
   categorie2?: CategorieRef | null;
   categorie3?: CategorieRef | null;
+  categories?: { categorie2: number; categorie3: number }[] | null;
   products: ObservedProduct[];
   otherProduct?: string;
   brands: ObservedBrand[];
