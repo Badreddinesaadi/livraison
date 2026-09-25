@@ -15,6 +15,7 @@ export const queryClient = new QueryClient({
           text2:
             error instanceof Error ? error.message : "Une erreur est survenue",
         });
+        console.error("QueryClient error:", error);
       },
     },
   },

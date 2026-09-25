@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { queryClient } from "./query";
 import { getApiUrl } from "@/stores/api-url.store";
+import { buildMultipartBody } from "@/utils/multipart";
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -95,17 +96,28 @@ class ApiClient {
     const isFormDataBody =
       typeof FormData !== "undefined" && body instanceof FormData;
 
-    if (isFormDataBody) {
-      delete mergedHeaders["Content-Type"];
-    }
-
     const fetchOptions: RequestInit = {
       method,
       headers: mergedHeaders,
     };
 
+    let formDataDebug: string | null = null;
+
     if (body) {
-      fetchOptions.body = isFormDataBody ? body : JSON.stringify(body);
+      if (isFormDataBody) {
+        const multipart = await buildMultipartBody(body);
+        mergedHeaders["Content-Type"] = multipart.contentType;
+        fetchOptions.body = multipart.body as unknown as BodyInit;
+        formDataDebug = multipart.parts
+          .map((part) =>
+            part.kind === "file"
+              ? `${part.name} (file: ${part.fileName}, ${part.mimeType}, ${part.size} bytes)`
+              : `${part.name} (text)`,
+          )
+          .join(", ");
+      } else {
+        fetchOptions.body = JSON.stringify(body);
+      }
     }
 
     if (isDebug && __DEV__) {
@@ -113,7 +125,14 @@ class ApiClient {
       console.log("URL:", finalUrl);
       console.log("Method:", method);
       console.log("Headers:", JSON.stringify(mergedHeaders, null, 2));
-      console.log("Body:", body ? JSON.stringify(body, null, 2) : "(none)");
+      console.log(
+        "Body:",
+        isFormDataBody
+          ? `[multipart] ${formDataDebug ?? "(empty)"}`
+          : body
+            ? JSON.stringify(body, null, 2)
+            : "(none)",
+      );
       console.log("==============================\n");
     }
 

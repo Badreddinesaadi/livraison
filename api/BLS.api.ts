@@ -53,19 +53,21 @@ export const closeBL = async ({
   formdata.append("idBL", idBL.toString());
   formdata.append("idVoyage", idVoyage.toString());
   formdata.append("status", status);
-  images.forEach((image, index) => {
+  images.forEach((image) => {
     formdata.append("images[]", image as any);
-    if (index === 0) {
-      formdata.append("image", image as any);
-    }
   });
   formdata.append("coordinates", JSON.stringify(coordinates));
+  let data = null;
+  try {
+    data = await client.request({
+      pathname: "/api/homescreen/voyage_chauffeur.php",
+      method: "POST",
+      body: formdata,
+      isDebug: true,
+    });
+  } catch (error) {
+    console.error("Error in closeBL:", error);
+  }
 
-  const data = await client.request({
-    pathname: "/api/homescreen/voyage_chauffeur.php",
-    method: "POST",
-    body: formdata,
-    isDebug: true,
-  });
   return data;
 };
