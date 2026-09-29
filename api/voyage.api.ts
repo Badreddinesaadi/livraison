@@ -1,12 +1,17 @@
 import { client, Pagination } from "@/constants/client";
 
+export type VehicleMode = "societe" | "location";
+
 export type CreateVoyageRequest = {
   date_depart: string;
-  idChauffeur: number;
-  idVehicule: number;
   depot_depart: number;
-  km_depart: number;
   idVille: number;
+  type_vehicule: VehicleMode;
+  idChauffeur?: number | null;
+  idVehicule?: number | null;
+  km_depart?: number | null;
+  chauffeur_externe_nom?: string | null;
+  societe_location_nom?: string | null;
   bl_list: { id: number }[];
 };
 
@@ -16,7 +21,7 @@ export const createVoyage = async (request: CreateVoyageRequest) => {
     pathname: "/api/homescreen/voyage.php",
     method: "POST",
     body: request,
-    isDebug: false,
+    isDebug: true,
   });
   return data;
 };
@@ -43,7 +48,7 @@ export type VoyageListItem = {
   idChauffeur: number | null;
   nomChauffeur: string | null;
   idVehicule: number | null;
-  km_depart: number;
+  km_depart: number | null;
   statut: "encours" | "terminer";
   depot_depart: number;
   depot_nom: string;
@@ -56,6 +61,9 @@ export type VoyageListItem = {
   vehicule_immatriculation: string | null;
   idVille: number | null;
   ville_nom: string | null;
+  type_vehicule: VehicleMode;
+  chauffeur_externe_nom: string | null;
+  societe_location_nom: string | null;
 };
 export const listVoyage = async ({
   page,
@@ -65,6 +73,7 @@ export const listVoyage = async ({
   idDepot,
   idVille,
   idClient,
+  typeVehicule,
 }: {
   page: number;
   codeQuery?: string;
@@ -73,6 +82,7 @@ export const listVoyage = async ({
   idDepot?: number;
   idVille?: number;
   idClient?: number;
+  typeVehicule?: VehicleMode;
 }) => {
   const result = await client.request<VoyageListItem[]>({
     pathname: `/api/homescreen/voyage.php`,
@@ -85,6 +95,7 @@ export const listVoyage = async ({
       ...(idDepot ? { idDepot } : {}),
       ...(idVille ? { idVille } : {}),
       ...(idClient ? { idClient } : {}),
+      ...(typeVehicule ? { typeVehicule } : {}),
     },
     isDebug: true,
     withPagination: true,

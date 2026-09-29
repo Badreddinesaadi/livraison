@@ -51,6 +51,7 @@ export const SelectChauffeurScreen = () => {
   const canUpdateVoyage = hasVoyagePermission(user, "UPDATE");
   const canEditVoyage =
     createVoyageStore.type === "create" ? canCreateVoyage : canUpdateVoyage;
+  const isRented = createVoyageStore.vehicleMode === "location";
 
   const chauffeurOptions = useMemo(
     () =>
@@ -183,7 +184,9 @@ export const SelectChauffeurScreen = () => {
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            Veuillez sélectionner le chauffeur pour ce voyage
+            {isRented
+              ? "Veuillez renseigner les informations du véhicule loué"
+              : "Veuillez sélectionner le chauffeur pour ce voyage"}
           </Text>
         </View>
 
@@ -201,45 +204,132 @@ export const SelectChauffeurScreen = () => {
             <View style={styles.card}>
               <View style={styles.sectionHeader}>
                 <FontAwesome6
-                  name="drivers-license"
+                  name="truck-ramp-box"
                   size={18}
                   color={Colors.light.primary}
                 />
-                <Text style={styles.sectionTitle}>Chauffeur</Text>
+                <Text style={styles.sectionTitle}>Type de véhicule</Text>
               </View>
-              <Pressable
-                style={styles.dateButton}
-                onPress={openChauffeurSelector}
-              >
-                <Text style={styles.dateButtonText}>
-                  {createVoyageStore.selectedChauffeur?.name ||
-                    "Sélectionner un chauffeur"}
-                </Text>
-                <FontAwesome6 name="chevron-right" size={14} color="#888" />
-              </Pressable>
+              <View style={styles.modeRow}>
+                <Pressable
+                  style={[
+                    styles.modeOption,
+                    !isRented && styles.modeOptionActive,
+                  ]}
+                  onPress={() => createVoyageStore.setVehicleMode("societe")}
+                >
+                  <Text
+                    style={[
+                      styles.modeOptionText,
+                      !isRented && styles.modeOptionTextActive,
+                    ]}
+                  >
+                    Véhicule société
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.modeOption,
+                    isRented && styles.modeOptionActive,
+                  ]}
+                  onPress={() => createVoyageStore.setVehicleMode("location")}
+                >
+                  <Text
+                    style={[
+                      styles.modeOptionText,
+                      isRented && styles.modeOptionTextActive,
+                    ]}
+                  >
+                    Véhicule loué
+                  </Text>
+                </Pressable>
+              </View>
             </View>
 
-            <View style={styles.card}>
-              <View style={styles.sectionHeader}>
-                <FontAwesome6
-                  name="truck"
-                  size={18}
-                  color={Colors.light.primary}
-                />
-                <Text style={styles.sectionTitle}>Véhicule</Text>
-              </View>
-              <Pressable
-                style={styles.dateButton}
-                onPress={openVehicleSelector}
-              >
-                <Text style={styles.dateButtonText}>
-                  {createVoyageStore.selectedVehicle
-                    ? `${createVoyageStore.selectedVehicle.immatriculation} (${createVoyageStore.selectedVehicle.vehiculeMarque})`
-                    : "Sélectionner un véhicule"}
-                </Text>
-                <FontAwesome6 name="chevron-right" size={14} color="#888" />
-              </Pressable>
-            </View>
+            {isRented ? (
+              <>
+                <View style={styles.card}>
+                  <View style={styles.sectionHeader}>
+                    <FontAwesome6
+                      name="id-card"
+                      size={18}
+                      color={Colors.light.primary}
+                    />
+                    <Text style={styles.sectionTitle}>Nom du chauffeur</Text>
+                  </View>
+                  <TextInput
+                    style={styles.kmInput}
+                    placeholder="Nom du chauffeur du véhicule loué..."
+                    placeholderTextColor="#999"
+                    value={createVoyageStore.externalChauffeurName}
+                    onChangeText={createVoyageStore.setExternalChauffeurName}
+                  />
+                </View>
+
+                <View style={styles.card}>
+                  <View style={styles.sectionHeader}>
+                    <FontAwesome6
+                      name="building"
+                      size={18}
+                      color={Colors.light.primary}
+                    />
+                    <Text style={styles.sectionTitle}>Société de location</Text>
+                  </View>
+                  <TextInput
+                    style={styles.kmInput}
+                    placeholder="Nom de la société de location..."
+                    placeholderTextColor="#999"
+                    value={createVoyageStore.rentalCompanyName}
+                    onChangeText={createVoyageStore.setRentalCompanyName}
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.card}>
+                  <View style={styles.sectionHeader}>
+                    <FontAwesome6
+                      name="drivers-license"
+                      size={18}
+                      color={Colors.light.primary}
+                    />
+                    <Text style={styles.sectionTitle}>Chauffeur</Text>
+                  </View>
+                  <Pressable
+                    style={styles.dateButton}
+                    onPress={openChauffeurSelector}
+                  >
+                    <Text style={styles.dateButtonText}>
+                      {createVoyageStore.selectedChauffeur?.name ||
+                        "Sélectionner un chauffeur"}
+                    </Text>
+                    <FontAwesome6 name="chevron-right" size={14} color="#888" />
+                  </Pressable>
+                </View>
+
+                <View style={styles.card}>
+                  <View style={styles.sectionHeader}>
+                    <FontAwesome6
+                      name="truck"
+                      size={18}
+                      color={Colors.light.primary}
+                    />
+                    <Text style={styles.sectionTitle}>Véhicule</Text>
+                  </View>
+                  <Pressable
+                    style={styles.dateButton}
+                    onPress={openVehicleSelector}
+                  >
+                    <Text style={styles.dateButtonText}>
+                      {createVoyageStore.selectedVehicle
+                        ? `${createVoyageStore.selectedVehicle.immatriculation} (${createVoyageStore.selectedVehicle.vehiculeMarque})`
+                        : "Sélectionner un véhicule"}
+                    </Text>
+                    <FontAwesome6 name="chevron-right" size={14} color="#888" />
+                  </Pressable>
+                </View>
+              </>
+            )}
 
             <View style={styles.card}>
               <View style={styles.sectionHeader}>
@@ -278,53 +368,55 @@ export const SelectChauffeurScreen = () => {
               </Pressable>
             </View>
 
-            <View style={styles.card}>
-              <View style={styles.sectionHeader}>
-                <FontAwesome6
-                  name="road"
-                  size={18}
-                  color={Colors.light.primary}
-                />
-                <Text style={styles.sectionTitle}>
-                  Km départ{" "}
-                  {createVoyageStore.selectedVehicle?.km_reel
-                    ? "(min: " +
-                        createVoyageStore.selectedVehicle?.km_reel +
-                        " km" || 0 + " km)"
-                    : ""}
-                </Text>
-              </View>
-              <TextInput
-                style={[
-                  styles.kmInput,
-                  !createVoyageStore.selectedVehicle && { opacity: 0.6 },
-                ]}
-                keyboardType="numeric"
-                placeholder={
-                  createVoyageStore.selectedVehicle
-                    ? "Kilométrage au départ..."
-                    : "Sélectionnez d'abord un véhicule"
-                }
-                placeholderTextColor="#999"
-                editable={Boolean(createVoyageStore.selectedVehicle)}
-                value={
-                  createVoyageStore.kmDepart
-                    ? String(createVoyageStore.kmDepart)
-                    : ""
-                }
-                onChangeText={(val) => {
-                  if (val === "") {
-                    createVoyageStore.setKmDepart(0);
-                    return;
+            {!isRented && (
+              <View style={styles.card}>
+                <View style={styles.sectionHeader}>
+                  <FontAwesome6
+                    name="road"
+                    size={18}
+                    color={Colors.light.primary}
+                  />
+                  <Text style={styles.sectionTitle}>
+                    Km départ{" "}
+                    {createVoyageStore.selectedVehicle?.km_reel
+                      ? "(min: " +
+                          createVoyageStore.selectedVehicle?.km_reel +
+                          " km" || 0 + " km)"
+                      : ""}
+                  </Text>
+                </View>
+                <TextInput
+                  style={[
+                    styles.kmInput,
+                    !createVoyageStore.selectedVehicle && { opacity: 0.6 },
+                  ]}
+                  keyboardType="numeric"
+                  placeholder={
+                    createVoyageStore.selectedVehicle
+                      ? "Kilométrage au départ..."
+                      : "Sélectionnez d'abord un véhicule"
                   }
+                  placeholderTextColor="#999"
+                  editable={Boolean(createVoyageStore.selectedVehicle)}
+                  value={
+                    createVoyageStore.kmDepart
+                      ? String(createVoyageStore.kmDepart)
+                      : ""
+                  }
+                  onChangeText={(val) => {
+                    if (val === "") {
+                      createVoyageStore.setKmDepart(0);
+                      return;
+                    }
 
-                  const parsed = parseInt(val, 10);
-                  if (isNaN(parsed)) return;
+                    const parsed = parseInt(val, 10);
+                    if (isNaN(parsed)) return;
 
-                  createVoyageStore.setKmDepart(parsed);
-                }}
-              />
-            </View>
+                    createVoyageStore.setKmDepart(parsed);
+                  }}
+                />
+              </View>
+            )}
 
             <View style={styles.card}>
               <View style={styles.sectionHeader}>
@@ -393,13 +485,37 @@ export const SelectChauffeurScreen = () => {
             disabled={
               !createVoyageStore.selectedDepot ||
               !createVoyageStore.selectedVille ||
-              !createVoyageStore.selectedChauffeur ||
-              !createVoyageStore.kmDepart ||
-              !createVoyageStore.dateDepart
+              !createVoyageStore.dateDepart ||
+              (isRented
+                ? !createVoyageStore.externalChauffeurName.trim() ||
+                  !createVoyageStore.rentalCompanyName.trim()
+                : !createVoyageStore.selectedChauffeur ||
+                  !createVoyageStore.kmDepart)
             }
             preset="filled"
             text="Suivant"
             onPress={() => {
+              if (isRented) {
+                if (!createVoyageStore.externalChauffeurName.trim()) {
+                  Toast.show({
+                    type: "error",
+                    text1: "Chauffeur manquant",
+                    text2: "Veuillez saisir le nom du chauffeur.",
+                  });
+                  return;
+                }
+                if (!createVoyageStore.rentalCompanyName.trim()) {
+                  Toast.show({
+                    type: "error",
+                    text1: "Société manquante",
+                    text2: "Veuillez saisir la société de location.",
+                  });
+                  return;
+                }
+                router.navigate("/voyages/create/select-bls");
+                return;
+              }
+
               const vehicle = createVoyageStore.selectedVehicle;
               const kmDepart = createVoyageStore.kmDepart;
 
@@ -506,6 +622,32 @@ const styles = StyleSheet.create({
   dateButtonText: {
     fontSize: 14,
     color: "#333",
+  },
+  modeRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  modeOption: {
+    flex: 1,
+    height: 46,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  modeOptionActive: {
+    borderColor: Colors.light.primary,
+    backgroundColor: Colors.light.primary + "15",
+  },
+  modeOptionText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
+  },
+  modeOptionTextActive: {
+    color: Colors.light.primary,
   },
   footer: {
     marginBottom: 10,

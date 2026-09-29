@@ -193,6 +193,15 @@ export const VoyageDetailsScreen = () => {
             </View>
 
             <DetailRow
+              icon="exchange-alt"
+              label="Type"
+              value={
+                data.type_vehicule === "location"
+                  ? "Véhicule loué"
+                  : "Véhicule société"
+              }
+            />
+            <DetailRow
               icon="user"
               label="Chauffeur"
               value={data.nomChauffeur || "—"}
@@ -215,7 +224,11 @@ export const VoyageDetailsScreen = () => {
             <DetailRow
               icon="car"
               label="Véhicule"
-              value={data.vehicule_nom || data.vehicule_immatriculation || "—"}
+              value={
+                data.type_vehicule === "location"
+                  ? data.societe_location_nom || "—"
+                  : data.vehicule_nom || data.vehicule_immatriculation || "—"
+              }
             />
             <DetailRow
               icon="tachometer-alt"

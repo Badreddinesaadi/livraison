@@ -6,6 +6,7 @@ import {
   changeVoyageStatus,
   deleteVoyage,
   listVoyage,
+  VehicleMode,
   VoyageListItem,
 } from "@/api/voyage.api";
 import Loader from "@/components/Loader";
@@ -208,6 +209,12 @@ export const VoyagesScreen = () => {
       store.resetAll();
       store.setIdVoyage(item.id);
 
+      if (item.type_vehicule === "location") {
+        store.setVehicleMode("location");
+        store.setExternalChauffeurName(item.chauffeur_externe_nom ?? "");
+        store.setRentalCompanyName(item.societe_location_nom ?? "");
+      }
+
       if (item.idChauffeur) {
         const foundedChauffeur = chauffersList?.find(
           (c) => c.id === item.idChauffeur,
@@ -334,6 +341,9 @@ export const VoyagesScreen = () => {
   const [selectedClientId, setSelectedClientId] = useState<number | undefined>(
     undefined,
   );
+  const [selectedTypeVehicule, setSelectedTypeVehicule] = useState<
+    VehicleMode | undefined
+  >(undefined);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const filtersCount = useMemo(() => {
@@ -342,7 +352,8 @@ export const VoyagesScreen = () => {
       (selectedVehiculeId ? 1 : 0) +
       (selectedDepotId ? 1 : 0) +
       (selectedVilleId ? 1 : 0) +
-      (selectedClientId ? 1 : 0)
+      (selectedClientId ? 1 : 0) +
+      (selectedTypeVehicule ? 1 : 0)
     );
   }, [
     selectedChauffeurId,
@@ -350,6 +361,7 @@ export const VoyagesScreen = () => {
     selectedDepotId,
     selectedVilleId,
     selectedClientId,
+    selectedTypeVehicule,
   ]);
 
   useEffect(() => {
@@ -390,6 +402,13 @@ export const VoyagesScreen = () => {
       "Tous"
     );
   }, [clientsList, selectedClientId]);
+
+  const selectedTypeVehiculeLabel = useMemo(() => {
+    if (!selectedTypeVehicule) return "Tous";
+    return selectedTypeVehicule === "location"
+      ? "Véhicule loué"
+      : "Véhicule société";
+  }, [selectedTypeVehicule]);
 
   const selectedVilleLabel = useMemo(() => {
     return (
@@ -462,6 +481,29 @@ export const VoyagesScreen = () => {
         return;
       }
 
+      if (key === "type-vehicule") {
+        openSelectorOptionsSheet({
+          title: "Filtrer par type de véhicule",
+          options: [
+            { id: 0, label: "Tous" },
+            { id: 1, label: "Véhicule société" },
+            { id: 2, label: "Véhicule loué" },
+          ],
+          selectedId:
+            selectedTypeVehicule === "societe"
+              ? 1
+              : selectedTypeVehicule === "location"
+                ? 2
+                : 0,
+          onSelect: (id) => {
+            setSelectedTypeVehicule(
+              id === 1 ? "societe" : id === 2 ? "location" : undefined,
+            );
+          },
+        });
+        return;
+      }
+
       if (key === "ville") {
         openSelectorOptionsSheet({
           title: "Filtrer par ville",
@@ -506,6 +548,7 @@ export const VoyagesScreen = () => {
       selectedVehiculeId,
       clientsList,
       selectedClientId,
+      selectedTypeVehicule,
       depotsList,
       selectedDepotId,
       villesList,
@@ -524,6 +567,11 @@ export const VoyagesScreen = () => {
         key: "vehicule",
         label: "Véhicule",
         valueLabel: selectedVehiculeLabel,
+      },
+      {
+        key: "type-vehicule",
+        label: "Type véhicule",
+        valueLabel: selectedTypeVehiculeLabel,
       },
       {
         key: "depot",
@@ -554,6 +602,7 @@ export const VoyagesScreen = () => {
         setSelectedDepotId(undefined);
         setSelectedVilleId(undefined);
         setSelectedClientId(undefined);
+        setSelectedTypeVehicule(undefined);
         closeBottomSheet();
       },
     });
@@ -561,6 +610,7 @@ export const VoyagesScreen = () => {
     openVoyageFiltersSheet,
     selectedChauffeurLabel,
     selectedVehiculeLabel,
+    selectedTypeVehiculeLabel,
     selectedDepotLabel,
     selectedVilleLabel,
     selectedClientLabel,
@@ -581,6 +631,7 @@ export const VoyagesScreen = () => {
           idDepot: selectedDepotId,
           idVille: selectedVilleId,
           idClient: selectedClientId,
+          typeVehicule: selectedTypeVehicule,
         },
       ],
       queryFn: ({ pageParam }) =>
@@ -592,6 +643,7 @@ export const VoyagesScreen = () => {
           idDepot: selectedDepotId,
           idVille: selectedVilleId,
           idClient: selectedClientId,
+          typeVehicule: selectedTypeVehicule,
         }),
       enabled: canListVoyages,
       initialPageParam: 1,
@@ -669,7 +721,7 @@ export const VoyagesScreen = () => {
             textAlign: "center",
           }}
         >
-          Vous n'avez pas la permission d'accéder au module Voyage.
+          Vous n&apos;avez pas la permission d&apos;accéder au module Voyage.
         </Text>
       </View>
     );

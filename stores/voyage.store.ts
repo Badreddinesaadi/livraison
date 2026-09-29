@@ -1,4 +1,5 @@
 import type { Ville } from "@/api/villes.api";
+import type { VehicleMode } from "@/api/voyage.api";
 import { BL } from "@/types/bl.types";
 import { Chauffeur, Depot, Vehicle } from "@/types/user.types";
 import { create } from "zustand";
@@ -18,6 +19,12 @@ type BlsState = {
   setSelectedDepot: (depot: Depot) => void;
   selectedVille: Ville | null;
   setSelectedVille: (ville: Ville) => void;
+  vehicleMode: VehicleMode;
+  setVehicleMode: (mode: VehicleMode) => void;
+  externalChauffeurName: string;
+  setExternalChauffeurName: (name: string) => void;
+  rentalCompanyName: string;
+  setRentalCompanyName: (name: string) => void;
   kmDepart: number;
   setKmDepart: (km: number) => void;
   dateDepart: Date | null;
@@ -56,6 +63,27 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
   setSelectedDepot: (depot: Depot) => set({ selectedDepot: depot }),
   selectedVille: null,
   setSelectedVille: (ville: Ville) => set({ selectedVille: ville }),
+  vehicleMode: "societe",
+  setVehicleMode: (mode: VehicleMode) =>
+    set(
+      mode === "location"
+        ? {
+            vehicleMode: mode,
+            selectedChauffeur: null,
+            selectedVehicle: null,
+            kmDepart: 0,
+          }
+        : {
+            vehicleMode: mode,
+            externalChauffeurName: "",
+            rentalCompanyName: "",
+          },
+    ),
+  externalChauffeurName: "",
+  setExternalChauffeurName: (name: string) =>
+    set({ externalChauffeurName: name }),
+  rentalCompanyName: "",
+  setRentalCompanyName: (name: string) => set({ rentalCompanyName: name }),
   kmDepart: 0,
   setKmDepart: (km: number) => set({ kmDepart: km }),
   dateDepart: null,
@@ -69,6 +97,9 @@ export const useCreateVoyageStore = create<BlsState>((set) => ({
       selectedVehicle: null,
       selectedDepot: null,
       selectedVille: null,
+      vehicleMode: "societe",
+      externalChauffeurName: "",
+      rentalCompanyName: "",
       kmDepart: 0,
       dateDepart: null,
       idVoyage: null,

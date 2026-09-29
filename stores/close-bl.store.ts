@@ -44,6 +44,7 @@ type SelectorSheetConfig = {
 export type VoyageFilterKey =
   | "chauffeur"
   | "vehicule"
+  | "type-vehicule"
   | "depot"
   | "ville"
   | "client"
@@ -98,7 +99,7 @@ type CloseBLState = {
   openAcheveConfirm: (
     voyageId: number,
     pendingUndeliveredCount: number,
-    voyageKmDepart: number,
+    voyageKmDepart: number | null,
     voyageDateDepart?: string | null,
   ) => void;
   openDeleteConfirm: (voyageId: number) => void;
@@ -177,7 +178,7 @@ export const useCloseBLStore = create<CloseBLState>((set, get) => ({
   openAcheveConfirm: (
     voyageId: number,
     pendingUndeliveredCount: number,
-    voyageKmDepart: number,
+    voyageKmDepart: number | null,
     voyageDateDepart?: string | null,
   ) =>
     set({

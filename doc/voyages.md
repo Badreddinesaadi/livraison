@@ -19,16 +19,17 @@
 
 #### Query Parameters
 
-| Parameter     | Type   | Required | Description                                                            |
-| ------------- | ------ | -------- | ---------------------------------------------------------------------- |
-| `page`        | int    | No       | Page number (default: 1)                                               |
-| `codeQuery`   | string | No       | Search across driver name, vehicle, brand, client, BL code, depot name |
-| `idChauffeur` | int    | No       | Filter by driver ID                                                    |
-| `idVehicule`  | int    | No       | Filter by vehicle ID                                                   |
-| `idDepot`     | int    | No       | Filter by departure depot ID                                           |
-| `idVille`     | int    | No       | Filter by city ID                                                      |
-| `idClient`    | int    | No       | Filter by client ID                                                    |
-| `id`          | int    | No       | Get a single voyage by ID                                              |
+| Parameter      | Type   | Required | Description                                                            |
+| -------------- | ------ | -------- | ---------------------------------------------------------------------- |
+| `page`         | int    | No       | Page number (default: 1)                                               |
+| `codeQuery`    | string | No       | Search across driver name, vehicle, brand, client, BL code, depot name |
+| `idChauffeur`  | int    | No       | Filter by driver ID                                                    |
+| `idVehicule`   | int    | No       | Filter by vehicle ID                                                   |
+| `idDepot`      | int    | No       | Filter by departure depot ID                                           |
+| `idVille`      | int    | No       | Filter by city ID                                                      |
+| `idClient`     | int    | No       | Filter by client ID                                                    |
+| `typeVehicule` | string | No       | Filter by vehicle type (`societe` or `location`)                       |
+| `id`           | int    | No       | Get a single voyage by ID                                              |
 
 #### Response
 
@@ -56,6 +57,9 @@
       "vehicule_immatriculation": "AB-123-CD",
       "idVille": 5,
       "ville_nom": "Tanger",
+      "type_vehicule": "societe",
+      "chauffeur_externe_nom": null,
+      "societe_location_nom": null,
       "km_retour": null,
       "date_retour": null,
       "bl_list": [
@@ -94,15 +98,23 @@
 
 #### Request Body
 
-| Field          | Type   | Required | Description                                         |
-| -------------- | ------ | -------- | --------------------------------------------------- |
-| `date_depart`  | string | Yes      | Departure date/time                                 |
-| `idChauffeur`  | int    | Yes      | Driver ID                                           |
-| `idVehicule`   | int    | Yes      | Vehicle ID                                          |
-| `km_depart`    | int    | Yes      | Starting km                                         |
-| `depot_depart` | int    | Yes      | Departure depot ID                                  |
-| `idVille`      | int    | Yes      | Destination city ID                                 |
-| `bl_list`      | array  | No       | Array of `{id: number}` representing BL IDs to link |
+| Field                   | Type   | Required | Description                                                   |
+| ----------------------- | ------ | -------- | ------------------------------------------------------------- |
+| `date_depart`           | string | Yes      | Departure date/time                                           |
+| `depot_depart`          | int    | Yes      | Departure depot ID                                            |
+| `idVille`               | int    | Yes      | Destination city ID                                           |
+| `type_vehicule`         | string | No       | `societe` (default) or `location`                             |
+| `idChauffeur`           | int    | Yes\*    | Driver ID. Required when `type_vehicule = societe`            |
+| `idVehicule`            | int    | Yes\*    | Vehicle ID. Required when `type_vehicule = societe`           |
+| `km_depart`             | int    | Yes\*    | Starting km. Required when `type_vehicule = societe`          |
+| `chauffeur_externe_nom` | string | Yes\*    | Rented driver name. Required when `type_vehicule = location`  |
+| `societe_location_nom`  | string | Yes\*    | Rental company name. Required when `type_vehicule = location` |
+| `bl_list`               | array  | No       | Array of `{id: number}` representing BL IDs to link           |
+
+> **Rented voyages:** with `type_vehicule = location`, `idChauffeur`, `idVehicule`
+> and `km_depart` are stored as `NULL`; only the external driver name and the
+> rental company name are kept. With `type_vehicule = societe` the two rented
+> name fields are stored as `NULL`.
 
 #### Response
 
@@ -128,18 +140,26 @@
 
 #### Request Body
 
-| Field          | Type   | Required | Description                             |
-| -------------- | ------ | -------- | --------------------------------------- |
-| `id`           | int    | Yes      | Voyage ID to update                     |
-| `statut`       | string | No       | Status (`encours`, `terminer`)          |
-| `idVehicule`   | int    | No       | Vehicle ID                              |
-| `depot_depart` | int    | No       | Departure depot ID                      |
-| `date_depart`  | string | No       | Departure date/time                     |
-| `km_depart`    | int    | No       | Starting km                             |
-| `km_retour`    | int    | No       | Return km                               |
-| `date_retour`  | string | No       | Return date/time                        |
-| `idVille`      | int    | No       | Destination city ID                     |
-| `bl_list`      | array  | No       | Replaces all BL links: `[{id: number}]` |
+| Field                   | Type   | Required | Description                                |
+| ----------------------- | ------ | -------- | ------------------------------------------ |
+| `id`                    | int    | Yes      | Voyage ID to update                        |
+| `statut`                | string | No       | Status (`encours`, `terminer`)             |
+| `type_vehicule`         | string | No       | `societe` or `location`                    |
+| `idChauffeur`           | int    | No       | Driver ID (null in rented mode)            |
+| `idVehicule`            | int    | No       | Vehicle ID (null in rented mode)           |
+| `chauffeur_externe_nom` | string | No       | Rented driver name (null in company mode)  |
+| `societe_location_nom`  | string | No       | Rental company name (null in company mode) |
+| `depot_depart`          | int    | No       | Departure depot ID                         |
+| `date_depart`           | string | No       | Departure date/time                        |
+| `km_depart`             | int    | No       | Starting km (null in rented mode)          |
+| `km_retour`             | int    | No       | Return km                                  |
+| `date_retour`           | string | No       | Return date/time                           |
+| `idVille`               | int    | No       | Destination city ID                        |
+| `bl_list`               | array  | No       | Replaces all BL links: `[{id: number}]`    |
+
+> **Mode switch:** sending `type_vehicule = location` nulls `idChauffeur`,
+> `idVehicule` and `km_depart`; sending `type_vehicule = societe` nulls
+> `chauffeur_externe_nom` and `societe_location_nom`.
 
 > **Note:** If `bl_list` is provided, all existing BL links are deleted and replaced with the new list.
 

@@ -28,6 +28,7 @@ export const VoyageCard = ({
   const [expanded, setExpanded] = useState(false);
   const canManageVoyage = canUpdateVoyage || canDeleteVoyage;
   const bls = item.bl_list;
+  const isRented = item.type_vehicule === "location";
   // opened bls count
   const blsEncoursCount = useMemo(() => {
     return bls?.filter((bl) => bl.statut === "Encours").length ?? 0;
@@ -91,11 +92,29 @@ export const VoyageCard = ({
 
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: "700", fontSize: 15, color: "#1a1a2e" }}>
-            {item.vehicule_immatriculation}
+            {isRented
+              ? item.societe_location_nom || "Véhicule loué"
+              : item.vehicule_immatriculation}
           </Text>
           <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
-            {item.nomChauffeur}
+            {isRented ? item.chauffeur_externe_nom || "—" : item.nomChauffeur}
           </Text>
+          {isRented && (
+            <View
+              style={{
+                alignSelf: "flex-start",
+                marginTop: 4,
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 999,
+                backgroundColor: PRIMARY + "22",
+              }}
+            >
+              <Text style={{ fontSize: 11, fontWeight: "700", color: PRIMARY }}>
+                Loué
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={{ alignItems: "flex-end", marginRight: 10 }}>
@@ -241,15 +260,29 @@ export const VoyageCard = ({
           />
           <DetailRow icon="city" label="Ville" value={item.ville_nom || "—"} />
           <DetailRow
+            icon="exchange-alt"
+            label="Type"
+            value={isRented ? "Véhicule loué" : "Véhicule société"}
+          />
+          <DetailRow
             icon="car"
             label="Véhicule"
             value={
-              item.vehicule_nom
-                ? String(item.vehicule_nom) +
-                  ` (${item.vehicule_immatriculation})`
-                : "—"
+              isRented
+                ? item.societe_location_nom || "—"
+                : item.vehicule_nom
+                  ? String(item.vehicule_nom) +
+                    ` (${item.vehicule_immatriculation})`
+                  : "—"
             }
           />
+          {isRented && (
+            <DetailRow
+              icon="user"
+              label="Chauffeur"
+              value={item.chauffeur_externe_nom || "—"}
+            />
+          )}
           <DetailRow
             icon="tachometer-alt"
             label="Km départ"

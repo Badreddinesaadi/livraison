@@ -67,28 +67,60 @@ try {
     // ==================== POST ====================
    if($method === 'POST'){
 
-    // Ajouter 'idVille' aux champs requis
-    $requiredFields = array('date_depart', 'idChauffeur', 'idVehicule', 'km_depart', 'depot_depart', 'idVille');
+    // Champs toujours requis
+    $requiredFields = array('date_depart', 'depot_depart', 'idVille');
     foreach ($requiredFields as $field) {
-        if(!isset($data[$field])){
+        if(!isset($data[$field]) || $data[$field] === ''){
             throw new Exception("Le champ $field est requis");
         }
     }
 
-    // Préparer la requête avec idVille
+    // Type de véhicule : 'societe' (véhicule de la société) ou 'location' (location).
+    // En mode société on exige chauffeur/véhicule/km ; en mode loué on exige le
+    // nom du chauffeur externe et la société de location, et on stocke les
+    // références société à NULL.
+    $typeVehicule = isset($data['type_vehicule']) ? $data['type_vehicule'] : 'societe';
+    if(!in_array($typeVehicule, array('societe','location'), true)){
+        throw new Exception("Type de véhicule invalide");
+    }
+
+    if($typeVehicule === 'societe'){
+        foreach (array('idChauffeur','idVehicule','km_depart') as $field) {
+            if(!isset($data[$field]) || $data[$field] === ''){
+                throw new Exception("Le champ $field est requis");
+            }
+        }
+        $idChauffeur = intval($data['idChauffeur']);
+        $idVehicule  = intval($data['idVehicule']);
+        $kmDepart    = intval($data['km_depart']);
+        $chauffeurExterneNom = null;
+        $societeLocationNom  = null;
+    } else {
+        $chauffeurExterneNom = isset($data['chauffeur_externe_nom']) ? trim($data['chauffeur_externe_nom']) : '';
+        $societeLocationNom  = isset($data['societe_location_nom']) ? trim($data['societe_location_nom']) : '';
+        if($chauffeurExterneNom === '') throw new Exception("Le nom du chauffeur est requis");
+        if($societeLocationNom === '') throw new Exception("La société de location est requise");
+        $idChauffeur = null;
+        $idVehicule  = null;
+        $kmDepart    = null;
+    }
+
     $stmt = $con->prepare("
-        INSERT INTO mapp_voyage (date_depart, idChauffeur, idVehicule, km_depart, depot_depart, idVille, statut, date_create, idCreate)
-        VALUES (?, ?, ?, ?, ?, ?, 'encours', NOW(), ?)
+        INSERT INTO mapp_voyage (date_depart, idChauffeur, idVehicule, type_vehicule, chauffeur_externe_nom, societe_location_nom, km_depart, depot_depart, idVille, statut, date_create, idCreate)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'encours', NOW(), ?)
     ");
 
     $stmt->bind_param(
-        "siiiiii",
+        "siisssiiii",
         $data['date_depart'],
-        $data['idChauffeur'],
-        $data['idVehicule'],
-        $data['km_depart'],
+        $idChauffeur,
+        $idVehicule,
+        $typeVehicule,
+        $chauffeurExterneNom,
+        $societeLocationNom,
+        $kmDepart,
         $data['depot_depart'],
-        $data['idVille'], // <-- ici
+        $data['idVille'],
         $userId
     );
     $stmt->execute();
@@ -174,6 +206,7 @@ try {
         if(isset($_GET['idClient'])) { $filters[] = "d2.id_entreprise=?"; $values[] = intval($_GET['idClient']); $types .= 'i'; }
         if(isset($_GET['idDepot'])) { $filters[] = "v.depot_depart=?"; $values[] = intval($_GET['idDepot']); $types .= 'i'; }
         if(isset($_GET['idVehicule'])) { $filters[] = "v.idVehicule=?"; $values[] = intval($_GET['idVehicule']); $types .= 'i'; }
+        if(isset($_GET['typeVehicule']) && $_GET['typeVehicule'] !== '') { $filters[] = "v.type_vehicule=?"; $values[] = $_GET['typeVehicule']; $types .= 's'; }
 
         if($userRole=="chauffeur"){
             $filters[] = "v.idChauffeur=?";
@@ -191,10 +224,12 @@ try {
 					LOWER(ve.immatriculation) LIKE ? OR
 					LOWER(mv.designation) LIKE ? OR
 					LOWER(p.societe) LIKE ? OR
-					LOWER(d2.id_document) LIKE ?
+					LOWER(d2.id_document) LIKE ? OR
+					LOWER(v.chauffeur_externe_nom) LIKE ? OR
+					LOWER(v.societe_location_nom) LIKE ?
 				)";
 
-				for($i=0; $i<6; $i++){
+				for($i=0; $i<8; $i++){
 					$values[] = $search;
 					$types .= 's';
 				}
@@ -227,7 +262,8 @@ try {
    $sql = "
     SELECT DISTINCT
         v.*,
-        CONCAT(u.nom,' ',u.prenom) AS nomChauffeur,
+        CASE WHEN v.type_vehicule='location' THEN v.chauffeur_externe_nom
+             ELSE CONCAT(u.nom,' ',u.prenom) END AS nomChauffeur,
         d.nom AS depot_nom,
         mv.designation AS vehicule_nom,
         ve.immatriculation AS vehicule_immatriculation,
@@ -289,22 +325,40 @@ if($method === 'PUT'){
     $idVoyage = intval($data['id']);
 
     // Champs modifiables
-    $allowedFields = array('statut','idVehicule','depot_depart','date_depart','heure_depart','km_depart','km_retour','date_retour','idVille');
+    $allowedFields = array('statut','idChauffeur','idVehicule','type_vehicule','chauffeur_externe_nom','societe_location_nom','depot_depart','date_depart','heure_depart','km_depart','km_retour','date_retour','idVille');
+    $intFields = array('idChauffeur','idVehicule','depot_depart','km_depart','km_retour','idVille');
+
+    $typeVehicule = isset($data['type_vehicule']) ? $data['type_vehicule'] : null;
+    if($typeVehicule !== null && !in_array($typeVehicule, array('societe','location'), true)){
+        throw new Exception("Type de véhicule invalide");
+    }
+
+    // Normalisation : une bascule de mode vide les champs de l'autre mode.
+    if($typeVehicule === 'location'){
+        $data['idChauffeur'] = null;
+        $data['idVehicule']  = null;
+        $data['km_depart']   = null;
+    } elseif($typeVehicule === 'societe'){
+        $data['chauffeur_externe_nom'] = null;
+        $data['societe_location_nom']  = null;
+    }
 
     $setParts = array(); $values = array(); $types = '';
 
     foreach($allowedFields as $field){
-        if(isset($data[$field])){
-            $setParts[] = "$field=?";
+        // array_key_exists (et non isset) pour autoriser l'effacement explicite (NULL).
+        if(!array_key_exists($field, $data)) continue;
 
-            if(in_array($field,array('idVehicule','depot_depart','km_depart','km_retour','idVille'))){ 
-                $values[] = intval($data[$field]);
-                $types .= 'i';
-            } else {
-                $values[] = $data[$field];
-                $types .= 's';
-            }
+        $value = $data[$field];
+
+        if(in_array($field, $intFields, true)){
+            $values[] = ($value === null || $value === '') ? null : intval($value);
+            $types .= 'i';
+        } else {
+            $values[] = ($value === null || $value === '') ? null : $value;
+            $types .= 's';
         }
+        $setParts[] = "$field=?";
     }
 
     if(!empty($setParts)){

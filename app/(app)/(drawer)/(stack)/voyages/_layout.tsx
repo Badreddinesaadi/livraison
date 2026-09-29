@@ -170,6 +170,7 @@ export default function StackLayout() {
             <View
               style={{
                 marginTop: top,
+                marginBottom: bottom,
                 height: 60,
                 backgroundColor: Colors.light.background,
                 padding: 16,

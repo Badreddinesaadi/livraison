@@ -25,6 +25,7 @@ export const VoyageSummaryScreen = () => {
   const canUpdateVoyage = hasVoyagePermission(user, "UPDATE");
   const canEditVoyage =
     store.type === "create" ? canCreateVoyage : canUpdateVoyage;
+  const isRented = store.vehicleMode === "location";
   const createVoyageMutation = useMutation({
     mutationFn: createVoyage,
     mutationKey: ["createVoyage"],
@@ -103,15 +104,15 @@ export const VoyageSummaryScreen = () => {
           renderItem={null}
           ListHeaderComponent={
             <View style={{ gap: 16 }}>
-              {/* Chauffeur */}
+              {/* Type de véhicule */}
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <FontAwesome6
-                    name="drivers-license"
+                    name="truck-ramp-box"
                     size={18}
                     color={Colors.light.primary}
                   />
-                  <Text style={styles.cardLabel}>Chauffeur</Text>
+                  <Text style={styles.cardLabel}>Type de véhicule</Text>
                   <TouchableOpacity
                     style={styles.editBtn}
                     onPress={() => {
@@ -127,49 +128,139 @@ export const VoyageSummaryScreen = () => {
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.cardValue}>
-                  {store.selectedChauffeur?.name ?? "—"}
+                  {isRented ? "Véhicule loué" : "Véhicule société"}
                 </Text>
-                {store?.selectedChauffeur?.telephone ? (
-                  <Text style={styles.cardSub}>
-                    {store?.selectedChauffeur.telephone}
-                  </Text>
-                ) : null}
               </View>
 
-              {/* Véhicule */}
-              <View style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <FontAwesome6
-                    name="truck"
-                    size={18}
-                    color={Colors.light.primary}
-                  />
-                  <Text style={styles.cardLabel}>Véhicule</Text>
-                  <TouchableOpacity
-                    style={styles.editBtn}
-                    onPress={() => {
-                      router.dismissAll();
-                      router.replace("/voyages/create/chauffeur");
-                    }}
-                  >
-                    <FontAwesome6
-                      name="pen"
-                      size={14}
-                      color={Colors.light.primary}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.cardValue}>
-                  {store.selectedVehicle
-                    ? `${store.selectedVehicle.immatriculation} (${store.selectedVehicle.vehiculeMarque})`
-                    : "—"}
-                </Text>
-                {store.selectedVehicle?.vehiculeMarque ? (
-                  <Text style={styles.cardSub}>
-                    {store.selectedVehicle.vehiculeMarque}
-                  </Text>
-                ) : null}
-              </View>
+              {isRented ? (
+                <>
+                  {/* Nom du chauffeur */}
+                  <View style={styles.card}>
+                    <View style={styles.cardHeader}>
+                      <FontAwesome6
+                        name="id-card"
+                        size={18}
+                        color={Colors.light.primary}
+                      />
+                      <Text style={styles.cardLabel}>Nom du chauffeur</Text>
+                      <TouchableOpacity
+                        style={styles.editBtn}
+                        onPress={() => {
+                          router.dismissAll();
+                          router.replace("/voyages/create/chauffeur");
+                        }}
+                      >
+                        <FontAwesome6
+                          name="pen"
+                          size={14}
+                          color={Colors.light.primary}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.cardValue}>
+                      {store.externalChauffeurName || "—"}
+                    </Text>
+                  </View>
+
+                  {/* Société de location */}
+                  <View style={styles.card}>
+                    <View style={styles.cardHeader}>
+                      <FontAwesome6
+                        name="building"
+                        size={18}
+                        color={Colors.light.primary}
+                      />
+                      <Text style={styles.cardLabel}>Société de location</Text>
+                      <TouchableOpacity
+                        style={styles.editBtn}
+                        onPress={() => {
+                          router.dismissAll();
+                          router.replace("/voyages/create/chauffeur");
+                        }}
+                      >
+                        <FontAwesome6
+                          name="pen"
+                          size={14}
+                          color={Colors.light.primary}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.cardValue}>
+                      {store.rentalCompanyName || "—"}
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  {/* Chauffeur */}
+                  <View style={styles.card}>
+                    <View style={styles.cardHeader}>
+                      <FontAwesome6
+                        name="drivers-license"
+                        size={18}
+                        color={Colors.light.primary}
+                      />
+                      <Text style={styles.cardLabel}>Chauffeur</Text>
+                      <TouchableOpacity
+                        style={styles.editBtn}
+                        onPress={() => {
+                          router.dismissAll();
+                          router.replace("/voyages/create/chauffeur");
+                        }}
+                      >
+                        <FontAwesome6
+                          name="pen"
+                          size={14}
+                          color={Colors.light.primary}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.cardValue}>
+                      {store.selectedChauffeur?.name ?? "—"}
+                    </Text>
+                    {store?.selectedChauffeur?.telephone ? (
+                      <Text style={styles.cardSub}>
+                        {store?.selectedChauffeur.telephone}
+                      </Text>
+                    ) : null}
+                  </View>
+
+                  {/* Véhicule */}
+                  <View style={styles.card}>
+                    <View style={styles.cardHeader}>
+                      <FontAwesome6
+                        name="truck"
+                        size={18}
+                        color={Colors.light.primary}
+                      />
+                      <Text style={styles.cardLabel}>Véhicule</Text>
+                      <TouchableOpacity
+                        style={styles.editBtn}
+                        onPress={() => {
+                          router.dismissAll();
+                          router.replace("/voyages/create/chauffeur");
+                        }}
+                      >
+                        <FontAwesome6
+                          name="pen"
+                          size={14}
+                          color={Colors.light.primary}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.cardValue}>
+                      {store.selectedVehicle
+                        ? `${store.selectedVehicle.immatriculation} (${store.selectedVehicle.vehiculeMarque})`
+                        : "—"}
+                    </Text>
+                    {store.selectedVehicle?.vehiculeMarque ? (
+                      <Text style={styles.cardSub}>
+                        {store.selectedVehicle.vehiculeMarque}
+                      </Text>
+                    ) : null}
+                  </View>
+                </>
+              )}
 
               {/* Dépôt */}
               <View style={styles.card}>
@@ -230,32 +321,34 @@ export const VoyageSummaryScreen = () => {
               </View>
 
               {/* Km départ */}
-              <View style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <FontAwesome6
-                    name="road"
-                    size={18}
-                    color={Colors.light.primary}
-                  />
-                  <Text style={styles.cardLabel}>Km départ</Text>
-                  <TouchableOpacity
-                    style={styles.editBtn}
-                    onPress={() => {
-                      router.dismissAll();
-                      router.replace("/voyages/create/chauffeur");
-                    }}
-                  >
+              {!isRented && (
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
                     <FontAwesome6
-                      name="pen"
-                      size={14}
+                      name="road"
+                      size={18}
                       color={Colors.light.primary}
                     />
-                  </TouchableOpacity>
+                    <Text style={styles.cardLabel}>Km départ</Text>
+                    <TouchableOpacity
+                      style={styles.editBtn}
+                      onPress={() => {
+                        router.dismissAll();
+                        router.replace("/voyages/create/chauffeur");
+                      }}
+                    >
+                      <FontAwesome6
+                        name="pen"
+                        size={14}
+                        color={Colors.light.primary}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.cardValue}>
+                    {store.kmDepart ? `${store.kmDepart} km` : "—"}
+                  </Text>
                 </View>
-                <Text style={styles.cardValue}>
-                  {store.kmDepart ? `${store.kmDepart} km` : "—"}
-                </Text>
-              </View>
+              )}
 
               {/* Date départ */}
               <View style={styles.card}>
@@ -349,12 +442,15 @@ export const VoyageSummaryScreen = () => {
             }
             disabled={
               !canEditVoyage ||
-              !store.selectedChauffeur ||
-              !store.selectedVehicle ||
               !store.selectedDepot ||
               !store.selectedVille ||
-              !store.kmDepart ||
               !store.dateDepart ||
+              (isRented
+                ? !store.externalChauffeurName.trim() ||
+                  !store.rentalCompanyName.trim()
+                : !store.selectedChauffeur ||
+                  !store.selectedVehicle ||
+                  !store.kmDepart) ||
               !store.bls ||
               store.bls.length === 0
             }
@@ -371,26 +467,40 @@ export const VoyageSummaryScreen = () => {
                 return;
               }
 
+              const modePayload = isRented
+                ? {
+                    type_vehicule: "location" as const,
+                    idChauffeur: null,
+                    idVehicule: null,
+                    km_depart: null,
+                    chauffeur_externe_nom: store.externalChauffeurName.trim(),
+                    societe_location_nom: store.rentalCompanyName.trim(),
+                  }
+                : {
+                    type_vehicule: "societe" as const,
+                    idChauffeur: store.selectedChauffeur!.id,
+                    idVehicule: store.selectedVehicle!.id,
+                    km_depart: store.kmDepart,
+                    chauffeur_externe_nom: null,
+                    societe_location_nom: null,
+                  };
+
               if (store.type === "create") {
                 createVoyageMutation.mutate({
                   bl_list: store.bls!.map((bl) => ({ id: bl.id })),
-                  idChauffeur: store.selectedChauffeur!.id,
-                  idVehicule: store.selectedVehicle!.id,
                   depot_depart: store.selectedDepot!.id,
                   idVille: store.selectedVille!.id,
-                  km_depart: store.kmDepart,
                   date_depart: store.dateDepart!.toISOString(),
+                  ...modePayload,
                 });
               } else {
                 updateVoyageMutation.mutate({
                   id: store.idVoyage!,
                   bl_list: store.bls!.map((bl) => ({ id: bl.id })),
-                  idChauffeur: store.selectedChauffeur!.id,
-                  idVehicule: store.selectedVehicle!.id,
                   depot_depart: store.selectedDepot!.id,
                   idVille: store.selectedVille!.id,
-                  km_depart: store.kmDepart,
                   date_depart: store.dateDepart!.toISOString(),
+                  ...modePayload,
                 });
               }
             }}
