@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
@@ -181,7 +182,10 @@ export const SelectChauffeurScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.header}>
           <Text style={styles.title}>
             {isRented
@@ -199,6 +203,7 @@ export const SelectChauffeurScreen = () => {
           <ScrollView
             style={styles.formScroll}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.formContent}
           >
             <View style={styles.card}>
@@ -545,7 +550,7 @@ export const SelectChauffeurScreen = () => {
             }}
           />
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

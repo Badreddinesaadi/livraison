@@ -123,7 +123,7 @@ export default function LoginScreen() {
               <Text style={styles.buttonText}>Se connecter</Text>
             )}
           </TouchableOpacity>
-          <Text style={styles.version}>0.0.3</Text>
+          <Text style={styles.version}>0.0.4</Text>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

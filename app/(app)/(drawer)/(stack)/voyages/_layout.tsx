@@ -7,6 +7,7 @@ import VoyageMoreActionsBottomSheetContent from "@/components/VoyageMoreActionsB
 import { Colors } from "@/constants/theme";
 import { useCloseBLStore } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
+import { useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { useQueryClient } from "@tanstack/react-query";
@@ -121,6 +122,8 @@ export default function StackLayout() {
     [],
   );
   const { top, bottom } = useSafeAreaInsets();
+  const insets = useSafeAreaInsetsStyle(["top", "bottom"]);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const rotation = useRef(new Animated.Value(0));
   const animationRef = useRef<any>(null);
@@ -162,15 +165,13 @@ export default function StackLayout() {
     };
   }, []);
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, ...insets }}>
       <Stack
         screenOptions={{
           animation: "ios_from_right",
           header: (s) => (
             <View
               style={{
-                marginTop: top,
-                marginBottom: bottom,
                 height: 60,
                 backgroundColor: Colors.light.background,
                 padding: 16,
@@ -243,6 +244,7 @@ export default function StackLayout() {
           }
         }}
         bottomInset={bottom}
+        topInset={top}
       >
         {sheetType === "voyage-action-confirm" && voyageActionType ? (
           <VoyageActionConfirmBottomSheetContent
