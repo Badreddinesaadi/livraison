@@ -10,30 +10,37 @@ require __DIR__ . "/../functions.php";
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $con->set_charset("utf8mb4");
 
-// ------------------ V�rification du token ------------------
+/* ============================================================
+   Helper : remplace le splat operator "...$values" (PHP 5.6+)
+   par call_user_func_array (compatible PHP 5.5)
+============================================================ */
+function bindParamsArray($stmt, $types, $values) {
+    $refs = array();
+    $refs[] = $types;
+    foreach ($values as $key => $value) {
+        $refs[] = &$values[$key];
+    }
+    return call_user_func_array(array($stmt, 'bind_param'), $refs);
+}
+
+// ------------------ Vérification du token (headers) ------------------
 $headers = checkAppHeader();
 $token = isset($headers['auth_token']) ? $headers['auth_token'] : null;
 
 if(empty($token)){
     http_response_code(401);
-    echo json_encode(["status"=>false,"message"=>"Token manquant"]);
+    echo json_encode(array("status"=>false,"message"=>"Token manquant"));
     exit;
 }
 
 $tokendata = checkToken($token, $con);
 if(!$tokendata['status']){
     http_response_code(401);
-    echo json_encode(["status"=>false,"message"=>$tokendata['message']]);
+    echo json_encode(array("status"=>false,"message"=>$tokendata['message']));
     exit;
 }
 
 $userId = $tokendata['idUser'];
-
-$stmtRole = $con->prepare("SELECT role FROM utilisateur WHERE id=?");
-$stmtRole->bind_param("i",$userId);
-$stmtRole->execute();
-$resRole = $stmtRole->get_result()->fetch_assoc();
-$userRole = $resRole['role'];
 
 $method = get_method();
 $data = get_request_data();
@@ -42,11 +49,26 @@ $con->begin_transaction();
 
 try {
 
+    // ------------------ Vérification du rôle (déplacé dans le try) ------------------
+    // Avec MYSQLI_REPORT_STRICT, toute erreur SQL lève une exception qui doit
+    // être interceptée par le catch ci-dessous, donc cette requête doit être
+    // dans le bloc try (elle était avant en dehors, exception non gérée possible).
+    $stmtRole = $con->prepare("SELECT role FROM utilisateur WHERE id=?");
+    $stmtRole->bind_param("i",$userId);
+    $stmtRole->execute();
+    $resRole = $stmtRole->get_result()->fetch_assoc();
+
+    if(!$resRole){
+        throw new Exception("Utilisateur introuvable");
+    }
+
+    $userRole = $resRole['role'];
+
     // ==================== POST ====================
    if($method === 'POST'){
 
     // Ajouter 'idVille' aux champs requis
-    $requiredFields = ['date_depart', 'idChauffeur', 'idVehicule', 'km_depart', 'depot_depart', 'idVille'];
+    $requiredFields = array('date_depart', 'idChauffeur', 'idVehicule', 'km_depart', 'depot_depart', 'idVille');
     foreach ($requiredFields as $field) {
         if(!isset($data[$field])){
             throw new Exception("Le champ $field est requis");
@@ -55,7 +77,7 @@ try {
 
     // Préparer la requête avec idVille
     $stmt = $con->prepare("
-        INSERT INTO voyage (date_depart, idChauffeur, idVehicule, km_depart, depot_depart, idVille, statut, date_create, idCreate)
+        INSERT INTO mapp_voyage (date_depart, idChauffeur, idVehicule, km_depart, depot_depart, idVille, statut, date_create, idCreate)
         VALUES (?, ?, ?, ?, ?, ?, 'encours', NOW(), ?)
     ");
 
@@ -74,7 +96,7 @@ try {
 
     // Gestion des BL
     if(isset($data['bl_list']) && is_array($data['bl_list'])){
-        $stmtBL = $con->prepare("INSERT INTO voyage_bl (idVoyage, idBL, statut) VALUES (?, ?, 'encours')");
+        $stmtBL = $con->prepare("INSERT INTO mapp_voyage_bl (idVoyage, idBL, statut) VALUES (?, ?, 'encours')");
         foreach($data['bl_list'] as $bl){
             if(!isset($bl['id'])) continue;
             $stmtBL->bind_param("ii", $voyageId, $bl['id']);
@@ -84,11 +106,11 @@ try {
 
     $con->commit();
 
-    send_response([
+    send_response(array(
         "status" => true,
         "message" => "Voyage crée avec succés",
-        "data" => ["voyage_id" => $voyageId]
-    ]);
+        "data" => array("voyage_id" => $voyageId)
+    ));
 }
     // ==================== GET ====================
     if($method === 'GET'){
@@ -96,10 +118,10 @@ try {
         function getBLList($con, $idVoyage, $userRole, $userId){
             $sql = "
                 SELECT vb.id AS idVoyageBL, vb.idBL AS id, d.id_document AS code, d.datetime_document, vb.statut, p.societe AS nomClient
-                FROM voyage_bl vb
+                FROM mapp_voyage_bl vb
                 JOIN jbm.document d ON d.id = vb.idBL
                 JOIN jbm.partenaires p ON p.id = d.id_entreprise
-                JOIN voyage v ON vb.idVoyage = v.id
+                JOIN mapp_voyage v ON vb.idVoyage = v.id
                 WHERE vb.idVoyage=? ".($userRole=="chauffeur"?" AND v.idChauffeur=?":"")."
             ";
             $stmtBL = $con->prepare($sql);
@@ -111,18 +133,30 @@ try {
             }
 
             $stmtBL->execute();
-            $blList = $stmtBL->get_result()->fetch_all(MYSQLI_ASSOC);
+            $resBL = $stmtBL->get_result();
+            $blList = array();
+            while($b = $resBL->fetch_assoc()){
+                $blList[] = $b;
+            }
+            $stmtBL->close();
 
             foreach($blList as &$bl){
                 $stmtImg = $con->prepare("
                     SELECT id, nom_fichier, chemin_fichier, date_upload
-                    FROM voyage_bl_image 
+                    FROM mapp_voyage_bl_image 
                     WHERE idVoyageBL=?
                 ");
                 $stmtImg->bind_param("i",$bl['idVoyageBL']);
                 $stmtImg->execute();
-                $bl['images'] = $stmtImg->get_result()->fetch_all(MYSQLI_ASSOC);
+                $resImg = $stmtImg->get_result();
+                $images = array();
+                while($img = $resImg->fetch_assoc()){
+                    $images[] = $img;
+                }
+                $bl['images'] = $images;
+                $stmtImg->close();
             }
+            unset($bl);
 
             return $blList;
         }
@@ -131,8 +165,8 @@ try {
         $perPage = 10;
         $offset = ($page - 1) * $perPage;
 
-        $filters = [];
-        $values = [];
+        $filters = array();
+        $values = array();
         $types = '';
 
         if(isset($_GET['id'])) { $filters[] = "v.id=?"; $values[] = intval($_GET['id']); $types .= 'i'; }
@@ -147,7 +181,7 @@ try {
             $types .= 'i';
         }
 
-        // ?? RECHERCHE GLOBALE
+        // RECHERCHE GLOBALE
 			if(isset($_GET['codeQuery']) && !empty($_GET['codeQuery'])){
 				$search = "%".strtolower($_GET['codeQuery'])."%";
 
@@ -171,21 +205,22 @@ try {
         // COUNT
         $stmtCount = $con->prepare("
             SELECT COUNT(DISTINCT v.id) AS total
-            FROM voyage v
+            FROM mapp_voyage v
             LEFT JOIN utilisateur u ON v.idChauffeur = u.id
             LEFT JOIN vue_depots d ON v.depot_depart = d.id
             LEFT JOIN vehicule ve ON v.idVehicule = ve.id
             LEFT JOIN marque_vehicule mv ON ve.idMarque = mv.id
-            LEFT JOIN voyage_bl vb ON vb.idVoyage = v.id
+            LEFT JOIN mapp_voyage_bl vb ON vb.idVoyage = v.id
             LEFT JOIN jbm.document d2 ON d2.id = vb.idBL
             LEFT JOIN jbm.partenaires p ON p.id = d2.id_entreprise
             $where
         ");
 
-        if(!empty($values)) $stmtCount->bind_param($types, ...$values);
+        if(!empty($values)) bindParamsArray($stmtCount, $types, $values);
         $stmtCount->execute();
 
-        $total = $stmtCount->get_result()->fetch_assoc()['total'];
+        $countRow = $stmtCount->get_result()->fetch_assoc();
+        $total = $countRow['total'];
         $totalPages = ceil($total / $perPage);
 
         // DATA
@@ -197,12 +232,12 @@ try {
         mv.designation AS vehicule_nom,
         ve.immatriculation AS vehicule_immatriculation,
         vi.designation AS ville_nom  -- <-- ici
-    FROM voyage v
+    FROM mapp_voyage v
     LEFT JOIN utilisateur u ON v.idChauffeur = u.id
     LEFT JOIN vue_depots d ON v.depot_depart = d.id
     LEFT JOIN vehicule ve ON v.idVehicule = ve.id
     LEFT JOIN marque_vehicule mv ON ve.idMarque = mv.id
-    LEFT JOIN voyage_bl vb ON vb.idVoyage = v.id
+    LEFT JOIN mapp_voyage_bl vb ON vb.idVoyage = v.id
     LEFT JOIN jbm.document d2 ON d2.id = vb.idBL
     LEFT JOIN jbm.partenaires p ON p.id = d2.id_entreprise
     LEFT JOIN ville vi ON vi.id = v.idVille  -- <-- ici
@@ -219,27 +254,32 @@ try {
         $valuesWithLimit[] = $perPage;
         $valuesWithLimit[] = $offset;
 
-        $stmt->bind_param($typesWithLimit, ...$valuesWithLimit);
+        bindParamsArray($stmt, $typesWithLimit, $valuesWithLimit);
         $stmt->execute();
 
-        $voyages = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $result = $stmt->get_result();
+        $voyages = array();
+        while($v = $result->fetch_assoc()){
+            $voyages[] = $v;
+        }
 
         foreach($voyages as &$voyage){
             $voyage['bl_list'] = getBLList($con,$voyage['id'],$userRole,$userId);
         }
+        unset($voyage);
 
         $con->commit();
 
-        send_response([
+        send_response(array(
             "status" => true,
-            "pagination" => [
+            "pagination" => array(
                 "page" => $page,
                 "perPage" => $perPage,
                 "total" => $total,
                 "totalPages" => $totalPages
-            ],
+            ),
             "data" => $voyages
-        ]);
+        ));
     }
 
     // ==================== PUT ====================
@@ -249,15 +289,15 @@ if($method === 'PUT'){
     $idVoyage = intval($data['id']);
 
     // Champs modifiables
-    $allowedFields = ['statut','idVehicule','depot_depart','date_depart','heure_depart','km_depart','km_retour','date_retour','idVille'];
+    $allowedFields = array('statut','idVehicule','depot_depart','date_depart','heure_depart','km_depart','km_retour','date_retour','idVille');
 
-    $setParts = []; $values = []; $types = '';
+    $setParts = array(); $values = array(); $types = '';
 
     foreach($allowedFields as $field){
         if(isset($data[$field])){
             $setParts[] = "$field=?";
 
-            if(in_array($field,['idVehicule','depot_depart','km_depart','km_retour','idVille'])){ 
+            if(in_array($field,array('idVehicule','depot_depart','km_depart','km_retour','idVille'))){ 
                 $values[] = intval($data[$field]);
                 $types .= 'i';
             } else {
@@ -272,27 +312,27 @@ if($method === 'PUT'){
         $types .= 'i';
 
         if($userRole=="chauffeur"){
-            $sql = "UPDATE voyage SET ".implode(", ",$setParts)." WHERE id=? AND idChauffeur=?";
+            $sql = "UPDATE mapp_voyage SET ".implode(", ",$setParts)." WHERE id=? AND idChauffeur=?";
             $values[] = $userId;
             $types .= 'i';
         } else {
-            $sql = "UPDATE voyage SET ".implode(", ",$setParts)." WHERE id=?";
+            $sql = "UPDATE mapp_voyage SET ".implode(", ",$setParts)." WHERE id=?";
         }
 
         $stmt = $con->prepare($sql);
-        $stmt->bind_param($types, ...$values);
+        bindParamsArray($stmt, $types, $values);
         $stmt->execute();
     }
 
     // --- Mise à jour des BL ---
     if(isset($data['bl_list']) && is_array($data['bl_list'])){
         // Supprimer les BL existants
-        $stmtDel = $con->prepare("DELETE FROM voyage_bl WHERE idVoyage=?");
+        $stmtDel = $con->prepare("DELETE FROM mapp_voyage_bl WHERE idVoyage=?");
         $stmtDel->bind_param("i", $idVoyage);
         $stmtDel->execute();
 
         // Réinsérer la nouvelle liste
-        $stmtBL = $con->prepare("INSERT INTO voyage_bl (idVoyage, idBL, statut) VALUES (?, ?, 'encours')");
+        $stmtBL = $con->prepare("INSERT INTO mapp_voyage_bl (idVoyage, idBL, statut) VALUES (?, ?, 'encours')");
         foreach($data['bl_list'] as $bl){
             if(!isset($bl['id'])) continue;
             $stmtBL->bind_param("ii", $idVoyage, $bl['id']);
@@ -302,10 +342,10 @@ if($method === 'PUT'){
 
     $con->commit();
 
-    send_response([
+    send_response(array(
         "status"=>true,
         "message"=>"Voyage mis à jour avec BL"
-    ]);
+    ));
 }
 
     // ==================== DELETE ====================
@@ -315,33 +355,33 @@ if($method === 'PUT'){
         $idVoyage = intval($data['id']);
 
         if($userRole == "chauffeur"){
-            $stmtCheck = $con->prepare("SELECT id FROM voyage WHERE id=? AND idChauffeur=?");
+            $stmtCheck = $con->prepare("SELECT id FROM mapp_voyage WHERE id=? AND idChauffeur=?");
             $stmtCheck->bind_param("ii", $idVoyage, $userId);
             $stmtCheck->execute();
             $exists = $stmtCheck->get_result()->fetch_assoc();
             if(!$exists) throw new Exception("Accès refusé");
         }
 
-        $stmtBL = $con->prepare("DELETE FROM voyage_bl WHERE idVoyage=?");
+        $stmtBL = $con->prepare("DELETE FROM mapp_voyage_bl WHERE idVoyage=?");
         $stmtBL->bind_param("i", $idVoyage);
         $stmtBL->execute();
 
-        $stmtVoyage = $con->prepare("DELETE FROM voyage WHERE id=?");
+        $stmtVoyage = $con->prepare("DELETE FROM mapp_voyage WHERE id=?");
         $stmtVoyage->bind_param("i", $idVoyage);
         $stmtVoyage->execute();
 
         $con->commit();
 
-        send_response([
+        send_response(array(
             "status" => true,
             "message" => "Voyage supprimé"
-        ]);
+        ));
     }
 
 } catch(Exception $e){
     $con->rollback();
-    send_response([
+    send_response(array(
         "status"=>false,
         "message"=>$e->getMessage()
-    ]);
+    ));
 }
