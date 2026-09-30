@@ -34,6 +34,8 @@ export type BLItem = {
   datetime_document: string;
   images: Image[] | null;
   statut: "Livré" | "Encours";
+  /** Locally closed offline — waiting to sync. */
+  _pendingSync?: boolean;
 };
 
 type Image = {

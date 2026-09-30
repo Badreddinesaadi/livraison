@@ -261,10 +261,11 @@ try {
                 $stmtCoord->execute();
             }
 
-            // Update statut
-            $stmtUpdate = $con->prepare("UPDATE voyage_bl SET statut=? WHERE id=?");
-            $stmtUpdate->bind_param("si",$statut,$idVoyageBL);
-            $stmtUpdate->execute();
+        // Update statut (+ trace si la clôture a été faite hors ligne)
+        $isOffline = (isset($data['offline']) && $data['offline'] !== '' && $data['offline'] !== '0') ? 1 : 0;
+        $stmtUpdate = $con->prepare("UPDATE voyage_bl SET statut=?, is_offline=? WHERE id=?");
+        $stmtUpdate->bind_param("sii",$statut,$isOffline,$idVoyageBL);
+        $stmtUpdate->execute();
 
             echo json_encode([
                 "status"=>true,

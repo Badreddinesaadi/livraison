@@ -1,6 +1,7 @@
 import { getCurrentUser, signInWithEmailAndPassword } from "@/api/auth.api";
 import { useStorageState } from "@/hooks/use-storage-state";
 import { User } from "@/types/auth.types";
+import { queryPersister } from "@/utils/offline/persister";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, use, useEffect, type PropsWithChildren } from "react";
 
@@ -59,6 +60,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const signOut = () => {
     queryClient.setQueryData(["currentUser"], null);
     setSession(null);
+    void queryPersister.removeClient();
   };
 
   useEffect(() => {}, [data]);

@@ -346,7 +346,17 @@ export const VoyageDetailsScreen = () => {
                           </View>
                         )}
                       </View>
-                      {bl.statut === "Livré" ? (
+                      {bl._pendingSync ? (
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: PRIMARY,
+                            fontWeight: "600",
+                          }}
+                        >
+                          En attente de sync
+                        </Text>
+                      ) : bl.statut === "Livré" ? (
                         <FontAwesome5
                           name="check-circle"
                           size={12}

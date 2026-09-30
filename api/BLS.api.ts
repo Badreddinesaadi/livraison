@@ -38,6 +38,7 @@ export const closeBL = async ({
   status,
   idBL,
   coordinates,
+  offline,
 }: {
   idVoyage: number;
   idBL: number;
@@ -47,7 +48,8 @@ export const closeBL = async ({
     type: string;
   }[];
   status: string;
-  coordinates: { x: number; y: number };
+  coordinates: { x: number; y: number } | null;
+  offline?: boolean;
 }) => {
   const formdata = new FormData();
   formdata.append("idBL", idBL.toString());
@@ -56,18 +58,17 @@ export const closeBL = async ({
   images.forEach((image) => {
     formdata.append("images[]", image as any);
   });
-  formdata.append("coordinates", JSON.stringify(coordinates));
-  let data = null;
-  try {
-    data = await client.request({
-      pathname: "/api/homescreen/voyage_chauffeur.php",
-      method: "POST",
-      body: formdata,
-      isDebug: true,
-    });
-  } catch (error) {
-    console.error("Error in closeBL:", error);
+  if (coordinates) {
+    formdata.append("coordinates", JSON.stringify(coordinates));
+  }
+  if (offline) {
+    formdata.append("offline", "1");
   }
 
-  return data;
+  return await client.request({
+    pathname: "/api/homescreen/voyage_chauffeur.php",
+    method: "POST",
+    body: formdata,
+    isDebug: true,
+  });
 };

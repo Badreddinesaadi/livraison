@@ -223,6 +223,9 @@ export const VoyageCard = ({
                           color={SUCCESS}
                         />
                       )}
+                      {bl._pendingSync && (
+                        <FontAwesome5 name="clock" size={11} color={PRIMARY} />
+                      )}
                       {(bl.images?.length ?? 0) > 0 && (
                         <View
                           style={{

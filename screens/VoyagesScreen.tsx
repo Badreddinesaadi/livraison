@@ -21,6 +21,7 @@ import {
   VoyageFilterKey,
 } from "@/stores/close-bl.store";
 import { useCreateVoyageStore } from "@/stores/voyage.store";
+import { useOfflineSyncStore } from "@/stores/offline-sync.store";
 import { BL } from "@/types/bl.types";
 import { FontAwesome5 } from "@expo/vector-icons";
 import {
@@ -71,6 +72,15 @@ export const VoyagesScreen = () => {
   });
   const router = useRouter();
   const store = useCreateVoyageStore();
+  const pendingSyncCount = useOfflineSyncStore((s) => s.pendingCount);
+  const isSyncingCloseBL = useOfflineSyncStore((s) => s.isSyncing);
+  const needsLogin = useOfflineSyncStore((s) => s.needsLogin);
+  const syncNow = useOfflineSyncStore((s) => s.syncNow);
+  const refreshSyncCount = useOfflineSyncStore((s) => s.refreshCount);
+
+  useEffect(() => {
+    void refreshSyncCount();
+  }, [refreshSyncCount]);
   const setCloseBLContext = useCloseBLStore((s) => s.setContext);
   const openCloseBLSheet = useCloseBLStore((s) => s.openSheet);
   const openAcheveConfirmSheet = useCloseBLStore((s) => s.openAcheveConfirm);
@@ -827,6 +837,41 @@ export const VoyagesScreen = () => {
             </View>
           )}
         </View>
+
+        {(pendingSyncCount > 0 || needsLogin) && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              columnGap: 8,
+              backgroundColor: "#fff7f3",
+              borderColor: PRIMARY + "55",
+              borderWidth: 1,
+              borderRadius: 10,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              marginBottom: 10,
+            }}
+          >
+            <FontAwesome5
+              name={needsLogin ? "lock" : "cloud-upload-alt"}
+              size={13}
+              color={PRIMARY}
+            />
+            <Text style={{ flex: 1, fontSize: 13, color: "#7a4a2a" }}>
+              {needsLogin
+                ? "Reconnectez-vous pour synchroniser vos clôtures hors ligne."
+                : `${pendingSyncCount} clôture${pendingSyncCount > 1 ? "s" : ""} en attente de synchronisation.`}
+            </Text>
+            <Button
+              preset="ghost"
+              size="sm"
+              text={isSyncingCloseBL ? "..." : "Synchroniser"}
+              disabled={isSyncingCloseBL || needsLogin}
+              onPress={() => void syncNow()}
+            />
+          </View>
+        )}
 
         {/* Result count */}
         <Text style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>

@@ -1,13 +1,21 @@
+import OfflineNotice from "@/components/OfflineNotice";
 import { SplashScreenController } from "@/components/splash";
 import { queryClient } from "@/constants/query";
 import { useApiUrlStore } from "@/stores/api-url.store";
 import { SessionProvider, useSession } from "@/stores/auth.store";
+import { initOfflineSync } from "@/stores/offline-sync.store";
+import { setupOnlineManager } from "@/utils/offline/network";
+import { queryPersister, shouldPersistQuery } from "@/utils/offline/persister";
 import * as Sentry from "@sentry/react-native";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { useIsRestoring } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import Toast from "react-native-toast-message";
+
+setupOnlineManager();
+
 Sentry.init({
   dsn: "https://db4c2b3e4c28ab5e373dad6c73917a13@o4510540277612544.ingest.de.sentry.io/4512067805773904",
 
@@ -28,11 +36,20 @@ Sentry.init({
 });
 export default Sentry.wrap(function Layout() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: queryPersister,
+        maxAge: 1000 * 60 * 60 * 24,
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query) => shouldPersistQuery(query.queryKey),
+        },
+      }}
+    >
       <SessionProvider>
         <InnerLayout />
       </SessionProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 });
 
@@ -41,12 +58,17 @@ const InnerLayout = () => {
   const apiUrl = useApiUrlStore((s) => s.apiUrl);
   const isApiUrlLoaded = useApiUrlStore((s) => s.isLoaded);
   const initApiUrl = useApiUrlStore((s) => s.initApiUrl);
+  const isRestoring = useIsRestoring();
 
   useEffect(() => {
     initApiUrl();
   }, [initApiUrl]);
 
-  const isReady = isApiUrlLoaded && !session.isLoading;
+  useEffect(() => {
+    initOfflineSync();
+  }, []);
+
+  const isReady = isApiUrlLoaded && !session.isLoading && !isRestoring;
 
   return (
     <>
@@ -69,6 +91,7 @@ const InnerLayout = () => {
           </Stack.Protected>
         </Stack>
       ) : null}
+      <OfflineNotice />
       <Toast visibilityTime={2000} />
     </>
   );

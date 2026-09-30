@@ -94,7 +94,8 @@
           "project": "sdkwood-app",
           "organization": "safouane"
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -18,7 +18,7 @@ export default function OfflineNotice() {
           exiting={FadeOutUp.duration(220)}
           style={styles.banner}
         >
-          <FontAwesome5 name="wifi" size={14} color={Colors.light.background} />
+          <FontAwesome5 name="wifi" size={12} color={Colors.light.background} />
           <Text style={styles.text}>Vous êtes hors ligne</Text>
         </Animated.View>
       ) : null}
@@ -30,22 +30,23 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     top: 12,
-    left: 14,
-    right: 14,
+    left: 0,
+    right: 0,
     zIndex: 1000,
+    alignItems: "center",
   },
   banner: {
     backgroundColor: Colors.light.primary,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     flexDirection: "row",
     alignItems: "center",
-    columnGap: 8,
+    columnGap: 6,
   },
   text: {
     color: Colors.light.background,
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "600",
   },
 });

@@ -1,9 +1,16 @@
-import { closeBL } from "@/api/BLS.api";
 import { Button } from "@/components/ui/button";
 import { hasVoyagePermission } from "@/constants/permissions";
 import { useSession } from "@/stores/auth.store";
 import { useCloseBLStore } from "@/stores/close-bl.store";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useOfflineSyncStore } from "@/stores/offline-sync.store";
+import {
+  clearUnsentJobsForBl,
+  enqueueCloseBlJob,
+  makeClientUuid,
+} from "@/utils/offline/db";
+import { deletePhotoDir, persistPhotos } from "@/utils/offline/photos";
+import { markBlsPendingSync } from "@/utils/offline/voyage-cache";
+import { onlineManager, useQueryClient } from "@tanstack/react-query";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import * as Location from "expo-location";
@@ -54,53 +61,9 @@ export const CloseBLScreen = () => {
   }, [mode, allOpenBls, targetBLId]);
   const isCloseAllMode = mode === "all";
 
-  const { mutate: closeBLMutate, isPending } = useMutation({
-    mutationFn: async ({
-      idVoyage,
-      idsBL,
-      images,
-      coordinates,
-    }: {
-      idVoyage: number;
-      idsBL: number[];
-      images: UploadPhoto[];
-      coordinates: { x: number; y: number };
-    }) => {
-      await Promise.all(
-        idsBL.map((idBL) =>
-          closeBL({
-            idVoyage,
-            idBL,
-            images,
-            status: "livre",
-            coordinates,
-          }),
-        ),
-      );
-
-      return idsBL.length;
-    },
-    onSuccess: (closedCount) => {
-      Toast.show({
-        type: "success",
-        text1: closedCount > 1 ? "BLs clôturés" : "BL clôturé",
-        text2:
-          closedCount > 1
-            ? `${closedCount} BLs sont marqués comme livrés.`
-            : `Le BL ${selectedBL?.code ?? (targetBLId ? `#${targetBLId}` : "")} est marqué comme livré.`,
-      });
-      closeBLStore.reset();
-      queryClient.invalidateQueries({ queryKey: ["voyages"] });
-      router.back();
-    },
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: "Échec de clôture",
-        text2: error.message || "Impossible de clôturer ce BL.",
-      });
-    },
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const refreshCount = useOfflineSyncStore((s) => s.refreshCount);
+  const syncNow = useOfflineSyncStore((s) => s.syncNow);
 
   const takePhoto = async () => {
     if (photos.length >= 10) {
@@ -164,38 +127,70 @@ export const CloseBLScreen = () => {
 
     setIsCapturingLocation(true);
 
+    let coordinates: { x: number; y: number } | null = null;
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== "granted") {
-        Toast.show({
-          type: "error",
-          text1: "Localisation requise",
-          text2: "Veuillez autoriser la localisation pour clôturer le BL.",
+      if (status === "granted") {
+        const position = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
         });
-        return;
+        coordinates = {
+          x: position.coords.longitude,
+          y: position.coords.latitude,
+        };
       }
-
-      const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      const { latitude, longitude } = position.coords;
-
-      closeBLMutate({
-        idVoyage: voyageId,
-        idsBL: targetBLIds,
-        coordinates: { x: longitude, y: latitude },
-        images: photos,
-      });
     } catch {
-      Toast.show({
-        type: "error",
-        text1: "Position indisponible",
-        text2: "Impossible de récupérer votre position actuelle.",
-      });
+      // GPS unavailable (e.g. offline) — proceed without coordinates.
+      coordinates = null;
     } finally {
       setIsCapturingLocation(false);
+    }
+
+    setIsSubmitting(true);
+    try {
+      for (const idBL of targetBLIds) {
+        const jobUuid = makeClientUuid();
+        const { dirUri, photoPaths } = persistPhotos(jobUuid, photos);
+        const replaced = await clearUnsentJobsForBl(voyageId, idBL);
+        replaced.forEach((job) => deletePhotoDir(job.photoDir));
+        await enqueueCloseBlJob({
+          idVoyage: voyageId,
+          idBl: idBL,
+          status: "livre",
+          coordinates,
+          photoPaths,
+          photoDir: dirUri,
+        });
+      }
+
+      markBlsPendingSync(queryClient, voyageId, targetBLIds);
+      await refreshCount();
+
+      const isOnline = onlineManager.isOnline();
+      Toast.show({
+        type: "success",
+        text1: targetBLIds.length > 1 ? "BLs clôturés" : "BL clôturé",
+        text2: isOnline
+          ? targetBLIds.length > 1
+            ? `${targetBLIds.length} BLs sont marqués comme livrés.`
+            : `Le BL ${selectedBL?.code ?? (targetBLId ? `#${targetBLId}` : "")} est marqué comme livré.`
+          : "Enregistré hors ligne. Synchronisation à la reconnexion.",
+      });
+
+      closeBLStore.reset();
+      if (isOnline) {
+        void syncNow();
+      }
+      router.back();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Échec de clôture",
+        text2:
+          error instanceof Error ? error.message : "Impossible de clôturer ce BL.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -294,7 +289,7 @@ export const CloseBLScreen = () => {
                 : "Marquer comme livré"
             }
             disabled={photos.length === 0 || isPhotoCooldown}
-            isLoading={isPending || isCapturingLocation || isPhotoCooldown}
+            isLoading={isSubmitting || isCapturingLocation || isPhotoCooldown}
             onPress={handleMarkAsDelivered}
           />
         </View>
