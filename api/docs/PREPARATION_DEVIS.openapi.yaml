@@ -1,0 +1,689 @@
+openapi: 3.1.0
+info:
+  title: API SDKWOOD — Préparation devis
+  version: 1.0.0
+  license:
+    name: Propriétaire
+    identifier: LicenseRef-Proprietary
+  description: |
+    Contrat HTTP du module **« Préparation devis »** de l'application SDKWOOD.
+
+    Le module expose la liste des devis à préparer (document, client, ville,
+    mode de livraison, commercial, statut et nombre de lignes) ainsi que le
+    détail des produits d'un devis, produits et lots portant chacun un état de
+    préparation.
+
+    L'intégration ERP est une préoccupation interne du serveur et n'est pas
+    exposée par ce contrat. L'API attend un jeton pré-émis dans l'en-tête
+    `auth_token`. Ce contrat ne définit aucun point d'entrée de connexion ou
+    d'émission de jeton.
+
+    ## Enveloppe des réponses
+    Toutes les réponses réussies utilisent une enveloppe commune :
+      - `status` : booléen, `true` si l'opération a réussi, `false` sinon ;
+      - `data` : contient les données retournées (objet, tableau ou `null`) ;
+      - `pagination` : présent uniquement pour les points d'entrée qui
+        retournent une liste paginée, avec `page`, `perPage`, `total` et
+        `totalPages`.
+
+    Exemple pour une ressource unique ou un détail :
+
+        {
+          "status": true,
+          "data": { ... }
+        }
+
+    Exemple pour une liste paginée :
+
+        {
+          "status": true,
+          "data": [ ... ],
+          "pagination": {
+            "page": 1,
+            "perPage": 50,
+            "total": 128,
+            "totalPages": 3
+          }
+        }
+servers:
+  - url: http://{backendHost}
+    description: Backend PHP SDKBOARD (développement local)
+    variables:
+      backendHost:
+        default: localhost:8075
+        description: Hôte et port du back-office SDKBOARD (ex. localhost:8075)
+  - url: https://{apiHost}/api/v1
+    description: Serveur d'API (production)
+    variables:
+      apiHost:
+        default: api.sdkwood.ma
+        description: Nom d'hôte public de l'API
+  - url: http://{localHost}:3001/api/v1
+    description: Développement local
+    variables:
+      localHost:
+        default: 127.0.0.1
+        description: Nom d'hôte local de l'API
+tags:
+  - name: Préparation devis
+    description: Devis à préparer et détail des produits/lots à préparer
+security:
+  - authToken: []
+paths:
+  /api/homescreen/prepaption_devis.php:
+    get:
+      tags: [Préparation devis]
+      operationId: listPreparationsDevis
+      summary: Récupérer la liste paginée des devis à préparer
+      description: |
+        Point d'entrée PHP unique `/api/homescreen/prepaption_devis.php`
+        (GET uniquement). Retourne la liste paginée des devis préparables, avec
+        pour chaque devis le document, la date, le client, la ville, le mode de
+        livraison, le commercial, le statut (code et libellé), l'utilisateur
+        créateur et le nombre de lignes.
+
+        ## Filtres
+          - `document` : recherche sur le code document ;
+          - `clientId`, `villeId`, `commercialId` : filtres par identifiant ;
+          - `statut` : filtre par code de statut ;
+          - `dateFrom` / `dateTo` : plage sur la date du devis (bornes
+            incluses).
+
+        Les filtres sont combinables et facultatifs. `statut`, `modeLivraison`
+        et `statutLabel` sont exposés en tant que chaînes de caractères.
+
+        ## Tri
+        Le tri par défaut n'est pas contractuel à ce stade.
+      parameters:
+        - name: document
+          in: query
+          description: Rechercher par code document (ex. `DC2504704`)
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          description: Filtrer par identifiant de client
+          schema:
+            type: integer
+        - name: statut
+          in: query
+          description: Filtrer par code de statut du devis (ex. `valider`)
+          schema:
+            type: string
+        - name: villeId
+          in: query
+          description: Filtrer par identifiant de ville
+          schema:
+            type: integer
+        - name: commercialId
+          in: query
+          description: Filtrer par identifiant de commercial
+          schema:
+            type: integer
+        - name: dateFrom
+          in: query
+          description: Inclure les devis dont la date est égale ou postérieure à cette date
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          description: Inclure les devis dont la date est égale ou antérieure à cette date
+          schema:
+            type: string
+            format: date
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: Liste paginée des devis à préparer
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data, pagination]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DevisPreparation"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+
+  /api/homescreen/preparation_devis_produits.php:
+    get:
+      tags: [Préparation devis]
+      operationId: getDevisProduits
+      summary: Récupérer les produits et lots d'un devis
+      description: |
+        Retourne les produits d'un devis identifié par `idDevis`. Chaque
+        produit expose son état de préparation, son identifiant et son nom, le
+        stock, la quantité réservée, la quantité commandée, l'unité et le
+        reste à livrer.
+
+        Chaque produit contient la liste de ses lots, chaque lot exposant son
+        état de préparation, son identifiant et son code, la quantité, le
+        nombre de pièces (entier), la longueur, l'observation, la date
+        d'entrée (ISO 8601), le dépôt et l'utilisateur créateur.
+      parameters:
+        - name: idDevis
+          in: query
+          required: true
+          description: Identifiant du devis
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Produits et lots du devis
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DevisProduit"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+    post:
+      tags: [Préparation devis]
+      operationId: prepareDevisItem
+      summary: Préparer un produit ou un lot d'un devis
+      description: |
+        Marque comme préparé un produit **ou** un lot d'un devis, identifié par
+        son `id`. Le corps de la requête est discriminé par le champ `type` :
+
+          - `preparer_produit` : prépare le produit `idProduit` du devis
+            `idDevis`. La préparation d'un produit **se propage à tous ses
+            lots** ;
+          - `preparer_lot` : prépare le lot `idLot` du produit `idProduit` du
+            devis `idDevis`.
+
+        ## Comportement
+          - définit l'état de préparation à `true` sur la cible ;
+          - **idempotent** : préparer un élément déjà préparé réussit sans effet
+            supplémentaire ;
+          - opération à **sens unique** : ce point d'entrée ne permet pas de
+            dé-préparer (aucun retour à `false`) ;
+          - **effet de bord** : lorsque tous les produits du devis sont
+            préparés, le `statut` du devis est mis à jour automatiquement.
+
+        La réponse retourne le produit mis à jour, afin que le client puisse
+        rafraîchir son état sans nouvel appel.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/PreparerProduitRequest"
+                - $ref: "#/components/schemas/PreparerLotRequest"
+              discriminator:
+                propertyName: type
+                mapping:
+                  preparer_produit: "#/components/schemas/PreparerProduitRequest"
+                  preparer_lot: "#/components/schemas/PreparerLotRequest"
+      responses:
+        "200":
+          description: Produit mis à jour après préparation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/DevisProduit"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "422":
+          $ref: "#/components/responses/ErreurValidation"
+    put:
+      tags: [Préparation devis]
+      operationId: remplacerLotDevis
+      summary: Remplacer un lot d'un produit d'un devis
+      description: |
+        Remplace `idLot` par `idNouveauLot`. Le nouveau lot doit avoir le même
+        produit, la même couleur, la même longueur et la même section que le lot
+        remplacé, avoir du stock, et ne pas déjà figurer sur la ligne. Le lot
+        actuel ne doit être ni préparé ni livré. `PATCH` est accepté aussi.
+        Le produit remplace son lot, le devis repasse en préparation, et la
+        réponse retourne le produit mis à jour.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RemplacerLotRequest"
+      responses:
+        "200":
+          description: Produit mis à jour après remplacement
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: true si l'opération a réussi, false sinon.
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/DevisProduit"
+        "400":
+          $ref: "#/components/responses/RequeteInvalide"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "403":
+          description: Droit de modification manquant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+        "409":
+          $ref: "#/components/responses/Conflit"
+        "422":
+          description: |
+            Validation métier en échec. Code `CRITERES_NON_RESPECTES` avec
+            `details.ecarts` : liste de {critere, attendu, recu, message}.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    authToken:
+      type: apiKey
+      in: header
+      name: auth_token
+      description: Jeton d'application pré-émis. L'émission du jeton est en dehors de cette API.
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Numéro de page à retourner (commence à 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PerPage:
+      name: perPage
+      in: query
+      description: Nombre d'éléments par page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+
+  responses:
+    RequeteInvalide:
+      description: Requête malformée
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NonAutorise:
+      description: Jeton `auth_token` manquant ou invalide
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Introuvable:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflit:
+      description: Conflit d'état ou d'idempotence
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ErreurValidation:
+      description: Validation métier en échec
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [status, code, message]
+      properties:
+        status:
+          type: boolean
+          description: Toujours `false` pour une erreur.
+          example: false
+        code:
+          type: string
+          description: Code machine de l'erreur
+          examples: [VALIDATION_ERROR]
+        message:
+          type: string
+          description: Message lisible de l'erreur
+        details:
+          type: object
+          description: Détails complémentaires de l'erreur
+          additionalProperties: true
+        requestId:
+          type: string
+          description: Identifiant de corrélation de la requête
+
+    Pagination:
+      type: object
+      additionalProperties: false
+      required: [page, perPage, total, totalPages]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Numéro de la page courante
+          example: 1
+        perPage:
+          type: integer
+          minimum: 1
+          description: Nombre d'éléments par page
+          example: 50
+        total:
+          type: integer
+          minimum: 0
+          description: Nombre total d'éléments
+          example: 128
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Nombre total de pages
+          example: 3
+
+    NamedRef:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      description: Référence d'entité réduite à son identifiant et son libellé.
+      properties:
+        id:
+          type: integer
+          description: Identifiant de l'entité
+        name:
+          type: string
+          description: Libellé de l'entité
+
+    DevisPreparation:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          document,
+          date,
+          client,
+          ville,
+          modeLivraison,
+          commercial,
+          statut,
+          statutLabel,
+          createdby,
+          nbLignes,
+        ]
+      description: Ligne de la liste des devis à préparer.
+      properties:
+        id:
+          type: integer
+          description: Identifiant du devis
+          example: 62164
+        document:
+          type: string
+          description: Code document du devis
+          example: "DC2504704"
+        date:
+          type: string
+          format: date
+          description: Date du devis
+          example: "2025-12-31"
+        client:
+          $ref: "#/components/schemas/NamedRef"
+          description: Client du devis
+        ville:
+          $ref: "#/components/schemas/NamedRef"
+          description: Ville de livraison du devis
+        modeLivraison:
+          type: string
+          description: Mode de livraison (chaîne libre, ex. `REMORQUE`)
+          example: "REMORQUE"
+        commercial:
+          $ref: "#/components/schemas/NamedRef"
+          description: Commercial affecté au devis
+        statut:
+          type: string
+          description: Code du statut du devis (chaîne libre, ex. `valider`)
+          example: "valider"
+        statutLabel:
+          type: string
+          description: Libellé lisible du statut du devis
+          example: "Encours de préparation"
+        createdby:
+          $ref: "#/components/schemas/NamedRef"
+          description: Utilisateur créateur du devis
+        nbLignes:
+          type: integer
+          minimum: 0
+          description: Nombre de lignes (produits) du devis
+          example: 5
+
+    DevisProduit:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          preparation,
+          id,
+          name,
+          stock,
+          qteResa,
+          qtecmde,
+          unite,
+          restealivre,
+          lots,
+        ]
+      description: Produit d'un devis avec son état de préparation et ses lots.
+      properties:
+        preparation:
+          type: boolean
+          description: true si le produit est entièrement préparé, false sinon.
+          example: false
+        id:
+          type: integer
+          description: Identifiant du produit
+        name:
+          type: string
+          description: Nom du produit
+        stock:
+          type: number
+          format: float
+          description: Stock disponible du produit
+        qteResa:
+          type: number
+          format: float
+          description: Quantité réservée pour ce devis
+        qtecmde:
+          type: number
+          format: float
+          description: Quantité commandée sur ce devis
+        unite:
+          type: string
+          description: Unité de mesure du produit
+        restealivre:
+          type: number
+          format: float
+          description: Quantité restant à livrer
+        lots:
+          type: array
+          description: Lots du produit
+          items:
+            $ref: "#/components/schemas/DevisProduitLot"
+
+    DevisProduitLot:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          preparation,
+          id,
+          code,
+          qte,
+          nbrePce,
+          long,
+          observ,
+          dateEntree,
+          depot,
+          createdby,
+        ]
+      description: Lot d'un produit d'un devis.
+      properties:
+        preparation:
+          type: boolean
+          description: true si le lot est préparé, false sinon.
+          example: false
+        id:
+          type: string
+          description: Identifiant du lot = code du lot (texte), identique à `code`.
+          example: "561440"
+        code:
+          type: string
+          description: Code du lot
+          example: "1607-19"
+        qte:
+          type: number
+          format: float
+          description: Quantité du lot
+        nbrePce:
+          type: integer
+          description: Nombre de pièces (entier, non décimal)
+        long:
+          type: string
+          description: Longueur du lot
+        observ:
+          type: string
+          description: Observation sur le lot
+        dateEntree:
+          type: string
+          format: date-time
+          description: Date d'entrée du lot (ISO 8601)
+        depot:
+          $ref: "#/components/schemas/NamedRef"
+          description: Dépôt du lot
+        createdby:
+          $ref: "#/components/schemas/NamedRef"
+          description: Utilisateur créateur du lot
+
+    PreparerProduitRequest:
+      type: object
+      additionalProperties: false
+      required: [type, idDevis, idProduit]
+      description: Préparation d'un produit entier d'un devis (propage aux lots).
+      properties:
+        type:
+          type: string
+          description: Discriminant de l'action.
+          const: preparer_produit
+          example: preparer_produit
+        idDevis:
+          type: integer
+          description: Identifiant du devis
+          example: 62164
+        idProduit:
+          type: integer
+          description: Identifiant du produit à préparer
+          example: 1816
+
+    PreparerLotRequest:
+      type: object
+      additionalProperties: false
+      required: [type, idDevis, idProduit, idLot]
+      description: Préparation d'un lot d'un produit d'un devis.
+      properties:
+        type:
+          type: string
+          description: Discriminant de l'action.
+          const: preparer_lot
+          example: preparer_lot
+        idDevis:
+          type: integer
+          description: Identifiant du devis
+          example: 62164
+        idProduit:
+          type: integer
+          description: Identifiant du produit parent du lot
+          example: 1816
+        idLot:
+          type: string
+          description: Code du lot à préparer (texte).
+          example: "561440"
+
+    RemplacerLotRequest:
+      type: object
+      additionalProperties: false
+      required: [type, idDevis, idProduit, idLot, idNouveauLot]
+      description: Remplace un lot par un autre du même produit, de même couleur, longueur et section.
+      properties:
+        type:
+          type: string
+          description: Discriminant de l'action.
+          const: remplacer_lot
+          example: remplacer_lot
+        idDevis:
+          type: integer
+          description: Identifiant du devis
+          example: 62164
+        idProduit:
+          type: integer
+          description: Identifiant du produit parent du lot
+          example: 1816
+        idLot:
+          type: string
+          description: Code du lot actuel (ni préparé ni livré).
+          example: "561440"
+        idNouveauLot:
+          type: string
+          description: Code du lot de remplacement.
+          example: "563872"
