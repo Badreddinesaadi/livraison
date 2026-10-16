@@ -31,6 +31,7 @@ type Permissions = {
     | "projet"
     | "rapport qualite"
     | "demande de transfert"
+    | "preparation devis"
     | "rapport terrain"]: (
     | "CREATE"
     | "UPDATE"

@@ -1,6 +1,7 @@
 import { getCurrentUser, signInWithEmailAndPassword } from "@/api/auth.api";
 import { useStorageState } from "@/hooks/use-storage-state";
 import { User } from "@/types/auth.types";
+import { onUnauthorized } from "@/utils/auth-events";
 import { queryPersister } from "@/utils/offline/persister";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, use, useEffect, type PropsWithChildren } from "react";
@@ -63,6 +64,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
     void queryPersister.removeClient();
   };
 
+  // Fired by the request layer on a definitive 401 (expired/invalid token).
+  // Surgical logout: drop the token + cached currentUser so the route guard
+  // sends the user to sign-in, but keep the offline cache (voyages, depots…).
+  useEffect(() => {
+    return onUnauthorized(() => {
+      queryClient.removeQueries({ queryKey: ["currentUser"] });
+      setSession(null);
+    });
+  }, [queryClient, setSession]);
+
   useEffect(() => {}, [data]);
 
   useEffect(() => {
@@ -94,7 +105,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
           );
         },
         signOut,
-        user: data,
+        // `data` may come from the persisted offline cache; only trust it when a
+        // token is actually present, so a stale cache can never re-open the app.
+        user: session ? data : null,
         isLoading: isFinished || isLoading,
         signInIsPending: signInMutation.isPending,
       }}

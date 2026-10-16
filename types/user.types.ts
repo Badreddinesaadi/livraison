@@ -16,6 +16,11 @@ export type Client = {
   adresse: string;
 };
 
+export type Commercial = {
+  id: number;
+  name: string;
+};
+
 export type Vehicle = {
   id: number;
   immatriculation: string;

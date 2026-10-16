@@ -148,6 +148,25 @@ export const canAccessDemandeTransfertModule = (
   );
 };
 
+const PREPARATION_DEVIS_ACTIONS: PermissionAction[] = ["LIST", "UPDATE"];
+
+export const hasPreparationDevisPermission = (
+  user: User | null | undefined,
+  action: PermissionAction,
+) => {
+  return hasModulePermission(user, "preparation devis", action);
+};
+
+export const canAccessPreparationDevisModule = (
+  user: User | null | undefined,
+) => {
+  return hasAnyModulePermission(
+    user,
+    "preparation devis",
+    PREPARATION_DEVIS_ACTIONS,
+  );
+};
+
 const RAPPORT_VISITE_ACTIONS: PermissionAction[] = [
   "CREATE",
   "UPDATE",

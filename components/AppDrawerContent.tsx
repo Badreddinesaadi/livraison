@@ -1,5 +1,6 @@
 import {
   hasDemandeTransfertPermission,
+  hasPreparationDevisPermission,
   hasProjetPermission,
   hasRapportQualitePermission,
   hasRapportVisitePermission,
@@ -28,6 +29,7 @@ type DrawerRoute =
   | "/rotation-chauffeur"
   | "/projet-locations"
   | "/demande-transferts"
+  | "/preparation-devis"
   | "/rvt"
   | "/settings";
 
@@ -59,6 +61,11 @@ const DRAWER_ITEMS: DrawerMenuItem[] = [
     label: "Demande de transfert",
     route: "/demande-transferts",
     icon: "swap-horizontal",
+  },
+  {
+    label: "Préparation devis",
+    route: "/preparation-devis",
+    icon: "clipboard-check-outline",
   },
   {
     label: "Tournées de visite",
@@ -95,6 +102,10 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     "LIST",
   );
   const canShowRapportVisiteModule = hasRapportVisitePermission(user, "LIST");
+  const canShowPreparationDevisModule = hasPreparationDevisPermission(
+    user,
+    "LIST",
+  );
 
   const handleNavigate = (route: DrawerRoute) => {
     router.navigate(route);
@@ -172,6 +183,10 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
 
             if (item.route === "/rvt") {
               return canShowRapportVisiteModule;
+            }
+
+            if (item.route === "/preparation-devis") {
+              return canShowPreparationDevisModule;
             }
 
             return true;

@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
-import { queryClient } from "./query";
 import { getApiUrl } from "@/stores/api-url.store";
+import { emitUnauthorized } from "@/utils/auth-events";
 import { buildMultipartBody } from "@/utils/multipart";
 
 interface RequestOptions {
@@ -137,7 +137,15 @@ class ApiClient {
     }
 
     const response = await fetch(finalUrl, fetchOptions);
-    const data = await response.json();
+
+    // The payload is not guaranteed to be JSON (e.g. an empty or HTML 401/5xx
+    // body), so a parse failure must not bypass the status handling below.
+    let data: any = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
 
     if (isDebug && __DEV__) {
       console.log("\n====== API RESPONSE DEBUG ======");
@@ -146,15 +154,31 @@ class ApiClient {
       console.log("================================\n");
     }
 
-    if (data.status === false) {
+    // Session is invalid: the API answers 401 with `{status:false, message:...}`
+    // (no `code` field). `code === 76` is kept for backward compatibility.
+    const isUnauthorized =
+      response.status === 401 ||
+      (data?.status === false && data?.code === 76);
+
+    if (isUnauthorized) {
       if (__DEV__) {
-        console.log("API Error (status is false):", data.message);
+        console.log("API Unauthorized (401 / expired token):", pathname);
       }
 
-      if (data.code === 76) {
-        // token is expired
-        await SecureStore.deleteItemAsync("sessionToken");
-        queryClient.setQueryData(["currentUser"], null);
+      // Clears the stored token; the auth store reacts to `emitUnauthorized`
+      // to reset React state and drop the cached/persisted `currentUser`,
+      // while keeping the offline (voyage/depot/...) cache intact.
+      await SecureStore.deleteItemAsync("sessionToken");
+      emitUnauthorized();
+
+      throw new Error(
+        data?.message || "Session expirée, veuillez vous reconnecter",
+      );
+    }
+
+    if (data?.status === false) {
+      if (__DEV__) {
+        console.log("API Error (status is false):", data.message);
       }
 
       throw new Error(data.message || "An error occurred");
@@ -162,12 +186,12 @@ class ApiClient {
 
     if (withPagination) {
       return {
-        data: (data.data as T) ?? null,
-        pagination: (data.pagination as Pagination) ?? null,
+        data: (data?.data as T) ?? null,
+        pagination: (data?.pagination as Pagination) ?? null,
       };
     }
 
-    return data.data as T | null;
+    return (data?.data as T) ?? null;
   }
 }
 
