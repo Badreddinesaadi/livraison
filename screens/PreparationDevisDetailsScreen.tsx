@@ -1,20 +1,21 @@
 import {
+  DevisPreparation,
   DevisProduit,
   DevisProduitLot,
   getDevisProduits,
-  listPreparationsDevis,
   preparerDevisLot,
   preparerDevisProduit,
 } from "@/api/preparation-devis.api";
 import Loader from "@/components/Loader";
 import { hasPreparationDevisPermission } from "@/constants/permissions";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
+import { useListItemFromCache } from "@/hooks/use-list-item-from-cache";
 import { useSession } from "@/stores/auth.store";
 import { usePreparationDevisSheetStore } from "@/stores/preparation-devis.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   LayoutAnimation,
   Pressable,
@@ -132,9 +133,11 @@ const PreparerBadge = ({
 const LotItem = ({
   lot,
   onPreparerLot,
+  onReplaceLot,
 }: {
   lot: DevisProduitLot;
   onPreparerLot?: () => void;
+  onReplaceLot?: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const toggle = () => {
@@ -176,6 +179,27 @@ const LotItem = ({
           {lot.code}
         </Text>
         <PreparerBadge prepared={lot.preparation} onPress={onPreparerLot} />
+        {onReplaceLot && (
+          <Pressable
+            onPress={onReplaceLot}
+            hitSlop={6}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 6,
+              backgroundColor: PRIMARY + "14",
+              marginLeft: 6,
+            }}
+          >
+            <FontAwesome5 name="exchange-alt" size={11} color={PRIMARY} />
+            <Text style={{ fontSize: 11, fontWeight: "600", color: PRIMARY }}>
+              Remplacer
+            </Text>
+          </Pressable>
+        )}
         <FontAwesome5
           name={expanded ? "chevron-up" : "chevron-down"}
           size={10}
@@ -222,13 +246,13 @@ const LotItem = ({
 const ProductCard = ({
   product,
   canUpdate,
-  onReplaceLots,
+  onReplaceLot,
   onPreparerProduct,
   onPreparerLot,
 }: {
   product: DevisProduit;
   canUpdate: boolean;
-  onReplaceLots?: () => void;
+  onReplaceLot?: (lot: DevisProduitLot) => void;
   onPreparerProduct?: () => void;
   onPreparerLot?: (lot: DevisProduitLot) => void;
 }) => {
@@ -326,42 +350,13 @@ const ProductCard = ({
                   ? () => onPreparerLot(lot)
                   : undefined
               }
+              onReplaceLot={
+                canUpdate && onReplaceLot && !lot.preparation
+                  ? () => onReplaceLot(lot)
+                  : undefined
+              }
             />
           ))}
-        </View>
-      )}
-
-      {canUpdate && onReplaceLots && !product.preparation && (
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 10,
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            borderTopWidth: 1,
-            borderTopColor: "#f2f2f2",
-          }}
-        >
-          {product.lots.length > 0 && (
-            <Pressable
-              onPress={onReplaceLots}
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "18",
-                gap: 6,
-              }}
-            >
-              <FontAwesome5 name="exchange-alt" size={14} color={PRIMARY} />
-              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
-                Remplacer les lots
-              </Text>
-            </Pressable>
-          )}
         </View>
       )}
 
@@ -421,25 +416,16 @@ export const PreparationDevisDetailsScreen = () => {
   );
 
   const { devisId } = useLocalSearchParams<{ devisId: string }>();
-
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ["preparation-devis", "produits", devisId],
     queryFn: () => getDevisProduits({ idDevis: String(devisId) }),
     enabled: canView && Boolean(devisId),
   });
 
-  const { data: listData } = useQuery({
-    queryKey: ["preparation-devis", "list", "", {}],
-    queryFn: () => listPreparationsDevis({ page: 1 }),
-    enabled: canView && Boolean(devisId),
-  });
-
-  const devisItem = useMemo(() => {
-    if (!listData?.data) return null;
-    return (
-      listData.data.find((item) => String(item.id) === String(devisId)) ?? null
-    );
-  }, [listData, devisId]);
+  const devisItem = useListItemFromCache<DevisPreparation>(
+    ["preparation-devis", "list"],
+    devisId,
+  );
 
   const products = productsData ?? [];
   const statutStyle = devisItem
@@ -448,7 +434,6 @@ export const PreparationDevisDetailsScreen = () => {
         text: "#9ca3af",
       })
     : { bg: "#9ca3af18", text: "#9ca3af" };
-
   const canPrepare = canUpdate && devisItem?.statut === "valider";
 
   const invalidate = () => {
@@ -521,12 +506,13 @@ export const PreparationDevisDetailsScreen = () => {
     });
   };
 
-  const handleReplaceLots = (product: DevisProduit) => {
+  const handleReplaceLot = (product: DevisProduit, lot: DevisProduitLot) => {
     if (!canPrepare) return;
     openReplaceLotsSheet({
       idDevis: Number(devisId),
       idProduit: product.id,
       productName: product.name,
+      currentLot: lot,
       currentLots: product.lots ?? [],
     });
   };
@@ -702,7 +688,7 @@ export const PreparationDevisDetailsScreen = () => {
               key={product.id}
               product={product}
               canUpdate={canPrepare}
-              onReplaceLots={() => handleReplaceLots(product)}
+              onReplaceLot={(lot) => handleReplaceLot(product, lot)}
               onPreparerProduct={() => handlePreparerProduct(product)}
               onPreparerLot={(lot) => handlePreparerLot(product, lot)}
             />

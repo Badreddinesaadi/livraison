@@ -1,9 +1,9 @@
 import { DevisProduitLot, remplacerDevisLot } from "@/api/preparation-devis.api";
 import { getProductLots, ProduitLot } from "@/api/produit.api";
-import { PRIMARY, SUCCESS } from "@/constants/theme";
+import { PRIMARY } from "@/constants/theme";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -11,16 +11,16 @@ type ReplaceDevisLotsBottomSheetContentProps = {
   idDevis: number;
   idProduit: number;
   productName: string;
+  currentLot: DevisProduitLot;
   currentLots: DevisProduitLot[];
   onClose: () => void;
 };
-
-type LotSwap = { idLot: string; idNouveauLot: string };
 
 export default function ReplaceDevisLotsBottomSheetContent({
   idDevis,
   idProduit,
   productName,
+  currentLot,
   currentLots,
   onClose,
 }: ReplaceDevisLotsBottomSheetContentProps) {
@@ -31,59 +31,31 @@ export default function ReplaceDevisLotsBottomSheetContent({
     queryFn: () => getProductLots({ idProduit }),
   });
 
-  const [selectedLotNumbers, setSelectedLotNumbers] = useState<Set<string>>(
-    new Set(),
-  );
+  const [selected, setSelected] = useState<string | null>(null);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setSelectedLotNumbers(
-        new Set((currentLots ?? []).map((l) => l.id ?? l.code)),
-      );
-    }, 0);
-    return () => clearTimeout(timeout);
-  }, [currentLots]);
+  const currentLotCode = currentLot.id ?? currentLot.code;
 
-  const currentLotSet = useMemo(
-    () => new Set((currentLots ?? []).map((l) => l.id ?? l.code)),
-    [currentLots],
-  );
-
-  const preparedLotSet = useMemo(
+  // Lots already on the devis line (other than the one being replaced) cannot be
+  // chosen again — the server rejects a replacement already present on the line.
+  const lineLotSet = useMemo(
     () =>
       new Set(
         (currentLots ?? [])
-          .filter((l) => l.preparation)
-          .map((l) => l.id ?? l.code),
+          .map((l) => l.id ?? l.code)
+          .filter((code) => code !== currentLotCode),
       ),
-    [currentLots],
+    [currentLots, currentLotCode],
   );
 
-  const toggleLot = (lotNum: string) => {
-    if (preparedLotSet.has(lotNum)) return;
-    setSelectedLotNumbers((prev) => {
-      const next = new Set(prev);
-      if (next.has(lotNum)) {
-        next.delete(lotNum);
-      } else {
-        next.add(lotNum);
-      }
-      return next;
-    });
-  };
-
   const { mutate, isPending } = useMutation({
-    mutationFn: async (swaps: LotSwap[]) => {
-      for (const swap of swaps) {
-        await remplacerDevisLot({
-          type: "remplacer_lot",
-          idDevis,
-          idProduit,
-          idLot: swap.idLot,
-          idNouveauLot: swap.idNouveauLot,
-        });
-      }
-    },
+    mutationFn: (idNouveauLot: string) =>
+      remplacerDevisLot({
+        type: "remplacer_lot",
+        idDevis,
+        idProduit,
+        idLot: currentLotCode,
+        idNouveauLot,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["preparation-devis", "produits"],
@@ -93,8 +65,8 @@ export default function ReplaceDevisLotsBottomSheetContent({
       });
       Toast.show({
         type: "success",
-        text1: "Lots remplacés",
-        text2: "Les lots ont été remplacés avec succès.",
+        text1: "Lot remplacé",
+        text2: "Le lot a été remplacé avec succès.",
       });
       onClose();
     },
@@ -102,55 +74,21 @@ export default function ReplaceDevisLotsBottomSheetContent({
       Toast.show({
         type: "error",
         text1: "Échec",
-        text2: error.message || "Impossible de remplacer les lots.",
+        text2: error.message || "Impossible de remplacer le lot.",
       });
     },
   });
 
   const handleSave = () => {
-    const toDelete: string[] = [];
-    const toInsert: string[] = [];
-
-    (currentLots ?? []).forEach((lot) => {
-      const lotNum = lot.id ?? lot.code;
-      const isSelected = selectedLotNumbers.has(lotNum);
-      if (lot.preparation) return;
-      if (!isSelected) {
-        toDelete.push(lotNum);
-      }
-    });
-
-    selectedLotNumbers.forEach((lotNum) => {
-      if (!currentLotSet.has(lotNum)) {
-        toInsert.push(lotNum);
-      }
-    });
-
-    if (toDelete.length === 0 && toInsert.length === 0) {
+    if (!selected) {
       Toast.show({
         type: "info",
-        text1: "Aucun changement",
-        text2: "Aucune modification détectée.",
-      });
-      onClose();
-      return;
-    }
-
-    if (toDelete.length !== toInsert.length) {
-      Toast.show({
-        type: "info",
-        text1: "Nombre de lots différent",
-        text2: "Sélectionnez autant de nouveaux lots que de lots à remplacer.",
+        text1: "Aucun lot sélectionné",
+        text2: "Sélectionnez le lot de remplacement.",
       });
       return;
     }
-
-    const swaps: LotSwap[] = toDelete.map((idLot, index) => ({
-      idLot,
-      idNouveauLot: toInsert[index],
-    }));
-
-    mutate(swaps);
+    mutate(selected);
   };
 
   const formatLotDate = (value?: string | null) => {
@@ -165,9 +103,10 @@ export default function ReplaceDevisLotsBottomSheetContent({
   };
 
   const renderItem = ({ item }: { item: ProduitLot }) => {
-    const isSelected = selectedLotNumbers.has(item.num_lot);
-    const isCurrent = currentLotSet.has(item.num_lot);
-    const isPrepared = preparedLotSet.has(item.num_lot);
+    const isCurrentLot = item.num_lot === currentLotCode;
+    const isOnLine = lineLotSet.has(item.num_lot);
+    const isUnavailable = isCurrentLot || isOnLine;
+    const isSelected = selected === item.num_lot;
 
     const content = (
       <View
@@ -178,43 +117,39 @@ export default function ReplaceDevisLotsBottomSheetContent({
           paddingHorizontal: 12,
           borderRadius: 10,
           borderWidth: 1,
-          borderColor: isPrepared
-            ? "#d1d5db"
+          borderColor: isUnavailable
+            ? "#e5e7eb"
             : isSelected
               ? PRIMARY
               : "#eee",
-          backgroundColor: isPrepared
-            ? "#f3f4f6"
+          backgroundColor: isUnavailable
+            ? "#f9fafb"
             : isSelected
               ? PRIMARY + "08"
               : "#fff",
           marginBottom: 8,
-          opacity: isPrepared ? 0.55 : 1,
+          opacity: isUnavailable ? 0.55 : 1,
         }}
       >
         <View
           style={{
             width: 22,
             height: 22,
-            borderRadius: 4,
+            borderRadius: 11,
             borderWidth: 2,
-            borderColor: isPrepared
+            borderColor: isUnavailable
               ? "#d1d5db"
               : isSelected
                 ? PRIMARY
                 : "#ccc",
-            backgroundColor: isPrepared
-              ? "#d1d5db"
-              : isSelected
-                ? PRIMARY
-                : "transparent",
+            backgroundColor: isSelected ? PRIMARY : "transparent",
             alignItems: "center",
             justifyContent: "center",
             marginRight: 10,
             marginTop: 2,
           }}
         >
-          {(isSelected || isPrepared) && (
+          {isSelected && (
             <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
               ✓
             </Text>
@@ -229,23 +164,23 @@ export default function ReplaceDevisLotsBottomSheetContent({
             >
               {item.num_lot}
             </Text>
-            {isPrepared && (
+            {isCurrentLot && (
               <View
                 style={{
                   paddingHorizontal: 5,
                   paddingVertical: 1,
                   borderRadius: 4,
-                  backgroundColor: SUCCESS + "18",
+                  backgroundColor: "#f59e0b18",
                 }}
               >
                 <Text
-                  style={{ fontSize: 10, fontWeight: "600", color: SUCCESS }}
+                  style={{ fontSize: 10, fontWeight: "600", color: "#b45309" }}
                 >
-                  Préparé
+                  À remplacer
                 </Text>
               </View>
             )}
-            {isCurrent && !isPrepared && (
+            {isOnLine && (
               <View
                 style={{
                   paddingHorizontal: 5,
@@ -257,7 +192,7 @@ export default function ReplaceDevisLotsBottomSheetContent({
                 <Text
                   style={{ fontSize: 10, fontWeight: "600", color: PRIMARY }}
                 >
-                  Actuel
+                  Sur la ligne
                 </Text>
               </View>
             )}
@@ -299,27 +234,14 @@ export default function ReplaceDevisLotsBottomSheetContent({
       </View>
     );
 
-    if (isPrepared) {
+    if (isUnavailable) {
       return content;
     }
 
     return (
-      <Pressable onPress={() => toggleLot(item.num_lot)}>{content}</Pressable>
+      <Pressable onPress={() => setSelected(item.num_lot)}>{content}</Pressable>
     );
   };
-
-  const changedCount = useMemo(() => {
-    let removed = 0;
-    (currentLots ?? []).forEach((lot) => {
-      if (lot.preparation) return;
-      if (!selectedLotNumbers.has(lot.id ?? lot.code)) removed += 1;
-    });
-    let added = 0;
-    selectedLotNumbers.forEach((lotNum) => {
-      if (!currentLotSet.has(lotNum)) added += 1;
-    });
-    return Math.max(removed, added);
-  }, [currentLots, selectedLotNumbers, currentLotSet]);
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 16 }}>
@@ -331,13 +253,10 @@ export default function ReplaceDevisLotsBottomSheetContent({
           marginBottom: 4,
         }}
       >
-        Remplacer les lots
+        Remplacer le lot
       </Text>
-      <Text
-        style={{ fontSize: 12, color: "#888", marginBottom: 10 }}
-        numberOfLines={2}
-      >
-        {productName}
+      <Text style={{ fontSize: 12, color: "#888", marginBottom: 10 }}>
+        {currentLotCode} · {productName}
       </Text>
 
       <BottomSheetFlatList<ProduitLot>
@@ -370,22 +289,22 @@ export default function ReplaceDevisLotsBottomSheetContent({
         }}
       >
         <Text style={{ fontSize: 12, color: "#888", marginBottom: 8 }}>
-          {changedCount} remplacement{changedCount !== 1 ? "s" : ""}
+          {selected ? `Remplacer par : ${selected}` : "Sélectionnez un lot"}
         </Text>
         <Pressable
           onPress={handleSave}
-          disabled={isPending}
+          disabled={isPending || !selected}
           style={{
             paddingVertical: 12,
             borderRadius: 10,
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: PRIMARY,
-            opacity: isPending ? 0.7 : 1,
+            opacity: isPending || !selected ? 0.5 : 1,
           }}
         >
           <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>
-            {isPending ? "Enregistrement..." : "Enregistrer"}
+            {isPending ? "Enregistrement..." : "Remplacer"}
           </Text>
         </Pressable>
       </View>

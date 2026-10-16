@@ -237,6 +237,7 @@ export default function StackLayout() {
             idDevis={replaceLotsConfig.idDevis}
             idProduit={replaceLotsConfig.idProduit}
             productName={replaceLotsConfig.productName}
+            currentLot={replaceLotsConfig.currentLot}
             currentLots={replaceLotsConfig.currentLots}
             onClose={closeSheet}
           />

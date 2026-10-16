@@ -1,15 +1,13 @@
-import {
-  updateDemandeTransfert,
-  listDemandeTransfert,
-} from "@/api/demande-transfert.api";
+import { DemandeTransfert, updateDemandeTransfert } from "@/api/demande-transfert.api";
 import { Button } from "@/components/ui/button";
 import { hasDemandeTransfertPermission } from "@/constants/permissions";
 import { PRIMARY } from "@/constants/theme";
+import { useListItemFromCache } from "@/hooks/use-list-item-from-cache";
 import { useSession } from "@/stores/auth.store";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -55,28 +53,25 @@ export const EditDemandeTransfertScreen = () => {
     demandeTransfertId: string;
   }>();
 
-  const { data: listData } = useQuery({
-    queryKey: ["demande-transferts", "list"],
-    queryFn: () => listDemandeTransfert({ page: 1 }),
-    enabled: Boolean(demandeTransfertId),
-  });
-
-  const transfertItem = useMemo(() => {
-    if (!listData?.data) return null;
-    return (
-      listData.data.find(
-        (item) => String(item.id) === String(demandeTransfertId),
-      ) ?? null
-    );
-  }, [listData, demandeTransfertId]);
-
-  const [transporteur, setTransporteur] = useState(
-    transfertItem?.transporteur ?? "",
+  const transfertItem = useListItemFromCache<DemandeTransfert>(
+    ["demande-transferts", "list"],
+    demandeTransfertId,
   );
-  const [matricule, setMatricule] = useState(transfertItem?.matricule ?? "");
-  const [observation, setObservation] = useState(
-    transfertItem?.observation ?? "",
-  );
+
+  const [transporteur, setTransporteur] = useState("");
+  const [matricule, setMatricule] = useState("");
+  const [observation, setObservation] = useState("");
+
+  // Seed the form once the item resolves from the (possibly cold) list cache,
+  // without overwriting edits the user may already have made.
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (seededRef.current || !transfertItem) return;
+    seededRef.current = true;
+    setTransporteur(transfertItem.transporteur);
+    setMatricule(transfertItem.matricule);
+    setObservation(transfertItem.observation);
+  }, [transfertItem]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: updateDemandeTransfert,
@@ -127,7 +122,7 @@ export const EditDemandeTransfertScreen = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.infoText}>
-          Vous n'avez pas la permission de modifier une demande de transfert.
+          Vous n&apos;avez pas la permission de modifier une demande de transfert.
         </Text>
       </View>
     );

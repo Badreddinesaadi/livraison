@@ -1,22 +1,23 @@
 import {
+  DemandeTransfert,
   DemandeTransfertLot,
   DemandeTransfertProduct,
   changeDTStatut,
   deleteDemandeTransfert,
   deleteProductFromDT,
   getDemandeTransfertDetails,
-  listDemandeTransfert,
   preparerDemandeTransfert,
 } from "@/api/demande-transfert.api";
 import Loader from "@/components/Loader";
 import { hasDemandeTransfertPermission } from "@/constants/permissions";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
+import { useListItemFromCache } from "@/hooks/use-list-item-from-cache";
 import { useSession } from "@/stores/auth.store";
 import { useDemandeTransfertSheetStore } from "@/stores/demande-transfert.store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   LayoutAnimation,
   Pressable,
@@ -492,20 +493,10 @@ export const DemandeTransfertDetailsScreen = () => {
     enabled: canView && Boolean(demandeTransfertId),
   });
 
-  const { data: listData } = useQuery({
-    queryKey: ["demande-transferts", "list"],
-    queryFn: () => listDemandeTransfert({ page: 1 }),
-    enabled: canView && Boolean(demandeTransfertId),
-  });
-
-  const transfertItem = useMemo(() => {
-    if (!listData?.data) return null;
-    return (
-      listData.data.find(
-        (item) => String(item.id) === String(demandeTransfertId),
-      ) ?? null
-    );
-  }, [listData, demandeTransfertId]);
+  const transfertItem = useListItemFromCache<DemandeTransfert>(
+    ["demande-transferts", "list"],
+    demandeTransfertId,
+  );
 
   const products = detailsData?.details ?? [];
   const statutStyle = transfertItem
@@ -677,7 +668,7 @@ export const DemandeTransfertDetailsScreen = () => {
             textAlign: "center",
           }}
         >
-          Vous n'avez pas la permission de consulter cette demande.
+          Vous n&apos;avez pas la permission de consulter cette demande.
         </Text>
       </SafeAreaView>
     );
