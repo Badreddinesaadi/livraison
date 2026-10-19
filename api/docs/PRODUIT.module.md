@@ -88,7 +88,7 @@ Un lot est retourné s'il respecte **les mêmes règles que le remplacement**
 (`PUT /api/homescreen/preparation_devis_produits.php`,
 `type=remplacer_lot`) :
 
-- même produit (`product_id`, donc même section) ;
+- même produit (`product_id` ; la section est celle du produit) ;
 - même couleur (`color_id`) ;
 - même longueur (`longueur`) ;
 - stock disponible (`solde > 0`) ;

@@ -30,6 +30,9 @@ export type DevisProduitLot = {
   dateEntree: string;
   depot: NamedRef;
   createdby: NamedRef;
+  livre?: boolean;
+  documentLivraison?: string | null;
+  modifiable?: boolean;
 };
 
 export type DevisProduit = {
@@ -81,7 +84,7 @@ export const getDevisProduits = async ({
   const result = await client.request<DevisProduit[]>({
     pathname: "/api/homescreen/preparation_devis_produits.php",
     method: "GET",
-    searchParams: { idDevis },
+    searchParams: { idDevis, etatLots: 1 },
     isDebug: true,
   });
 

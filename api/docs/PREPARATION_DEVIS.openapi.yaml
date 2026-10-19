@@ -174,6 +174,9 @@ paths:
         état de préparation, son identifiant et son code, la quantité, le
         nombre de pièces (entier), la longueur, l'observation, la date
         d'entrée (ISO 8601), le dépôt et l'utilisateur créateur.
+
+        Avec `etatLots=1`, chaque lot expose en plus `livre`,
+        `documentLivraison` et `modifiable` (voir `DevisProduitLot`).
       parameters:
         - name: idDevis
           in: query
@@ -181,6 +184,7 @@ paths:
           description: Identifiant du devis
           schema:
             type: integer
+        - $ref: "#/components/parameters/EtatLots"
       responses:
         "200":
           description: Produits et lots du devis
@@ -231,7 +235,10 @@ paths:
             préparés, le `statut` du devis est mis à jour automatiquement.
 
         La réponse retourne le produit mis à jour, afin que le client puisse
-        rafraîchir son état sans nouvel appel.
+        rafraîchir son état sans nouvel appel. Avec `etatLots=1`, les lots de la
+        réponse incluent `livre`, `documentLivraison` et `modifiable`.
+      parameters:
+        - $ref: "#/components/parameters/EtatLots"
       requestBody:
         required: true
         content:
@@ -275,15 +282,21 @@ paths:
       summary: Remplacer un lot d'un produit d'un devis
       description: |
         Remplace `idLot` par `idNouveauLot`. Le nouveau lot doit avoir le même
-        produit, la même couleur, la même longueur et la même section que le lot
-        remplacé, avoir du stock, et ne pas déjà figurer sur la ligne. Le lot
-        actuel ne doit être ni préparé ni livré. `PATCH` est accepté aussi.
-        Le produit remplace son lot, le devis repasse en préparation, et la
-        réponse retourne le produit mis à jour.
+        produit, la même couleur et la même longueur que le lot remplacé, avoir
+        du stock, et ne pas déjà figurer sur la ligne. La section est celle du
+        produit. Le lot actuel ne doit être ni préparé ni livré. `PATCH` est
+        accepté aussi. Le produit remplace son lot, le devis repasse en
+        préparation, ses quantités et montants sont recalculés, et la réponse
+        retourne le produit mis à jour.
 
         Les lots éligibles peuvent être listés à l'avance via
         `GET /api/produit/lots_produits.php?idProduit=&idLot=&idDevis=&remplacable=1`
         (voir le contrat du module Produits).
+
+        Avec `etatLots=1`, les lots de la réponse incluent `livre`,
+        `documentLivraison` et `modifiable`.
+      parameters:
+        - $ref: "#/components/parameters/EtatLots"
       requestBody:
         required: true
         content:
@@ -323,7 +336,9 @@ paths:
         "422":
           description: |
             Validation métier en échec. Code `CRITERES_NON_RESPECTES` avec
-            `details.ecarts` : liste de {critere, attendu, recu, message}.
+            `details.ecarts` : liste de {critere, attendu, recu, message}
+            (`critere` : `couleur` ou `longueur`). Autres codes :
+            `LOT_AUTRE_PRODUIT`, `LOT_SANS_STOCK`, `DEVIS_NON_PREPARABLE`.
           content:
             application/json:
               schema:
@@ -355,6 +370,19 @@ components:
         minimum: 1
         maximum: 100
         default: 50
+    EtatLots:
+      name: etatLots
+      in: query
+      required: false
+      description: |
+        `1` ajoute `livre`, `documentLivraison` et `modifiable` à chaque lot
+        (voir `DevisProduitLot`). Sans ce paramètre, la réponse reste celle du
+        contrat initial.
+      schema:
+        type: integer
+        enum: [0, 1]
+        default: 0
+      example: 1
 
   responses:
     RequeteInvalide:
@@ -582,7 +610,9 @@ components:
           depot,
           createdby,
         ]
-      description: Lot d'un produit d'un devis.
+      description: |
+        Lot d'un produit d'un devis. Les champs `livre`, `documentLivraison` et
+        `modifiable` ne sont présents qu'avec `etatLots=1`.
       properties:
         preparation:
           type: boolean
@@ -619,6 +649,24 @@ components:
         createdby:
           $ref: "#/components/schemas/NamedRef"
           description: Utilisateur créateur du lot
+        livre:
+          type: boolean
+          description: |
+            Présent seulement avec `etatLots=1`. `true` si le lot figure sur un
+            document de livraison de la commande liée au devis.
+          example: false
+        documentLivraison:
+          type: [string, "null"]
+          description: |
+            Présent seulement avec `etatLots=1`. Code du document de livraison,
+            sinon `null`.
+          example: "BDC2504215"
+        modifiable:
+          type: boolean
+          description: |
+            Présent seulement avec `etatLots=1`. `true` si le lot peut être
+            remplacé : ni préparé (`preparation`), ni livré (`livre`).
+          example: true
 
     PreparerProduitRequest:
       type: object
@@ -668,7 +716,7 @@ components:
       type: object
       additionalProperties: false
       required: [type, idDevis, idProduit, idLot, idNouveauLot]
-      description: Remplace un lot par un autre du même produit, de même couleur, longueur et section.
+      description: Remplace un lot par un autre du même produit, de même couleur et de même longueur.
       properties:
         type:
           type: string

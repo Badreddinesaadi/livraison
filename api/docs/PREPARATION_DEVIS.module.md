@@ -113,10 +113,22 @@ chaque produit, ses lots.
 | `depot`       | `{id, name}` | Dépôt du lot                                                     |
 | `createdby`   | `{id, name}` | Utilisateur créateur du lot                                      |
 
+Avec `etatLots=1`, chaque lot expose en plus :
+
+| Champ               | Type             | Description                                                              |
+| ------------------- | ---------------- | ------------------------------------------------------------------------ |
+| `livre`             | booléen          | `true` si le lot figure sur un document de livraison de la commande liée au devis |
+| `documentLivraison` | chaîne ou `null` | Code du document de livraison, sinon `null`                              |
+| `modifiable`        | booléen          | `true` si le lot peut être remplacé : ni préparé, ni livré               |
+
+Sans `etatLots=1`, la réponse reste celle du contrat initial (ces champs sont
+absents). Le drapeau fonctionne aussi sur les réponses de `POST` et `PUT`.
+
 **Point d'entrée associé :**
 | Fonction | Endpoint |
 | --- | --- |
 | Consulter les produits et lots d'un devis | `GET /api/homescreen/preparation_devis_produits.php?idDevis={idDevis}` |
+| Consulter les produits et lots avec l'état de livraison | `GET /api/homescreen/preparation_devis_produits.php?idDevis={idDevis}&etatLots=1` |
 
 ---
 
@@ -177,11 +189,17 @@ prévu n'est pas le bon sur le terrain. Le remplacement se fait via un `PUT`
 }
 ```
 
-Contraintes : le nouveau lot doit avoir le **même produit, la même couleur, la
-même longueur et la même section** que le lot remplacé, disposer de **stock**,
-et ne pas déjà figurer sur la ligne. Le lot actuel ne doit être **ni préparé ni
-livré**. Le produit remplace son lot, le devis repasse en préparation, et la
-réponse retourne le produit mis à jour.
+Contraintes : le nouveau lot doit avoir le **même produit, la même couleur et
+la même longueur** que le lot remplacé (la section est celle du produit),
+disposer de **stock**, et ne pas déjà figurer sur la ligne. Le lot actuel ne
+doit être **ni préparé ni livré**. Le produit remplace son lot, le devis repasse
+en préparation, ses quantités et montants sont recalculés, et la réponse
+retourne le produit mis à jour.
+
+En cas d'échec de validation, la réponse `422` utilise le code
+`CRITERES_NON_RESPECTES` avec `details.ecarts` (liste de `{critere, attendu,
+recu, message}`, `critere` valant `couleur` ou `longueur`), ou l'un des codes
+`LOT_AUTRE_PRODUIT`, `LOT_SANS_STOCK`, `DEVIS_NON_PREPARABLE`.
 
 Les lots éligibles peuvent être listés à l'avance via
 `GET /api/produit/lots_produits.php?idProduit=<id>&idLot=<code>&idDevis=<id>&remplacable=1`
@@ -214,7 +232,7 @@ Les lots éligibles peuvent être listés à l'avance via
 2. Il ouvre un devis pour voir ses **produits** et leurs **lots** et l'état de
    préparation de chacun.
 3. Si un lot ne convient pas, il le **remplace** par un lot équivalent (même
-   produit, couleur, longueur et section, avec stock).
+   produit, couleur et longueur, avec stock).
 4. Il prépare physiquement les lots et les produits.
 5. Il marque chaque produit ou lot comme préparé ; préparer un produit prépare
    automatiquement tous ses lots.

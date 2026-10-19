@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/api/homescreen/preparation_devis_produits.php?idDevis=62164&etatLots=1"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  idDevis: "62164"
+  etatLots: "1"
+settings: {}
+order: 1000

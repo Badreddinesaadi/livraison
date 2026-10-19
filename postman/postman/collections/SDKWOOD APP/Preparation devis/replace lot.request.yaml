@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/api/homescreen/preparation_devis_produits.php?etatLots=1"
+method: PUT
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  etatLots: "1"
+body:
+  type: json
+  content: |
+    {
+      "type": "remplacer_lot",
+      "idDevis": 62164,
+      "idProduit": 1816,
+      "idLot": "561440",
+      "idNouveauLot": "563872"
+    }
+settings: {}
+order: 2000

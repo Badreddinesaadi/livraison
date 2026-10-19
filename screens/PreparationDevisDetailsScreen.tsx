@@ -229,6 +229,13 @@ const LotItem = ({
             label="Dépôt"
             value={lot.depot?.name || "-"}
           />
+          {lot.documentLivraison ? (
+            <DetailRow
+              icon="truck"
+              label="Document livraison"
+              value={lot.documentLivraison}
+            />
+          ) : null}
           <DetailRow
             icon="user-check"
             label="Créé par"
@@ -351,7 +358,7 @@ const ProductCard = ({
                   : undefined
               }
               onReplaceLot={
-                canUpdate && onReplaceLot && !lot.preparation
+                canUpdate && onReplaceLot && (lot.modifiable ?? !lot.preparation)
                   ? () => onReplaceLot(lot)
                   : undefined
               }
