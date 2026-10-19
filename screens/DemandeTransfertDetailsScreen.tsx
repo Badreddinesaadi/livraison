@@ -498,6 +498,15 @@ export const DemandeTransfertDetailsScreen = () => {
     demandeTransfertId,
   );
 
+  const normalizedStatut = (transfertItem?.statut ?? "").trim().toLowerCase();
+  const isBrouillon = normalizedStatut === "brouillon";
+  const isEncours = normalizedStatut === "encours";
+  const isEnvoye = normalizedStatut === "envoye";
+  const isPreparationStatut = isEncours || isEnvoye;
+  const canPrepare = canUpdate && isPreparationStatut;
+  const canAddProducts = canCreate && isBrouillon;
+  const canManageLots = canUpdate && (isBrouillon || isPreparationStatut);
+
   const products = detailsData?.details ?? [];
   const statutStyle = transfertItem
     ? (STATUT_STYLE[transfertItem.statut] ?? {
@@ -507,6 +516,7 @@ export const DemandeTransfertDetailsScreen = () => {
     : { bg: "#9ca3af22", text: "#9ca3af" };
 
   const handleAddProduct = () => {
+    if (!canAddProducts) return;
     openAddProductSheet({
       idDT: Number(demandeTransfertId),
     });
@@ -532,16 +542,19 @@ export const DemandeTransfertDetailsScreen = () => {
   };
 
   const handleManageLots = (product: DemandeTransfertProduct) => {
+    if (!canManageLots) return;
     openManageLotsSheet({
       idDT: Number(demandeTransfertId),
       idProduit: product.idProduit,
       productDetailId: product.id,
       productName: product.produit,
       currentLots: product.lots ?? [],
+      mode: isBrouillon ? "manage" : "replace",
     });
   };
 
   const handlePreparerProduct = (product: DemandeTransfertProduct) => {
+    if (!canPrepare) return;
     openPreparerConfirmSheet({
       type: "preparer_produit",
       label: product.produit,
@@ -562,6 +575,7 @@ export const DemandeTransfertDetailsScreen = () => {
   };
 
   const handlePreparerLot = (lot: DemandeTransfertLot) => {
+    if (!canPrepare) return;
     openPreparerConfirmSheet({
       type: "preparer_lot",
       label: lot.Lot,
@@ -876,7 +890,7 @@ export const DemandeTransfertDetailsScreen = () => {
           >
             Produits ({products.length})
           </Text>
-          {canCreate && (
+          {canAddProducts && (
             <Pressable
               onPress={handleAddProduct}
               style={{
@@ -897,6 +911,28 @@ export const DemandeTransfertDetailsScreen = () => {
           )}
         </View>
 
+        {transfertItem && !isPreparationStatut && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              gap: 8,
+              padding: 12,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: "#f59e0b55",
+              backgroundColor: "#f59e0b14",
+              marginBottom: 14,
+            }}
+          >
+            <FontAwesome5 name="info-circle" size={14} color="#92400e" />
+            <Text style={{ flex: 1, fontSize: 12, color: "#92400e" }}>
+              La préparation est disponible uniquement lorsque la demande est
+              « Encours » ou « Envoyé ».
+            </Text>
+          </View>
+        )}
+
         {products.length > 0 ? (
           products.map((product) => (
             <ProductCard
@@ -905,9 +941,15 @@ export const DemandeTransfertDetailsScreen = () => {
               canDelete={canDelete}
               canUpdate={canUpdate}
               onDeleteProduct={() => handleDeleteProduct(product)}
-              onManageLots={() => handleManageLots(product)}
-              onPreparerProduct={() => handlePreparerProduct(product)}
-              onPreparerLot={(lot) => handlePreparerLot(lot)}
+              onManageLots={
+                canManageLots ? () => handleManageLots(product) : undefined
+              }
+              onPreparerProduct={
+                canPrepare ? () => handlePreparerProduct(product) : undefined
+              }
+              onPreparerLot={
+                canPrepare ? (lot) => handlePreparerLot(lot) : undefined
+              }
             />
           ))
         ) : (

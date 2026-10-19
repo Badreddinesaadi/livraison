@@ -253,6 +253,7 @@ export default function StackLayout() {
             productDetailId={manageLotsConfig.productDetailId}
             productName={manageLotsConfig.productName}
             currentLots={manageLotsConfig.currentLots}
+            mode={manageLotsConfig.mode}
             onClose={closeSheet}
           />
         ) : sheetType === "preparer-confirm" && preparerConfig ? (

@@ -16,6 +16,7 @@ type ManageLotsBottomSheetContentProps = {
   productDetailId: string;
   productName: string;
   currentLots: DemandeTransfertLot[];
+  mode: "manage" | "replace";
   onClose: () => void;
 };
 
@@ -25,9 +26,11 @@ export default function ManageLotsBottomSheetContent({
   productDetailId,
   productName,
   currentLots,
+  mode,
   onClose,
 }: ManageLotsBottomSheetContentProps) {
   const queryClient = useQueryClient();
+  const isReplaceOnly = mode === "replace";
 
   const { data: availableLots, isLoading } = useQuery({
     queryKey: ["produits", "lots", idProduit],
@@ -100,6 +103,16 @@ export default function ManageLotsBottomSheetContent({
   });
 
   const handleSave = () => {
+    if (isReplaceOnly && selectedLotNumbers.size !== currentLots.length) {
+      Toast.show({
+        type: "info",
+        text1: "Remplacement uniquement",
+        text2:
+          "Retirez un lot puis sélectionnez son remplacement : le nombre de lots doit rester identique.",
+      });
+      return;
+    }
+
     const idItem = currentLots[0]?.idItem || productDetailId;
 
     const lotsUpdate: {
@@ -365,7 +378,7 @@ export default function ManageLotsBottomSheetContent({
           marginBottom: 4,
         }}
       >
-        Gérer les lots
+        {isReplaceOnly ? "Remplacer les lots" : "Gérer les lots"}
       </Text>
       <Text
         style={{ fontSize: 12, color: "#888", marginBottom: 10 }}
@@ -373,6 +386,12 @@ export default function ManageLotsBottomSheetContent({
       >
         {productName}
       </Text>
+      {isReplaceOnly && (
+        <Text style={{ fontSize: 12, color: "#92400e", marginBottom: 10 }}>
+          Remplacez chaque lot retiré par un autre lot. Le nombre total de lots
+          doit rester identique.
+        </Text>
+      )}
 
       <BottomSheetFlatList<ProduitLot>
         data={availableLots ?? []}
@@ -421,7 +440,11 @@ export default function ManageLotsBottomSheetContent({
           }}
         >
           <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>
-            {isPending ? "Enregistrement..." : "Enregistrer"}
+            {isPending
+              ? "Enregistrement..."
+              : isReplaceOnly
+                ? "Remplacer"
+                : "Enregistrer"}
           </Text>
         </Pressable>
       </View>

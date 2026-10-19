@@ -230,6 +230,9 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 | **Auth**         | Required           |
 
 > **Important:** Use `type: "detail_lots"` (not `"detail"` as in the frontend).
+>
+> **Règle métier :** l'ajout d'un produit n'est autorisé que lorsque la demande
+> est au statut `Brouillon`.
 
 #### Request Body
 
@@ -256,6 +259,10 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 ---
 
 ### 2.3 Update Lots
+
+> **Règle métier :** l'ajout ou la suppression de lots n'est autorisé qu'au
+> statut `Brouillon`. Aux statuts `Encours` et `Envoye`, seul le remplacement
+> d'un lot par un autre est autorisé, à nombre de lots identique.
 
 | Field            | Value              |
 | ---------------- | ------------------ |
@@ -294,6 +301,10 @@ Also supports `type: "transfert"` to delete an entire DT (same as the main endpo
 ---
 
 ## 3. Preparation Endpoint — `preparation_transfert.php`
+
+> **Règle métier :** la préparation d'un produit ou d'un lot n'est autorisée que
+> lorsque le statut de la demande de transfert est `Encours` ou `Envoye`. Pour
+> tout autre statut (`Brouillon`, `Reçue`), l'action est refusée.
 
 ### 3.1 Get Detail + Lots by idItem
 

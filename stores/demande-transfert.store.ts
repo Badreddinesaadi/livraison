@@ -48,6 +48,7 @@ type ManageLotsConfig = {
   productDetailId: string;
   productName: string;
   currentLots: DemandeTransfertLot[];
+  mode: "manage" | "replace";
 };
 
 type PreparerConfig = {
