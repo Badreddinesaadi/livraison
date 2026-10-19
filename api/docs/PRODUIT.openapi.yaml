@@ -1,0 +1,302 @@
+openapi: 3.1.0
+info:
+  title: API SDKWOOD — Produits
+  version: 1.0.0
+  license:
+    name: Propriétaire
+    identifier: LicenseRef-Proprietary
+  description: |
+    Contrat HTTP du module **« Produits »** de l'application SDKWOOD.
+
+    Le module expose les lots de stock d'un produit via la vue
+    `vue_lots_solde`. Un lot porte son produit, sa couleur, sa longueur, sa
+    quantité en unité de vente, son dépôt et sa date d'entrée.
+
+    Le même point d'entrée sert à lister tous les lots d'un produit ou,
+    lorsqu'il est appelé avec le drapeau `remplacable=1`, uniquement les lots
+    éligibles au remplacement d'un lot donné dans un devis.
+
+    L'intégration ERP est une préoccupation interne du serveur et n'est pas
+    exposée par ce contrat. L'API attend un jeton pré-émis dans l'en-tête
+    `auth_token`. Ce contrat ne définit aucun point d'entrée de connexion ou
+    d'émission de jeton.
+
+    ## Enveloppe des réponses
+    Toutes les réponses réussies utilisent une enveloppe commune :
+      - `status` : booléen, `true` si l'opération a réussi, `false` sinon ;
+      - `data` : contient les données retournées (tableau de lots).
+
+    Exemple :
+
+        {
+          "status": true,
+          "data": [ ... ]
+        }
+servers:
+  - url: http://{backendHost}
+    description: Backend PHP SDKBOARD (développement local)
+    variables:
+      backendHost:
+        default: localhost:8075
+        description: Hôte et port du back-office SDKBOARD (ex. localhost:8075)
+  - url: https://{apiHost}/api/v1
+    description: Serveur d'API (production)
+    variables:
+      apiHost:
+        default: api.sdkwood.ma
+        description: Nom d'hôte public de l'API
+  - url: http://{localHost}:3001/api/v1
+    description: Développement local
+    variables:
+      localHost:
+        default: 127.0.0.1
+        description: Nom d'hôte local de l'API
+tags:
+  - name: Produits
+    description: Produits, lots et soldes de stock
+security:
+  - authToken: []
+paths:
+  /api/produit/lots_produits.php:
+    get:
+      tags: [Produits]
+      operationId: listProduitLots
+      summary: Lister les lots d'un produit ou les lots remplaçables
+      description: |
+        Retourne les lots de stock lus dans la vue `vue_lots_solde`.
+
+        ## Mode standard
+        Sans drapeau, retourne tous les lots du produit `idProduit`, triés par
+        date d'entrée décroissante. `idProduit` est facultatif : sans lui, tous
+        les lots sont retournés.
+
+        ## Mode remplacement (`remplacable=1`)
+        Retourne uniquement les lots éligibles au remplacement du lot `idLot`
+        du produit `idProduit` dans le devis `idDevis`. Un lot est éligible
+        lorsqu'il respecte **les mêmes règles que le remplacement de lot**
+        (`PUT /api/homescreen/preparation_devis_produits.php`,
+        `type=remplacer_lot`) :
+
+          - même produit (`product_id`, donc même section) ;
+          - même couleur (`color_id`) ;
+          - même longueur (`longueur`) ;
+          - stock disponible (`solde > 0`) ;
+          - différent du lot courant (`num_lot <> idLot`) ;
+          - ne figure pas déjà sur la ligne du devis (`idDevis` + `idProduit`).
+
+        Dans ce mode, `idProduit`, `idLot` et `idDevis` sont **obligatoires**.
+        L'absence de l'un de ces paramètres retourne `400`.
+
+        Le lot courant doit par ailleurs être ni préparé ni livré ; cette
+        règle reste vérifiée par le point d'entrée de remplacement.
+      parameters:
+        - name: idProduit
+          in: query
+          required: false
+          description: |
+            Identifiant du produit. Facultatif en mode standard ; obligatoire
+            lorsque `remplacable=1`.
+          schema:
+            type: integer
+            minimum: 1
+          example: 1816
+        - name: remplacable
+          in: query
+          required: false
+          description: |
+            Drapeau de filtrage. `1` active le mode « lots remplaçables » ;
+            `0` (ou absence) conserve le comportement standard.
+          schema:
+            type: integer
+            enum: [0, 1]
+            default: 0
+          example: 1
+        - name: idLot
+          in: query
+          required: false
+          description: |
+            Code du lot courant à remplacer. Obligatoire lorsque
+            `remplacable=1`.
+          schema:
+            type: string
+          example: "561440"
+        - name: idDevis
+          in: query
+          required: false
+          description: |
+            Identifiant du devis contenant le lot courant. Obligatoire lorsque
+            `remplacable=1` ; sert à exclure les lots déjà présents sur la
+            ligne.
+          schema:
+            type: integer
+            minimum: 1
+          example: 62164
+      responses:
+        "200":
+          description: Liste des lots (filtrés ou non)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    description: "`true` si la requête a réussi."
+                    example: true
+                  data:
+                    type: array
+                    description: Lots du produit, triés par date décroissante.
+                    items:
+                      $ref: "#/components/schemas/ProduitLot"
+        "400":
+          description: |
+            Paramètres manquants ou invalides, notamment lorsque
+            `remplacable=1` sans `idProduit`, `idLot` ou `idDevis`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "404":
+          description: Lot courant introuvable (mode `remplacable=1`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          description: Méthode HTTP non autorisée (seul `GET` est accepté)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Erreur serveur (SQL ou interne)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    authToken:
+      type: apiKey
+      in: header
+      name: auth_token
+      description: Jeton d'application pré-émis. L'émission du jeton est en dehors de cette API.
+
+  responses:
+    NonAutorise:
+      description: Jeton `auth_token` manquant ou invalide
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [status, message]
+      properties:
+        status:
+          type: boolean
+          description: Toujours `false` pour une erreur.
+          example: false
+        message:
+          type: string
+          description: Message lisible décrivant l'erreur.
+          example: idProduit, idLot et idDevis sont requis lorsque remplacable=1
+
+    ProduitLot:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id_depot,
+          product_id,
+          color_id,
+          couleur,
+          colorCode,
+          num_lot,
+          longueur,
+          nbrePiece,
+          observation,
+          date,
+          nbreJrs,
+          solde,
+          qte_uv,
+          depot,
+          unite_v,
+          tarif,
+        ]
+      description: Lot de stock d'un produit (ligne de `vue_lots_solde`).
+      properties:
+        id_depot:
+          type: integer
+          description: Identifiant du dépôt.
+          example: 12
+        product_id:
+          type: integer
+          description: Identifiant du produit.
+          example: 1816
+        color_id:
+          type: integer
+          description: Identifiant de la couleur.
+          example: 45
+        couleur:
+          type: string
+          description: Libellé de la couleur.
+          example: Blanc
+        colorCode:
+          type: string
+          description: Code couleur.
+          example: "#FFFFFF"
+        num_lot:
+          type: string
+          description: Code du lot.
+          example: "561440"
+        longueur:
+          type: string
+          description: Longueur du lot.
+          example: "2400"
+        nbrePiece:
+          type: string
+          description: Nombre de pièces.
+          example: "12"
+        observation:
+          type: string
+          description: Observation libre.
+          example: ""
+        date:
+          type: string
+          format: date-time
+          description: Date d'entrée du lot (ISO 8601).
+          example: "2026-05-02T00:00:00"
+        nbreJrs:
+          type: integer
+          description: Nombre de jours depuis l'entrée.
+          example: 18
+        solde:
+          type: string
+          description: Solde de stock (chaîne, à caster avant comparaison).
+          example: "42.500"
+        qte_uv:
+          type: number
+          format: float
+          description: Quantité en unité de vente.
+          example: 42.5
+        depot:
+          type: string
+          description: Libellé du dépôt.
+          example: Dépôt central
+        unite_v:
+          type: string
+          description: Unité de vente.
+          example: M2
+        tarif:
+          type: string
+          description: Tarif du lot.
+          example: "125.00"

@@ -78,3 +78,21 @@ export const getProductLots = async ({
   });
   return data ?? [];
 };
+
+export const getReplaceableProductLots = async ({
+  idProduit,
+  idLot,
+  idDevis,
+}: {
+  idProduit: number | string;
+  idLot: string;
+  idDevis: number | string;
+}) => {
+  const data = await client.request<ProduitLot[]>({
+    pathname: "/api/produit/lots_produits.php",
+    method: "GET",
+    searchParams: { idProduit, idLot, idDevis, remplacable: 1 },
+    isDebug: true,
+  });
+  return data ?? [];
+};

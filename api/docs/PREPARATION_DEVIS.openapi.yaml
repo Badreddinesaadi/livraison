@@ -280,6 +280,10 @@ paths:
         actuel ne doit être ni préparé ni livré. `PATCH` est accepté aussi.
         Le produit remplace son lot, le devis repasse en préparation, et la
         réponse retourne le produit mis à jour.
+
+        Les lots éligibles peuvent être listés à l'avance via
+        `GET /api/produit/lots_produits.php?idProduit=&idLot=&idDevis=&remplacable=1`
+        (voir le contrat du module Produits).
       requestBody:
         required: true
         content:

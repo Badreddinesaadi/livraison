@@ -513,7 +513,6 @@ export const PreparationDevisDetailsScreen = () => {
       idProduit: product.id,
       productName: product.name,
       currentLot: lot,
-      currentLots: product.lots ?? [],
     });
   };
 

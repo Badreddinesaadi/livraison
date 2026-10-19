@@ -70,7 +70,6 @@ type ReplaceLotsConfig = {
   idProduit: number;
   productName: string;
   currentLot: DevisProduitLot;
-  currentLots: DevisProduitLot[];
 };
 
 type PreparerConfig = {

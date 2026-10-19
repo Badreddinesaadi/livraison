@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/api/produit/lots_produits.php?idProduit=1816&idLot=561440&idDevis=62164&remplacable=1"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  idProduit: "1816"
+  idLot: "561440"
+  idDevis: "62164"
+  remplacable: "1"
+settings: {}
+order: 1000

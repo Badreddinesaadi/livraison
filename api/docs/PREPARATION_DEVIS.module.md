@@ -183,10 +183,15 @@ et ne pas déjà figurer sur la ligne. Le lot actuel ne doit être **ni prépar�
 livré**. Le produit remplace son lot, le devis repasse en préparation, et la
 réponse retourne le produit mis à jour.
 
+Les lots éligibles peuvent être listés à l'avance via
+`GET /api/produit/lots_produits.php?idProduit=<id>&idLot=<code>&idDevis=<id>&remplacable=1`
+(voir la documentation du module **Produits**).
+
 **Point d'entrée associé :**
 | Fonction | Endpoint |
 | --- | --- |
 | Remplacer un lot d'un produit | `PUT /api/homescreen/preparation_devis_produits.php` |
+| Lister les lots remplaçables | `GET /api/produit/lots_produits.php?remplacable=1` |
 
 ---
 
@@ -198,6 +203,7 @@ réponse retourne le produit mis à jour.
 | Produits et lots d'un devis            | Préparation devis | `/api/homescreen/preparation_devis_produits.php?idDevis=` | GET     |
 | Préparer un produit ou un lot          | Préparation devis | `/api/homescreen/preparation_devis_produits.php`          | POST    |
 | Remplacer un lot d'un produit          | Préparation devis | `/api/homescreen/preparation_devis_produits.php`          | PUT     |
+| Lister les lots remplaçables           | Préparation devis | `/api/produit/lots_produits.php?remplacable=1`            | GET     |
 
 ---
 
