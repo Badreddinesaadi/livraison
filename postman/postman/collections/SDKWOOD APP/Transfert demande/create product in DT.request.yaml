@@ -9,13 +9,12 @@ body:
   type: json
   content: |
     {
-      "type": "detail_lots",
+      "type": "detail",
       "idDT": 101,
       "idProduit": 55,
       "qte": 10,
       "nbrFDX": 2,
-      "unite": "pcs",
-      "lots": []
+      "unite": "pcs"
     }
 settings: {}
 order: 4000

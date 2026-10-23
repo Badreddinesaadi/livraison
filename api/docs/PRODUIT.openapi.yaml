@@ -81,8 +81,8 @@ paths:
         remplacement de lot** :
 
           - même produit (`product_id`) ;
-          - même couleur (`color_id`) ;
-          - même longueur (`longueur`) ;
+          - même couleur (`color_id`) et même longueur (`longueur`), sauf en
+            demande de transfert au statut `Brouillon` ;
           - stock disponible (`solde > 0`) ;
           - différent du lot courant (`num_lot <> idLot`) ;
           - ne figure pas déjà dans le document fourni (`idDevis` ou `idDT`).
@@ -94,7 +94,8 @@ paths:
         Dans le contexte `idDT`, les règles correspondent à
         `PUT /api/homescreen/details_demande_transfert.php`,
         `type=modifier_lot` : la demande ne doit pas être `Reçue` et le lot
-        courant ne doit pas être préparé.
+        courant ne doit pas être préparé. Au statut `Brouillon`, aucun critère
+        de couleur ni de longueur n'est appliqué.
 
         Dans ce mode, `idProduit`, `idLot` et un contexte (`idDevis` ou `idDT`)
         sont **obligatoires**. L'absence de l'un de ces paramètres retourne

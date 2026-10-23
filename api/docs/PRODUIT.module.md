@@ -91,8 +91,8 @@ L'absence de `idProduit`, `idLot` ou de contexte (`idDevis`/`idDT`) lorsque
 Un lot est retourné s'il respecte **les mêmes règles que le remplacement** :
 
 - même produit (`product_id`) ;
-- même couleur (`color_id`) ;
-- même longueur (`longueur`) ;
+- même couleur (`color_id`) et même longueur (`longueur`), sauf en demande de
+  transfert au statut `Brouillon` ;
 - stock disponible (`solde > 0`) ;
 - différent du lot courant (`num_lot <> idLot`) ;
 - ne figure pas déjà dans le document fourni (`idDevis` ou `idDT`).
@@ -104,7 +104,8 @@ le lot courant doit être ni préparé ni livré.
 Dans une demande de transfert, les règles correspondent à
 `PUT /api/homescreen/details_demande_transfert.php`
 (`type=modifier_lot`) ; la demande ne doit pas être `Reçue` et le lot courant
-ne doit pas être préparé.
+ne doit pas être préparé. Au statut `Brouillon`, aucun critère de couleur ni de
+longueur n'est appliqué.
 
 ### Exemple
 

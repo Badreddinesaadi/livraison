@@ -1,0 +1,620 @@
+openapi: 3.1.0
+info:
+  title: API SDKWOOD — Détails demande de transfert
+  version: 1.0.0
+  license:
+    name: Propriétaire
+    identifier: LicenseRef-Proprietary
+  description: |
+    Contrat HTTP de `details_demande_transfert.php` : lecture des produits et
+    lots d'une demande de transfert, ajout/suppression de produits, gestion des
+    lots et préparation.
+
+    ## État d'implémentation
+    Les actions `detail`, `detail_lots`, `preparer_produit`, `preparer_lot`,
+    `recevoir_produit`, `update_lot` et `detail` (DELETE) existent dans le
+    backend actuel.
+
+    Les actions `ajouter_lot` et `modifier_lot` sont le **contrat cible** : elles
+    sont marquées `x-implementation-status: target` et doivent être ajoutées au
+    backend. Les actions de lecture `lots_produits.php?ajoutable=1` et
+    `?remplacable=1&idDT=` sont déjà implémentées.
+
+    ## Enveloppe des réponses
+    Toutes les réponses utilisent :
+
+        {
+          "status": true,
+          "message": "…",
+          "idItem": 25
+        }
+
+    Les erreurs métier sont retournées en **HTTP 200** avec `status: false`,
+    `code` et `message`. Seul le jeton invalide retourne HTTP 401.
+
+    L'API attend un jeton pré-émis dans l'en-tête `auth_token`. Ce contrat ne
+    définit aucun point d'entrée de connexion ou d'émission de jeton.
+servers:
+  - url: http://{backendHost}
+    description: Backend PHP SDKBOARD (développement local)
+    variables:
+      backendHost:
+        default: localhost:8075
+        description: Hôte et port du back-office SDKBOARD (ex. localhost:8075)
+  - url: https://{apiHost}/api/v1
+    description: Serveur d'API (production)
+    variables:
+      apiHost:
+        default: api.sdkwood.ma
+        description: Nom d'hôte public de l'API
+  - url: http://{localHost}:3001/api/v1
+    description: Développement local
+    variables:
+      localHost:
+        default: 127.0.0.1
+        description: Nom d'hôte local de l'API
+tags:
+  - name: Demande de transfert — détails
+    description: Produits, lots et préparation d'une demande de transfert
+security:
+  - authToken: []
+paths:
+  /api/homescreen/details_demande_transfert.php:
+    get:
+      tags: [Demande de transfert — détails]
+      operationId: getDemandeTransfertDetails
+      summary: Lire les produits et lots d'une demande de transfert
+      description: |
+        Retourne les lignes `demandetransfert_details` de la demande `idDT`,
+        chacune avec ses lots `transfer_lots` enrichis du dépôt lorsqu'il est
+        disponible.
+      parameters:
+        - name: idDT
+          in: query
+          required: true
+          description: Identifiant de la demande de transfert.
+          schema:
+            type: integer
+            minimum: 1
+          example: 15
+        - name: details
+          in: query
+          required: true
+          description: Doit valoir `1`.
+          schema:
+            type: string
+            enum: ["1"]
+          example: "1"
+      responses:
+        "200":
+          description: Produits et lots de la demande.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailsEnvelope"
+              examples:
+                success:
+                  value:
+                    status: true
+                    idDT: 15
+                    data:
+                      details:
+                        - id: 1
+                          idDT: 15
+                          idProduit: 42
+                          nbrFDX: 5
+                          Qte: 100
+                          unite: pcs
+                          preparer: Non
+                          produit: Produit exemple
+                          unite_v: pcs
+                          lots:
+                            - idItem: 1
+                              idProduit: 42
+                              Lot: LOT-001
+                              preparer: Non
+                              qte: 50
+                              old_lot: LOT-001
+                              depotId: 2
+                              depotName: Dépôt Casablanca
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "500":
+          $ref: "#/components/responses/ErreurServeur"
+    post:
+      tags: [Demande de transfert — détails]
+      operationId: postDemandeTransfertDetails
+      summary: Ajouter un produit, des lots ou préparer un élément
+      description: |
+        Le corps est discriminé par `type` :
+
+          - `detail` : crée une ligne produit (`demandetransfert_details`) ;
+          - `detail_lots` : ajoute des lots à une ligne existante (`idItem`) ;
+          - `preparer_produit` : marque la ligne produit préparée (refusé en
+            `Brouillon` et `Reçue`) ;
+          - `preparer_lot` : marque un lot préparé et synchronise l'état produit ;
+          - `recevoir_produit` : marque la ligne reçue, uniquement en `Reçue`.
+
+        `detail_lots` ne crée pas le produit et ne valide ni stock, ni couleur,
+        ni longueur, ni statut. Utiliser `detail` d'abord.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/AddProductRequest"
+                - $ref: "#/components/schemas/AddInitialLotsRequest"
+                - $ref: "#/components/schemas/PrepareProductRequest"
+                - $ref: "#/components/schemas/PrepareLotRequest"
+                - $ref: "#/components/schemas/ReceiveProductRequest"
+              discriminator:
+                propertyName: type
+                mapping:
+                  detail: "#/components/schemas/AddProductRequest"
+                  detail_lots: "#/components/schemas/AddInitialLotsRequest"
+                  preparer_produit: "#/components/schemas/PrepareProductRequest"
+                  preparer_lot: "#/components/schemas/PrepareLotRequest"
+                  recevoir_produit: "#/components/schemas/ReceiveProductRequest"
+      responses:
+        "200":
+          description: |
+            Résultat de l'action. Une erreur métier retourne aussi HTTP 200 avec
+            `status: false` et un `code`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "500":
+          $ref: "#/components/responses/ErreurServeur"
+    put:
+      tags: [Demande de transfert — détails]
+      operationId: putDemandeTransfertLots
+      summary: Modifier les lots d'une demande de transfert
+      description: |
+        Le corps est discriminé par `type` :
+
+          - `update_lot` : action héritée par lots (implémentée) ;
+          - `ajouter_lot` : ajout d'un lot (contrat cible, non implémenté) ;
+          - `modifier_lot` : remplacement d'un lot avec conservation de la
+            quantité (contrat cible, non implémenté).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/BulkUpdateLotsRequest"
+                - $ref: "#/components/schemas/AddLotRequest"
+                - $ref: "#/components/schemas/ReplaceLotRequest"
+              discriminator:
+                propertyName: type
+                mapping:
+                  update_lot: "#/components/schemas/BulkUpdateLotsRequest"
+                  ajouter_lot: "#/components/schemas/AddLotRequest"
+                  modifier_lot: "#/components/schemas/ReplaceLotRequest"
+      responses:
+        "200":
+          description: |
+            Résultat de l'action. Les erreurs de validation sont retournées avec
+            `status: false` et un `code`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "500":
+          $ref: "#/components/responses/ErreurServeur"
+    delete:
+      tags: [Demande de transfert — détails]
+      operationId: deleteDemandeTransfertProduct
+      summary: Supprimer une ligne produit et ses lots
+      description: |
+        Supprime tous les `transfer_lots` de la ligne `idItem`, puis la ligne
+        `demandetransfert_details`. La suppression d'une demande complète se fait
+        via `demande_transfert.php`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteProductDetailRequest"
+      responses:
+        "200":
+          description: Ligne supprimée.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+        "500":
+          $ref: "#/components/responses/ErreurServeur"
+
+components:
+  securitySchemes:
+    authToken:
+      type: apiKey
+      in: header
+      name: auth_token
+      description: Jeton d'application pré-émis. L'émission du jeton est en dehors de cette API.
+
+  responses:
+    NonAutorise:
+      description: Jeton `auth_token` manquant ou invalide.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ErreurServeur:
+      description: Erreur SQL ou interne.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: boolean
+          const: false
+        message:
+          type: string
+
+    OperationResponse:
+      type: object
+      required: [status]
+      additionalProperties: true
+      description: |
+        Enveloppe commune. En cas d'échec métier : HTTP 200, `status: false`,
+        `code` et `message`.
+      properties:
+        status:
+          type: boolean
+        message:
+          type: string
+        code:
+          type: string
+          description: Code métier optionnel (`NOT_FOUND`, `CRITERES_NON_RESPECTES`, etc.).
+        idItem:
+          type: integer
+          description: Identifiant créé, retourné par `type=detail`.
+        ecarts:
+          type: array
+          description: Détail des critères non respectés (`CRITERES_NON_RESPECTES`).
+          items:
+            $ref: "#/components/schemas/Ecart"
+        data:
+          type: object
+          additionalProperties: true
+
+    Ecart:
+      type: object
+      properties:
+        critere:
+          type: string
+          enum: [produit, couleur, longueur]
+        attendu: {}
+        recu: {}
+        message:
+          type: string
+
+    DetailsEnvelope:
+      type: object
+      required: [status, idDT, data]
+      properties:
+        status:
+          type: boolean
+        idDT:
+          type: integer
+        data:
+          type: object
+          required: [details]
+          properties:
+            details:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProductDetail"
+
+    ProductDetail:
+      type: object
+      additionalProperties: true
+      description: Ligne `demandetransfert_details` enrichie du produit.
+      properties:
+        id:
+          type: integer
+        idDT:
+          type: integer
+        idProduit:
+          type: integer
+        nbrFDX:
+          type: number
+        Qte:
+          type: number
+        unite:
+          type: string
+        preparer:
+          type: string
+          enum: ["Non", "Oui"]
+        recu:
+          type: string
+          enum: ["Non", "Oui"]
+        produit:
+          type: string
+        unite_v:
+          type: string
+        lots:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransferLot"
+
+    TransferLot:
+      type: object
+      additionalProperties: true
+      description: Ligne `transfer_lots` enrichie du dépôt.
+      properties:
+        idItem:
+          type: integer
+        idProduit:
+          type: integer
+        Lot:
+          type: string
+        preparer:
+          type: string
+          enum: ["Non", "Oui"]
+        qte:
+          type: number
+        qte_uv:
+          type: number
+        old_lot:
+          type: string
+        idModif:
+          type: integer
+        depotId:
+          type: integer
+        depotName:
+          type: string
+
+    AddProductRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: implemented
+      required: [type, idDT, idProduit, qte, nbrFDX, unite]
+      properties:
+        type:
+          type: string
+          enum: [detail]
+        idDT:
+          type: integer
+          minimum: 1
+        idProduit:
+          type: integer
+          minimum: 1
+        qte:
+          type: number
+        nbrFDX:
+          type: number
+        unite:
+          type: string
+          example: pcs
+
+    AddInitialLotsRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: implemented
+      required: [type, idItem, idProduit]
+      properties:
+        type:
+          type: string
+          enum: [detail_lots]
+        idItem:
+          type: integer
+          minimum: 1
+        idProduit:
+          type: integer
+          minimum: 1
+        lots:
+          type: array
+          default: []
+          items:
+            $ref: "#/components/schemas/LotInput"
+
+    LotInput:
+      type: object
+      additionalProperties: false
+      required: [Lot, qte]
+      properties:
+        Lot:
+          type: string
+        qte:
+          type: number
+
+    PrepareProductRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: implemented
+      required: [type, id]
+      properties:
+        type:
+          type: string
+          enum: [preparer_produit]
+        id:
+          type: integer
+          minimum: 1
+          description: Identifiant de la ligne produit (`demandetransfert_details.id`).
+
+    PrepareLotRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: implemented
+      required: [type, idItem, idProduit, Lot]
+      properties:
+        type:
+          type: string
+          enum: [preparer_lot]
+        idItem:
+          type: integer
+          minimum: 1
+        idProduit:
+          type: integer
+          minimum: 1
+        Lot:
+          type: string
+
+    ReceiveProductRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: implemented
+      required: [type, id]
+      properties:
+        type:
+          type: string
+          enum: [recevoir_produit]
+        id:
+          type: integer
+          minimum: 1
+
+    BulkUpdateLotsRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: implemented
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [update_lot]
+        userId:
+          type: integer
+          default: 0
+          description: Valeur écrite dans `idModif` ; l'action actuelle n'utilise pas l'utilisateur du jeton.
+        lots_update:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkLotUpdate"
+        lots_insert:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkLotInsert"
+        lots_delete:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkLotDelete"
+
+    BulkLotUpdate:
+      type: object
+      additionalProperties: false
+      required: [idItem, idProduit, old_lot, new_lot, qte]
+      properties:
+        idItem:
+          type: integer
+        idProduit:
+          type: integer
+        old_lot:
+          type: string
+        new_lot:
+          type: string
+        qte:
+          type: number
+
+    BulkLotInsert:
+      type: object
+      additionalProperties: false
+      required: [idItem, idProduit, Lot, qte]
+      properties:
+        idItem:
+          type: integer
+        idProduit:
+          type: integer
+        Lot:
+          type: string
+        qte:
+          type: number
+
+    BulkLotDelete:
+      type: object
+      additionalProperties: false
+      required: [idItem, idProduit, Lot]
+      properties:
+        idItem:
+          type: integer
+        idProduit:
+          type: integer
+        Lot:
+          type: string
+
+    AddLotRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: target
+      description: |
+        **Contrat cible — non implémenté.** Ajoute un lot à une demande au statut
+        `Brouillon`, sur un produit non préparé. Le serveur fixe
+        `qte = lot.solde`, `qte_uv = lot.qte_uv`, `old_lot = ""` et
+        `idModif = utilisateur du jeton`, puis recalcule la ligne.
+      required: [type, idDT, idItem, idProduit, lot]
+      properties:
+        type:
+          type: string
+          enum: [ajouter_lot]
+        idDT:
+          type: integer
+          minimum: 1
+        idItem:
+          type: integer
+          minimum: 1
+        idProduit:
+          type: integer
+          minimum: 1
+        lot:
+          type: string
+          description: Code du lot à ajouter.
+
+    ReplaceLotRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: target
+      description: |
+        **Contrat cible — non implémenté.** Remplace un lot aux statuts
+        `Brouillon`, `Encours` ou `Envoye`. Refusé en `Reçue`, sur un lot préparé,
+        si le stock est insuffisant, ou si le nouveau lot est déjà présent dans la
+        demande. La quantité courante est conservée.
+      required: [type, idDT, idItem, idProduit, oldLot, newLot]
+      properties:
+        type:
+          type: string
+          enum: [modifier_lot]
+        idDT:
+          type: integer
+          minimum: 1
+        idItem:
+          type: integer
+          minimum: 1
+        idProduit:
+          type: integer
+          minimum: 1
+        oldLot:
+          type: string
+          description: Code du lot courant.
+        newLot:
+          type: string
+          description: Code du lot de remplacement.
+
+    DeleteProductDetailRequest:
+      type: object
+      additionalProperties: false
+      x-implementation-status: implemented
+      required: [type, id]
+      properties:
+        type:
+          type: string
+          enum: [detail]
+        id:
+          type: integer
+          minimum: 1
+          description: Identifiant de la ligne produit.
