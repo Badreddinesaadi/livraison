@@ -7,20 +7,15 @@ headers:
   content_type: application/json
 body:
   type: json
-  content: "{\r
-
-    \  \"type\": \"detail\",\r
-
-    \  \"idDT\": 101,\r
-
-    \  \"idProduit\": 55,\r
-
-    \  \"qte\": 10,\r
-
-    \  \"nbrFDX\": 2,\r
-
-    \  \"unite\": \"pcs\"\r
-
-    }\r\n"
+  content: |
+    {
+      "type": "detail_lots",
+      "idDT": 101,
+      "idProduit": 55,
+      "qte": 10,
+      "nbrFDX": 2,
+      "unite": "pcs",
+      "lots": []
+    }
 settings: {}
 order: 4000

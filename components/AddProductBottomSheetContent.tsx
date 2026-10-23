@@ -112,12 +112,13 @@ export default function AddProductBottomSheetContent({
     }
 
     const payload: AddProductToDTRequest = {
-      type: "detail",
+      type: "detail_lots",
       idDT,
       idProduit: selectedProduct.produit_id,
       nbrFDX: Number(nbrFDX),
       qte: Number(qte),
       unite,
+      lots: [],
     };
     mutate(payload);
   };

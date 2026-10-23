@@ -1,8 +1,9 @@
 import AddProductBottomSheetContent from "@/components/AddProductBottomSheetContent";
+import AddTransfertLotBottomSheetContent from "@/components/AddTransfertLotBottomSheetContent";
 import DeleteDTConfirmBottomSheetContent from "@/components/DeleteDTConfirmBottomSheetContent";
 import DeleteProductConfirmBottomSheetContent from "@/components/DeleteProductConfirmBottomSheetContent";
-import ManageLotsBottomSheetContent from "@/components/ManageLotsBottomSheetContent";
 import PreparerConfirmBottomSheetContent from "@/components/PreparerConfirmBottomSheetContent";
+import ReplaceTransfertLotBottomSheetContent from "@/components/ReplaceTransfertLotBottomSheetContent";
 import SelectOptionBottomSheetContent from "@/components/SelectOptionBottomSheetContent";
 import StatutSelectorBottomSheetContent from "@/components/StatutSelectorBottomSheetContent";
 import { Button } from "@/components/ui/button";
@@ -36,8 +37,11 @@ export default function StackLayout() {
   const deleteProductConfig = useDemandeTransfertSheetStore(
     (s) => s.deleteProductConfig,
   );
-  const manageLotsConfig = useDemandeTransfertSheetStore(
-    (s) => s.manageLotsConfig,
+  const addLotConfig = useDemandeTransfertSheetStore(
+    (s) => s.addLotConfig,
+  );
+  const replaceLotConfig = useDemandeTransfertSheetStore(
+    (s) => s.replaceLotConfig,
   );
   const preparerConfig = useDemandeTransfertSheetStore(
     (s) => s.preparerConfig,
@@ -74,7 +78,8 @@ export default function StackLayout() {
 
   const snapPoints = useMemo(() => {
     if (sheetType === "add-product") return ["90%"];
-    if (sheetType === "manage-lots") return ["80%"];
+    if (sheetType === "add-lot") return ["80%"];
+    if (sheetType === "replace-lot") return ["80%"];
     if (sheetType === "delete-product-confirm") return ["30%"];
     if (sheetType === "preparer-confirm") return ["35%"];
     if (sheetType === "statut-selector") return ["55%"];
@@ -246,14 +251,21 @@ export default function StackLayout() {
             onCancel={closeSheet}
             onConfirm={confirmDeleteProduct}
           />
-        ) : sheetType === "manage-lots" && manageLotsConfig ? (
-          <ManageLotsBottomSheetContent
-            idDT={manageLotsConfig.idDT}
-            idProduit={manageLotsConfig.idProduit}
-            productDetailId={manageLotsConfig.productDetailId}
-            productName={manageLotsConfig.productName}
-            currentLots={manageLotsConfig.currentLots}
-            mode={manageLotsConfig.mode}
+        ) : sheetType === "add-lot" && addLotConfig ? (
+          <AddTransfertLotBottomSheetContent
+            idDT={addLotConfig.idDT}
+            idProduit={addLotConfig.idProduit}
+            productDetailId={addLotConfig.productDetailId}
+            productName={addLotConfig.productName}
+            onClose={closeSheet}
+          />
+        ) : sheetType === "replace-lot" && replaceLotConfig ? (
+          <ReplaceTransfertLotBottomSheetContent
+            idDT={replaceLotConfig.idDT}
+            idProduit={replaceLotConfig.idProduit}
+            productDetailId={replaceLotConfig.productDetailId}
+            productName={replaceLotConfig.productName}
+            currentLot={replaceLotConfig.currentLot}
             onClose={closeSheet}
           />
         ) : sheetType === "preparer-confirm" && preparerConfig ? (

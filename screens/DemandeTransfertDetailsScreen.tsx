@@ -135,9 +135,11 @@ const PreparerBadge = ({
 const LotItem = ({
   lot,
   onPreparerLot,
+  onReplaceLot,
 }: {
   lot: DemandeTransfertLot;
   onPreparerLot?: () => void;
+  onReplaceLot?: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const toggle = () => {
@@ -179,6 +181,27 @@ const LotItem = ({
           {lot.Lot}
         </Text>
         <PreparerBadge preparer={lot.preparer} onPress={onPreparerLot} />
+        {onReplaceLot && (
+          <Pressable
+            onPress={onReplaceLot}
+            hitSlop={6}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 6,
+              backgroundColor: PRIMARY + "14",
+              marginLeft: 6,
+            }}
+          >
+            <FontAwesome5 name="exchange-alt" size={11} color={PRIMARY} />
+            <Text style={{ fontSize: 11, fontWeight: "600", color: PRIMARY }}>
+              Remplacer
+            </Text>
+          </Pressable>
+        )}
         <FontAwesome5
           name={expanded ? "chevron-up" : "chevron-down"}
           size={10}
@@ -255,17 +278,19 @@ const ProductCard = ({
   canDelete,
   canUpdate,
   onDeleteProduct,
-  onManageLots,
+  onAddLot,
   onPreparerProduct,
   onPreparerLot,
+  onReplaceLot,
 }: {
   product: DemandeTransfertProduct;
   canDelete: boolean;
   canUpdate: boolean;
   onDeleteProduct?: () => void;
-  onManageLots?: () => void;
+  onAddLot?: () => void;
   onPreparerProduct?: () => void;
   onPreparerLot?: (lot: DemandeTransfertLot) => void;
+  onReplaceLot?: (lot: DemandeTransfertLot) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const toggle = () => {
@@ -360,6 +385,13 @@ const ProductCard = ({
               onPreparerLot={
                 onPreparerLot ? () => onPreparerLot(lot) : undefined
               }
+              onReplaceLot={
+                onReplaceLot &&
+                !isProductPrepared &&
+                (lot.preparer ?? "").toLowerCase() !== "oui"
+                  ? () => onReplaceLot(lot)
+                  : undefined
+              }
             />
           ))}
         </View>
@@ -408,9 +440,9 @@ const ProductCard = ({
             borderTopColor: "#f2f2f2",
           }}
         >
-          {canUpdate && onManageLots && (
+          {canUpdate && onAddLot && (
             <Pressable
-              onPress={onManageLots}
+              onPress={onAddLot}
               style={{
                 flex: 1,
                 flexDirection: "row",
@@ -422,9 +454,9 @@ const ProductCard = ({
                 gap: 6,
               }}
             >
-              <FontAwesome5 name="exchange-alt" size={14} color={PRIMARY} />
+              <FontAwesome5 name="plus" size={14} color={PRIMARY} />
               <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
-                Lots
+                Ajouter un lot
               </Text>
             </Pressable>
           )}
@@ -467,8 +499,11 @@ export const DemandeTransfertDetailsScreen = () => {
   const finishDeleteProduct = useDemandeTransfertSheetStore(
     (s) => s.finishDeleteProduct,
   );
-  const openManageLotsSheet = useDemandeTransfertSheetStore(
-    (s) => s.openManageLotsSheet,
+  const openAddLotSheet = useDemandeTransfertSheetStore(
+    (s) => s.openAddLotSheet,
+  );
+  const openReplaceLotSheet = useDemandeTransfertSheetStore(
+    (s) => s.openReplaceLotSheet,
   );
   const openPreparerConfirmSheet = useDemandeTransfertSheetStore(
     (s) => s.openPreparerConfirmSheet,
@@ -505,7 +540,8 @@ export const DemandeTransfertDetailsScreen = () => {
   const isPreparationStatut = isEncours || isEnvoye;
   const canPrepare = canUpdate && isPreparationStatut;
   const canAddProducts = canCreate && isBrouillon;
-  const canManageLots = canUpdate && (isBrouillon || isPreparationStatut);
+  const canAddLots = canUpdate && isBrouillon;
+  const canReplaceLots = canUpdate && (isBrouillon || isEncours || isEnvoye);
 
   const products = detailsData?.details ?? [];
   const statutStyle = transfertItem
@@ -541,15 +577,32 @@ export const DemandeTransfertDetailsScreen = () => {
     });
   };
 
-  const handleManageLots = (product: DemandeTransfertProduct) => {
-    if (!canManageLots) return;
-    openManageLotsSheet({
+  const handleAddLot = (product: DemandeTransfertProduct) => {
+    if (!canAddLots) return;
+    if ((product.preparer ?? "").toLowerCase() === "oui") return;
+
+    openAddLotSheet({
       idDT: Number(demandeTransfertId),
       idProduit: product.idProduit,
       productDetailId: product.id,
       productName: product.produit,
-      currentLots: product.lots ?? [],
-      mode: isBrouillon ? "manage" : "replace",
+    });
+  };
+
+  const handleReplaceLot = (
+    product: DemandeTransfertProduct,
+    lot: DemandeTransfertLot,
+  ) => {
+    if (!canReplaceLots) return;
+    if ((product.preparer ?? "").toLowerCase() === "oui") return;
+    if ((lot.preparer ?? "").toLowerCase() === "oui") return;
+
+    openReplaceLotSheet({
+      idDT: Number(demandeTransfertId),
+      idProduit: product.idProduit,
+      productDetailId: product.id,
+      productName: product.produit,
+      currentLot: lot,
     });
   };
 
@@ -927,8 +980,8 @@ export const DemandeTransfertDetailsScreen = () => {
           >
             <FontAwesome5 name="info-circle" size={14} color="#92400e" />
             <Text style={{ flex: 1, fontSize: 12, color: "#92400e" }}>
-              La préparation est disponible uniquement lorsque la demande est
-              « Encours » ou « Envoyé ».
+              La préparation est disponible uniquement lorsque la demande est «
+              Encours » ou « Envoyé ».
             </Text>
           </View>
         )}
@@ -941,14 +994,17 @@ export const DemandeTransfertDetailsScreen = () => {
               canDelete={canDelete}
               canUpdate={canUpdate}
               onDeleteProduct={() => handleDeleteProduct(product)}
-              onManageLots={
-                canManageLots ? () => handleManageLots(product) : undefined
-              }
+              onAddLot={canAddLots ? () => handleAddLot(product) : undefined}
               onPreparerProduct={
                 canPrepare ? () => handlePreparerProduct(product) : undefined
               }
               onPreparerLot={
                 canPrepare ? (lot) => handlePreparerLot(lot) : undefined
+              }
+              onReplaceLot={
+                canReplaceLots
+                  ? (lot) => handleReplaceLot(product, lot)
+                  : undefined
               }
             />
           ))

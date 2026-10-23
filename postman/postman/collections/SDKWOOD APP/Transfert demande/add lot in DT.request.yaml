@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/api/homescreen/details_demande_transfert.php"
+method: PUT
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+body:
+  type: json
+  content: |
+    {
+      "type": "ajouter_lot",
+      "idDT": 15,
+      "idItem": 1,
+      "idProduit": 1816,
+      "lot": "561440"
+    }
+settings: {}
+order: 5000

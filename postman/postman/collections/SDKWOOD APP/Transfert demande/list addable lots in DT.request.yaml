@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{BACKEND_URL}}/api/produit/lots_produits.php?idProduit=1816&idDT=15&ajoutable=1"
+method: GET
+headers:
+  login_token: SDKWOOD
+  code_token: SDKWOOD/2026@!!
+  content_type: application/json
+queryParams:
+  idProduit: "1816"
+  idDT: "15"
+  ajoutable: "1"
+settings: {}
+order: 2100

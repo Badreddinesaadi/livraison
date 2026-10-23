@@ -9,7 +9,8 @@ type SheetType =
   | "selector-options"
   | "add-product"
   | "delete-product-confirm"
-  | "manage-lots"
+  | "add-lot"
+  | "replace-lot"
   | "preparer-confirm"
   | "statut-selector"
   | "delete-dt-confirm"
@@ -42,13 +43,19 @@ type DeleteProductConfig = {
   handler: (productDetailId: string) => void;
 };
 
-type ManageLotsConfig = {
+type AddTransfertLotConfig = {
   idDT: number;
   idProduit: string;
   productDetailId: string;
   productName: string;
-  currentLots: DemandeTransfertLot[];
-  mode: "manage" | "replace";
+};
+
+type ReplaceTransfertLotConfig = {
+  idDT: number;
+  idProduit: string;
+  productDetailId: string;
+  productName: string;
+  currentLot: DemandeTransfertLot;
 };
 
 type PreparerConfig = {
@@ -77,7 +84,8 @@ type DemandeTransfertSheetState = {
   selectorSheetConfig: SelectorSheetConfig | null;
   addProductConfig: AddProductConfig | null;
   deleteProductConfig: DeleteProductConfig | null;
-  manageLotsConfig: ManageLotsConfig | null;
+  addLotConfig: AddTransfertLotConfig | null;
+  replaceLotConfig: ReplaceTransfertLotConfig | null;
   preparerConfig: PreparerConfig | null;
   statutSelectorConfig: StatutSelectorConfig | null;
   deleteDTConfig: DeleteDTConfig | null;
@@ -91,7 +99,8 @@ type DemandeTransfertSheetState = {
   openDeleteProductConfirmSheet: (config: DeleteProductConfig) => void;
   confirmDeleteProduct: () => void;
   finishDeleteProduct: () => void;
-  openManageLotsSheet: (config: ManageLotsConfig) => void;
+  openAddLotSheet: (config: AddTransfertLotConfig) => void;
+  openReplaceLotSheet: (config: ReplaceTransfertLotConfig) => void;
   openPreparerConfirmSheet: (config: PreparerConfig) => void;
   confirmPreparer: () => void;
   finishPreparer: () => void;
@@ -108,7 +117,8 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
     selectorSheetConfig: null,
     addProductConfig: null,
     deleteProductConfig: null,
-    manageLotsConfig: null,
+    addLotConfig: null,
+    replaceLotConfig: null,
     preparerConfig: null,
     statutSelectorConfig: null,
     deleteDTConfig: null,
@@ -122,7 +132,8 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         selectorSheetConfig: config,
         addProductConfig: null,
         deleteProductConfig: null,
-        manageLotsConfig: null,
+        addLotConfig: null,
+        replaceLotConfig: null,
         preparerConfig: null,
         statutSelectorConfig: null,
         deleteDTConfig: null,
@@ -149,7 +160,8 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         addProductConfig: config,
         selectorSheetConfig: null,
         deleteProductConfig: null,
-        manageLotsConfig: null,
+        addLotConfig: null,
+        replaceLotConfig: null,
         preparerConfig: null,
         statutSelectorConfig: null,
         deleteDTConfig: null,
@@ -164,7 +176,8 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         deleteProductConfig: config,
         selectorSheetConfig: null,
         addProductConfig: null,
-        manageLotsConfig: null,
+        addLotConfig: null,
+        replaceLotConfig: null,
         preparerConfig: null,
         statutSelectorConfig: null,
         deleteDTConfig: null,
@@ -196,13 +209,30 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         isDeleteProductPending: false,
         deleteProductConfig: null,
       }),
-    openManageLotsSheet: (config: ManageLotsConfig) =>
+    openAddLotSheet: (config: AddTransfertLotConfig) =>
       set({
-        sheetType: "manage-lots",
-        manageLotsConfig: config,
+        sheetType: "add-lot",
+        addLotConfig: config,
         selectorSheetConfig: null,
         addProductConfig: null,
         deleteProductConfig: null,
+        replaceLotConfig: null,
+        preparerConfig: null,
+        statutSelectorConfig: null,
+        deleteDTConfig: null,
+        isDeleteProductPending: false,
+        isPreparerPending: false,
+        isDeleteDTPending: false,
+        isSheetOpen: true,
+      }),
+    openReplaceLotSheet: (config: ReplaceTransfertLotConfig) =>
+      set({
+        sheetType: "replace-lot",
+        replaceLotConfig: config,
+        selectorSheetConfig: null,
+        addProductConfig: null,
+        deleteProductConfig: null,
+        addLotConfig: null,
         preparerConfig: null,
         statutSelectorConfig: null,
         deleteDTConfig: null,
@@ -218,7 +248,8 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         selectorSheetConfig: null,
         addProductConfig: null,
         deleteProductConfig: null,
-        manageLotsConfig: null,
+        addLotConfig: null,
+        replaceLotConfig: null,
         statutSelectorConfig: null,
         deleteDTConfig: null,
         isDeleteProductPending: false,
@@ -251,7 +282,8 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         selectorSheetConfig: null,
         addProductConfig: null,
         deleteProductConfig: null,
-        manageLotsConfig: null,
+        addLotConfig: null,
+        replaceLotConfig: null,
         preparerConfig: null,
         deleteDTConfig: null,
         isDeleteProductPending: false,
@@ -266,7 +298,8 @@ export const useDemandeTransfertSheetStore = create<DemandeTransfertSheetState>(
         selectorSheetConfig: null,
         addProductConfig: null,
         deleteProductConfig: null,
-        manageLotsConfig: null,
+        addLotConfig: null,
+        replaceLotConfig: null,
         preparerConfig: null,
         statutSelectorConfig: null,
         isDeleteProductPending: false,

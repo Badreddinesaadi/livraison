@@ -12,9 +12,10 @@ info:
     `vue_lots_solde`. Un lot porte son produit, sa couleur, sa longueur, sa
     quantité en unité de vente, son dépôt et sa date d'entrée.
 
-    Le même point d'entrée sert à lister tous les lots d'un produit ou,
-    lorsqu'il est appelé avec le drapeau `remplacable=1`, uniquement les lots
-    éligibles au remplacement d'un lot donné dans un devis.
+    Le même point d'entrée sert à lister tous les lots d'un produit, à lister
+    les lots éligibles au remplacement d'un lot donné (devis ou demande de
+    transfert via `remplacable=1`), ou à lister les lots éligibles à l'ajout
+    dans une demande de transfert (`ajoutable=1`).
 
     L'intégration ERP est une préoccupation interne du serveur et n'est pas
     exposée par ce contrat. L'API attend un jeton pré-émis dans l'en-tête
@@ -61,7 +62,7 @@ paths:
     get:
       tags: [Produits]
       operationId: listProduitLots
-      summary: Lister les lots d'un produit ou les lots remplaçables
+      summary: Lister les lots d'un produit, remplaçables ou ajoutables
       description: |
         Retourne les lots de stock lus dans la vue `vue_lots_solde`.
 
@@ -72,30 +73,55 @@ paths:
 
         ## Mode remplacement (`remplacable=1`)
         Retourne uniquement les lots éligibles au remplacement du lot `idLot`
-        du produit `idProduit` dans le devis `idDevis`. Un lot est éligible
-        lorsqu'il respecte **les mêmes règles que le remplacement de lot**
-        (`PUT /api/homescreen/preparation_devis_produits.php`,
-        `type=remplacer_lot`) :
+        du produit `idProduit`. Le contexte est un devis (`idDevis`) ou une
+        demande de transfert (`idDT`) ; **exactement l'un des deux** doit être
+        fourni.
 
-          - même produit (`product_id` ; la section est celle du produit) ;
+        Un lot est éligible lorsqu'il respecte **les mêmes règles que le
+        remplacement de lot** :
+
+          - même produit (`product_id`) ;
           - même couleur (`color_id`) ;
           - même longueur (`longueur`) ;
           - stock disponible (`solde > 0`) ;
           - différent du lot courant (`num_lot <> idLot`) ;
-          - ne figure pas déjà sur la ligne du devis (`idDevis` + `idProduit`).
+          - ne figure pas déjà dans le document fourni (`idDevis` ou `idDT`).
 
-        Dans ce mode, `idProduit`, `idLot` et `idDevis` sont **obligatoires**.
-        L'absence de l'un de ces paramètres retourne `400`.
+        Dans le contexte `idDevis`, les règles correspondent à
+        `PUT /api/homescreen/preparation_devis_produits.php`,
+        `type=remplacer_lot`.
 
-        Le lot courant doit par ailleurs être ni préparé ni livré ; cette
-        règle reste vérifiée par le point d'entrée de remplacement.
+        Dans le contexte `idDT`, les règles correspondent à
+        `PUT /api/homescreen/details_demande_transfert.php`,
+        `type=modifier_lot` : la demande ne doit pas être `Reçue` et le lot
+        courant ne doit pas être préparé.
+
+        Dans ce mode, `idProduit`, `idLot` et un contexte (`idDevis` ou `idDT`)
+        sont **obligatoires**. L'absence de l'un de ces paramètres retourne
+        `400`.
+
+        ## Mode ajout transfert (`ajoutable=1`)
+        Retourne uniquement les lots éligibles à l'ajout sur une ligne produit
+        d'une demande de transfert (`idDT`). Un lot est éligible lorsqu'il
+        respecte les règles de `PUT /api/homescreen/details_demande_transfert.php`,
+        `type=ajouter_lot` :
+
+          - même produit (`product_id`) ;
+          - même couleur que le produit (`color_id`) ;
+          - même longueur que le produit (`longueur`) ;
+          - stock disponible (`solde > 0`) ;
+          - ne figure pas déjà dans la demande (`idDT`) ;
+          - la demande n'est pas au statut `Reçue`.
+
+        Dans ce mode, `idProduit` et `idDT` sont **obligatoires**. L'absence de
+        l'un de ces paramètres retourne `400`.
       parameters:
         - name: idProduit
           in: query
           required: false
           description: |
             Identifiant du produit. Facultatif en mode standard ; obligatoire
-            lorsque `remplacable=1`.
+            lorsque `remplacable=1` ou `ajoutable=1`.
           schema:
             type: integer
             minimum: 1
@@ -105,7 +131,19 @@ paths:
           required: false
           description: |
             Drapeau de filtrage. `1` active le mode « lots remplaçables » ;
-            `0` (ou absence) conserve le comportement standard.
+            `0` (ou absence) conserve le comportement standard. Ce mode requiert
+            `idProduit`, `idLot` et `idDevis` ou `idDT`.
+          schema:
+            type: integer
+            enum: [0, 1]
+            default: 0
+          example: 1
+        - name: ajoutable
+          in: query
+          required: false
+          description: |
+            Drapeau de filtrage. `1` active le mode « lots ajoutables » pour
+            une demande de transfert ; il requiert `idProduit` et `idDT`.
           schema:
             type: integer
             enum: [0, 1]
@@ -124,13 +162,22 @@ paths:
           in: query
           required: false
           description: |
-            Identifiant du devis contenant le lot courant. Obligatoire lorsque
-            `remplacable=1` ; sert à exclure les lots déjà présents sur la
-            ligne.
+            Identifiant du devis contenant le lot courant. Contexte du mode
+            `remplacable=1` ; mutuellement exclusif avec `idDT`.
           schema:
             type: integer
             minimum: 1
           example: 62164
+        - name: idDT
+          in: query
+          required: false
+          description: |
+            Identifiant de la demande de transfert. Contexte requis par
+            `ajoutable=1` et alternative à `idDevis` pour `remplacable=1`.
+          schema:
+            type: integer
+            minimum: 1
+          example: 15
       responses:
         "200":
           description: Liste des lots (filtrés ou non)
@@ -153,7 +200,8 @@ paths:
         "400":
           description: |
             Paramètres manquants ou invalides, notamment lorsque
-            `remplacable=1` sans `idProduit`, `idLot` ou `idDevis`.
+            `remplacable=1` sans `idProduit`, `idLot` ou contexte
+            (`idDevis`/`idDT`), ou `ajoutable=1` sans `idProduit` et `idDT`.
           content:
             application/json:
               schema:
@@ -162,6 +210,14 @@ paths:
           $ref: "#/components/responses/NonAutorise"
         "404":
           description: Lot courant introuvable (mode `remplacable=1`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: |
+            Demande de transfert non modifiable (`statut=Reçue`) dans un mode
+            utilisant `idDT`.
           content:
             application/json:
               schema:
@@ -208,7 +264,7 @@ components:
         message:
           type: string
           description: Message lisible décrivant l'erreur.
-          example: idProduit, idLot et idDevis sont requis lorsque remplacable=1
+          example: idProduit, idLot et idDevis ou idDT sont requis lorsque remplacable=1
 
     ProduitLot:
       type: object

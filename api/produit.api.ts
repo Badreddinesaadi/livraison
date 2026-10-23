@@ -65,20 +65,6 @@ export const listProduits = async () => {
   return data ?? [];
 };
 
-export const getProductLots = async ({
-  idProduit,
-}: {
-  idProduit: number | string;
-}) => {
-  const data = await client.request<ProduitLot[]>({
-    pathname: "/api/produit/lots_produits.php",
-    method: "GET",
-    searchParams: { idProduit },
-    isDebug: true,
-  });
-  return data ?? [];
-};
-
 export const getReplaceableProductLots = async ({
   idProduit,
   idLot,
@@ -92,6 +78,40 @@ export const getReplaceableProductLots = async ({
     pathname: "/api/produit/lots_produits.php",
     method: "GET",
     searchParams: { idProduit, idLot, idDevis, remplacable: 1 },
+    isDebug: true,
+  });
+  return data ?? [];
+};
+
+export const getAddableTransferLots = async ({
+  idProduit,
+  idDT,
+}: {
+  idProduit: number | string;
+  idDT: number | string;
+}) => {
+  const data = await client.request<ProduitLot[]>({
+    pathname: "/api/produit/lots_produits.php",
+    method: "GET",
+    searchParams: { idProduit, idDT, ajoutable: 1 },
+    isDebug: true,
+  });
+  return data ?? [];
+};
+
+export const getReplaceableTransferLots = async ({
+  idProduit,
+  idLot,
+  idDT,
+}: {
+  idProduit: number | string;
+  idLot: string;
+  idDT: number | string;
+}) => {
+  const data = await client.request<ProduitLot[]>({
+    pathname: "/api/produit/lots_produits.php",
+    method: "GET",
+    searchParams: { idProduit, idLot, idDT, remplacable: 1 },
     isDebug: true,
   });
   return data ?? [];

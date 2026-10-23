@@ -187,7 +187,7 @@ const LotItem = ({
               flexDirection: "row",
               alignItems: "center",
               gap: 4,
-              paddingHorizontal: 8,
+              paddingHorizontal: 16,
               paddingVertical: 4,
               borderRadius: 6,
               backgroundColor: PRIMARY + "14",
@@ -195,9 +195,9 @@ const LotItem = ({
             }}
           >
             <FontAwesome5 name="exchange-alt" size={11} color={PRIMARY} />
-            <Text style={{ fontSize: 11, fontWeight: "600", color: PRIMARY }}>
+            {/* <Text style={{ fontSize: 11, fontWeight: "600", color: PRIMARY }}>
               Remplacer
-            </Text>
+            </Text> */}
           </Pressable>
         )}
         <FontAwesome5
@@ -358,7 +358,9 @@ const ProductCard = ({
                   : undefined
               }
               onReplaceLot={
-                canUpdate && onReplaceLot && (lot.modifiable ?? !lot.preparation)
+                canUpdate &&
+                onReplaceLot &&
+                (lot.modifiable ?? !lot.preparation)
                   ? () => onReplaceLot(lot)
                   : undefined
               }

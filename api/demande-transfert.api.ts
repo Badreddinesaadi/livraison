@@ -122,12 +122,13 @@ export const getDemandeTransfertDetails = async ({ id }: { id: string }) => {
 };
 
 export type AddProductToDTRequest = {
-  type: "detail";
+  type: "detail_lots";
   idDT: number;
   idProduit: number;
   qte: number;
   nbrFDX: number;
   unite: string;
+  lots?: { Lot: string; qte: number }[];
 };
 
 export type DeleteProductFromDTRequest = {
@@ -135,32 +136,21 @@ export type DeleteProductFromDTRequest = {
   id: string | number;
 };
 
-export type LotInsertItem = {
-  idItem: string;
-  idProduit: number;
-  Lot: string;
-  qte: number;
-};
-
-export type LotUpdateItem = {
-  idItem: string;
-  idProduit: number;
-  old_lot: string;
-  new_lot: string;
-  qte: number;
-};
-
-export type LotDeleteItem = {
+export type AjouterDemandeTransfertLotRequest = {
+  type: "ajouter_lot";
+  idDT: number;
   idItem: string;
   idProduit: string;
-  Lot: string;
+  lot: string;
 };
 
-export type UpdateLotsRequest = {
-  type: "update_lot";
-  lots_update: LotUpdateItem[];
-  lots_insert: LotInsertItem[];
-  lots_delete: LotDeleteItem[];
+export type RemplacerDemandeTransfertLotRequest = {
+  type: "modifier_lot";
+  idDT: number;
+  idItem: string;
+  idProduit: string;
+  oldLot: string;
+  newLot: string;
 };
 
 export const addProductToDT = async (request: AddProductToDTRequest) => {
@@ -183,7 +173,20 @@ export const deleteProductFromDT = async (
   });
 };
 
-export const updateProductLots = async (request: UpdateLotsRequest) => {
+export const ajouterDemandeTransfertLot = async (
+  request: AjouterDemandeTransfertLotRequest,
+) => {
+  return client.request({
+    pathname: "/api/homescreen/details_demande_transfert.php",
+    method: "PUT",
+    body: request,
+    isDebug: true,
+  });
+};
+
+export const remplacerDemandeTransfertLot = async (
+  request: RemplacerDemandeTransfertLotRequest,
+) => {
   return client.request({
     pathname: "/api/homescreen/details_demande_transfert.php",
     method: "PUT",

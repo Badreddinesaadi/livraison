@@ -229,7 +229,8 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 | **Content-Type** | `application/json` |
 | **Auth**         | Required           |
 
-> **Important:** Use `type: "detail_lots"` (not `"detail"` as in the frontend).
+> **Important:** the frontend sends `type: "detail_lots"` with `lots: []`.
+> Lots are attached afterwards through the per-lot action in §2.3.
 >
 > **Règle métier :** l'ajout d'un produit n'est autorisé que lorsque la demande
 > est au statut `Brouillon`.
@@ -258,11 +259,11 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 
 ---
 
-### 2.3 Update Lots
+### 2.3 Add a Lot
 
-> **Règle métier :** l'ajout ou la suppression de lots n'est autorisé qu'au
-> statut `Brouillon`. Aux statuts `Encours` et `Envoye`, seul le remplacement
-> d'un lot par un autre est autorisé, à nombre de lots identique.
+> **Règle métier :** l’ajout d’un lot n’est autorisé qu’au statut `Brouillon`,
+> sur un produit non préparé. Le lot doit appartenir au produit, respecter sa
+> couleur et sa longueur, avoir du stock et ne pas déjà figurer dans la demande.
 
 | Field            | Value              |
 | ---------------- | ------------------ |
@@ -272,16 +273,70 @@ Cascading delete: removes associated `transfer_lots`, then `demandetransfert_det
 
 #### Request Body
 
-| Field         | Type   | Required | Description                                                    |
-| ------------- | ------ | -------- | -------------------------------------------------------------- |
-| `type`        | string | Yes      | Must be `"update_lot"`                                         |
-| `lots_update` | array  | No       | Lots to update: `[{idItem, idProduit, old_lot, new_lot, qte}]` |
-| `lots_insert` | array  | No       | Lots to insert: `[{idItem, idProduit, Lot, qte}]`              |
-| `lots_delete` | array  | No       | Lots to delete: `[{idItem, idProduit, Lot}]`                   |
+| Field       | Type   | Required | Description                 |
+| ----------- | ------ | -------- | --------------------------- |
+| `type`      | string | Yes      | Must be `"ajouter_lot"`      |
+| `idDT`      | int    | Yes      | DT ID                       |
+| `idItem`    | int    | Yes      | Product detail ID           |
+| `idProduit` | int    | Yes      | Product ID                  |
+| `lot`       | string | Yes      | Lot number to add           |
+
+#### Behavior
+
+- Inserts `transfer_lots` with `preparer = "Non"`, `qte = lot.solde`,
+  `qte_uv = lot.qte_uv`, `idModif = user ID`, and `old_lot = ""`.
+- Recalculates `Qte` and `nbrFDX` on `demandetransfert_details`.
+- Returns `400` on missing fields, `401` without auth, `403` without update
+  permission, `404` when the DT, detail, product, or lot is unknown, and `409`
+  with `DT_NON_MODIFIABLE` or `PRODUIT_PREPARE` on invalid state.
+- Returns `422` with `LOT_AUTRE_PRODUIT`, `CRITERES_NON_RESPECTES`,
+  `LOT_SANS_STOCK`, or `LOT_DEJA_UTILISE` when the lot is not eligible.
+
+> **Legacy :** the bulk `update_lot` action (`lots_update`, `lots_insert`,
+> `lots_delete`) remains available on the server but is **not used by the
+> frontend**.
 
 ---
 
-### 2.4 Delete Product Detail
+### 2.4 Replace a Lot
+
+> **Règle métier :** le remplacement d’un lot est autorisé aux statuts
+> `Brouillon`, `Encours`, et `Envoye`. Il est refusé au statut `Reçue` et sur un
+> lot déjà préparé. La quantité du lot courant est conservée.
+
+| Field            | Value              |
+| ---------------- | ------------------ |
+| **Method**       | `PUT`              |
+| **Content-Type** | `application/json` |
+| **Auth**         | Required           |
+
+#### Request Body
+
+| Field       | Type   | Required | Description                 |
+| ----------- | ------ | -------- | --------------------------- |
+| `type`      | string | Yes      | Must be `"modifier_lot"`    |
+| `idDT`      | int    | Yes      | DT ID                       |
+| `idItem`    | int    | Yes      | Product detail ID           |
+| `idProduit` | int    | Yes      | Product ID                  |
+| `oldLot`    | string | Yes      | Current lot number          |
+| `newLot`    | string | Yes      | Replacement lot number      |
+
+#### Behavior
+
+- Requires the current `transfer_lots` row and `preparer <> "Oui"`.
+- Requires the replacement lot to use the same product, color, and length, have
+  stock, differ from the current lot, and not already appear in the DT.
+- Preserves the current lot `qte`; returns `422 LOT_STOCK_INSUFFISANT` when
+  `solde < qte`.
+- Sets `old_lot = oldLot`, `Lot = newLot`, `qte_uv = newLot.qte_uv`, and
+  `idModif = user ID`, then recalculates detail `Qte` and `nbrFDX`.
+- Returns `409 DT_NON_MODIFIABLE` for `Reçue` and `409 LOT_PREPARE` for a
+  prepared lot; other ineligibility cases use the same `422` codes as adding a
+  lot.
+
+---
+
+### 2.5 Delete Product Detail
 
 | Field            | Value              |
 | ---------------- | ------------------ |
@@ -371,7 +426,12 @@ Sets `preparer = 'Oui'` and `idModif` on the matching `transfer_lots` row.
 
 ---
 
-### 3.4 Modify a Lot
+### 3.4 Modify a Lot (Legacy)
+
+> **Legacy :** this action predates `details_demande_transfert.php`
+> `type: "modifier_lot"`. The frontend uses the contract documented in
+> §2.4. This action has no statut or eligibility validation and requires the
+> caller to pass `qte`.
 
 | Field      | Value    |
 | ---------- | -------- |
@@ -541,11 +601,12 @@ Envoye    --[admin validates]--> Reçue
 | ------------------------------------------------------------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `updateDemandeTransfert` (PUT with transporteur, matricule, observation) | **NO**          | The backend PUT only handles statut transitions, NOT field updates. Updating transporteur/matricule/observation is **not supported** by the backend. |
 | `changeDTStatut` (PUT with `id` and `statut`)                            | Partial         | The backend determines the new statut based on current statut and user role, NOT from a `statut` field in the request                                |
-| `addProductToDT` (POST with `type: "detail"`)                            | **MISMATCH**    | Frontend sends `type: "detail"`, but the backend expects `type: "detail_lots"` for creating a product with lots                                      |
-| `getProductLots` (GET produits/lots_produits.php)                        | Yes             | Separate endpoint, outside this module                                                                                                               |
+| `addProductToDT` (POST with `type: "detail_lots"`)                       | Yes             | Matches `details_demande_transfert.php` POST; the frontend sends `lots: []` and attaches lots through §2.3                                            |
+| `getAddableTransferLots` / `getReplaceableTransferLots` (GET lots with `idDT`) | **NO**  | Requires `lots_produits.php` to accept `idDT` with `ajoutable=1` and `remplacable=1`                                                                  |
+| `ajouterDemandeTransfertLot` (PUT with `type: "ajouter_lot"`)           | **NO**          | New contract documented in §2.3; the server must implement it                                                                                       |
+| `remplacerDemandeTransfertLot` (PUT with `type: "modifier_lot"`)        | **NO**          | New contract documented in §2.4; the server must implement it                                                                                       |
 | `listDemandeTransfert` search                                            | Yes             | `searchquery` matches `searchquery` backend param                                                                                                    |
 | `deleteProductFromDT` (DELETE with `type: "detail"`)                     | Yes             | Matches `details_demande_transfert.php` DELETE with `type: "detail"`                                                                                 |
-| `updateProductLots` (PUT with lots_update/insert/delete)                 | Yes             | Matches `details_demande_transfert.php` PUT with `type: "update_lot"`                                                                                |
 | `preparerDemandeTransfert` (POST for product/lot)                        | Yes             | Backend uses `validation_transfert.php` with `action: "preparerItem"` or `"preparerLot"`                                                             |
 | `validation_transfert.php` GET listing                                   | **NOT USED**    | Frontend lists DTs via `demande_transfert.php` GET                                                                                                   |
 | `validation_transfert.php` POST `annulerPreparation`                     | **NOT USED**    | No cancel preparation UI in frontend                                                                                                                 |
@@ -557,7 +618,7 @@ Envoye    --[admin validates]--> Reçue
 
 1. **No PATCH/PUT for DT field updates:** The backend PUT endpoint only handles statut transitions. Updating `transporteur`, `matricule`, or `observation` after creation is **not supported**.
 
-2. **Frontend `addProductToDT` uses wrong type:** The frontend sends `type: "detail"` but the backend expects `type: "detail_lots"`. This will cause the request to fall through to the default handler, returning `"Action non supportée"`.
+2. **New lot actions are not implemented server-side:** the frontend now calls `ajouter_lot` and `modifier_lot` on `details_demande_transfert.php`, plus `ajoutable=1` and `idDT` on `lots_produits.php`. The current backend only exposes the legacy bulk `update_lot` action and `remplacable=1` for devis.
 
 3. **Statut change is role-based, not free-form:** The frontend's `StatutSelectorBottomSheetContent` allows selecting any statut, but the backend only allows specific transitions based on current statut + user role.
 
