@@ -140,6 +140,9 @@ export default function StackLayout() {
               }}
             >
               <TouchableWithoutFeedback
+                style={{
+                  height: "100%",
+                }}
                 onPress={() => {
                   if (s.route.name === "index") {
                     s.navigation.replace("(app)/(drawer)");

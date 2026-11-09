@@ -122,7 +122,7 @@ export const getDemandeTransfertDetails = async ({ id }: { id: string }) => {
 };
 
 export type AddProductToDTRequest = {
-  type: "detail_lots";
+  type: "detail";
   idDT: number;
   idProduit: number;
   qte: number;

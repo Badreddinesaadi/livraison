@@ -9,7 +9,7 @@ import {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -99,20 +99,32 @@ export default function AddProductBottomSheetContent({
 
   const handleSubmit = () => {
     if (!selectedProduct) {
-      Toast.show({ type: "error", text1: "Produit requis", text2: "Veuillez sélectionner un produit." });
+      Toast.show({
+        type: "error",
+        text1: "Produit requis",
+        text2: "Veuillez sélectionner un produit.",
+      });
       return;
     }
     if (!nbrFDX.trim() || Number(nbrFDX) <= 0) {
-      Toast.show({ type: "error", text1: "Nombre FDX requis", text2: "Veuillez saisir un nombre valide." });
+      Toast.show({
+        type: "error",
+        text1: "Nombre FDX requis",
+        text2: "Veuillez saisir un nombre valide.",
+      });
       return;
     }
     if (!qte.trim() || Number(qte) <= 0) {
-      Toast.show({ type: "error", text1: "Quantité requise", text2: "Veuillez saisir une quantité valide." });
+      Toast.show({
+        type: "error",
+        text1: "Quantité requise",
+        text2: "Veuillez saisir une quantité valide.",
+      });
       return;
     }
 
     const payload: AddProductToDTRequest = {
-      type: "detail_lots",
+      type: "detail",
       idDT,
       idProduit: selectedProduct.produit_id,
       nbrFDX: Number(nbrFDX),
@@ -131,12 +143,29 @@ export default function AddProductBottomSheetContent({
   if (step === 2 && selectedProduct) {
     return (
       <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-        <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a2e", marginBottom: 14 }}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#1a1a2e",
+            marginBottom: 14,
+          }}
+        >
           Ajouter un produit
         </Text>
 
-        <View style={{ backgroundColor: "#f7f8fa", borderRadius: 10, padding: 12, marginBottom: 12 }}>
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#1a1a2e" }} numberOfLines={2}>
+        <View
+          style={{
+            backgroundColor: "#f7f8fa",
+            borderRadius: 10,
+            padding: 12,
+            marginBottom: 12,
+          }}
+        >
+          <Text
+            style={{ fontSize: 14, fontWeight: "600", color: "#1a1a2e" }}
+            numberOfLines={2}
+          >
             {selectedProduct.produit}
           </Text>
           <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
@@ -145,31 +174,55 @@ export default function AddProductBottomSheetContent({
         </View>
 
         <View style={{ marginBottom: 10 }}>
-          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>Nombre FDX</Text>
+          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+            Nombre FDX
+          </Text>
           <BottomSheetTextInput
             value={nbrFDX}
             onChangeText={setNbrFDX}
             placeholder="Nombre de FDX"
             placeholderTextColor="#bbb"
             keyboardType="decimal-pad"
-            style={{ minHeight: 48, borderWidth: 1, borderColor: "#e8e8e8", borderRadius: 10, backgroundColor: "#fff", paddingHorizontal: 12, fontSize: 14, color: "#11181C" }}
+            style={{
+              minHeight: 48,
+              borderWidth: 1,
+              borderColor: "#e8e8e8",
+              borderRadius: 10,
+              backgroundColor: "#fff",
+              paddingHorizontal: 12,
+              fontSize: 14,
+              color: "#11181C",
+            }}
           />
         </View>
 
         <View style={{ marginBottom: 10 }}>
-          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>Quantité</Text>
+          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+            Quantité
+          </Text>
           <BottomSheetTextInput
             value={qte}
             onChangeText={setQte}
             placeholder="Quantité"
             placeholderTextColor="#bbb"
             keyboardType="decimal-pad"
-            style={{ minHeight: 48, borderWidth: 1, borderColor: "#e8e8e8", borderRadius: 10, backgroundColor: "#fff", paddingHorizontal: 12, fontSize: 14, color: "#11181C" }}
+            style={{
+              minHeight: 48,
+              borderWidth: 1,
+              borderColor: "#e8e8e8",
+              borderRadius: 10,
+              backgroundColor: "#fff",
+              paddingHorizontal: 12,
+              fontSize: 14,
+              color: "#11181C",
+            }}
           />
         </View>
 
         <View style={{ marginBottom: 14 }}>
-          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>Unité</Text>
+          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+            Unité
+          </Text>
           <View style={{ flexDirection: "row", gap: 8 }}>
             {UNITE_OPTIONS.map((opt) => (
               <Pressable
@@ -181,11 +234,18 @@ export default function AddProductBottomSheetContent({
                   borderRadius: 10,
                   borderWidth: 1,
                   borderColor: unite === opt.value ? PRIMARY : "#e8e8e8",
-                  backgroundColor: unite === opt.value ? PRIMARY + "18" : "#fff",
+                  backgroundColor:
+                    unite === opt.value ? PRIMARY + "18" : "#fff",
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 14, fontWeight: "600", color: unite === opt.value ? PRIMARY : "#555" }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: unite === opt.value ? PRIMARY : "#555",
+                  }}
+                >
                   {opt.label}
                 </Text>
               </Pressable>
@@ -196,16 +256,35 @@ export default function AddProductBottomSheetContent({
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Pressable
             onPress={handleBack}
-            style={{ flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: "#ddd", alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: "#ddd",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#fff",
+            }}
           >
             <Text style={{ color: "#555", fontWeight: "700" }}>Retour</Text>
           </Pressable>
           <Pressable
             onPress={handleSubmit}
             disabled={isPending}
-            style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: PRIMARY, opacity: isPending ? 0.7 : 1 }}
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              borderRadius: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: PRIMARY,
+              opacity: isPending ? 0.7 : 1,
+            }}
           >
-            <Text style={{ color: "#fff", fontWeight: "700" }}>{isPending ? "Ajout..." : "Ajouter"}</Text>
+            <Text style={{ color: "#fff", fontWeight: "700" }}>
+              {isPending ? "Ajout..." : "Ajouter"}
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -214,7 +293,14 @@ export default function AddProductBottomSheetContent({
 
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-      <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a2e", marginBottom: 14 }}>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "700",
+          color: "#1a1a2e",
+          marginBottom: 14,
+        }}
+      >
         Ajouter un produit
       </Text>
 
@@ -239,7 +325,9 @@ export default function AddProductBottomSheetContent({
         />
         {searchText ? (
           <Pressable onPress={() => setSearchText("")} hitSlop={8}>
-            <Text style={{ color: "#888", fontSize: 16, fontWeight: "700" }}>✕</Text>
+            <Text style={{ color: "#888", fontSize: 16, fontWeight: "700" }}>
+              ✕
+            </Text>
           </Pressable>
         ) : null}
       </View>
@@ -262,7 +350,10 @@ export default function AddProductBottomSheetContent({
               marginBottom: 10,
             }}
           >
-            <Text style={{ fontWeight: "600", color: "#222", fontSize: 14 }} numberOfLines={2}>
+            <Text
+              style={{ fontWeight: "600", color: "#222", fontSize: 14 }}
+              numberOfLines={2}
+            >
               {item.produit}
             </Text>
             <Text style={{ color: "#888", marginTop: 2, fontSize: 12 }}>
@@ -275,7 +366,9 @@ export default function AddProductBottomSheetContent({
             <Text style={{ color: "#aaa" }}>Chargement...</Text>
           ) : (
             <Text style={{ color: "#aaa" }}>
-              {debouncedSearch ? "Aucun produit trouvé" : "Aucun produit disponible"}
+              {debouncedSearch
+                ? "Aucun produit trouvé"
+                : "Aucun produit disponible"}
             </Text>
           )
         }
