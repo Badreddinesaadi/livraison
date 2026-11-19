@@ -15,7 +15,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 const DEVIS_STATUTS = ["encours", "valider", "refuser", "livrer", "livrer part."];
 
@@ -236,24 +236,9 @@ export const PreparationDevisScreen = () => {
 
   if (!canList) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <View style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n'avez pas la permission d'accéder au module Préparation devis.
         </Text>
       </View>
@@ -261,45 +246,13 @@ export const PreparationDevisScreen = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: 14,
-        marginTop: 4,
-        backgroundColor: "#f7f8fa",
-      }}
-    >
-      <View style={{ flex: 1 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 4,
-            columnGap: 8,
-            marginBottom: 12,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#fff",
-              borderColor: "#e8e8e8",
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 12,
-            }}
-          >
+    <View style={styles.screen}>
+      <View style={styles.flex}>
+        <View style={styles.searchRow}>
+          <View style={styles.searchInputWrap}>
             <FontAwesome5 name="search" size={14} color="#bbb" />
             <TextInput
-              style={{
-                flex: 1,
-                height: 46,
-                paddingHorizontal: 10,
-                fontSize: 14,
-                color: "#222",
-              }}
+              style={styles.searchInput}
               placeholder="Rechercher par document..."
               placeholderTextColor="#bbb"
               value={searchText}
@@ -310,16 +263,10 @@ export const PreparationDevisScreen = () => {
 
           <Pressable
             onPress={handleOpenFiltersSheet}
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: filtersCount > 0 ? Colors.light.primary : "#e8e8e8",
-              backgroundColor: "#fff",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            style={[
+              styles.filterButton,
+              filtersCount > 0 && styles.filterButtonSelected,
+            ]}
           >
             <FontAwesome5
               name="filter"
@@ -327,23 +274,8 @@ export const PreparationDevisScreen = () => {
               color={filtersCount > 0 ? Colors.light.primary : "#222"}
             />
             {filtersCount > 0 && (
-              <View
-                style={{
-                  position: "absolute",
-                  top: 4,
-                  right: 4,
-                  minWidth: 16,
-                  height: 16,
-                  borderRadius: 8,
-                  paddingHorizontal: 3,
-                  backgroundColor: Colors.light.primary,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text
-                  style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}
-                >
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>
                   {filtersCount}
                 </Text>
               </View>
@@ -351,7 +283,7 @@ export const PreparationDevisScreen = () => {
           </Pressable>
         </View>
 
-        <Text style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>
+        <Text style={styles.resultCount}>
           {listData.length} devis
         </Text>
 
@@ -371,7 +303,7 @@ export const PreparationDevisScreen = () => {
             />
           )}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={styles.contentContainer}
           onEndReachedThreshold={0.3}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
@@ -383,9 +315,9 @@ export const PreparationDevisScreen = () => {
             isLoading ? (
               <Loader />
             ) : (
-              <View style={{ alignItems: "center", marginTop: 60 }}>
+              <View style={styles.emptyState}>
                 <FontAwesome5 name="file-invoice" size={40} color="#ddd" />
-                <Text style={{ color: "#ccc", marginTop: 14, fontSize: 14 }}>
+                <Text style={styles.emptyText}>
                   Aucun devis trouvé
                 </Text>
               </View>
@@ -396,3 +328,99 @@ export const PreparationDevisScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  screen: {
+    flex: 1,
+    paddingHorizontal: 14,
+    marginTop: 4,
+    backgroundColor: "#f7f8fa",
+  },
+  flex: {
+    flex: 1,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    columnGap: 8,
+    marginBottom: 12,
+  },
+  searchInputWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderColor: "#e8e8e8",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: 46,
+    paddingHorizontal: 10,
+    fontSize: 14,
+    color: "#222",
+  },
+  filterButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterButtonSelected: {
+    borderColor: Colors.light.primary,
+  },
+  filterBadge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    paddingHorizontal: 3,
+    backgroundColor: Colors.light.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  resultCount: {
+    fontSize: 13,
+    color: "#aaa",
+    marginBottom: 8,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  emptyState: {
+    alignItems: "center",
+    marginTop: 60,
+  },
+  emptyText: {
+    color: "#ccc",
+    marginTop: 14,
+    fontSize: 14,
+  },
+});

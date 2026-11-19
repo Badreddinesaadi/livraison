@@ -4,7 +4,7 @@ import { PRIMARY } from "@/constants/theme";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 type ReplaceDevisLotsBottomSheetContentProps = {
@@ -113,80 +113,44 @@ export default function ReplaceDevisLotsBottomSheetContent({
     return (
       <Pressable onPress={() => setSelected(item.num_lot)}>
         <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-start",
-            paddingVertical: 10,
-            paddingHorizontal: 12,
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: isSelected ? PRIMARY : "#eee",
-            backgroundColor: isSelected ? PRIMARY + "08" : "#fff",
-            marginBottom: 8,
-          }}
+          style={[
+            styles.lotCard,
+            isSelected && styles.lotCardSelected,
+          ]}
         >
           <View
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: 11,
-              borderWidth: 2,
-              borderColor: isSelected ? PRIMARY : "#ccc",
-              backgroundColor: isSelected ? PRIMARY : "transparent",
-              alignItems: "center",
-              justifyContent: "center",
-              marginRight: 10,
-              marginTop: 2,
-            }}
+            style={[
+              styles.checkbox,
+              isSelected && styles.checkboxSelected,
+            ]}
           >
             {isSelected && (
-              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
-                ✓
-              </Text>
+              <Text style={styles.checkmark}>✓</Text>
             )}
           </View>
 
-          <View style={{ flex: 1 }}>
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
-            >
-              <Text
-                style={{ fontSize: 13, fontWeight: "600", color: "#1a1a2e" }}
-                numberOfLines={1}
-              >
+          <View style={styles.flexOne}>
+            <View style={styles.titleRow}>
+              <Text style={styles.lotTitle} numberOfLines={1}>
                 {item.num_lot}
               </Text>
             </View>
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                marginTop: 4,
-                gap: 6,
-              }}
-            >
-              <Text style={{ fontSize: 11, color: "#666" }}>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaText}>
                 Qte: {item.qte_uv ?? item.solde} {item.unite_v}
               </Text>
-              <Text style={{ fontSize: 11, color: "#666" }}>
+              <Text style={styles.metaText}>
                 PCE: {item.nbrePiece ?? "-"}
               </Text>
-              <Text style={{ fontSize: 11, color: "#666" }}>
+              <Text style={styles.metaText}>
                 Long: {item.longueur ?? "-"}
               </Text>
             </View>
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                marginTop: 2,
-                gap: 6,
-              }}
-            >
-              <Text style={{ fontSize: 11, color: "#888" }}>
+            <View style={styles.metaRowSub}>
+              <Text style={styles.metaTextMuted}>
                 {item.depot ?? "-"}
               </Text>
-              <Text style={{ fontSize: 11, color: "#888" }}>
+              <Text style={styles.metaTextMuted}>
                 {formatLotDate(item.date)}
               </Text>
             </View>
@@ -197,18 +161,9 @@ export default function ReplaceDevisLotsBottomSheetContent({
   };
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 16 }}>
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "700",
-          color: "#1a1a2e",
-          marginBottom: 4,
-        }}
-      >
-        Remplacer le lot
-      </Text>
-      <Text style={{ fontSize: 12, color: "#888", marginBottom: 10 }}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Remplacer le lot</Text>
+      <Text style={styles.subtitle}>
         {currentLotCode} · {productName}
       </Text>
 
@@ -216,18 +171,18 @@ export default function ReplaceDevisLotsBottomSheetContent({
         data={availableLots ?? []}
         keyExtractor={(item: ProduitLot) => item.num_lot}
         showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 12 }}
+        style={styles.flexOne}
+        contentContainerStyle={styles.listContent}
         renderItem={renderItem}
         ListEmptyComponent={
           isLoading ? (
-            <Text style={{ color: "#aaa" }}>Chargement des lots...</Text>
+            <Text style={styles.emptyText}>Chargement des lots...</Text>
           ) : isError ? (
-            <Text style={{ color: "#ef4444" }}>
+            <Text style={styles.errorText}>
               Impossible de charger les lots remplaçables.
             </Text>
           ) : (
-            <Text style={{ color: "#aaa" }}>
+            <Text style={styles.emptyText}>
               Aucun lot remplaçable pour ce lot.
             </Text>
           )
@@ -238,31 +193,19 @@ export default function ReplaceDevisLotsBottomSheetContent({
         removeClippedSubviews
       />
 
-      <View
-        style={{
-          backgroundColor: "#fff",
-          paddingTop: 10,
-          paddingBottom: 12,
-          borderTopWidth: 1,
-          borderTopColor: "#eee",
-        }}
-      >
-        <Text style={{ fontSize: 12, color: "#888", marginBottom: 8 }}>
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
           {selected ? `Remplacer par : ${selected}` : "Sélectionnez un lot"}
         </Text>
         <Pressable
           onPress={handleSave}
           disabled={isPending || !selected}
-          style={{
-            paddingVertical: 12,
-            borderRadius: 10,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: PRIMARY,
-            opacity: isPending || !selected ? 0.5 : 1,
-          }}
+          style={[
+            styles.submitButton,
+            (isPending || !selected) && styles.submitButtonDisabled,
+          ]}
         >
-          <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>
+          <Text style={styles.submitButtonText}>
             {isPending ? "Enregistrement..." : "Remplacer"}
           </Text>
         </Pressable>
@@ -270,3 +213,126 @@ export default function ReplaceDevisLotsBottomSheetContent({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a2e",
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: "#888",
+    marginBottom: 10,
+  },
+  flexOne: {
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: 12,
+  },
+  lotCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    marginBottom: 8,
+  },
+  lotCardSelected: {
+    borderColor: PRIMARY,
+    backgroundColor: PRIMARY + "08",
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: "#ccc",
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+    marginTop: 2,
+  },
+  checkboxSelected: {
+    borderColor: PRIMARY,
+    backgroundColor: PRIMARY,
+  },
+  checkmark: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  lotTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1a1a2e",
+  },
+  metaRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 4,
+    gap: 6,
+  },
+  metaRowSub: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 2,
+    gap: 6,
+  },
+  metaText: {
+    fontSize: 11,
+    color: "#666",
+  },
+  metaTextMuted: {
+    fontSize: 11,
+    color: "#888",
+  },
+  emptyText: {
+    color: "#aaa",
+  },
+  errorText: {
+    color: "#ef4444",
+  },
+  footer: {
+    backgroundColor: "#fff",
+    paddingTop: 10,
+    paddingBottom: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  footerText: {
+    fontSize: 12,
+    color: "#888",
+    marginBottom: 8,
+  },
+  submitButton: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: PRIMARY,
+  },
+  submitButtonDisabled: {
+    opacity: 0.5,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+});

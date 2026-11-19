@@ -12,7 +12,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 const formatDateForApi = (date: Date) => {
   const year = date.getFullYear();
@@ -355,24 +355,9 @@ export const RotationChauffeurScreen = () => {
 
   if (!canListRotations) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <View style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n'avez pas la permission d'acceder au module Rotation.
         </Text>
       </View>
@@ -380,44 +365,16 @@ export const RotationChauffeurScreen = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: 14,
-        marginTop: 4,
-        backgroundColor: "#f7f8fa",
-      }}
-    >
-      <View style={{ flex: 1 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            marginTop: 4,
-            marginBottom: 12,
-          }}
-        >
+    <View style={styles.screen}>
+      <View style={styles.flex}>
+        <View style={styles.toolbar}>
           <Button
             preset="ghost"
             LeftAccessory={() => (
               <View>
                 {filtersCount > 0 && (
-                  <View
-                    style={{
-                      backgroundColor: PRIMARY,
-                      width: 15,
-                      height: 15,
-                      borderRadius: 10,
-                      position: "absolute",
-                      top: -5,
-                      right: -5,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      zIndex: 1,
-                    }}
-                  >
-                    <Text style={{ color: "#fff", fontSize: 12 }}>
+                  <View style={styles.filterBadge}>
+                    <Text style={styles.filterBadgeText}>
                       {filtersCount}
                     </Text>
                   </View>
@@ -430,7 +387,7 @@ export const RotationChauffeurScreen = () => {
           />
         </View>
 
-        <Text style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>
+        <Text style={styles.resultCount}>
           {listData.length} rotation{listData.length > 1 ? "s" : ""}
           {dateDu || dateAu ? ` · ${selectedIntervalLabel}` : ""}
         </Text>
@@ -442,7 +399,7 @@ export const RotationChauffeurScreen = () => {
           }
           renderItem={({ item }) => <RotationChauffeurCard item={item} />}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={styles.contentContainer}
           onEndReachedThreshold={0.3}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
@@ -454,9 +411,9 @@ export const RotationChauffeurScreen = () => {
             isLoading ? (
               <Loader />
             ) : (
-              <View style={{ alignItems: "center", marginTop: 60 }}>
+              <View style={styles.emptyState}>
                 <FontAwesome5 name="route" size={40} color="#ddd" />
-                <Text style={{ color: "#ccc", marginTop: 14, fontSize: 14 }}>
+                <Text style={styles.emptyText}>
                   Aucune rotation trouvee
                 </Text>
               </View>
@@ -509,3 +466,68 @@ export const RotationChauffeurScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  screen: {
+    flex: 1,
+    paddingHorizontal: 14,
+    marginTop: 4,
+    backgroundColor: "#f7f8fa",
+  },
+  flex: {
+    flex: 1,
+  },
+  toolbar: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  filterBadge: {
+    backgroundColor: PRIMARY,
+    width: 15,
+    height: 15,
+    borderRadius: 10,
+    position: "absolute",
+    top: -5,
+    right: -5,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  filterBadgeText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  resultCount: {
+    fontSize: 13,
+    color: "#aaa",
+    marginBottom: 8,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  emptyState: {
+    alignItems: "center",
+    marginTop: 60,
+  },
+  emptyText: {
+    color: "#ccc",
+    marginTop: 14,
+    fontSize: 14,
+  },
+});

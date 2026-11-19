@@ -20,6 +20,7 @@ import {
   Pressable,
   ScrollView,
   Share,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -530,24 +531,9 @@ export const ReturnDetailsScreen = () => {
 
   if (!canListReturns) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <SafeAreaView style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n&apos;avez pas la permission de consulter les retours.
         </Text>
       </SafeAreaView>
@@ -555,72 +541,30 @@ export const ReturnDetailsScreen = () => {
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        paddingHorizontal: 14,
-        // marginTop: 4,
-        backgroundColor: "#f7f8fa",
-      }}
-    >
+    <SafeAreaView style={styles.container}>
       {isLoading ? (
         <Loader />
       ) : isError || !data ? (
-        <View
-          style={{
-            marginTop: 40,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backgroundColor: "#fff",
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#eee",
-          }}
-        >
-          <Text style={{ color: "#888", fontSize: 14 }}>
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>
             Impossible de charger les détails du retour.
           </Text>
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: "#fff",
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              marginBottom: 12,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 12,
-              }}
-            >
-              <Text
-                style={{ fontSize: 18, fontWeight: "700", color: "#1a1a2e" }}
-              >
+          <View style={styles.card}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title}>
                 R{data?.id}-{data?.date ? format(data?.date, "yyMMdd") : "—"}
               </Text>
               <View
-                style={{
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderRadius: 999,
-                  backgroundColor: statusUi.bg,
-                }}
+                style={[
+                  styles.statusPill,
+                  { backgroundColor: statusUi.bg },
+                ]}
               >
                 <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: "700",
-                    color: statusUi.color,
-                  }}
+                  style={[styles.statusText, { color: statusUi.color }]}
                 >
                   {statusUi.label}
                 </Text>
@@ -654,82 +598,38 @@ export const ReturnDetailsScreen = () => {
             />
             {data.commentaire && (
               <View
-                style={{
-                  marginTop: 8,
-                  borderWidth: 1,
-                  borderColor:
-                    data.statut === "refuser" ? "#ffd6d6" : "#ffe2d7",
-                  backgroundColor:
-                    data.statut === "refuser" ? "#fff6f6" : "#fff8f4",
-                  borderRadius: 10,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
-                }}
+                style={[
+                  styles.commentBox,
+                  data.statut === "refuser"
+                    ? styles.commentBoxRefused
+                    : styles.commentBoxDefault,
+                ]}
               >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    columnGap: 8,
-                    marginBottom: 6,
-                  }}
-                >
+                <View style={styles.commentHeader}>
                   <FontAwesome5
                     name="comment-alt"
                     size={13}
                     color={data.statut === "refuser" ? "#ff4d4d" : PRIMARY}
                   />
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      fontWeight: "700",
-                      color: "#1a1a2e",
-                    }}
-                  >
-                    Commentaire
-                  </Text>
+                  <Text style={styles.commentTitle}>Commentaire</Text>
                 </View>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    color: "#333",
-                    lineHeight: 20,
-                  }}
-                >
+                <Text style={styles.commentText}>
                   {data.commentaire?.trim() || "Aucun commentaire renseigné"}
                 </Text>
               </View>
             )}
           </View>
 
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: "#fff",
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              marginBottom: 20,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 10,
-                columnGap: 8,
-              }}
-            >
+          <View style={[styles.card, styles.cardLast]}>
+            <View style={styles.sectionHeaderRow}>
               <FontAwesome5 name="file-image" size={14} color={PRIMARY} />
-              <Text
-                style={{ fontSize: 15, fontWeight: "700", color: "#1a1a2e" }}
-              >
+              <Text style={styles.sectionTitle}>
                 Fichiers ({data.images?.length ?? 0})
               </Text>
             </View>
 
             {data.images && data.images.length > 0 ? (
-              <View style={{ rowGap: 10 }}>
+              <View style={styles.filesWrap}>
                 {data.images.map((file, index) => {
                   const fileUrl = buildFileUrl(file.chemin_fichier);
                   if (!fileUrl) {
@@ -743,16 +643,7 @@ export const ReturnDetailsScreen = () => {
                   const isDownloading = downloadingFileId === file.id;
 
                   return (
-                    <View
-                      key={file.id}
-                      style={{
-                        borderWidth: 1,
-                        borderColor: "#eee",
-                        backgroundColor: "#fff",
-                        borderRadius: 10,
-                        padding: 10,
-                      }}
-                    >
+                    <View key={file.id} style={styles.fileCard}>
                       {fileIsImage ? (
                         <Pressable
                           onPress={() =>
@@ -761,31 +652,17 @@ export const ReturnDetailsScreen = () => {
                               dateUpload: file.date_upload ?? null,
                             })
                           }
-                          style={{ marginBottom: 10 }}
+                          style={styles.imagePressable}
                         >
                           <Image
                             source={{ uri: fileUrl }}
-                            style={{
-                              width: "100%",
-                              height: 180,
-                              borderRadius: 8,
-                              backgroundColor: "#f2f2f2",
-                            }}
+                            style={styles.fileImage}
                             contentFit="cover"
                             transition={120}
                           />
                         </Pressable>
                       ) : (
-                        <View
-                          style={{
-                            height: 56,
-                            borderRadius: 8,
-                            backgroundColor: "#f7f8fa",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginBottom: 10,
-                          }}
-                        >
+                        <View style={styles.fileIconBox}>
                           <FontAwesome5
                             name={fileIcon as any}
                             size={20}
@@ -794,36 +671,15 @@ export const ReturnDetailsScreen = () => {
                         </View>
                       )}
 
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: "#1a1a2e",
-                          fontWeight: "700",
-                        }}
-                        numberOfLines={2}
-                      >
+                      <Text style={styles.fileName} numberOfLines={2}>
                         {fileName}
                       </Text>
 
-                      <Text
-                        style={{
-                          marginTop: 6,
-                          fontSize: 12,
-                          color: "#777",
-                          fontWeight: "500",
-                        }}
-                      >
+                      <Text style={styles.uploadText}>
                         Upload: {formatUploadDate(file.date_upload)}
                       </Text>
 
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          marginTop: 10,
-                          columnGap: 10,
-                          flexWrap: "wrap",
-                        }}
-                      >
+                      <View style={styles.actionsRow}>
                         <Pressable
                           onPress={async () => {
                             if (fileIsImage) {
@@ -836,24 +692,9 @@ export const ReturnDetailsScreen = () => {
 
                             await handlePreviewFile(fileUrl, fileName);
                           }}
-                          style={{
-                            paddingHorizontal: 12,
-                            paddingVertical: 8,
-                            borderRadius: 8,
-                            borderWidth: 1,
-                            borderColor: "#ddd",
-                            backgroundColor: "#fff",
-                          }}
+                          style={styles.previewButton}
                         >
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: "#555",
-                              fontWeight: "700",
-                            }}
-                          >
-                            Aperçu
-                          </Text>
+                          <Text style={styles.actionTextDark}>Aperçu</Text>
                         </Pressable>
 
                         <Pressable
@@ -865,21 +706,12 @@ export const ReturnDetailsScreen = () => {
                             )
                           }
                           disabled={isDownloading}
-                          style={{
-                            paddingHorizontal: 12,
-                            paddingVertical: 8,
-                            borderRadius: 8,
-                            backgroundColor: PRIMARY,
-                            opacity: isDownloading ? 0.7 : 1,
-                          }}
+                          style={[
+                            styles.downloadButton,
+                            isDownloading && styles.buttonDisabled,
+                          ]}
                         >
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: "#fff",
-                              fontWeight: "700",
-                            }}
-                          >
+                          <Text style={styles.actionTextLight}>
                             {isDownloading
                               ? "Téléchargement..."
                               : "Télécharger"}
@@ -891,23 +723,12 @@ export const ReturnDetailsScreen = () => {
                             handleShareFile(fileUrl, file.nom_fichier, file.id)
                           }
                           disabled={isDownloading}
-                          style={{
-                            paddingHorizontal: 12,
-                            paddingVertical: 8,
-                            borderRadius: 8,
-                            backgroundColor: "#334155",
-                            opacity: isDownloading ? 0.7 : 1,
-                          }}
+                          style={[
+                            styles.shareButton,
+                            isDownloading && styles.buttonDisabled,
+                          ]}
                         >
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: "#fff",
-                              fontWeight: "700",
-                            }}
-                          >
-                            Partager
-                          </Text>
+                          <Text style={styles.actionTextLight}>Partager</Text>
                         </Pressable>
                       </View>
                     </View>
@@ -915,7 +736,7 @@ export const ReturnDetailsScreen = () => {
                 })}
               </View>
             ) : (
-              <Text style={{ fontSize: 13, color: "#888" }}>Aucun fichier</Text>
+              <Text style={styles.noFileText}>Aucun fichier</Text>
             )}
           </View>
         </ScrollView>
@@ -929,44 +750,19 @@ export const ReturnDetailsScreen = () => {
       >
         <Pressable
           onPress={() => setPreviewImage(null)}
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.85)",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 16,
-          }}
+          style={styles.modalBackdrop}
         >
-          <View
-            style={{
-              width: "100%",
-              maxWidth: 420,
-              aspectRatio: 3 / 4,
-              borderRadius: 12,
-              overflow: "hidden",
-              backgroundColor: "#111",
-            }}
-          >
+          <View style={styles.modalCard}>
             {previewImage?.uri ? (
               <Image
                 source={{ uri: previewImage.uri }}
-                style={{ width: "100%", height: "100%" }}
+                style={styles.previewImage}
                 contentFit="contain"
               />
             ) : null}
 
-            <View
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                backgroundColor: "rgba(0,0,0,0.65)",
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderRadius: 8,
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>
+            <View style={styles.previewDateBadge}>
+              <Text style={styles.previewDateText}>
                 {formatUploadDate(previewImage?.dateUpload)}
               </Text>
             </View>
@@ -986,22 +782,256 @@ const DetailRow = ({
   label: string;
   value: string;
 }) => (
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "flex-start",
-      marginBottom: 6,
-    }}
-  >
+  <View style={styles.detailRow}>
     <FontAwesome5
       name={icon as any}
       size={13}
       color={PRIMARY}
-      style={{ width: 18, marginTop: 1 }}
+      style={styles.detailIcon}
     />
-    <Text style={{ fontSize: 13, color: "#888", width: 110 }}>{label}</Text>
-    <Text style={{ fontSize: 13, color: "#222", flex: 1, flexWrap: "wrap" }}>
-      {value}
-    </Text>
+    <Text style={styles.detailLabel}>{label}</Text>
+    <Text style={styles.detailValue}>{value}</Text>
   </View>
 );
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 14,
+    backgroundColor: "#f7f8fa",
+  },
+  errorBox: {
+    marginTop: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  errorText: {
+    color: "#888",
+    fontSize: 14,
+  },
+  card: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    marginBottom: 12,
+  },
+  cardLast: {
+    marginBottom: 20,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  statusPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  commentBox: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  commentBoxRefused: {
+    borderColor: "#ffd6d6",
+    backgroundColor: "#fff6f6",
+  },
+  commentBoxDefault: {
+    borderColor: "#ffe2d7",
+    backgroundColor: "#fff8f4",
+  },
+  commentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 8,
+    marginBottom: 6,
+  },
+  commentTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  commentText: {
+    fontSize: 13,
+    color: "#333",
+    lineHeight: 20,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    columnGap: 8,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  filesWrap: {
+    rowGap: 10,
+  },
+  fileCard: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+  },
+  imagePressable: {
+    marginBottom: 10,
+  },
+  fileImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 8,
+    backgroundColor: "#f2f2f2",
+  },
+  fileIconBox: {
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: "#f7f8fa",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  fileName: {
+    fontSize: 13,
+    color: "#1a1a2e",
+    fontWeight: "700",
+  },
+  uploadText: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "#777",
+    fontWeight: "500",
+  },
+  actionsRow: {
+    flexDirection: "row",
+    marginTop: 10,
+    columnGap: 10,
+    flexWrap: "wrap",
+  },
+  previewButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  actionTextDark: {
+    fontSize: 12,
+    color: "#555",
+    fontWeight: "700",
+  },
+  downloadButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: PRIMARY,
+  },
+  shareButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: "#334155",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  actionTextLight: {
+    fontSize: 12,
+    color: "#fff",
+    fontWeight: "700",
+  },
+  noFileText: {
+    fontSize: 13,
+    color: "#888",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 420,
+    aspectRatio: 3 / 4,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#111",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+  },
+  previewDateBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  previewDateText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  detailIcon: {
+    width: 18,
+    marginTop: 1,
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: "#888",
+    width: 110,
+  },
+  detailValue: {
+    fontSize: 13,
+    color: "#222",
+    flex: 1,
+    flexWrap: "wrap",
+  },
+});

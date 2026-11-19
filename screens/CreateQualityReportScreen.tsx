@@ -218,7 +218,7 @@ export const CreateQualityReportScreen = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.infoText}>
-          Vous n'avez pas la permission de créer un rapport qualité.
+          Vous n&apos;avez pas la permission de créer un rapport qualité.
         </Text>
       </View>
     );
@@ -312,7 +312,7 @@ export const CreateQualityReportScreen = () => {
             <View style={styles.actionButtonWrap}>
               <Button
                 preset="default"
-                textStyle={{ fontSize: 13 }}
+                textStyle={styles.actionButtonText}
                 text={
                   isCameraVisible
                     ? `Prendre une photo (${files.length})`
@@ -324,7 +324,7 @@ export const CreateQualityReportScreen = () => {
             <View style={styles.actionButtonWrap}>
               <Button
                 preset="default"
-                textStyle={{ fontSize: 13 }}
+                textStyle={styles.actionButtonText}
                 text="Choisir des fichiers"
                 onPress={pickFromDeviceStorage}
               />
@@ -383,6 +383,9 @@ export const CreateQualityReportScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  actionButtonText: {
+    fontSize: 13,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 14,

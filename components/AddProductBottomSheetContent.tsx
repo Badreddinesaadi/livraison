@@ -10,7 +10,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 type AddProductBottomSheetContentProps = {
@@ -142,109 +142,59 @@ export default function AddProductBottomSheetContent({
 
   if (step === 2 && selectedProduct) {
     return (
-      <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "700",
-            color: "#1a1a2e",
-            marginBottom: 14,
-          }}
-        >
-          Ajouter un produit
-        </Text>
+      <View style={styles.stepContainer}>
+        <Text style={styles.title}>Ajouter un produit</Text>
 
-        <View
-          style={{
-            backgroundColor: "#f7f8fa",
-            borderRadius: 10,
-            padding: 12,
-            marginBottom: 12,
-          }}
-        >
-          <Text
-            style={{ fontSize: 14, fontWeight: "600", color: "#1a1a2e" }}
-            numberOfLines={2}
-          >
+        <View style={styles.productCard}>
+          <Text style={styles.productName} numberOfLines={2}>
             {selectedProduct.produit}
           </Text>
-          <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+          <Text style={styles.productMeta}>
             {selectedProduct.reference} · {selectedProduct.categorie}
           </Text>
         </View>
 
-        <View style={{ marginBottom: 10 }}>
-          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
-            Nombre FDX
-          </Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Nombre FDX</Text>
           <BottomSheetTextInput
             value={nbrFDX}
             onChangeText={setNbrFDX}
             placeholder="Nombre de FDX"
             placeholderTextColor="#bbb"
             keyboardType="decimal-pad"
-            style={{
-              minHeight: 48,
-              borderWidth: 1,
-              borderColor: "#e8e8e8",
-              borderRadius: 10,
-              backgroundColor: "#fff",
-              paddingHorizontal: 12,
-              fontSize: 14,
-              color: "#11181C",
-            }}
+            style={styles.input}
           />
         </View>
 
-        <View style={{ marginBottom: 10 }}>
-          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
-            Quantité
-          </Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Quantité</Text>
           <BottomSheetTextInput
             value={qte}
             onChangeText={setQte}
             placeholder="Quantité"
             placeholderTextColor="#bbb"
             keyboardType="decimal-pad"
-            style={{
-              minHeight: 48,
-              borderWidth: 1,
-              borderColor: "#e8e8e8",
-              borderRadius: 10,
-              backgroundColor: "#fff",
-              paddingHorizontal: 12,
-              fontSize: 14,
-              color: "#11181C",
-            }}
+            style={styles.input}
           />
         </View>
 
-        <View style={{ marginBottom: 14 }}>
-          <Text style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
-            Unité
-          </Text>
-          <View style={{ flexDirection: "row", gap: 8 }}>
+        <View style={styles.fieldLast}>
+          <Text style={styles.label}>Unité</Text>
+          <View style={styles.unitRow}>
             {UNITE_OPTIONS.map((opt) => (
               <Pressable
                 key={opt.id}
                 onPress={() => setUnite(opt.value)}
-                style={{
-                  flex: 1,
-                  paddingVertical: 12,
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: unite === opt.value ? PRIMARY : "#e8e8e8",
-                  backgroundColor:
-                    unite === opt.value ? PRIMARY + "18" : "#fff",
-                  alignItems: "center",
-                }}
+                style={[
+                  styles.unitOption,
+                  unite === opt.value && styles.unitOptionSelected,
+                ]}
               >
                 <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: "600",
-                    color: unite === opt.value ? PRIMARY : "#555",
-                  }}
+                  style={[
+                    styles.unitOptionText,
+                    unite === opt.value && styles.unitOptionTextSelected,
+                  ]}
                 >
                   {opt.label}
                 </Text>
@@ -253,36 +203,19 @@ export default function AddProductBottomSheetContent({
           </View>
         </View>
 
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <Pressable
-            onPress={handleBack}
-            style={{
-              flex: 1,
-              paddingVertical: 12,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#ddd",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#fff",
-            }}
-          >
-            <Text style={{ color: "#555", fontWeight: "700" }}>Retour</Text>
+        <View style={styles.actionRow}>
+          <Pressable onPress={handleBack} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Retour</Text>
           </Pressable>
           <Pressable
             onPress={handleSubmit}
             disabled={isPending}
-            style={{
-              flex: 1,
-              paddingVertical: 12,
-              borderRadius: 10,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: PRIMARY,
-              opacity: isPending ? 0.7 : 1,
-            }}
+            style={[
+              styles.submitButton,
+              isPending && styles.submitButtonPending,
+            ]}
           >
-            <Text style={{ color: "#fff", fontWeight: "700" }}>
+            <Text style={styles.submitButtonText}>
               {isPending ? "Ajout..." : "Ajouter"}
             </Text>
           </Pressable>
@@ -292,42 +225,20 @@ export default function AddProductBottomSheetContent({
   }
 
   return (
-    <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "700",
-          color: "#1a1a2e",
-          marginBottom: 14,
-        }}
-      >
-        Ajouter un produit
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Ajouter un produit</Text>
 
-      <View
-        style={{
-          marginBottom: 12,
-          borderWidth: 1,
-          borderColor: "#e8e8e8",
-          borderRadius: 10,
-          backgroundColor: "#fff",
-          paddingHorizontal: 12,
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
+      <View style={styles.searchBar}>
         <BottomSheetTextInput
           value={searchText}
           onChangeText={setSearchText}
           placeholder="Rechercher un produit..."
           placeholderTextColor="#bbb"
-          style={{ flex: 1, height: 42, fontSize: 14, color: "#222" }}
+          style={styles.searchInput}
         />
         {searchText ? (
           <Pressable onPress={() => setSearchText("")} hitSlop={8}>
-            <Text style={{ color: "#888", fontSize: 16, fontWeight: "700" }}>
-              ✕
-            </Text>
+            <Text style={styles.clearText}>✕</Text>
           </Pressable>
         ) : null}
       </View>
@@ -336,36 +247,25 @@ export default function AddProductBottomSheetContent({
         data={filteredProduits}
         keyExtractor={(item: Produit) => String(item.produit_id)}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }: { item: Produit }) => (
           <Pressable
             onPress={() => handleSelectProduct(item)}
-            style={{
-              paddingVertical: 12,
-              paddingHorizontal: 12,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#eee",
-              backgroundColor: "#fff",
-              marginBottom: 10,
-            }}
+            style={styles.item}
           >
-            <Text
-              style={{ fontWeight: "600", color: "#222", fontSize: 14 }}
-              numberOfLines={2}
-            >
+            <Text style={styles.itemTitle} numberOfLines={2}>
               {item.produit}
             </Text>
-            <Text style={{ color: "#888", marginTop: 2, fontSize: 12 }}>
+            <Text style={styles.itemMeta}>
               {item.reference} · {item.categorie} · {item.unite_v}
             </Text>
           </Pressable>
         )}
         ListEmptyComponent={
           isLoading ? (
-            <Text style={{ color: "#aaa" }}>Chargement...</Text>
+            <Text style={styles.emptyText}>Chargement...</Text>
           ) : (
-            <Text style={{ color: "#aaa" }}>
+            <Text style={styles.emptyText}>
               {debouncedSearch
                 ? "Aucun produit trouvé"
                 : "Aucun produit disponible"}
@@ -380,3 +280,161 @@ export default function AddProductBottomSheetContent({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  stepContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a2e",
+    marginBottom: 14,
+  },
+  productCard: {
+    backgroundColor: "#f7f8fa",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+  },
+  productName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1a1a2e",
+  },
+  productMeta: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 2,
+  },
+  field: {
+    marginBottom: 10,
+  },
+  fieldLast: {
+    marginBottom: 14,
+  },
+  label: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 4,
+  },
+  input: {
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: "#11181C",
+  },
+  unitRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  unitOption: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  unitOptionSelected: {
+    borderColor: PRIMARY,
+    backgroundColor: PRIMARY + "18",
+  },
+  unitOptionText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#555",
+  },
+  unitOptionTextSelected: {
+    color: PRIMARY,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  backButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  backButtonText: {
+    color: "#555",
+    fontWeight: "700",
+  },
+  submitButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: PRIMARY,
+  },
+  submitButtonPending: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  searchBar: {
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    height: 42,
+    fontSize: 14,
+    color: "#222",
+  },
+  clearText: {
+    color: "#888",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  listContent: {
+    paddingBottom: 100,
+  },
+  item: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    marginBottom: 10,
+  },
+  itemTitle: {
+    fontWeight: "600",
+    color: "#222",
+    fontSize: 14,
+  },
+  itemMeta: {
+    color: "#888",
+    marginTop: 2,
+    fontSize: 12,
+  },
+  emptyText: {
+    color: "#aaa",
+  },
+});

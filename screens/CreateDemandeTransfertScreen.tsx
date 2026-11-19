@@ -39,7 +39,7 @@ const SelectorField = ({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={[styles.fieldButton, disabled && { opacity: 0.5 }]}
+      style={[styles.fieldButton, disabled && styles.fieldButtonDisabled]}
     >
       <Text style={styles.fieldValue}>{value}</Text>
       <MaterialIcons name="keyboard-arrow-down" size={22} color="#666" />
@@ -309,6 +309,9 @@ export const CreateDemandeTransfertScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  fieldButtonDisabled: {
+    opacity: 0.5,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 14,

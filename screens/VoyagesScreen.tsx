@@ -32,7 +32,7 @@ import {
 } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Text, TextInput, View } from "react-native";
+import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 export const VoyagesScreen = () => {
@@ -713,24 +713,9 @@ export const VoyagesScreen = () => {
 
   if (!canListVoyages) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <View style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n&apos;avez pas la permission d&apos;accéder au module Voyage.
         </Text>
       </View>
@@ -738,46 +723,14 @@ export const VoyagesScreen = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: 14,
-        marginTop: 4,
-        backgroundColor: "#f7f8fa",
-      }}
-    >
-      <View style={{ flex: 1 }}>
+    <View style={styles.screen}>
+      <View style={styles.flex}>
         {/* Search bar */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 4,
-            columnGap: 8,
-            marginBottom: 12,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#fff",
-              borderColor: "#e8e8e8",
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 12,
-            }}
-          >
+        <View style={styles.searchRow}>
+          <View style={styles.searchInputWrap}>
             <FontAwesome5 name="search" size={14} color="#bbb" />
             <TextInput
-              style={{
-                flex: 1,
-                height: 46,
-                paddingHorizontal: 10,
-                fontSize: 14,
-                color: "#222",
-              }}
+              style={styles.searchInput}
               placeholder="Rechercher..."
               placeholderTextColor="#bbb"
               value={searchText}
@@ -791,21 +744,8 @@ export const VoyagesScreen = () => {
             LeftAccessory={() => (
               <View>
                 {filtersCount > 0 && (
-                  <View
-                    style={{
-                      backgroundColor: PRIMARY,
-                      width: 15,
-                      height: 15,
-                      borderRadius: 10,
-                      position: "absolute",
-                      top: -5,
-                      right: -5,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      zIndex: 1,
-                    }}
-                  >
-                    <Text style={{ color: "#fff", fontSize: 12 }}>
+                  <View style={styles.filterBadge}>
+                    <Text style={styles.filterBadgeText}>
                       {filtersCount}
                     </Text>
                   </View>
@@ -839,26 +779,13 @@ export const VoyagesScreen = () => {
         </View>
 
         {(pendingSyncCount > 0 || needsLogin) && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              columnGap: 8,
-              backgroundColor: "#fff7f3",
-              borderColor: PRIMARY + "55",
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              marginBottom: 10,
-            }}
-          >
+          <View style={styles.syncBanner}>
             <FontAwesome5
               name={needsLogin ? "lock" : "cloud-upload-alt"}
               size={13}
               color={PRIMARY}
             />
-            <Text style={{ flex: 1, fontSize: 13, color: "#7a4a2a" }}>
+            <Text style={styles.syncBannerText}>
               {needsLogin
                 ? "Reconnectez-vous pour synchroniser vos clôtures hors ligne."
                 : `${pendingSyncCount} clôture${pendingSyncCount > 1 ? "s" : ""} en attente de synchronisation.`}
@@ -874,7 +801,7 @@ export const VoyagesScreen = () => {
         )}
 
         {/* Result count */}
-        <Text style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>
+        <Text style={styles.resultCount}>
           {listData.length} voyage{listData.length !== 1 ? "s" : ""}
         </Text>
 
@@ -895,7 +822,7 @@ export const VoyagesScreen = () => {
             />
           )}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={styles.contentContainer}
           onEndReachedThreshold={0.3}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
@@ -907,9 +834,9 @@ export const VoyagesScreen = () => {
             isLoading ? (
               <Loader />
             ) : (
-              <View style={{ alignItems: "center", marginTop: 60 }}>
+              <View style={styles.emptyState}>
                 <FontAwesome5 name="truck" size={40} color="#ddd" />
-                <Text style={{ color: "#ccc", marginTop: 14, fontSize: 14 }}>
+                <Text style={styles.emptyText}>
                   Aucun voyage trouvé
                 </Text>
               </View>
@@ -920,3 +847,102 @@ export const VoyagesScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  screen: {
+    flex: 1,
+    paddingHorizontal: 14,
+    marginTop: 4,
+    backgroundColor: "#f7f8fa",
+  },
+  flex: {
+    flex: 1,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    columnGap: 8,
+    marginBottom: 12,
+  },
+  searchInputWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderColor: "#e8e8e8",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: 46,
+    paddingHorizontal: 10,
+    fontSize: 14,
+    color: "#222",
+  },
+  filterBadge: {
+    backgroundColor: PRIMARY,
+    width: 15,
+    height: 15,
+    borderRadius: 10,
+    position: "absolute",
+    top: -5,
+    right: -5,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  filterBadgeText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  syncBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 8,
+    backgroundColor: "#fff7f3",
+    borderColor: PRIMARY + "55",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10,
+  },
+  syncBannerText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#7a4a2a",
+  },
+  resultCount: {
+    fontSize: 13,
+    color: "#aaa",
+    marginBottom: 8,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  emptyState: {
+    alignItems: "center",
+    marginTop: 60,
+  },
+  emptyText: {
+    color: "#ccc",
+    marginTop: 14,
+    fontSize: 14,
+  },
+});

@@ -57,7 +57,7 @@ const SelectorField = ({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={[styles.fieldButton, disabled && { opacity: 0.5 }]}
+      style={[styles.fieldButton, disabled && styles.fieldButtonDisabled]}
     >
       <Text style={styles.fieldValue}>{value}</Text>
       <MaterialIcons name="keyboard-arrow-down" size={22} color="#666" />
@@ -405,7 +405,7 @@ export const CreateReturnScreen = () => {
             <View style={styles.actionButtonWrap}>
               <Button
                 preset="default"
-                textStyle={{ fontSize: 13 }}
+                textStyle={styles.actionButtonText}
                 text={
                   isCameraVisible
                     ? `Prendre une photo (${files.length})`
@@ -417,7 +417,7 @@ export const CreateReturnScreen = () => {
             <View style={styles.actionButtonWrap}>
               <Button
                 preset="default"
-                textStyle={{ fontSize: 13 }}
+                textStyle={styles.actionButtonText}
                 text="Choisir des fichiers"
                 onPress={pickFromDeviceStorage}
               />
@@ -476,6 +476,12 @@ export const CreateReturnScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  fieldButtonDisabled: {
+    opacity: 0.5,
+  },
+  actionButtonText: {
+    fontSize: 13,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 14,

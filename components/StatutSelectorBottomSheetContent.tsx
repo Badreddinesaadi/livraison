@@ -1,6 +1,6 @@
 import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const STATUTS = [
   { key: "Brouillon", label: "Brouillon", color: "#f59e0b" },
@@ -19,20 +19,11 @@ export default function StatutSelectorBottomSheetContent({
   onSelect,
 }: StatutSelectorBottomSheetContentProps) {
   return (
-    <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "700",
-          color: "#1a1a2e",
-          marginBottom: 4,
-        }}
-      >
-        Changer le statut
-      </Text>
-      <Text style={{ fontSize: 12, color: "#888", marginBottom: 14 }}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Changer le statut</Text>
+      <Text style={styles.subtitle}>
         Statut actuel :{" "}
-        <Text style={{ fontWeight: "600", color: "#1a1a2e" }}>
+        <Text style={styles.currentStatut}>
           {STATUTS.find((s) => s.key === currentStatut)?.label ?? currentStatut}
         </Text>
       </Text>
@@ -43,58 +34,32 @@ export default function StatutSelectorBottomSheetContent({
           <Pressable
             key={statut.key}
             onPress={() => onSelect(statut.key)}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingVertical: 12,
-              paddingHorizontal: 12,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: isCurrent ? PRIMARY : "#eee",
-              backgroundColor: isCurrent ? PRIMARY + "08" : "#fff",
-              marginBottom: 8,
-            }}
+            style={[
+              styles.option,
+              isCurrent && styles.optionSelected,
+            ]}
           >
             <View
-              style={{
-                width: 22,
-                height: 22,
-                borderRadius: 4,
-                borderWidth: 2,
-                borderColor: isCurrent ? PRIMARY : "#ccc",
-                backgroundColor: isCurrent ? PRIMARY : "transparent",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
+              style={[
+                styles.checkbox,
+                isCurrent && styles.checkboxSelected,
+              ]}
             >
               {isCurrent && (
-                <Text
-                  style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}
-                >
-                  ✓
-                </Text>
+                <Text style={styles.checkText}>✓</Text>
               )}
             </View>
             <View
-              style={{
-                paddingHorizontal: 8,
-                paddingVertical: 3,
-                borderRadius: 6,
-                backgroundColor: statut.color + "18",
-              }}
+              style={[
+                styles.badge,
+                { backgroundColor: statut.color + "18" },
+              ]}
             >
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: "700",
-                  color: statut.color,
-                }}
-              >
+              <Text style={[styles.badgeText, { color: statut.color }]}>
                 {statut.label}
               </Text>
             </View>
-            <View style={{ flex: 1 }} />
+            <View style={styles.spacer} />
             <FontAwesome5
               name="chevron-right"
               size={12}
@@ -106,3 +71,72 @@ export default function StatutSelectorBottomSheetContent({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a2e",
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: "#888",
+    marginBottom: 14,
+  },
+  currentStatut: {
+    fontWeight: "600",
+    color: "#1a1a2e",
+  },
+  option: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    marginBottom: 8,
+  },
+  optionSelected: {
+    borderColor: PRIMARY,
+    backgroundColor: PRIMARY + "08",
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "#ccc",
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  checkboxSelected: {
+    borderColor: PRIMARY,
+    backgroundColor: PRIMARY,
+  },
+  checkText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  badgeText: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  spacer: {
+    flex: 1,
+  },
+});

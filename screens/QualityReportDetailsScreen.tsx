@@ -20,6 +20,7 @@ import {
   Pressable,
   ScrollView,
   Share,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -558,24 +559,9 @@ export const QualityReportDetailsScreen = () => {
 
   if (!canListQualityReports) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <SafeAreaView style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n'avez pas la permission de consulter les rapports qualité.
         </Text>
       </SafeAreaView>
@@ -584,7 +570,7 @@ export const QualityReportDetailsScreen = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#f7f8fa" }}>
+      <SafeAreaView style={styles.container}>
         <Loader />
       </SafeAreaView>
     );
@@ -592,24 +578,9 @@ export const QualityReportDetailsScreen = () => {
 
   if (isError || !data) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <SafeAreaView style={styles.lockScreen}>
         <FontAwesome5 name="exclamation-circle" size={36} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Impossible de charger les détails de ce rapport.
         </Text>
       </SafeAreaView>
@@ -617,28 +588,18 @@ export const QualityReportDetailsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f7f8fa" }}>
+    <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={{ padding: 14, paddingBottom: 24, rowGap: 12 }}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: "#efefef",
-            padding: 14,
-          }}
-        >
-          <Text style={{ fontSize: 18, fontWeight: "700", color: "#11181C" }}>
-            Rapport qualité #{data.id}
-          </Text>
-          <Text style={{ marginTop: 4, color: "#64748B", fontSize: 13 }}>
+        <View style={styles.infoCard}>
+          <Text style={styles.title}>Rapport qualité #{data.id}</Text>
+          <Text style={styles.subtitle}>
             {fileCount} fichier{fileCount > 1 ? "s" : ""}
           </Text>
 
-          <View style={{ marginTop: 12, rowGap: 8 }}>
+          <View style={styles.fieldList}>
             <Field label="DUM" value={data.dum || "-"} />
             <Field label="Dossier" value={data.dossier || "-"} />
             <Field label="Commentaire" value={data.commentaire || "-"} />
@@ -648,25 +609,13 @@ export const QualityReportDetailsScreen = () => {
           </View>
         </View>
 
-        <View
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: "#efefef",
-            padding: 14,
-          }}
-        >
-          <Text style={{ fontSize: 15, fontWeight: "700", color: "#1a1a2e" }}>
-            Pièces jointes
-          </Text>
+        <View style={styles.infoCard}>
+          <Text style={styles.sectionTitle}>Pièces jointes</Text>
 
           {fileCount === 0 ? (
-            <Text style={{ marginTop: 10, color: "#94a3b8", fontSize: 13 }}>
-              Aucun fichier joint.
-            </Text>
+            <Text style={styles.emptyText}>Aucun fichier joint.</Text>
           ) : (
-            <View style={{ marginTop: 10, rowGap: 10 }}>
+            <View style={styles.filesWrap}>
               {(data.images ?? []).map((file, index) => {
                 const fileUrl = buildFileUrl(file.chemin_fichier);
                 if (!fileUrl) {
@@ -680,16 +629,7 @@ export const QualityReportDetailsScreen = () => {
                 const isProcessing = processingFileId === file.id;
 
                 return (
-                  <View
-                    key={file.id}
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "#eee",
-                      backgroundColor: "#fff",
-                      borderRadius: 10,
-                      padding: 10,
-                    }}
-                  >
+                  <View key={file.id} style={styles.fileCard}>
                     {fileIsImage ? (
                       <Pressable
                         onPress={() =>
@@ -698,31 +638,17 @@ export const QualityReportDetailsScreen = () => {
                             dateUpload: file.date_upload ?? null,
                           })
                         }
-                        style={{ marginBottom: 10 }}
+                        style={styles.imagePressable}
                       >
                         <Image
                           source={{ uri: fileUrl }}
-                          style={{
-                            width: "100%",
-                            height: 180,
-                            borderRadius: 8,
-                            backgroundColor: "#f2f2f2",
-                          }}
+                          style={styles.fileImage}
                           contentFit="cover"
                           transition={120}
                         />
                       </Pressable>
                     ) : (
-                      <View
-                        style={{
-                          height: 56,
-                          borderRadius: 8,
-                          backgroundColor: "#f7f8fa",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          marginBottom: 10,
-                        }}
-                      >
+                      <View style={styles.fileIconBox}>
                         <FontAwesome5
                           name={fileIcon as any}
                           size={20}
@@ -731,36 +657,15 @@ export const QualityReportDetailsScreen = () => {
                       </View>
                     )}
 
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        color: "#1a1a2e",
-                        fontWeight: "700",
-                      }}
-                      numberOfLines={2}
-                    >
+                    <Text style={styles.fileName} numberOfLines={2}>
                       {fileName}
                     </Text>
 
-                    <Text
-                      style={{
-                        marginTop: 6,
-                        fontSize: 12,
-                        color: "#777",
-                        fontWeight: "500",
-                      }}
-                    >
+                    <Text style={styles.uploadText}>
                       Upload: {formatUploadDate(file.date_upload)}
                     </Text>
 
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        marginTop: 10,
-                        columnGap: 10,
-                        flexWrap: "wrap",
-                      }}
-                    >
+                    <View style={styles.actionsRow}>
                       <Pressable
                         onPress={async () => {
                           if (fileIsImage) {
@@ -773,24 +678,9 @@ export const QualityReportDetailsScreen = () => {
 
                           await handlePreviewFile(fileUrl, fileName);
                         }}
-                        style={{
-                          paddingHorizontal: 12,
-                          paddingVertical: 8,
-                          borderRadius: 8,
-                          borderWidth: 1,
-                          borderColor: "#ddd",
-                          backgroundColor: "#fff",
-                        }}
+                        style={styles.previewButton}
                       >
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "#555",
-                            fontWeight: "700",
-                          }}
-                        >
-                          Aperçu
-                        </Text>
+                        <Text style={styles.actionTextDark}>Aperçu</Text>
                       </Pressable>
 
                       <Pressable
@@ -806,21 +696,12 @@ export const QualityReportDetailsScreen = () => {
                           )
                         }
                         disabled={isProcessing}
-                        style={{
-                          paddingHorizontal: 12,
-                          paddingVertical: 8,
-                          borderRadius: 8,
-                          backgroundColor: PRIMARY,
-                          opacity: isProcessing ? 0.7 : 1,
-                        }}
+                        style={[
+                          styles.downloadButton,
+                          isProcessing && styles.buttonDisabled,
+                        ]}
                       >
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "#fff",
-                            fontWeight: "700",
-                          }}
-                        >
+                        <Text style={styles.actionTextLight}>
                           {isProcessing ? "Téléchargement..." : "Télécharger"}
                         </Text>
                       </Pressable>
@@ -830,23 +711,12 @@ export const QualityReportDetailsScreen = () => {
                           handleShareFile(fileUrl, file.nom_fichier, file.id)
                         }
                         disabled={isProcessing}
-                        style={{
-                          paddingHorizontal: 12,
-                          paddingVertical: 8,
-                          borderRadius: 8,
-                          backgroundColor: "#334155",
-                          opacity: isProcessing ? 0.7 : 1,
-                        }}
+                        style={[
+                          styles.shareButton,
+                          isProcessing && styles.buttonDisabled,
+                        ]}
                       >
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "#fff",
-                            fontWeight: "700",
-                          }}
-                        >
-                          Partager
-                        </Text>
+                        <Text style={styles.actionTextLight}>Partager</Text>
                       </Pressable>
                     </View>
                   </View>
@@ -865,44 +735,19 @@ export const QualityReportDetailsScreen = () => {
       >
         <Pressable
           onPress={() => setPreviewImage(null)}
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.85)",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 16,
-          }}
+          style={styles.modalBackdrop}
         >
-          <View
-            style={{
-              width: "100%",
-              maxWidth: 420,
-              aspectRatio: 3 / 4,
-              borderRadius: 12,
-              overflow: "hidden",
-              backgroundColor: "#111",
-            }}
-          >
+          <View style={styles.modalCard}>
             {previewImage?.uri ? (
               <Image
                 source={{ uri: previewImage.uri }}
-                style={{ width: "100%", height: "100%" }}
+                style={styles.previewImage}
                 contentFit="contain"
               />
             ) : null}
 
-            <View
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                backgroundColor: "rgba(0,0,0,0.65)",
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderRadius: 8,
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>
+            <View style={styles.previewDateBadge}>
+              <Text style={styles.previewDateText}>
                 {formatUploadDate(previewImage?.dateUpload)}
               </Text>
             </View>
@@ -914,17 +759,190 @@ export const QualityReportDetailsScreen = () => {
 };
 
 const Field = ({ label, value }: { label: string; value: string }) => (
-  <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-    <Text style={{ width: 92, color: "#64748B", fontSize: 13 }}>{label}</Text>
-    <Text
-      style={{
-        flex: 1,
-        color: "#0f172a",
-        fontSize: 13,
-        fontWeight: "500",
-      }}
-    >
-      {value}
-    </Text>
+  <View style={styles.fieldRow}>
+    <Text style={styles.fieldLabel}>{label}</Text>
+    <Text style={styles.fieldValue}>{value}</Text>
   </View>
 );
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#f7f8fa",
+  },
+  listContent: {
+    padding: 14,
+    paddingBottom: 24,
+    rowGap: 12,
+  },
+  infoCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    padding: 14,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#11181C",
+  },
+  subtitle: {
+    marginTop: 4,
+    color: "#64748B",
+    fontSize: 13,
+  },
+  fieldList: {
+    marginTop: 12,
+    rowGap: 8,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  emptyText: {
+    marginTop: 10,
+    color: "#94a3b8",
+    fontSize: 13,
+  },
+  filesWrap: {
+    marginTop: 10,
+    rowGap: 10,
+  },
+  fileCard: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+  },
+  imagePressable: {
+    marginBottom: 10,
+  },
+  fileImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 8,
+    backgroundColor: "#f2f2f2",
+  },
+  fileIconBox: {
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: "#f7f8fa",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  fileName: {
+    fontSize: 13,
+    color: "#1a1a2e",
+    fontWeight: "700",
+  },
+  uploadText: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "#777",
+    fontWeight: "500",
+  },
+  actionsRow: {
+    flexDirection: "row",
+    marginTop: 10,
+    columnGap: 10,
+    flexWrap: "wrap",
+  },
+  previewButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  actionTextDark: {
+    fontSize: 12,
+    color: "#555",
+    fontWeight: "700",
+  },
+  downloadButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: PRIMARY,
+  },
+  shareButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: "#334155",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  actionTextLight: {
+    fontSize: 12,
+    color: "#fff",
+    fontWeight: "700",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 420,
+    aspectRatio: 3 / 4,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#111",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+  },
+  previewDateBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  previewDateText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  fieldRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  fieldLabel: {
+    width: 92,
+    color: "#64748B",
+    fontSize: 13,
+  },
+  fieldValue: {
+    flex: 1,
+    color: "#0f172a",
+    fontSize: 13,
+    fontWeight: "500",
+  },
+});

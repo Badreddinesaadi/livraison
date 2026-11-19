@@ -67,16 +67,8 @@ export const VoyageSummaryScreen = () => {
   if (!canEditVoyage) {
     return (
       <View style={styles.container}>
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 20,
-            rowGap: 12,
-          }}
-        >
-          <Text style={{ color: "#666", textAlign: "center" }}>
+        <View style={styles.permissionScreen}>
+          <Text style={styles.permissionText}>
             {store.type === "create"
               ? "Vous n'avez pas la permission de créer un voyage."
               : "Vous n'avez pas la permission de modifier un voyage."}
@@ -93,7 +85,7 @@ export const VoyageSummaryScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={{ flex: 1 }}>
+      <View style={styles.flex}>
         <Text style={styles.pageTitle}>
           Veuillez confirmer les détails du voyage avant de le créer
         </Text>
@@ -103,7 +95,7 @@ export const VoyageSummaryScreen = () => {
           keyExtractor={() => ""}
           renderItem={null}
           ListHeaderComponent={
-            <View style={{ gap: 16 }}>
+            <View style={styles.headerContent}>
               {/* Type de véhicule */}
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -427,7 +419,7 @@ export const VoyageSummaryScreen = () => {
           }
         />
 
-        <View style={{ marginBottom: 10, gap: 10, marginTop: 5 }}>
+        <View style={styles.actions}>
           <Button
             preset="filled"
             text={
@@ -520,6 +512,28 @@ export const VoyageSummaryScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  permissionScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    rowGap: 12,
+  },
+  permissionText: {
+    color: "#666",
+    textAlign: "center",
+  },
+  flex: {
+    flex: 1,
+  },
+  headerContent: {
+    gap: 16,
+  },
+  actions: {
+    marginBottom: 10,
+    gap: 10,
+    marginTop: 5,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 14,

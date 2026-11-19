@@ -2,7 +2,13 @@ import { VoyageListItem } from "@/api/voyage.api";
 import { PRIMARY, SUCCESS } from "@/constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import { LayoutAnimation, Pressable, Text, View } from "react-native";
+import {
+  LayoutAnimation,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export const VoyageCard = ({
   item,
@@ -26,7 +32,6 @@ export const VoyageCard = ({
   onAcheveVoyage: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const canManageVoyage = canUpdateVoyage || canDeleteVoyage;
   const bls = item.bl_list;
   const isRented = item.type_vehicule === "location";
   // opened bls count
@@ -47,41 +52,14 @@ export const VoyageCard = ({
   };
 
   return (
-    <Pressable
-      onPress={toggle}
-      style={{
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        marginBottom: 12,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.07,
-        shadowRadius: 4,
-        elevation: 2,
-        borderWidth: 1,
-        borderColor: "#efefef",
-        overflow: "hidden",
-      }}
-    >
+    <Pressable onPress={toggle} style={styles.card}>
       {/* ── Header row ── */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          padding: 14,
-        }}
-      >
+      <View style={styles.header}>
         <View
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            backgroundColor:
-              item.statut === "terminer" ? SUCCESS + "33" : PRIMARY + "33",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 12,
-          }}
+          style={[
+            styles.iconBubble,
+            item.statut === "terminer" && styles.iconBubbleDone,
+          ]}
         >
           <FontAwesome5
             name="truck"
@@ -90,61 +68,30 @@ export const VoyageCard = ({
           />
         </View>
 
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontWeight: "700", fontSize: 15, color: "#1a1a2e" }}>
+        <View style={styles.titleWrap}>
+          <Text style={styles.title}>
             {isRented
               ? item.societe_location_nom || "Véhicule loué"
               : item.vehicule_immatriculation}
           </Text>
-          <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
+          <Text style={styles.subtitle}>
             {isRented ? item.chauffeur_externe_nom || "—" : item.nomChauffeur}
           </Text>
           {isRented && (
-            <View
-              style={{
-                alignSelf: "flex-start",
-                marginTop: 4,
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-                borderRadius: 999,
-                backgroundColor: PRIMARY + "22",
-              }}
-            >
-              <Text style={{ fontSize: 11, fontWeight: "700", color: PRIMARY }}>
-                Loué
-              </Text>
+            <View style={styles.rentedBadge}>
+              <Text style={styles.rentedBadgeText}>Loué</Text>
             </View>
           )}
         </View>
 
-        <View style={{ alignItems: "flex-end", marginRight: 10 }}>
-          <Text style={{ fontSize: 12, color: "#aaa" }}>{departDate}</Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 12,
-                color: PRIMARY,
-                fontWeight: "600",
-                marginTop: 2,
-              }}
-            >
+        <View style={styles.meta}>
+          <Text style={styles.date}>{departDate}</Text>
+          <View style={styles.blSummaryRow}>
+            <Text style={styles.blPendingText}>
               {blsEncoursCount !== 0 &&
                 `${blsEncoursCount} ${blsEncoursCount > 1 ? "BLs" : "BL"} en cours`}
             </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                color: SUCCESS,
-                fontWeight: "600",
-                marginTop: 2,
-              }}
-            >
+            <Text style={styles.blDeliveredText}>
               {bls?.length && bls?.length - blsEncoursCount !== 0
                 ? bls?.length - blsEncoursCount
                 : ""}{" "}
@@ -164,55 +111,27 @@ export const VoyageCard = ({
 
       {/* ── Expanded details ── */}
       {expanded && (
-        <View
-          style={{
-            borderTopWidth: 1,
-            borderTopColor: "#f2f2f2",
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-start",
-              marginBottom: 6,
-            }}
-          >
+        <View style={styles.body}>
+          <View style={styles.detailRow}>
             <FontAwesome5
               name="file-alt"
               size={13}
               color={PRIMARY}
-              style={{ width: 18, marginTop: 1 }}
+              style={styles.detailIcon}
             />
-            <Text style={{ fontSize: 13, color: "#888", width: 96 }}>BLs</Text>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                flexWrap: "wrap",
-                columnGap: 10,
-                rowGap: 6,
-              }}
-            >
+            <Text style={styles.detailLabel}>BLs</Text>
+            <View style={styles.blList}>
               {bls?.length ? (
                 bls.map((bl) => {
                   const isDelivered = bl.statut === "Livré";
                   return (
-                    <View
-                      key={bl.id}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
+                    <View key={bl.id} style={styles.blItem}>
                       <Text
-                        style={{
-                          fontSize: 13,
-                          color: isDelivered ? SUCCESS : "#222",
-                          fontWeight: isDelivered ? "700" : "400",
-                        }}
+                        style={
+                          isDelivered
+                            ? styles.blCodeDelivered
+                            : styles.blCode
+                        }
                       >
                         {bl.code}
                       </Text>
@@ -227,18 +146,8 @@ export const VoyageCard = ({
                         <FontAwesome5 name="clock" size={11} color={PRIMARY} />
                       )}
                       {(bl.images?.length ?? 0) > 0 && (
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 2,
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: SUCCESS,
-                            }}
-                          >
+                        <View style={styles.blImages}>
+                          <Text style={styles.blImageCount}>
                             {bl.images?.length ?? 0}
                           </Text>
                           <FontAwesome5
@@ -252,7 +161,7 @@ export const VoyageCard = ({
                   );
                 })
               ) : (
-                <Text style={{ fontSize: 13, color: "#222" }}>—</Text>
+                <Text style={styles.blEmpty}>—</Text>
               )}
             </View>
           </View>
@@ -293,80 +202,33 @@ export const VoyageCard = ({
           />
 
           {/* Action buttons */}
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 10,
-              marginTop: 10,
-              paddingTop: 10,
-              borderTopWidth: 1,
-              borderTopColor: "#f2f2f2",
-            }}
-          >
-            <Pressable
-              onPress={onMore}
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "18",
-                gap: 6,
-              }}
-            >
+          <View style={styles.actionRow}>
+            <Pressable onPress={onMore} style={styles.moreButton}>
               <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
-              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
-                Plus
-              </Text>
+              <Text style={styles.moreButtonText}>Plus</Text>
             </Pressable>
             {item.statut !== "terminer" &&
               canCloseBLVoyage &&
               blsEncoursCount > 0 && (
                 <Pressable
                   onPress={onOpenCloseBL}
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    paddingVertical: 10,
-                    borderRadius: 8,
-                    backgroundColor: "#25f27079",
-                    gap: 6,
-                  }}
+                  style={styles.closeBlButton}
                 >
                   <FontAwesome5
                     name={"check-circle"}
                     size={14}
                     color={"#0c5c2a"}
                   />
-                  <Text
-                    style={{
-                      color: "#0c5c2a",
-                      fontWeight: "600",
-                      fontSize: 13,
-                    }}
-                  >
-                    Clôturer BL
-                  </Text>
+                  <Text style={styles.closeBlButtonText}>Clôturer BL</Text>
                 </Pressable>
               )}
             {canAcheveBLVoyage && item.statut !== "terminer" && (
               <Pressable
                 onPress={onAcheveVoyage}
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 10,
-                  borderRadius: 8,
-                  backgroundColor:
-                    blsEncoursCount > 0 ? PRIMARY + "18" : "#25f27079",
-                  gap: 6,
-                }}
+                style={[
+                  styles.acheverButton,
+                  blsEncoursCount === 0 && styles.acheverButtonDone,
+                ]}
               >
                 <FontAwesome5
                   name="check-circle"
@@ -374,40 +236,19 @@ export const VoyageCard = ({
                   color={blsEncoursCount > 0 ? PRIMARY : "#0c5c2a"}
                 />
                 <Text
-                  style={{
-                    color: blsEncoursCount > 0 ? PRIMARY : "#0c5c2a",
-                    fontWeight: "600",
-                    fontSize: 13,
-                  }}
+                  style={[
+                    styles.acheverButtonText,
+                    blsEncoursCount === 0 && styles.acheverButtonTextDone,
+                  ]}
                 >
                   Achever
                 </Text>
               </Pressable>
             )}
             {canDeleteVoyage && (
-              <Pressable
-                onPress={onDelete}
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 10,
-                  borderRadius: 8,
-                  backgroundColor: "#ff4d4f18",
-                  gap: 6,
-                }}
-              >
+              <Pressable onPress={onDelete} style={styles.deleteButton}>
                 <FontAwesome5 name="trash-alt" size={14} color="#ff4d4f" />
-                <Text
-                  style={{
-                    color: "#ff4d4f",
-                    fontWeight: "600",
-                    fontSize: 13,
-                  }}
-                >
-                  Supprimer
-                </Text>
+                <Text style={styles.deleteButtonText}>Supprimer</Text>
               </Pressable>
             )}
           </View>
@@ -426,22 +267,232 @@ export const DetailRow = ({
   label: string;
   value: string;
 }) => (
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "flex-start",
-      marginBottom: 6,
-    }}
-  >
+  <View style={styles.detailRow}>
     <FontAwesome5
       name={icon as any}
       size={13}
       color={PRIMARY}
-      style={{ width: 18, marginTop: 1 }}
+      style={styles.detailIcon}
     />
-    <Text style={{ fontSize: 13, color: "#888", width: 96 }}>{label}</Text>
-    <Text style={{ fontSize: 13, color: "#222", flex: 1, flexWrap: "wrap" }}>
-      {value}
-    </Text>
+    <Text style={styles.detailLabel}>{label}</Text>
+    <Text style={styles.detailValue}>{value}</Text>
   </View>
 );
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    overflow: "hidden",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+  },
+  iconBubble: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: PRIMARY + "33",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  iconBubbleDone: {
+    backgroundColor: SUCCESS + "33",
+  },
+  titleWrap: {
+    flex: 1,
+  },
+  title: {
+    fontWeight: "700",
+    fontSize: 15,
+    color: "#1a1a2e",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#666",
+    marginTop: 2,
+  },
+  rentedBadge: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: PRIMARY + "22",
+  },
+  rentedBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: PRIMARY,
+  },
+  meta: {
+    alignItems: "flex-end",
+    marginRight: 10,
+  },
+  date: {
+    fontSize: 12,
+    color: "#aaa",
+  },
+  blSummaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  blPendingText: {
+    fontSize: 12,
+    color: PRIMARY,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  blDeliveredText: {
+    fontSize: 12,
+    color: SUCCESS,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  body: {
+    borderTopWidth: 1,
+    borderTopColor: "#f2f2f2",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  detailIcon: {
+    width: 18,
+    marginTop: 1,
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: "#888",
+    width: 96,
+  },
+  detailValue: {
+    fontSize: 13,
+    color: "#222",
+    flex: 1,
+    flexWrap: "wrap",
+  },
+  blList: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: 10,
+    rowGap: 6,
+  },
+  blItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  blCode: {
+    fontSize: 13,
+    color: "#222",
+    fontWeight: "400",
+  },
+  blCodeDelivered: {
+    fontSize: 13,
+    color: SUCCESS,
+    fontWeight: "700",
+  },
+  blImages: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  blImageCount: {
+    color: SUCCESS,
+  },
+  blEmpty: {
+    fontSize: 13,
+    color: "#222",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f2f2f2",
+  },
+  moreButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: PRIMARY + "18",
+    gap: 6,
+  },
+  moreButtonText: {
+    color: PRIMARY,
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  closeBlButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#25f27079",
+    gap: 6,
+  },
+  closeBlButtonText: {
+    color: "#0c5c2a",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  acheverButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: PRIMARY + "18",
+    gap: 6,
+  },
+  acheverButtonDone: {
+    backgroundColor: "#25f27079",
+  },
+  acheverButtonText: {
+    color: PRIMARY,
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  acheverButtonTextDone: {
+    color: "#0c5c2a",
+  },
+  deleteButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#ff4d4f18",
+    gap: 6,
+  },
+  deleteButtonText: {
+    color: "#ff4d4f",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+});
