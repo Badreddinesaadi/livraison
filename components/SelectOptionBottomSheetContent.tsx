@@ -4,7 +4,7 @@ import {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { ListRenderItem, Pressable, Text, View } from "react-native";
+import { ListRenderItem, Pressable, StyleSheet, Text, View } from "react-native";
 
 type SelectOption = {
   id: number;
@@ -42,28 +42,23 @@ const SelectOptionItem = memo(function SelectOptionItem({
   return (
     <Pressable
       onPress={onPressItem}
-      style={{
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor:
-          item.type === "highlight" ? SUCCESS : isSelected ? PRIMARY : "#eee",
-        backgroundColor: "#fff",
-        marginBottom: 10,
-      }}
+      style={[
+        styles.option,
+        isSelected && styles.optionSelected,
+        item.type === "highlight" && styles.optionHighlight,
+      ]}
     >
       <Text
-        style={{
-          fontWeight: "600",
-          color:
-            item.type === "highlight" ? SUCCESS : isSelected ? PRIMARY : "#222",
-        }}
+        style={[
+          styles.optionLabel,
+          isSelected && styles.optionLabelSelected,
+          item.type === "highlight" && styles.optionLabelHighlight,
+        ]}
       >
         {item.label}
       </Text>
       {item.valueLabel || item.subLabel ? (
-        <Text style={{ color: "#888", marginTop: 2 }}>
+        <Text style={styles.optionSubLabel}>
           {item.valueLabel || item.subLabel}
         </Text>
       ) : null}
@@ -129,48 +124,21 @@ export default function SelectOptionBottomSheetContent({
   );
 
   return (
-    <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "700",
-          color: "#1a1a2e",
-          marginBottom: 14,
-        }}
-      >
-        {title}
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>{title}</Text>
 
       {shouldShowSearch ? (
-        <View
-          style={{
-            marginBottom: 12,
-            borderWidth: 1,
-            borderColor: "#e8e8e8",
-            borderRadius: 10,
-            backgroundColor: "#fff",
-            paddingHorizontal: 12,
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.searchBar}>
           <BottomSheetTextInput
             value={searchText}
             onChangeText={setSearchText}
             placeholder={searchPlaceholder}
             placeholderTextColor="#bbb"
-            style={{
-              flex: 1,
-              height: 42,
-              fontSize: 14,
-              color: "#222",
-            }}
+            style={styles.searchInput}
           />
           {searchText ? (
             <Pressable onPress={clearSearch} hitSlop={8}>
-              <Text style={{ color: "#888", fontSize: 16, fontWeight: "700" }}>
-                ✕
-              </Text>
+              <Text style={styles.clearText}>✕</Text>
             </Pressable>
           ) : null}
         </View>
@@ -180,14 +148,14 @@ export default function SelectOptionBottomSheetContent({
         data={filteredOptions}
         keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={styles.listContent}
         renderItem={renderItem}
         initialNumToRender={12}
         maxToRenderPerBatch={12}
         windowSize={8}
         removeClippedSubviews
         ListEmptyComponent={
-          <Text style={{ color: "#aaa" }}>
+          <Text style={styles.emptyText}>
             {shouldShowSearch && debouncedSearch
               ? "Aucune option trouvée"
               : emptyLabel}
@@ -197,3 +165,72 @@ export default function SelectOptionBottomSheetContent({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a2e",
+    marginBottom: 14,
+  },
+  option: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    marginBottom: 10,
+  },
+  optionSelected: {
+    borderColor: PRIMARY,
+  },
+  optionHighlight: {
+    borderColor: SUCCESS,
+  },
+  optionLabel: {
+    fontWeight: "600",
+    color: "#222",
+  },
+  optionLabelSelected: {
+    color: PRIMARY,
+  },
+  optionLabelHighlight: {
+    color: SUCCESS,
+  },
+  optionSubLabel: {
+    color: "#888",
+    marginTop: 2,
+  },
+  searchBar: {
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    height: 42,
+    fontSize: 14,
+    color: "#222",
+  },
+  clearText: {
+    color: "#888",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  listContent: {
+    paddingBottom: 100,
+  },
+  emptyText: {
+    color: "#aaa",
+  },
+});

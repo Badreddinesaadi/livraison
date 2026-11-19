@@ -1,7 +1,7 @@
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type VoyageActionConfirmVariant = "achever" | "supprimer";
 
@@ -171,41 +171,14 @@ export default function VoyageActionConfirmBottomSheetContent({
   };
 
   return (
-    <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "700",
-          color: "#1a1a2e",
-          marginBottom: 10,
-        }}
-      >
-        {content.title}
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>{content.title}</Text>
 
-      <Text
-        style={{
-          fontSize: 14,
-          color: "#444",
-          lineHeight: 22,
-          marginBottom: 16,
-        }}
-      >
-        {content.message}
-      </Text>
+      <Text style={styles.message}>{content.message}</Text>
 
       {isAchever ? (
-        <View style={{ marginBottom: 16 }}>
-          <Text
-            style={{
-              fontSize: 13,
-              color: "#444",
-              marginBottom: 8,
-              fontWeight: "600",
-            }}
-          >
-            Km actuel du véhicule
-          </Text>
+        <View style={styles.formSection}>
+          <Text style={styles.label}>Km actuel du véhicule</Text>
           <BottomSheetTextInput
             value={kmRetourInput}
             onChangeText={(text) => {
@@ -217,40 +190,13 @@ export default function VoyageActionConfirmBottomSheetContent({
             placeholder="Ex: 125000"
             keyboardType="number-pad"
             editable={!isLoading}
-            style={{
-              borderWidth: 1,
-              borderColor: "#ddd",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              fontSize: 14,
-              color: "#1a1a2e",
-              backgroundColor: "#fff",
-            }}
+            style={styles.input}
           />
           {typeof kmDepart === "number" ? (
-            <Text
-              style={{
-                marginTop: 6,
-                fontSize: 12,
-                color: "#666",
-              }}
-            >
-              Km départ: {kmDepart} km
-            </Text>
+            <Text style={styles.kmDepartText}>Km départ: {kmDepart} km</Text>
           ) : null}
 
-          <Text
-            style={{
-              fontSize: 13,
-              color: "#444",
-              marginTop: 14,
-              marginBottom: 8,
-              fontWeight: "600",
-            }}
-          >
-            Date et heure retour
-          </Text>
+          <Text style={styles.dateLabel}>Date et heure retour</Text>
           <Pressable
             onPress={() => {
               if (isLoading) return;
@@ -260,17 +206,12 @@ export default function VoyageActionConfirmBottomSheetContent({
                 setErrorMessage(null);
               }
             }}
-            style={{
-              borderWidth: 1,
-              borderColor: "#ddd",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              paddingVertical: 12,
-              backgroundColor: "#fff",
-            }}
+            style={styles.dateButton}
           >
             <Text
-              style={{ fontSize: 14, color: dateRetour ? "#1a1a2e" : "#999" }}
+              style={
+                dateRetour ? styles.dateValueFilled : styles.dateValueEmpty
+              }
             >
               {dateRetourLabel}
             </Text>
@@ -333,55 +274,30 @@ export default function VoyageActionConfirmBottomSheetContent({
           ) : null}
 
           {errorMessage ? (
-            <Text
-              style={{
-                marginTop: 6,
-                fontSize: 12,
-                color: DANGER,
-                fontWeight: "600",
-              }}
-            >
-              {errorMessage}
-            </Text>
+            <Text style={styles.errorText}>{errorMessage}</Text>
           ) : null}
         </View>
       ) : null}
 
-      <View style={{ flexDirection: "row", columnGap: 10 }}>
+      <View style={styles.actionRow}>
         <Pressable
           onPress={onCancel}
           disabled={isLoading}
-          style={{
-            flex: 1,
-            paddingVertical: 12,
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#ddd",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#fff",
-            opacity: isLoading ? 0.7 : 1,
-          }}
+          style={[styles.cancelButton, isLoading && styles.buttonDisabled]}
         >
-          <Text style={{ color: "#444", fontWeight: "600", fontSize: 14 }}>
-            Annuler
-          </Text>
+          <Text style={styles.cancelButtonText}>Annuler</Text>
         </Pressable>
 
         <Pressable
           onPress={handleConfirmPress}
           disabled={isLoading}
-          style={{
-            flex: 1,
-            paddingVertical: 12,
-            borderRadius: 10,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: content.confirmBackgroundColor,
-            opacity: isLoading ? 0.7 : 1,
-          }}
+          style={[
+            styles.confirmButton,
+            { backgroundColor: content.confirmBackgroundColor },
+            isLoading && styles.buttonDisabled,
+          ]}
         >
-          <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>
+          <Text style={styles.confirmButtonText}>
             {isLoading ? "Traitement..." : content.confirmLabel}
           </Text>
         </Pressable>
@@ -389,3 +305,109 @@ export default function VoyageActionConfirmBottomSheetContent({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a2e",
+    marginBottom: 10,
+  },
+  message: {
+    fontSize: 14,
+    color: "#444",
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  formSection: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 13,
+    color: "#444",
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: "#1a1a2e",
+    backgroundColor: "#fff",
+  },
+  kmDepartText: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "#666",
+  },
+  dateLabel: {
+    fontSize: 13,
+    color: "#444",
+    marginTop: 14,
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  dateButton: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+  },
+  dateValueFilled: {
+    fontSize: 14,
+    color: "#1a1a2e",
+  },
+  dateValueEmpty: {
+    fontSize: 14,
+    color: "#999",
+  },
+  errorText: {
+    marginTop: 6,
+    fontSize: 12,
+    color: DANGER,
+    fontWeight: "600",
+  },
+  actionRow: {
+    flexDirection: "row",
+    columnGap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  cancelButtonText: {
+    color: "#444",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  confirmButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+});

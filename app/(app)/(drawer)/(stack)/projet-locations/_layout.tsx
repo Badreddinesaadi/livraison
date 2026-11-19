@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Easing,
+  StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
@@ -114,23 +115,12 @@ export default function StackLayout() {
   );
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, paddingBottom: bottom }}>
+    <GestureHandlerRootView style={[styles.root, { paddingBottom: bottom }]}>
       <Stack
         screenOptions={{
           animation: "ios_from_right",
           header: (s) => (
-            <View
-              style={{
-                marginTop: top,
-                height: 60,
-                backgroundColor: Colors.light.background,
-                padding: 16,
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                columnGap: 16,
-              }}
-            >
+            <View style={[styles.header, { marginTop: top }]}>
               <TouchableWithoutFeedback
                 onPress={() => {
                   if (s.route.name === "index") {
@@ -142,7 +132,7 @@ export default function StackLayout() {
               >
                 <FontAwesome name="arrow-left" size={24} color="black" />
               </TouchableWithoutFeedback>
-              <Text style={{ fontSize: 20, fontWeight: "700" }}>
+              <Text style={styles.headerTitle}>
                 {headerTitles[s.route.name] ?? "Lieux de projet"}
               </Text>
               <Button
@@ -210,8 +200,8 @@ export default function StackLayout() {
             onConfirm={confirmProjetLocationDelete}
           />
         ) : (
-          <View style={{ padding: 16 }}>
-            <Text style={{ color: "#888" }}>Aucune option disponible</Text>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>Aucune option disponible</Text>
           </View>
         )}
       </BottomSheet>
@@ -223,3 +213,28 @@ const headerTitles: Record<string, string> = {
   index: "Liste des lieux",
   "create/index": "Creer un lieu",
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  header: {
+    height: 60,
+    backgroundColor: Colors.light.background,
+    padding: 16,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    columnGap: 16,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  emptyState: {
+    padding: 16,
+  },
+  emptyText: {
+    color: "#888",
+  },
+});

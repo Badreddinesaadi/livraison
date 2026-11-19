@@ -10,7 +10,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -92,24 +99,9 @@ export const VoyageDetailsScreen = () => {
 
   if (!canListVoyages) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <View style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n&apos;avez pas la permission de consulter les voyages.
         </Text>
       </View>
@@ -117,75 +109,35 @@ export const VoyageDetailsScreen = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: 14,
-        marginTop: 4,
-        backgroundColor: "#f7f8fa",
-      }}
-    >
+    <View style={styles.container}>
       {isLoading ? (
         <Loader />
       ) : isError || !data ? (
-        <View
-          style={{
-            marginTop: 40,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backgroundColor: "#fff",
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#eee",
-          }}
-        >
-          <Text style={{ color: "#888", fontSize: 14 }}>
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>
             Impossible de charger les détails du voyage.
           </Text>
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: "#fff",
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              marginBottom: 12,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 12,
-              }}
-            >
-              <Text
-                style={{ fontSize: 18, fontWeight: "700", color: "#1a1a2e" }}
-              >
-                Voyage #{data.id}
-              </Text>
+          <View style={styles.card}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title}>Voyage #{data.id}</Text>
               <View
-                style={{
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderRadius: 999,
-                  backgroundColor:
-                    data.statut === "terminer"
-                      ? SUCCESS + "22"
-                      : PRIMARY + "22",
-                }}
+                style={[
+                  styles.statusPill,
+                  data.statut === "terminer"
+                    ? styles.statusPillDone
+                    : styles.statusPillProgress,
+                ]}
               >
                 <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: "700",
-                    color: data.statut === "terminer" ? SUCCESS : PRIMARY,
-                  }}
+                  style={[
+                    styles.statusText,
+                    data.statut === "terminer"
+                      ? styles.statusTextDone
+                      : styles.statusTextProgress,
+                  ]}
                 >
                   {data.statut === "terminer" ? "Terminé" : "En cours"}
                 </Text>
@@ -247,39 +199,17 @@ export const VoyageDetailsScreen = () => {
             />
           </View>
 
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: "#fff",
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              marginBottom: 20,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 10,
-                columnGap: 8,
-              }}
-            >
+          <View style={[styles.card, styles.cardLast]}>
+            <View style={styles.sectionHeaderRow}>
               <FontAwesome5 name="file-alt" size={14} color={PRIMARY} />
-              <Text
-                style={{ fontSize: 15, fontWeight: "700", color: "#1a1a2e" }}
-              >
+              <Text style={styles.sectionTitle}>
                 BLs ({data.bl_list?.length ?? 0})
               </Text>
             </View>
 
-            <View
-              style={{ flexDirection: "row", columnGap: 10, marginBottom: 10 }}
-            >
-              <Text style={{ fontSize: 12, color: PRIMARY, fontWeight: "600" }}>
-                {blsEncoursCount} en cours
-              </Text>
-              <Text style={{ fontSize: 12, color: SUCCESS, fontWeight: "600" }}>
+            <View style={styles.statsRow}>
+              <Text style={styles.statPrimary}>{blsEncoursCount} en cours</Text>
+              <Text style={styles.statSuccess}>
                 {blsLivreCount > 0
                   ? `${blsLivreCount} livré${blsLivreCount > 1 ? "s" : ""}`
                   : "0 livré"}
@@ -287,55 +217,22 @@ export const VoyageDetailsScreen = () => {
             </View>
 
             {data.bl_list?.length ? (
-              <View style={{ rowGap: 10 }}>
+              <View style={styles.blList}>
                 {data.bl_list.map((bl) => (
-                  <View
-                    key={bl.id}
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "#eee",
-                      backgroundColor: "#fff",
-                      borderRadius: 10,
-                      padding: 10,
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: 6,
-                      }}
-                    >
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 6,
-                        }}
-                      >
+                  <View key={bl.id} style={styles.blCard}>
+                    <View style={styles.blHeaderRow}>
+                      <View style={styles.blHeaderLeft}>
                         <Text
-                          style={{
-                            fontSize: 13,
-                            color: bl.statut === "Livré" ? SUCCESS : "#222",
-                            fontWeight: "700",
-                          }}
+                          style={[
+                            styles.blCode,
+                            bl.statut === "Livré" && styles.blCodeDelivered,
+                          ]}
                         >
                           {bl.code}
                         </Text>
                         {(bl.images?.length ?? 0) > 0 && (
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                              gap: 2,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                color: SUCCESS,
-                              }}
-                            >
+                          <View style={styles.imageCountWrap}>
+                            <Text style={styles.imageCountText}>
                               {bl.images?.length ?? 0}
                             </Text>
                             <FontAwesome5
@@ -347,13 +244,7 @@ export const VoyageDetailsScreen = () => {
                         )}
                       </View>
                       {bl._pendingSync ? (
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: PRIMARY,
-                            fontWeight: "600",
-                          }}
-                        >
+                        <Text style={styles.syncText}>
                           En attente de sync
                         </Text>
                       ) : bl.statut === "Livré" ? (
@@ -363,21 +254,11 @@ export const VoyageDetailsScreen = () => {
                           color={SUCCESS}
                         />
                       ) : (
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: PRIMARY,
-                            fontWeight: "600",
-                          }}
-                        >
-                          En cours
-                        </Text>
+                        <Text style={styles.syncText}>En cours</Text>
                       )}
                     </View>
 
-                    <Text
-                      style={{ fontSize: 12, color: "#888", marginBottom: 8 }}
-                    >
+                    <Text style={styles.clientText}>
                       {bl.nomClient || "Client inconnu"}
                     </Text>
 
@@ -385,7 +266,7 @@ export const VoyageDetailsScreen = () => {
                       <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ columnGap: 8 }}
+                        contentContainerStyle={styles.imagesContent}
                       >
                         {bl.images.map((image) => {
                           const imageUrl = buildImageUrl(
@@ -409,12 +290,7 @@ export const VoyageDetailsScreen = () => {
                             >
                               <Image
                                 source={{ uri: imageUrl }}
-                                style={{
-                                  width: 84,
-                                  height: 84,
-                                  borderRadius: 8,
-                                  backgroundColor: "#f2f2f2",
-                                }}
+                                style={styles.thumb}
                                 contentFit="cover"
                                 transition={120}
                               />
@@ -423,15 +299,13 @@ export const VoyageDetailsScreen = () => {
                         })}
                       </ScrollView>
                     ) : (
-                      <Text style={{ fontSize: 12, color: "#aaa" }}>
-                        Aucune image
-                      </Text>
+                      <Text style={styles.noImageText}>Aucune image</Text>
                     )}
                   </View>
                 ))}
               </View>
             ) : (
-              <Text style={{ fontSize: 13, color: "#888" }}>Aucun BL</Text>
+              <Text style={styles.noBlText}>Aucun BL</Text>
             )}
           </View>
         </ScrollView>
@@ -445,44 +319,19 @@ export const VoyageDetailsScreen = () => {
       >
         <Pressable
           onPress={() => setPreviewImage(null)}
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.85)",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 16,
-          }}
+          style={styles.modalBackdrop}
         >
-          <View
-            style={{
-              width: "100%",
-              maxWidth: 420,
-              aspectRatio: 3 / 4,
-              borderRadius: 12,
-              overflow: "hidden",
-              backgroundColor: "#111",
-            }}
-          >
+          <View style={styles.modalCard}>
             {previewImage?.uri ? (
               <Image
                 source={{ uri: previewImage.uri }}
-                style={{ width: "100%", height: "100%" }}
+                style={styles.previewImage}
                 contentFit="contain"
               />
             ) : null}
 
-            <View
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                backgroundColor: "rgba(0,0,0,0.65)",
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderRadius: 8,
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>
+            <View style={styles.previewDateBadge}>
+              <Text style={styles.previewDateText}>
                 {formatUploadDate(previewImage?.dateUpload)}
               </Text>
             </View>
@@ -492,3 +341,205 @@ export const VoyageDetailsScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 14,
+    marginTop: 4,
+    backgroundColor: "#f7f8fa",
+  },
+  errorBox: {
+    marginTop: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  errorText: {
+    color: "#888",
+    fontSize: 14,
+  },
+  card: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    marginBottom: 12,
+  },
+  cardLast: {
+    marginBottom: 20,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  statusPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  statusPillDone: {
+    backgroundColor: SUCCESS + "22",
+  },
+  statusPillProgress: {
+    backgroundColor: PRIMARY + "22",
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  statusTextDone: {
+    color: SUCCESS,
+  },
+  statusTextProgress: {
+    color: PRIMARY,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    columnGap: 8,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  statsRow: {
+    flexDirection: "row",
+    columnGap: 10,
+    marginBottom: 10,
+  },
+  statPrimary: {
+    fontSize: 12,
+    color: PRIMARY,
+    fontWeight: "600",
+  },
+  statSuccess: {
+    fontSize: 12,
+    color: SUCCESS,
+    fontWeight: "600",
+  },
+  blList: {
+    rowGap: 10,
+  },
+  blCard: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+  },
+  blHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  blHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  blCode: {
+    fontSize: 13,
+    color: "#222",
+    fontWeight: "700",
+  },
+  blCodeDelivered: {
+    color: SUCCESS,
+  },
+  imageCountWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  imageCountText: {
+    color: SUCCESS,
+  },
+  syncText: {
+    fontSize: 12,
+    color: PRIMARY,
+    fontWeight: "600",
+  },
+  clientText: {
+    fontSize: 12,
+    color: "#888",
+    marginBottom: 8,
+  },
+  imagesContent: {
+    columnGap: 8,
+  },
+  thumb: {
+    width: 84,
+    height: 84,
+    borderRadius: 8,
+    backgroundColor: "#f2f2f2",
+  },
+  noImageText: {
+    fontSize: 12,
+    color: "#aaa",
+  },
+  noBlText: {
+    fontSize: 13,
+    color: "#888",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 420,
+    aspectRatio: 3 / 4,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#111",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+  },
+  previewDateBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  previewDateText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+});

@@ -9,7 +9,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Text, TextInput, View } from "react-native";
+import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 
 export const DemandeTransfertScreen = () => {
   const router = useRouter();
@@ -59,24 +59,9 @@ export const DemandeTransfertScreen = () => {
 
   if (!canList) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <View style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n'avez pas la permission d'acceder au module Demande de
           transfert.
         </Text>
@@ -85,45 +70,13 @@ export const DemandeTransfertScreen = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: 14,
-        marginTop: 4,
-        backgroundColor: "#f7f8fa",
-      }}
-    >
-      <View style={{ flex: 1 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 4,
-            columnGap: 8,
-            marginBottom: 12,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#fff",
-              borderColor: "#e8e8e8",
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 12,
-            }}
-          >
+    <View style={styles.screen}>
+      <View style={styles.flex}>
+        <View style={styles.searchRow}>
+          <View style={styles.searchInputWrap}>
             <FontAwesome5 name="search" size={14} color="#bbb" />
             <TextInput
-              style={{
-                flex: 1,
-                height: 46,
-                paddingHorizontal: 10,
-                fontSize: 14,
-                color: "#222",
-              }}
+              style={styles.searchInput}
               placeholder="Rechercher..."
               placeholderTextColor="#bbb"
               value={searchText}
@@ -154,7 +107,7 @@ export const DemandeTransfertScreen = () => {
           )}
         </View>
 
-        <Text style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>
+        <Text style={styles.resultCount}>
           {listData.length} demande{listData.length !== 1 ? "s" : ""}
         </Text>
 
@@ -174,7 +127,7 @@ export const DemandeTransfertScreen = () => {
             />
           )}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={styles.contentContainer}
           onEndReachedThreshold={0.3}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
@@ -186,9 +139,9 @@ export const DemandeTransfertScreen = () => {
             isLoading ? (
               <Loader />
             ) : (
-              <View style={{ alignItems: "center", marginTop: 60 }}>
+              <View style={styles.emptyState}>
                 <FontAwesome5 name="exchange-alt" size={40} color="#ddd" />
-                <Text style={{ color: "#ccc", marginTop: 14, fontSize: 14 }}>
+                <Text style={styles.emptyText}>
                   Aucune demande trouvee
                 </Text>
               </View>
@@ -199,3 +152,69 @@ export const DemandeTransfertScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  screen: {
+    flex: 1,
+    paddingHorizontal: 14,
+    marginTop: 4,
+    backgroundColor: "#f7f8fa",
+  },
+  flex: {
+    flex: 1,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    columnGap: 8,
+    marginBottom: 12,
+  },
+  searchInputWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderColor: "#e8e8e8",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: 46,
+    paddingHorizontal: 10,
+    fontSize: 14,
+    color: "#222",
+  },
+  resultCount: {
+    fontSize: 13,
+    color: "#aaa",
+    marginBottom: 8,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  emptyState: {
+    alignItems: "center",
+    marginTop: 60,
+  },
+  emptyText: {
+    color: "#ccc",
+    marginTop: 14,
+    fontSize: 14,
+  },
+});

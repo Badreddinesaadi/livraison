@@ -80,16 +80,8 @@ export const CreateVoyageScreen = () => {
   if (!canEditVoyage) {
     return (
       <View style={styles.container}>
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 20,
-            rowGap: 12,
-          }}
-        >
-          <Text style={{ color: "#666", textAlign: "center" }}>
+        <View style={styles.permissionScreen}>
+          <Text style={styles.permissionText}>
             {store.type === "create"
               ? "Vous n'avez pas la permission de créer un voyage."
               : "Vous n'avez pas la permission de modifier un voyage."}
@@ -106,7 +98,7 @@ export const CreateVoyageScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={{ flex: 1 }}>
+      <View style={styles.flex}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>
             Veuillez sélectionner les BLS à inclure dans le voyage
@@ -161,7 +153,7 @@ export const CreateVoyageScreen = () => {
             ListFooterComponent={isFetchingNextPage ? <Loader /> : null}
           />
         )}
-        <View style={{ marginBottom: 10 }}>
+        <View style={styles.footer}>
           <Button
             preset="filled"
             disabled={isFetching || !store.bls || store.bls.length === 0}
@@ -190,16 +182,9 @@ const BLCard = ({
   const blDate = new Date(bl.datetime_document);
   return (
     <View style={[styles.card]}>
-      <View style={{ marginBottom: 10 }}>
+      <View style={styles.cardSection}>
         <Text style={styles.cardTitle}>{bl.num_bl}</Text>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 4,
-            marginTop: 4,
-          }}
-        >
+        <View style={styles.metaRow}>
           <FontAwesome5 name="clock" size={12} color={Colors.light.primary} />
           <Text>
             {blDate.toLocaleDateString("fr-FR", {
@@ -211,14 +196,7 @@ const BLCard = ({
             })}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 4,
-            marginTop: 4,
-          }}
-        >
+        <View style={styles.metaRow}>
           <FontAwesome5
             name="user-tag"
             size={12}
@@ -243,6 +221,32 @@ const BLCard = ({
   );
 };
 const styles = StyleSheet.create({
+  permissionScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    rowGap: 12,
+  },
+  permissionText: {
+    color: "#666",
+    textAlign: "center",
+  },
+  flex: {
+    flex: 1,
+  },
+  footer: {
+    marginBottom: 10,
+  },
+  cardSection: {
+    marginBottom: 10,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 14,

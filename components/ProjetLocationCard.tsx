@@ -10,6 +10,7 @@ import {
   Linking,
   Modal,
   Pressable,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -175,57 +176,22 @@ export const ProjetLocationCard = ({
   };
 
   return (
-    <Pressable
-      onPress={toggle}
-      style={{
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        marginBottom: 12,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.07,
-        shadowRadius: 4,
-        elevation: 2,
-        borderWidth: 1,
-        borderColor: "#efefef",
-        overflow: "hidden",
-      }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          padding: 14,
-        }}
-      >
+    <Pressable onPress={toggle} style={styles.card}>
+      <View style={styles.header}>
         <View
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            backgroundColor: projetUi.color + "22",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 12,
-          }}
+          style={[styles.iconBubble, { backgroundColor: projetUi.color + "22" }]}
         >
           <FontAwesome5 name={projetUi.icon} size={16} color={projetUi.color} />
         </View>
 
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontWeight: "700", fontSize: 15, color: "#1a1a2e" }}>
-            {`${projetUi.label} #${item.id}`}
-          </Text>
-          <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
-            {headerSubtitle}
-          </Text>
+        <View style={styles.titleWrap}>
+          <Text style={styles.title}>{`${projetUi.label} #${item.id}`}</Text>
+          <Text style={styles.subtitle}>{headerSubtitle}</Text>
         </View>
 
-        <View style={{ alignItems: "flex-end", marginRight: 10 }}>
-          <Text style={{ fontSize: 12, color: "#aaa" }}>
-            {formatDate(item.date)}
-          </Text>
-          <Text style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>
+        <View style={styles.meta}>
+          <Text style={styles.date}>{formatDate(item.date)}</Text>
+          <Text style={styles.imageCount}>
             {imageCount} image{imageCount > 1 ? "s" : ""}
           </Text>
         </View>
@@ -238,14 +204,7 @@ export const ProjetLocationCard = ({
       </View>
 
       {expanded && (
-        <View
-          style={{
-            borderTopWidth: 1,
-            borderTopColor: "#f2f2f2",
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-          }}
-        >
+        <View style={styles.body}>
           <DetailText
             icon="user"
             label="Contact nom"
@@ -277,23 +236,14 @@ export const ProjetLocationCard = ({
             value={item.commentaire || "-"}
           />
 
-          <View
-            style={{
-              marginTop: 8,
-              paddingTop: 8,
-              borderTopWidth: 1,
-              borderTopColor: "#f2f2f2",
-            }}
-          >
-            <Text style={{ fontSize: 13, color: "#555", marginBottom: 8 }}>
-              Images
-            </Text>
+          <View style={styles.imagesSection}>
+            <Text style={styles.imagesTitle}>Images</Text>
             {imageCount > 0 ? (
               <FlatList
                 horizontal
                 data={item.images ?? []}
                 keyExtractor={(img) => String(img.id)}
-                contentContainerStyle={{ paddingBottom: 4 }}
+                contentContainerStyle={styles.imageListContent}
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item: img }) => {
                   const imageUrl = buildFileUrl(img.chemin_fichier);
@@ -304,87 +254,42 @@ export const ProjetLocationCard = ({
                   return (
                     <Pressable
                       onPress={() => setPreviewImage(imageUrl)}
-                      style={{ marginRight: 10 }}
+                      style={styles.imageItem}
                     >
-                      <Image
-                        source={{ uri: imageUrl }}
-                        style={{
-                          width: 96,
-                          height: 72,
-                          borderRadius: 10,
-                          backgroundColor: "#f0f0f0",
-                        }}
-                      />
+                      <Image source={{ uri: imageUrl }} style={styles.image} />
                     </Pressable>
                   );
                 }}
               />
             ) : (
-              <Text style={{ fontSize: 12, color: "#999" }}>
-                Aucune image disponible
-              </Text>
+              <Text style={styles.emptyText}>Aucune image disponible</Text>
             )}
           </View>
 
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 10,
-              marginTop: 10,
-              paddingTop: 10,
-              borderTopWidth: 1,
-              borderTopColor: "#f2f2f2",
-            }}
-          >
+          <View style={styles.actionRow}>
             <Pressable
               onPress={handleOpenMap}
               disabled={!coordinates}
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "18",
-                gap: 6,
-                opacity: coordinates ? 1 : 0.5,
-              }}
+              style={[
+                styles.mapButton,
+                !coordinates && styles.mapButtonDisabled,
+              ]}
             >
               <FontAwesome5 name="map-marked-alt" size={14} color={PRIMARY} />
-              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
-                Ouvrir la carte
-              </Text>
+              <Text style={styles.mapButtonText}>Ouvrir la carte</Text>
             </Pressable>
             <Pressable
               onPress={handleCall}
               disabled={!item.contact_telephone}
-              style={{
-                width: 44,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "12",
-                opacity: item.contact_telephone ? 1 : 0.5,
-              }}
+              style={[
+                styles.iconButton,
+                !item.contact_telephone && styles.iconButtonDisabled,
+              ]}
             >
               <FontAwesome5 name="phone" size={14} color={PRIMARY} />
             </Pressable>
             {canManageProjetLocation && (
-              <Pressable
-                onPress={onMore}
-                style={{
-                  width: 44,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 10,
-                  borderRadius: 8,
-                  backgroundColor: PRIMARY + "12",
-                }}
-              >
+              <Pressable onPress={onMore} style={styles.iconButton}>
                 <FontAwesome5 name="ellipsis-h" size={14} color={PRIMARY} />
               </Pressable>
             )}
@@ -399,28 +304,13 @@ export const ProjetLocationCard = ({
       >
         <Pressable
           onPress={() => setPreviewImage(null)}
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.85)",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 16,
-          }}
+          style={styles.previewOverlay}
         >
-          <View
-            style={{
-              width: "100%",
-              maxWidth: 420,
-              aspectRatio: 3 / 4,
-              borderRadius: 12,
-              overflow: "hidden",
-              backgroundColor: "#111",
-            }}
-          >
+          <View style={styles.previewFrame}>
             {previewImage ? (
               <Image
                 source={{ uri: previewImage }}
-                style={{ width: "100%", height: "100%" }}
+                style={styles.previewImage}
                 contentFit="contain"
               />
             ) : null}
@@ -440,22 +330,179 @@ const DetailText = ({
   label: string;
   value: string;
 }) => (
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "flex-start",
-      marginBottom: 6,
-    }}
-  >
+  <View style={styles.detailRow}>
     <FontAwesome5
       name={icon as any}
       size={13}
       color={PRIMARY}
-      style={{ width: 18, marginTop: 1 }}
+      style={styles.detailIcon}
     />
-    <Text style={{ fontSize: 13, color: "#888", width: 96 }}>{label}</Text>
-    <Text style={{ fontSize: 13, color: "#222", flex: 1, flexWrap: "wrap" }}>
-      {value}
-    </Text>
+    <Text style={styles.detailLabel}>{label}</Text>
+    <Text style={styles.detailValue}>{value}</Text>
   </View>
 );
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    overflow: "hidden",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+  },
+  iconBubble: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  titleWrap: {
+    flex: 1,
+  },
+  title: {
+    fontWeight: "700",
+    fontSize: 15,
+    color: "#1a1a2e",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#666",
+    marginTop: 2,
+  },
+  meta: {
+    alignItems: "flex-end",
+    marginRight: 10,
+  },
+  date: {
+    fontSize: 12,
+    color: "#aaa",
+  },
+  imageCount: {
+    fontSize: 12,
+    color: "#aaa",
+    marginTop: 2,
+  },
+  body: {
+    borderTopWidth: 1,
+    borderTopColor: "#f2f2f2",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  imagesSection: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#f2f2f2",
+  },
+  imagesTitle: {
+    fontSize: 13,
+    color: "#555",
+    marginBottom: 8,
+  },
+  imageListContent: {
+    paddingBottom: 4,
+  },
+  imageItem: {
+    marginRight: 10,
+  },
+  image: {
+    width: 96,
+    height: 72,
+    borderRadius: 10,
+    backgroundColor: "#f0f0f0",
+  },
+  emptyText: {
+    fontSize: 12,
+    color: "#999",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f2f2f2",
+  },
+  mapButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: PRIMARY + "18",
+    gap: 6,
+  },
+  mapButtonDisabled: {
+    opacity: 0.5,
+  },
+  mapButtonText: {
+    color: PRIMARY,
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  iconButton: {
+    width: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: PRIMARY + "12",
+  },
+  iconButtonDisabled: {
+    opacity: 0.5,
+  },
+  previewOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  previewFrame: {
+    width: "100%",
+    maxWidth: 420,
+    aspectRatio: 3 / 4,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#111",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  detailIcon: {
+    width: 18,
+    marginTop: 1,
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: "#888",
+    width: 96,
+  },
+  detailValue: {
+    fontSize: 13,
+    color: "#222",
+    flex: 1,
+    flexWrap: "wrap",
+  },
+});

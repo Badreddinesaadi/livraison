@@ -156,16 +156,8 @@ export const SelectChauffeurScreen = () => {
   if (!canEditVoyage) {
     return (
       <View style={styles.container}>
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 20,
-            rowGap: 12,
-          }}
-        >
-          <Text style={{ color: "#666", textAlign: "center" }}>
+        <View style={styles.permissionScreen}>
+          <Text style={styles.permissionText}>
             {createVoyageStore.type === "create"
               ? "Vous n'avez pas la permission de créer un voyage."
               : "Vous n'avez pas la permission de modifier un voyage."}
@@ -393,7 +385,7 @@ export const SelectChauffeurScreen = () => {
                 <TextInput
                   style={[
                     styles.kmInput,
-                    !createVoyageStore.selectedVehicle && { opacity: 0.6 },
+                    !createVoyageStore.selectedVehicle && styles.kmInputDisabled,
                   ]}
                   keyboardType="numeric"
                   placeholder={
@@ -556,6 +548,17 @@ export const SelectChauffeurScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  permissionScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    rowGap: 12,
+  },
+  permissionText: {
+    color: "#666",
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     paddingHorizontal: 14,
@@ -612,6 +615,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#11181C",
     backgroundColor: "#fff",
+  },
+  kmInputDisabled: {
+    opacity: 0.6,
   },
   dateButton: {
     height: 48,

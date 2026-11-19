@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Easing,
+  StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
@@ -165,22 +166,12 @@ export default function StackLayout() {
     };
   }, []);
   return (
-    <GestureHandlerRootView style={{ flex: 1, ...insets }}>
+    <GestureHandlerRootView style={[styles.root, insets]}>
       <Stack
         screenOptions={{
           animation: "ios_from_right",
           header: (s) => (
-            <View
-              style={{
-                height: 60,
-                backgroundColor: Colors.light.background,
-                padding: 16,
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                columnGap: 16,
-              }}
-            >
+            <View style={styles.header}>
               <TouchableWithoutFeedback
                 onPress={() => {
                   if (s.route.name === "index") {
@@ -192,7 +183,7 @@ export default function StackLayout() {
               >
                 <FontAwesome5 name="arrow-left" size={24} color="black" />
               </TouchableWithoutFeedback>
-              <Text style={{ fontSize: 20, fontWeight: "700" }}>
+              <Text style={styles.headerTitle}>
                 {headerTitles[s.route.name] ??
                   (Type === "create"
                     ? "Créer un voyage"
@@ -299,3 +290,22 @@ const headerTitles: Record<string, string> = {
   "action-bl/[blId]": "Action sur le BL",
   "details/[voyageId]": "Détails du voyage",
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  header: {
+    height: 60,
+    backgroundColor: Colors.light.background,
+    padding: 16,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    columnGap: 16,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+});

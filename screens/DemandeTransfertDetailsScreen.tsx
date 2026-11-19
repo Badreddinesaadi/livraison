@@ -22,6 +22,7 @@ import {
   LayoutAnimation,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -75,23 +76,15 @@ const DetailRow = ({
   label: string;
   value: string;
 }) => (
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "flex-start",
-      marginBottom: 6,
-    }}
-  >
+  <View style={styles.detailRow}>
     <FontAwesome5
       name={icon as any}
       size={13}
       color={PRIMARY}
-      style={{ width: 18, marginTop: 1 }}
+      style={styles.detailIcon}
     />
-    <Text style={{ fontSize: 13, color: "#888", width: 110 }}>{label}</Text>
-    <Text style={{ fontSize: 13, color: "#222", flex: 1, flexWrap: "wrap" }}>
-      {value}
-    </Text>
+    <Text style={styles.detailLabel}>{label}</Text>
+    <Text style={styles.detailValue}>{value}</Text>
   </View>
 );
 
@@ -105,20 +98,16 @@ const PreparerBadge = ({
   const isOui = preparer.toLowerCase() === "oui";
   const badge = (
     <View
-      style={{
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 6,
-        backgroundColor: isOui ? SUCCESS + "18" : "#f59e0b18",
-        alignSelf: "flex-start",
-      }}
+      style={[
+        styles.badge,
+        isOui ? styles.badgePrepared : styles.badgePending,
+      ]}
     >
       <Text
-        style={{
-          fontSize: 11,
-          fontWeight: "700",
-          color: isOui ? SUCCESS : "#f59e0b",
-        }}
+        style={[
+          styles.badgeText,
+          isOui ? styles.badgeTextPrepared : styles.badgeTextPending,
+        ]}
       >
         {isOui ? "Préparé" : "Non préparé"}
       </Text>
@@ -148,36 +137,10 @@ const LotItem = ({
   };
 
   return (
-    <View
-      style={{
-        borderWidth: 1,
-        borderColor: "#eee",
-        borderRadius: 8,
-        marginBottom: 6,
-        overflow: "hidden",
-      }}
-    >
-      <Pressable
-        onPress={toggle}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingVertical: 10,
-          paddingHorizontal: 12,
-          backgroundColor: "#fafbfc",
-        }}
-      >
+    <View style={styles.lotCard}>
+      <Pressable onPress={toggle} style={styles.lotHeader}>
         <FontAwesome5 name="barcode" size={12} color={PRIMARY} />
-        <Text
-          style={{
-            flex: 1,
-            fontSize: 13,
-            fontWeight: "600",
-            color: "#1a1a2e",
-            marginLeft: 8,
-          }}
-          numberOfLines={1}
-        >
+        <Text style={styles.lotCode} numberOfLines={1}>
           {lot.Lot}
         </Text>
         <PreparerBadge preparer={lot.preparer} onPress={onPreparerLot} />
@@ -185,32 +148,21 @@ const LotItem = ({
           <Pressable
             onPress={onReplaceLot}
             hitSlop={6}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 4,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 6,
-              backgroundColor: PRIMARY + "14",
-              marginLeft: 6,
-            }}
+            style={styles.replaceButton}
           >
             <FontAwesome5 name="exchange-alt" size={11} color={PRIMARY} />
-            <Text style={{ fontSize: 11, fontWeight: "600", color: PRIMARY }}>
-              Remplacer
-            </Text>
+            <Text style={styles.replaceText}>Remplacer</Text>
           </Pressable>
         )}
         <FontAwesome5
           name={expanded ? "chevron-up" : "chevron-down"}
           size={10}
           color="#bbb"
-          style={{ marginLeft: 8 }}
+          style={styles.chevron}
         />
       </Pressable>
       {expanded && (
-        <View style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
+        <View style={styles.lotDetails}>
           <LotDetailRow icon="barcode" label="Code lot" value={lot.Lot} />
           <LotDetailRow
             icon="history"
@@ -253,23 +205,15 @@ const LotDetailRow = ({
   label: string;
   value: string;
 }) => (
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "flex-start",
-      marginBottom: 4,
-    }}
-  >
+  <View style={styles.lotDetailRow}>
     <FontAwesome5
       name={icon as any}
       size={11}
       color={PRIMARY}
-      style={{ width: 14, marginTop: 1 }}
+      style={styles.lotDetailIcon}
     />
-    <Text style={{ fontSize: 12, color: "#999", width: 80 }}>{label}</Text>
-    <Text style={{ fontSize: 12, color: "#333", flex: 1, flexWrap: "wrap" }}>
-      {value}
-    </Text>
+    <Text style={styles.lotDetailLabel}>{label}</Text>
+    <Text style={styles.lotDetailValue}>{value}</Text>
   </View>
 );
 
@@ -302,45 +246,16 @@ const ProductCard = ({
   const isProductPrepared = (product.preparer ?? "").toLowerCase() === "oui";
 
   return (
-    <View
-      style={{
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#efefef",
-        overflow: "hidden",
-        marginBottom: 10,
-      }}
-    >
-      <Pressable
-        onPress={toggle}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          padding: 14,
-        }}
-      >
-        <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: PRIMARY + "18",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 10,
-          }}
-        >
+    <View style={styles.productCard}>
+      <Pressable onPress={toggle} style={styles.productHeader}>
+        <View style={styles.productIconBubble}>
           <FontAwesome5 name="box" size={14} color={PRIMARY} />
         </View>
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{ fontSize: 13, fontWeight: "700", color: "#1a1a2e" }}
-            numberOfLines={2}
-          >
+        <View style={styles.productInfo}>
+          <Text style={styles.productName} numberOfLines={2}>
             {product.produit}
           </Text>
-          <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+          <Text style={styles.productSubtitle}>
             {product.nbrFDX} FDX · {product.Qte} {product.unite_v}
           </Text>
         </View>
@@ -352,31 +267,15 @@ const ProductCard = ({
           name={expanded ? "chevron-up" : "chevron-down"}
           size={12}
           color="#bbb"
-          style={{ marginLeft: 8 }}
+          style={styles.chevron}
         />
       </Pressable>
 
       {lotsCount > 0 && (
-        <View
-          style={{
-            borderTopWidth: 1,
-            borderTopColor: "#f2f2f2",
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 8,
-              gap: 6,
-            }}
-          >
+        <View style={styles.lotsSection}>
+          <View style={styles.lotsHeader}>
             <FontAwesome5 name="th-list" size={13} color={PRIMARY} />
-            <Text style={{ fontSize: 14, fontWeight: "700", color: "#1a1a2e" }}>
-              Lots ({lotsCount})
-            </Text>
+            <Text style={styles.lotsTitle}>Lots ({lotsCount})</Text>
           </View>
           {product.lots.map((lot, idx) => (
             <LotItem
@@ -398,14 +297,7 @@ const ProductCard = ({
       )}
 
       {expanded && (
-        <View
-          style={{
-            borderTopWidth: 1,
-            borderTopColor: "#f2f2f2",
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-          }}
-        >
+        <View style={styles.lotsSection}>
           <DetailRow
             icon="box"
             label="Produit"
@@ -430,48 +322,17 @@ const ProductCard = ({
       )}
 
       {(canDelete || canUpdate) && !isProductPrepared && (
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 10,
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            borderTopWidth: 1,
-            borderTopColor: "#f2f2f2",
-          }}
-        >
+        <View style={styles.actionsRow}>
           {canUpdate && onAddLot && (
-            <Pressable
-              onPress={onAddLot}
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: PRIMARY + "18",
-                gap: 6,
-              }}
-            >
+            <Pressable onPress={onAddLot} style={styles.addLotButton}>
               <FontAwesome5 name="plus" size={14} color={PRIMARY} />
-              <Text style={{ color: PRIMARY, fontWeight: "600", fontSize: 13 }}>
-                Ajouter un lot
-              </Text>
+              <Text style={styles.addLotText}>Ajouter un lot</Text>
             </Pressable>
           )}
           {canDelete && onDeleteProduct && (
             <Pressable
               onPress={onDeleteProduct}
-              style={{
-                width: 44,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: "#ef444412",
-              }}
+              style={styles.deleteProductButton}
             >
               <FontAwesome5 name="trash" size={14} color="#ef4444" />
             </Pressable>
@@ -717,24 +578,9 @@ export const DemandeTransfertDetailsScreen = () => {
 
   if (!canView) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-          backgroundColor: "#f7f8fa",
-        }}
-      >
+      <SafeAreaView style={styles.lockScreen}>
         <FontAwesome5 name="lock" size={34} color="#bbb" />
-        <Text
-          style={{
-            marginTop: 12,
-            color: "#666",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
+        <Text style={styles.lockText}>
           Vous n&apos;avez pas la permission de consulter cette demande.
         </Text>
       </SafeAreaView>
@@ -743,58 +589,32 @@ export const DemandeTransfertDetailsScreen = () => {
 
   if (detailsLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#f7f8fa" }}>
+      <SafeAreaView style={styles.container}>
         <Loader />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f7f8fa" }}>
+    <SafeAreaView style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 14, paddingBottom: 30 }}
+        contentContainerStyle={styles.listContent}
       >
         {transfertItem && (
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: "#fff",
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              marginBottom: 14,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 12,
-              }}
-            >
-              <Text
-                style={{ fontSize: 18, fontWeight: "700", color: "#1a1a2e" }}
-              >
-                {transfertItem.reference}
-              </Text>
+          <View style={styles.infoCard}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title}>{transfertItem.reference}</Text>
               {canUpdate ? (
                 <Pressable onPress={handleChangeStatut}>
                   <View
-                    style={{
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 999,
-                      backgroundColor: statutStyle.bg,
-                    }}
+                    style={[
+                      styles.statusPill,
+                      { backgroundColor: statutStyle.bg },
+                    ]}
                   >
                     <Text
-                      style={{
-                        fontSize: 12,
-                        fontWeight: "700",
-                        color: statutStyle.text,
-                      }}
+                      style={[styles.statusText, { color: statutStyle.text }]}
                     >
                       {transfertItem.statut}
                     </Text>
@@ -802,19 +622,13 @@ export const DemandeTransfertDetailsScreen = () => {
                 </Pressable>
               ) : (
                 <View
-                  style={{
-                    paddingHorizontal: 10,
-                    paddingVertical: 4,
-                    borderRadius: 999,
-                    backgroundColor: statutStyle.bg,
-                  }}
+                  style={[
+                    styles.statusPill,
+                    { backgroundColor: statutStyle.bg },
+                  ]}
                 >
                   <Text
-                    style={{
-                      fontSize: 12,
-                      fontWeight: "700",
-                      color: statutStyle.text,
-                    }}
+                    style={[styles.statusText, { color: statutStyle.text }]}
                   >
                     {transfertItem.statut}
                   </Text>
@@ -876,110 +690,36 @@ export const DemandeTransfertDetailsScreen = () => {
         )}
 
         {(canUpdate || canDelete) && transfertItem && (
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 10,
-              marginBottom: 14,
-            }}
-          >
+          <View style={styles.actionRow}>
             {canUpdate && (
-              <Pressable
-                onPress={handleEditDT}
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 12,
-                  borderRadius: 10,
-                  backgroundColor: PRIMARY + "18",
-                  gap: 6,
-                }}
-              >
+              <Pressable onPress={handleEditDT} style={styles.editButton}>
                 <FontAwesome5 name="edit" size={14} color={PRIMARY} />
-                <Text
-                  style={{ color: PRIMARY, fontWeight: "600", fontSize: 14 }}
-                >
-                  Modifier
-                </Text>
+                <Text style={styles.editText}>Modifier</Text>
               </Pressable>
             )}
             {canDelete && (
-              <Pressable
-                onPress={handleDeleteDT}
-                style={{
-                  width: 48,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 12,
-                  borderRadius: 10,
-                  backgroundColor: "#ef444412",
-                }}
-              >
+              <Pressable onPress={handleDeleteDT} style={styles.deleteButton}>
                 <FontAwesome5 name="trash" size={16} color="#ef4444" />
               </Pressable>
             )}
           </View>
         )}
 
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-            gap: 8,
-          }}
-        >
+        <View style={styles.sectionHeaderRow}>
           <FontAwesome5 name="boxes" size={16} color={PRIMARY} />
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "700",
-              color: "#1a1a2e",
-              flex: 1,
-            }}
-          >
-            Produits ({products.length})
-          </Text>
+          <Text style={styles.sectionTitle}>Produits ({products.length})</Text>
           {canAddProducts && (
-            <Pressable
-              onPress={handleAddProduct}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                borderRadius: 8,
-                backgroundColor: PRIMARY,
-              }}
-            >
+            <Pressable onPress={handleAddProduct} style={styles.addProductButton}>
               <FontAwesome5 name="plus" size={12} color="#fff" />
-              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>
-                Ajouter
-              </Text>
+              <Text style={styles.addProductText}>Ajouter</Text>
             </Pressable>
           )}
         </View>
 
         {transfertItem && !isPreparationStatut && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-start",
-              gap: 8,
-              padding: 12,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#f59e0b55",
-              backgroundColor: "#f59e0b14",
-              marginBottom: 14,
-            }}
-          >
+          <View style={styles.warningBox}>
             <FontAwesome5 name="info-circle" size={14} color="#92400e" />
-            <Text style={{ flex: 1, fontSize: 12, color: "#92400e" }}>
+            <Text style={styles.warningText}>
               La préparation est disponible uniquement lorsque la demande est «
               Encours » ou « Envoyé ».
             </Text>
@@ -1009,23 +749,337 @@ export const DemandeTransfertDetailsScreen = () => {
             />
           ))
         ) : (
-          <View
-            style={{
-              alignItems: "center",
-              paddingVertical: 30,
-              backgroundColor: "#fff",
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: "#efefef",
-            }}
-          >
+          <View style={styles.emptyBox}>
             <FontAwesome5 name="box-open" size={32} color="#ddd" />
-            <Text style={{ color: "#ccc", marginTop: 10, fontSize: 14 }}>
-              Aucun produit
-            </Text>
+            <Text style={styles.emptyText}>Aucun produit</Text>
           </View>
         )}
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f7f8fa",
+  },
+  lockText: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#f7f8fa",
+  },
+  listContent: {
+    padding: 14,
+    paddingBottom: 30,
+  },
+  infoCard: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    marginBottom: 14,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  statusPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 14,
+  },
+  editButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: PRIMARY + "18",
+    gap: 6,
+  },
+  editText: {
+    color: PRIMARY,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  deleteButton: {
+    width: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#ef444412",
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a2e",
+    flex: 1,
+  },
+  addProductButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: PRIMARY,
+  },
+  addProductText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  warningBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#f59e0b55",
+    backgroundColor: "#f59e0b14",
+    marginBottom: 14,
+  },
+  warningText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#92400e",
+  },
+  emptyBox: {
+    alignItems: "center",
+    paddingVertical: 30,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#efefef",
+  },
+  emptyText: {
+    color: "#ccc",
+    marginTop: 10,
+    fontSize: 14,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  detailIcon: {
+    width: 18,
+    marginTop: 1,
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: "#888",
+    width: 110,
+  },
+  detailValue: {
+    fontSize: 13,
+    color: "#222",
+    flex: 1,
+    flexWrap: "wrap",
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+  },
+  badgePrepared: {
+    backgroundColor: SUCCESS + "18",
+  },
+  badgePending: {
+    backgroundColor: "#f59e0b18",
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  badgeTextPrepared: {
+    color: SUCCESS,
+  },
+  badgeTextPending: {
+    color: "#f59e0b",
+  },
+  lotCard: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 8,
+    marginBottom: 6,
+    overflow: "hidden",
+  },
+  lotHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: "#fafbfc",
+  },
+  lotCode: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1a1a2e",
+    marginLeft: 8,
+  },
+  replaceButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: PRIMARY + "14",
+    marginLeft: 6,
+  },
+  replaceText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: PRIMARY,
+  },
+  chevron: {
+    marginLeft: 8,
+  },
+  lotDetails: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  lotDetailRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 4,
+  },
+  lotDetailIcon: {
+    width: 14,
+    marginTop: 1,
+  },
+  lotDetailLabel: {
+    fontSize: 12,
+    color: "#999",
+    width: 80,
+  },
+  lotDetailValue: {
+    fontSize: 12,
+    color: "#333",
+    flex: 1,
+    flexWrap: "wrap",
+  },
+  productCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+  productHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+  },
+  productIconBubble: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: PRIMARY + "18",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  productSubtitle: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 2,
+  },
+  lotsSection: {
+    borderTopWidth: 1,
+    borderTopColor: "#f2f2f2",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  lotsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 6,
+  },
+  lotsTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1a1a2e",
+  },
+  actionsRow: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f2f2f2",
+  },
+  addLotButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: PRIMARY + "18",
+    gap: 6,
+  },
+  addLotText: {
+    color: PRIMARY,
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  deleteProductButton: {
+    width: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#ef444412",
+  },
+});
