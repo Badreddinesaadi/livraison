@@ -35,6 +35,10 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# android release build artifacts
+builds/
+credentials/android/
+
 app-example
 
 # generated native folders

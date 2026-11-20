@@ -87,15 +87,8 @@
       "expo-image",
       "@react-native-community/datetimepicker",
       "expo-status-bar",
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "sdkwood-app",
-          "organization": "safouane"
-        }
-      ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
